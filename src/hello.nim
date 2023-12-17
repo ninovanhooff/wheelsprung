@@ -12,7 +12,7 @@ space.gravity = gravity
 
 var ground = newSegmentShape(space.staticBody, v(80, 50), v(140, 60), 0)
 ground.friction = 1.0
-var discarded = space.addShape(ground)
+discard space.addShape(ground)
 
 var radius = 10.0
 var mass = 2.0

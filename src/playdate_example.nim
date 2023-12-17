@@ -3,15 +3,11 @@ import strformat
 
 
 import playdate/api
-import chipmunk7
 import hello
 
 const FONT_PATH = "/System/Fonts/Asheville-Sans-14-Bold.pft"
 
 var font: LCDFont
-
-var x = int(LCD_COLUMNS / 2)
-var y = int(LCD_ROWS / 2) + 32
 
 proc update(): int {.cdecl, raises: [].} =
     playdate.graphics.clear(kColorWhite)
