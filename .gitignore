@@ -1,0 +1,5 @@
+*.pdx
+source/pdex.*
+*.dSYM
+.DS_Store
+game.map
