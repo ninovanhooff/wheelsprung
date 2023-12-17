@@ -49,9 +49,11 @@ proc updateChipmunkHello*() {.cdecl, raises: [].} =
 
 
 proc drawCircle(pos: Vect, radius: float, angle:float, color: LCDColor) =
+  # covert from center position to top left
   let x = (pos.x - radius).toInt
   let y = (pos.y - radius).toInt
   let size: int = (radius * 2f).toInt
+  # angle is in radians, convert to degrees
   let deg = rad2deg(angle)
   playdate.graphics.drawEllipse(x,y,size, size, 1, deg, deg + 350, color);
 
