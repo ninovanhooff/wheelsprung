@@ -1,4 +1,5 @@
 import strutils
+import std/math
 import chipmunk7
 import playdate/api
 
@@ -28,12 +29,16 @@ var timeStep = 1.0/50.0
 
 var time = 0.0
 
+proc rad2deg(rad: float): float =
+  return rad * 180.0 / PI
+
 proc updateChipmunkHello*() {.cdecl, raises: [].} =
-  var pos = ballBody.position
-  var vel = ballBody.velocity
+  let pos = ballBody.position
+  let vel = ballBody.velocity
+  let angle = ballBody.angle
   try:
-    playdate.system.logToConsole("Time is $#. ballBody is at ($#, $#). Its velocity is ($#, $#)".format(
-      time, pos.x, pos.y, vel.x, vel.y
+    playdate.system.logToConsole("Time is $#. ballBody is at ($#, $#). Its velocity is ($#, $#). Its angle is $#".format(
+      time, pos.x, pos.y, vel.x, vel.y, angle
     ))
   except:
     playdate.system.logToConsole("Error logging ball pos to console")
@@ -47,7 +52,8 @@ proc drawCircle(pos: Vect, radius: float, angle:float, color: LCDColor) =
   let x = (pos.x - radius).toInt
   let y = (pos.y - radius).toInt
   let size: int = (radius * 2f).toInt
-  playdate.graphics.drawEllipse(x,y,size, size, 1, angle, angle + 300, color);
+  let deg = rad2deg(angle)
+  playdate.graphics.drawEllipse(x,y,size, size, 1, deg, deg + 350, color);
 
 proc drawSegment(segment: SegmentShape, color: LCDColor) =
   playdate.graphics.drawLine(segment.a.x.toInt, segment.a.y.toInt, segment.b.x.toInt, segment.b.y.toInt, 1, color);
