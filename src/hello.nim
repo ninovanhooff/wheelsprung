@@ -4,27 +4,27 @@ import playdate/api
 
 
 
-var gravity = v(0, -100)
+var gravity = v(0, 100)
 
 var space = newSpace()
 space.gravity = gravity
 
-var ground = newSegmentShape(space.staticBody, v(-20, 5), v(20, -5), 0)
+var ground = newSegmentShape(space.staticBody, v(80, 50), v(140, 60), 0)
 ground.friction = 1.0
 var discarded = space.addShape(ground)
 
-var radius = 5.0
-var mass = 1.0
+var radius = 10.0
+var mass = 2.0
 
 var moment = momentForCircle(mass, 0, radius, vzero)
 
 var ballBody = space.addBody(newBody(mass, moment))
-ballBody.position = v(0, 15)
+ballBody.position = v(100, 0)
 
 var ballShape = space.addShape(newCircleShape(ballBody, radius, vzero))
 ballShape.friction = 0.7
 
-var timeStep = 1.0/60.0
+var timeStep = 1.0/50.0
 
 var time = 0.0
 
@@ -44,10 +44,13 @@ proc updateChipmunkHello*() {.cdecl, raises: [].} =
 
 
 proc drawCircle(pos: Vect, radius: float, angle:float, color: LCDColor) =
-  playdate.graphics.drawEllipse(pos.x.toInt, -pos.y.toInt, radius.toInt, radius.toInt, 2, angle, angle + 355, color);
+  let x = (pos.x - radius).toInt
+  let y = (pos.y - radius).toInt
+  let size: int = (radius * 2f).toInt
+  playdate.graphics.drawEllipse(x,y,size, size, 1, angle, angle + 300, color);
 
 proc drawSegment(segment: SegmentShape, color: LCDColor) =
-  playdate.graphics.drawLine(segment.a.x.toInt, -segment.a.y.toInt, segment.b.x.toInt, -segment.b.y.toInt, 1, color);
+  playdate.graphics.drawLine(segment.a.x.toInt, segment.a.y.toInt, segment.b.x.toInt, segment.b.y.toInt, 1, color);
 
 proc drawChipmunkHello*() =
   var pos = ballBody.position

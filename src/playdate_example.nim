@@ -14,6 +14,7 @@ var x = int(LCD_COLUMNS / 2)
 var y = int(LCD_ROWS / 2) + 32
 
 proc update(): int {.cdecl, raises: [].} =
+    playdate.graphics.clear(kColorWhite)
     updateChipmunkHello()
     drawChipmunkHello()
     playdate.system.drawFPS(0, 0)
