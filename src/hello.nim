@@ -1,4 +1,3 @@
-import strutils
 import std/math
 import chipmunk7
 import playdate/api
@@ -9,6 +8,7 @@ var gravity = v(0, 100)
 
 var space = newSpace()
 space.gravity = gravity
+# space.iterations = 1
 
 var ground = newSegmentShape(space.staticBody, v(80, 50), v(140, 60), 0)
 ground.friction = 1.0
@@ -36,12 +36,12 @@ proc updateChipmunkHello*() {.cdecl, raises: [].} =
   let pos = ballBody.position
   let vel = ballBody.velocity
   let angle = ballBody.angle
-  try:
-    playdate.system.logToConsole("Time is $#. ballBody is at ($#, $#). Its velocity is ($#, $#). Its angle is $#".format(
-      time, pos.x, pos.y, vel.x, vel.y, angle
-    ))
-  except:
-    playdate.system.logToConsole("Error logging ball pos to console")
+  # try:
+  #   playdate.system.logToConsole("Time is $#. ballBody is at ($#, $#). Its velocity is ($#, $#). Its angle is $#".format(
+  #     time, pos.x, pos.y, vel.x, vel.y, angle
+  #   ))
+  # except:
+  #   playdate.system.logToConsole("Error logging ball pos to console")
 
   space.step(timeStep)
 
