@@ -1,11 +1,12 @@
 import std/math
 import chipmunk7
-import strutils
 import playdate/api
 
 
 var gravity = v(0, 100)
-const brakeTorque = 3_000f
+const brakeTorque = 5_000f
+const groundFriction = 10.0f
+const wheelFriction = 3.0f
 var timeStep = 1.0/50.0
 var time = 0.0
 
@@ -14,7 +15,17 @@ space.gravity = gravity
 # space.iterations = 1
 
 proc print(str: auto) =
-  playdate.system.logToConsole(str)
+  playdate.system.logToConsole($str)
+
+proc addGround(vects: varargs[Vect]): Shape =
+  var groundVerts = newSeq[Vect]()
+  for v in vects:
+    groundVerts.insert(v, 0)
+  # print("groundVerts.len: " & $groundVerts.len)
+  # var ground = newPolyShapeRaw(space.staticBody, cint(groundVerts.len), addr(groundVerts[0]), 0f)
+  var ground = newPolyShape(space.staticBody, cint(groundVerts.len), addr(groundVerts[0]), TransformIdentity, 0f)
+  ground.friction = groundFriction
+  space.addShape(ground)
 
 proc addWheel(space: Space, pos: Vect): Body =
   var radius = 15.0f
@@ -26,7 +37,7 @@ proc addWheel(space: Space, pos: Vect): Body =
   body.position = pos
 
   var shape = space.addShape(newCircleShape(body, radius, vzero))
-  shape.friction = 1.0f
+  shape.friction = wheelFriction
 
   return body
 
@@ -71,10 +82,14 @@ proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
     elif shape.kind == cpPolyShape:
       let poly = cast[PolyShape](shape)
       let numVerts = poly.count
+      print("numVerts: " & $numVerts)
       for i in 0 ..< numVerts:
         let a = localToWorld(poly.body, poly.vert(i))
         let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts))
+        print("i: " & $i & " a: " & $a & " b: " & $b)
         playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+        playdate.graphics.drawText($i, a.x.toInt, a.y.toInt);
+      print("------")
 
 proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
   if constraint.isGrooveJoint:
@@ -100,9 +115,12 @@ let
   posChassis = v(80, 20)
 
 
-var ground = newSegmentShape(space.staticBody, v(20, 150), v(240, 150), 0)
-ground.friction = 3.0
-discard space.addShape(ground)
+let ground = addGround(
+  v(300, 80), v(280, 120), v(240, 120), v(200, 150),
+  v(170, 150), v(140,150), v(100, 120), v(80, 120),
+  v(10,150), v(10,200), v(300, 200)
+)
+ground.friction = 10.0
 
 let wheel1: Body = space.addWheel(posA)
 let wheel2: Body = addWheel(space, posB)
