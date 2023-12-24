@@ -74,20 +74,25 @@ proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
       for i in 0 ..< numVerts:
         let a = localToWorld(poly.body, poly.vert(i))
         let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts))
-        
-        try:
-          playdate.system.logToConsole("ax $# ay$# bx $# by $#".format(
-            a.x, a.y, b.x, b.y
-          ))
-        except:
-          playdate.system.logToConsole("Error logging ball pos to console")
-
-
         playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+
+proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
+  if constraint.isGrooveJoint:
+    # discard
+    let groove = cast[GrooveJoint](constraint)
+    let a = localToWorld(groove.bodyA, groove.grooveA)
+    let b = localToWorld(groove.bodyA, groove.grooveB)
+    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+  elif constraint.isDampedSpring:
+    let spring = cast[DampedSpring](constraint)
+    let a = localToWorld(spring.bodyA, spring.anchorA)
+    let b = localToWorld(spring.bodyB, spring.anchorB)
+    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
 proc drawChipmunkHello*() =
   # iterate over all shapes in the space
   eachShape(space, shapeIter, nil)
+  eachConstraint(space, constraintIter, nil)
 
 let
   posA = v(50, 60)
@@ -99,9 +104,24 @@ var ground = newSegmentShape(space.staticBody, v(20, 150), v(140, 170), 0)
 ground.friction = 1.0
 discard space.addShape(ground)
 
-let wheel1 = addWheel(space, posA)
+let wheel1 = space.addWheel(posA)
 let wheel2 = addWheel(space, posB)
 let chassis = addChassis(space, posChassis)
+
+# NOTE inverted y axis!
+discard space.addConstraint(
+  chassis.newGrooveJoint(wheel1, v(-30, 10), v(-30, 40), vzero)
+)
+discard space.addConstraint(
+  chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 40), vzero)
+)
+
+discard space.addConstraint(
+  chassis.newDampedSpring(wheel1, v(-30,0), vzero, 50f, 20f, 10f)
+)
+discard space.addConstraint(
+  chassis.newDampedSpring(wheel2, v(30,0), vzero, 50f, 20f, 10f)
+)
 
 
 
