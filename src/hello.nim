@@ -5,12 +5,16 @@ import playdate/api
 
 
 var gravity = v(0, 100)
+const brakeTorque = 3_000f
 var timeStep = 1.0/50.0
 var time = 0.0
 
 var space = newSpace()
 space.gravity = gravity
 # space.iterations = 1
+
+proc print(str: auto) =
+  playdate.system.logToConsole(str)
 
 proc addWheel(space: Space, pos: Vect): Body =
   var radius = 15.0f
@@ -44,10 +48,6 @@ proc addChassis(space: Space, pos: Vect): Body =
 
 proc rad2deg(rad: float): float =
   return rad * 180.0 / PI
-
-proc updateChipmunkHello*() {.cdecl, raises: [].} =
-  space.step(timeStep)
-  time += timeStep
 
 proc drawCircle(pos: Vect, radius: float, angle:float, color: LCDColor) =
   # covert from center position to top left
@@ -100,13 +100,13 @@ let
   posChassis = v(80, 20)
 
 
-var ground = newSegmentShape(space.staticBody, v(20, 150), v(140, 170), 0)
-ground.friction = 1.0
+var ground = newSegmentShape(space.staticBody, v(20, 150), v(240, 150), 0)
+ground.friction = 3.0
 discard space.addShape(ground)
 
-let wheel1 = space.addWheel(posA)
-let wheel2 = addWheel(space, posB)
-let chassis = addChassis(space, posChassis)
+let wheel1: Body = space.addWheel(posA)
+let wheel2: Body = addWheel(space, posB)
+let chassis: Body = addChassis(space, posChassis)
 
 # NOTE inverted y axis!
 discard space.addConstraint(
@@ -123,6 +123,54 @@ discard space.addConstraint(
   chassis.newDampedSpring(wheel2, v(30,0), vzero, 50f, 20f, 10f)
 )
 
+proc resetPosition() =
+  wheel1.position = posA
+  wheel1.velocity = vzero
+  wheel1.force = vzero
+  wheel1.angle = 0f
+  wheel1.angularVelocity = 0f
+  wheel1.torque = 0f
+
+  wheel2.position = posB
+  wheel2.velocity = vzero
+  wheel2.force = vzero
+  wheel2.angle = 0f
+  wheel2.angularVelocity = 0f
+  wheel2.torque = 0f
+
+  chassis.position = posChassis
+  chassis.velocity = vzero
+  chassis.force = vzero
+  chassis.angle = 0f
+  chassis.angularVelocity = 0f
+  chassis.torque = 0f
+
+proc onThrottle*() =
+  wheel1.torque = 10000f
+  print("wheel1.torque: " & $wheel1.torque)
+
+proc onBrake*() =
+  wheel1.torque = -wheel1.angularVelocity * brakeTorque
+  wheel2.torque = -wheel2.angularVelocity * brakeTorque
+  print("wheel1.torque: " & $wheel1.torque)
+  print("wheel2.torque: " & $wheel2.torque)
+
+proc updateChipmunkHello*() {.cdecl, raises: [].} =
+# playdate is the global PlaydateAPI instance, available when playdate/api is imported
+  let buttonsState = playdate.system.getButtonsState()
+
+  if kButtonUp in buttonsState.current:
+    playdate.system.logToConsole("Button UP held")
+    onThrottle()
+  elif kButtonDown in buttonsState.current:
+    playdate.system.logToConsole("Button DOWN held")
+    onBrake()
+  elif kButtonLeft in buttonsState.pushed:
+    playdate.system.logToConsole("Button Left pressed")
+    resetPosition()
+
+  space.step(timeStep)
+  time += timeStep
 
 
 when defined chipmunkNoDestructors:
