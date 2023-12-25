@@ -38,18 +38,24 @@ proc parseLevel(path: string): Level {.raises: [].} =
         playdate.system.logToConsole(getCurrentExceptionMsg())
         return nil
 
+proc loadLayer(layer: Layer, space: Space) {.raises: [].} =
+    for obj in layer.objects:
+        let objOffset = v(obj.x, obj.y)
+        var poly: seq[Vect] = obj.polygon
+
+        for i in 0..poly.high:
+            poly[i] = poly[i] + objOffset
+
+        for i in 1..poly.high:
+            var groundSegment = newSegmentShape(space.staticBody, poly[i-1], poly[i], 0f)
+            groundSegment.friction = groundFriction
+            discard space.addShape(groundSegment)
+
 proc loadLevel*(path: string): Space {.raises: [].} =
     let space = newSpace()
     let level = parseLevel(path)
-    let obj = level.layers[0].objects[0]
-    let objOffset = v(obj.x, obj.y)
-    var poly: seq[Vect] = obj.polygon
 
-    for i in 0..poly.high:
-        poly[i] = poly[i] + objOffset
-
-    for i in 1..poly.high:
-        var groundSegment = newSegmentShape(space.staticBody, poly[i-1], poly[i], 0f)
-        groundSegment.friction = groundFriction
-        discard space.addShape(groundSegment)    
+    for layer in level.layers:
+        loadLayer(layer, space)
+      
     return space

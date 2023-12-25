@@ -107,7 +107,6 @@ let
 
 proc initHello*() {.raises: [].} =
   space = loadLevel("testlevel.json")
-  let isNil = space == nil
   space.gravity = gravity
   wheel1 = space.addWheel(posA)
   wheel2 = addWheel(space, posB)
