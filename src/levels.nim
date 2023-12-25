@@ -1,4 +1,5 @@
 import chipmunk7
+import options
 import std/json
 import playdate/api
 
@@ -14,7 +15,7 @@ type
     
     Layer = ref object of RootObj
         name: string
-        objects: seq[LevelObject]
+        objects: Option[seq[LevelObject]]
     
     Level = ref object of RootObj
         layers: seq[Layer]
@@ -39,7 +40,10 @@ proc parseLevel(path: string): Level {.raises: [].} =
         return nil
 
 proc loadLayer(layer: Layer, space: Space) {.raises: [].} =
-    for obj in layer.objects:
+    if layer.objects.isNone:
+        return
+
+    for obj in layer.objects.get:
         let objOffset = v(obj.x, obj.y)
         var poly: seq[Vect] = obj.polygon
 
