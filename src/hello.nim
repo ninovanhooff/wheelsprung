@@ -1,31 +1,22 @@
 import std/math
 import chipmunk7
 import playdate/api
+import levels
 
 
 var gravity = v(0, 100)
 const brakeTorque = 5_000f
-const groundFriction = 10.0f
 const wheelFriction = 3.0f
 var timeStep = 1.0/50.0
 var time = 0.0
 
-var space = newSpace()
-space.gravity = gravity
-# space.iterations = 1
+var space: Space
+var wheel1: Body
+var wheel2: Body
+var chassis: Body
 
 proc print(str: auto) =
   playdate.system.logToConsole($str)
-
-proc addGround(vects: varargs[Vect]): Shape =
-  var groundVerts = newSeq[Vect]()
-  for v in vects:
-    groundVerts.insert(v, 0)
-  # print("groundVerts.len: " & $groundVerts.len)
-  # var ground = newPolyShapeRaw(space.staticBody, cint(groundVerts.len), addr(groundVerts[0]), 0f)
-  var ground = newPolyShape(space.staticBody, cint(groundVerts.len), addr(groundVerts[0]), TransformIdentity, 0f)
-  ground.friction = groundFriction
-  space.addShape(ground)
 
 proc addWheel(space: Space, pos: Vect): Body =
   var radius = 15.0f
@@ -114,32 +105,28 @@ let
   posB = v(110, 60)
   posChassis = v(80, 20)
 
+proc initHello*() {.raises: [].} =
+  space = loadLevel("testlevel.json")
+  let isNil = space == nil
+  space.gravity = gravity
+  wheel1 = space.addWheel(posA)
+  wheel2 = addWheel(space, posB)
+  chassis = addChassis(space, posChassis)
 
-let ground = addGround(
-  v(300, 80), v(280, 120), v(240, 120), v(200, 150),
-  v(170, 150), v(140,150), v(100, 120), v(80, 120),
-  v(10,150), v(10,200), v(300, 200)
-)
-ground.friction = 10.0
+  # NOTE inverted y axis!
+  discard space.addConstraint(
+    chassis.newGrooveJoint(wheel1, v(-30, 10), v(-30, 40), vzero)
+  )
+  discard space.addConstraint(
+    chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 40), vzero)
+  )
 
-let wheel1: Body = space.addWheel(posA)
-let wheel2: Body = addWheel(space, posB)
-let chassis: Body = addChassis(space, posChassis)
-
-# NOTE inverted y axis!
-discard space.addConstraint(
-  chassis.newGrooveJoint(wheel1, v(-30, 10), v(-30, 40), vzero)
-)
-discard space.addConstraint(
-  chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 40), vzero)
-)
-
-discard space.addConstraint(
-  chassis.newDampedSpring(wheel1, v(-30,0), vzero, 50f, 20f, 10f)
-)
-discard space.addConstraint(
-  chassis.newDampedSpring(wheel2, v(30,0), vzero, 50f, 20f, 10f)
-)
+  discard space.addConstraint(
+    chassis.newDampedSpring(wheel1, v(-30,0), vzero, 50f, 20f, 10f)
+  )
+  discard space.addConstraint(
+    chassis.newDampedSpring(wheel2, v(30,0), vzero, 50f, 20f, 10f)
+  )
 
 proc resetPosition() =
   wheel1.position = posA

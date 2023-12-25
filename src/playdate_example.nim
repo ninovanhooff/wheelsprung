@@ -41,6 +41,11 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
         font = try: playdate.graphics.newFont(FONT_PATH) except: nil
         playdate.graphics.setFont(font)
 
+        try:
+            initHello()
+        except:
+            playdate.system.error(getCurrentExceptionMsg())
+
         # Set the update callback
         playdate.system.setUpdateCallback(catchingUpdate)
 
