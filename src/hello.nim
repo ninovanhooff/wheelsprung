@@ -15,6 +15,8 @@ var wheel1: Body
 var wheel2: Body
 var chassis: Body
 
+var camera: Vect = vzero
+
 proc print(str: auto) =
   playdate.system.logToConsole($str)
 
@@ -53,15 +55,18 @@ proc rad2deg(rad: float): float =
 
 proc drawCircle(pos: Vect, radius: float, angle:float, color: LCDColor) =
   # covert from center position to top left
-  let x = (pos.x - radius).toInt
-  let y = (pos.y - radius).toInt
+  let drawPos = pos - camera
+  let x = (drawPos.x - radius).toInt
+  let y = (drawPos.y - radius).toInt
   let size: int = (radius * 2f).toInt
   # angle is in radians, convert to degrees
   let deg = rad2deg(angle)
   playdate.graphics.drawEllipse(x,y,size, size, 1, deg, deg + 350, color);
 
 proc drawSegment(segment: SegmentShape, color: LCDColor) =
-  playdate.graphics.drawLine(segment.a.x.toInt, segment.a.y.toInt, segment.b.x.toInt, segment.b.y.toInt, 1, color);
+  let drawAPos = segment.a - camera
+  let drawBPos = segment.b - camera
+  playdate.graphics.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
 
 proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
     if shape.kind == cpCircleShape:
@@ -74,8 +79,8 @@ proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
       let poly = cast[PolyShape](shape)
       let numVerts = poly.count
       for i in 0 ..< numVerts:
-        let a = localToWorld(poly.body, poly.vert(i))
-        let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts))
+        let a = localToWorld(poly.body, poly.vert(i)) - camera
+        let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts)) - camera
         playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
         playdate.graphics.drawText($i, a.x.toInt, a.y.toInt);
 
@@ -83,13 +88,13 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
   if constraint.isGrooveJoint:
     # discard
     let groove = cast[GrooveJoint](constraint)
-    let a = localToWorld(groove.bodyA, groove.grooveA)
-    let b = localToWorld(groove.bodyA, groove.grooveB)
+    let a = localToWorld(groove.bodyA, groove.grooveA) - camera
+    let b = localToWorld(groove.bodyA, groove.grooveB) - camera
     playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
   elif constraint.isDampedSpring:
     let spring = cast[DampedSpring](constraint)
-    let a = localToWorld(spring.bodyA, spring.anchorA)
-    let b = localToWorld(spring.bodyB, spring.anchorB)
+    let a = localToWorld(spring.bodyA, spring.anchorA) - camera
+    let b = localToWorld(spring.bodyB, spring.anchorB) - camera
     playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
 proc drawChipmunkHello*() =
@@ -172,6 +177,8 @@ proc updateChipmunkHello*() {.cdecl, raises: [].} =
 
   space.step(timeStep)
   time += timeStep
+
+  camera = chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
 
 
 when defined chipmunkNoDestructors:
