@@ -43,11 +43,14 @@ proc loadLayer(layer: Layer, space: Space) {.raises: [].} =
         let objOffset = v(obj.x, obj.y)
         var poly: seq[Vect] = obj.polygon
 
-        for i in 0..poly.high:
+        let lastIndex = poly.high
+
+        for i in 0..lastIndex:
             poly[i] = poly[i] + objOffset
 
-        for i in 1..poly.high:
-            var groundSegment = newSegmentShape(space.staticBody, poly[i-1], poly[i], 0f)
+        for i in 0..lastIndex:
+            playdate.system.logToConsole("Adding segment from " & $i & " to " & $((i + 1) mod (lastIndex-1)))
+            var groundSegment = newSegmentShape(space.staticBody, poly[i], poly[(i + 1) mod (lastIndex+1)], 0f)
             groundSegment.friction = groundFriction
             discard space.addShape(groundSegment)
 

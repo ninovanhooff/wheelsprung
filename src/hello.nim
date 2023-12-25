@@ -73,14 +73,11 @@ proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
     elif shape.kind == cpPolyShape:
       let poly = cast[PolyShape](shape)
       let numVerts = poly.count
-      print("numVerts: " & $numVerts)
       for i in 0 ..< numVerts:
         let a = localToWorld(poly.body, poly.vert(i))
         let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts))
-        print("i: " & $i & " a: " & $a & " b: " & $b)
         playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
         playdate.graphics.drawText($i, a.x.toInt, a.y.toInt);
-      print("------")
 
 proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
   if constraint.isGrooveJoint:
