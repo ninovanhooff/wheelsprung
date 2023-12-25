@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="50" height="30" tilewidth="8" tileheight="8" infinite="0" nextlayerid="3" nextobjectid="3">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="100" height="50" tilewidth="8" tileheight="8" infinite="0" nextlayerid="6" nextobjectid="6">
  <editorsettings>
   <export target="../../../../Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.dirtbikesample/testlevel.json" format="json"/>
  </editorsettings>
  <objectgroup id="2" name="Object Layer 1">
   <object id="1" x="5.72773" y="151.921">
    <polygon points="15.3579,-68.5932 127.783,-10.6444 195.756,-6.94705 261.745,-27.5334 310.775,-60.3272 356.13,-116.311 386.548,-140.964 293.11,52.0791 93.92,60.5254"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="5" name="Object Layer 2">
+  <object id="5" x="474.449" y="68.7285">
+   <polyline points="0,0 27.7131,47.6666 97.5502,95.3331 179.581,117.504"/>
   </object>
  </objectgroup>
 </map>

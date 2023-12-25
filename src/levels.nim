@@ -11,7 +11,8 @@ type
         x, y: float
         width, height: float
         rotation: float
-        polygon: seq[Vect]
+        polygon: Option[seq[Vect]]
+        polyline: Option[seq[Vect]]
     
     Layer = ref object of RootObj
         name: string
@@ -39,22 +40,33 @@ proc parseLevel(path: string): Level {.raises: [].} =
         playdate.system.logToConsole(getCurrentExceptionMsg())
         return nil
 
+proc getSegments(obj: LevelObject): seq[Vect] {.raises: [].} =
+    if obj.polyline.isSome:
+        return obj.polyline.get
+    elif obj.polygon.isSome:
+        var segments: seq[Vect] = obj.polygon.get
+        segments.add(segments[0])
+        return segments
+    else:
+        return @[]
+
 proc loadLayer(layer: Layer, space: Space) {.raises: [].} =
     if layer.objects.isNone:
         return
 
     for obj in layer.objects.get:
         let objOffset = v(obj.x, obj.y)
-        var poly: seq[Vect] = obj.polygon
+        var segments: seq[Vect] = obj.getSegments()
+        if segments.len < 2:
+            continue
 
-        let lastIndex = poly.high
+        let lastIndex = segments.high
 
         for i in 0..lastIndex:
-            poly[i] = poly[i] + objOffset
+            segments[i] = segments[i] + objOffset
 
-        for i in 0..lastIndex:
-            playdate.system.logToConsole("Adding segment from " & $i & " to " & $((i + 1) mod (lastIndex-1)))
-            var groundSegment = newSegmentShape(space.staticBody, poly[i], poly[(i + 1) mod (lastIndex+1)], 0f)
+        for i in 1..lastIndex:
+            var groundSegment = newSegmentShape(space.staticBody, segments[i-1], segments[i], 0f)
             groundSegment.friction = groundFriction
             discard space.addShape(groundSegment)
 
