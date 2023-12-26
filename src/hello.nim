@@ -45,6 +45,7 @@ proc addChassis(space: Space, pos: Vect): Body =
   body.position = pos
 
   var shape = space.addShape(newBoxShape(body, width, height, 0f))
+  shape.filter = SHAPE_FILTER_NONE # no collisions
   shape.elasticity = 0.0f
   shape.friction = 0.7f
 
