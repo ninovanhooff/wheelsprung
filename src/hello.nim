@@ -46,7 +46,7 @@ proc addWheel(space: Space, pos: Vect): Body =
   return body
 
 proc addChassis(space: Space, pos: Vect): Body =
-  var mass = 5.0f
+  var mass = 4.0f
   var width = 80.0f
   var height = 30.0f
 
@@ -156,16 +156,16 @@ proc initHello*() {.raises: [].} =
   )
   # limit wheel to swing arm
   discard space.addConstraint(
-    swingArm.newGrooveJoint(wheel1, swingArmStartCenter, swingArmEndCenter, vzero)
+    swingArm.newGrooveJoint(wheel1, swingArmStartCenter, vzero, vzero)
   )
   # push wheel to end of swing arm
   discard space.addConstraint(
-    swingArm.newDampedSpring(wheel1, swingArmEndCenter, vzero, swingArmWidth*0.5f, 400f, 100f)
+    swingArm.newDampedSpring(wheel1, swingArmEndCenter, vzero, swingArmWidth, 100f, 20f)
   )
   
   # push swing arm down from chassis
   discard space.addConstraint(
-    chassis.newDampedSpring(swingArm, swingArmPosOffset + v(0, -10f), vzero, 15f, 300f, 60f)
+    chassis.newDampedSpring(swingArm, swingArmPosOffset + v(0, -10f), vzero, 20f, 80f, 40f)
   )
   # discard space.addConstraint(
   #   swingArm.newRotaryLimitJoint(chassis, 5f, 90f)
