@@ -18,6 +18,7 @@ var chassis: Body
 var swingArm: Body
 
 let
+  wheelRadius = 15.0f
   posA = v(30, 30)
   posB = v(110, 60)
   posChassis = v(80, 20)
@@ -32,7 +33,7 @@ proc print(str: auto) =
   playdate.system.logToConsole($str)
 
 proc addWheel(space: Space, pos: Vect): Body =
-  var radius = 10.0f
+  var radius = wheelRadius
   var mass = 1.0f
 
   var moment = momentForCircle(mass, 0, radius, vzero)
@@ -165,7 +166,7 @@ proc initHello*() {.raises: [].} =
   
   # push swing arm down from chassis
   discard space.addConstraint(
-    chassis.newDampedSpring(swingArm, swingArmPosOffset + v(0, -10f), vzero, 20f, 80f, 40f)
+    chassis.newDampedSpring(swingArm, swingArmPosOffset + v(0, -10f), vzero, 20f, 80f, 20f)
   )
   # discard space.addConstraint(
   #   swingArm.newRotaryLimitJoint(chassis, 5f, 90f)
