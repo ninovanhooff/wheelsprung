@@ -14,6 +14,14 @@ var space: Space
 var wheel1: Body
 var wheel2: Body
 var chassis: Body
+var swingArm: Body
+
+let
+  posA = v(50, 60)
+  posB = v(110, 60)
+  posChassis = v(80, 20)
+  swingArmPosOffset = v(-30,15)
+  swingArmRestAngle = -0.5f
 
 var camera: Vect = vzero
 
@@ -50,6 +58,23 @@ proc addChassis(space: Space, pos: Vect): Body =
   shape.friction = 0.7f
 
   return body
+
+proc addSwingArm(space: Space, pos: Vect): Body =
+  let swingArmMmass = 0.5f
+  let swingArmWidth = 40.0f
+  let swingArmHeight = 5.0f
+
+  let swingArmMoment = momentForBox(swingArmMmass, swingArmWidth, swingArmHeight)
+  let swingArm = space.addBody(newBody(swingArmMmass, swingArmMoment))
+  swingArm.position = pos
+  swingArm.angle = swingArmRestAngle
+
+  let swingArmShape = space.addShape(newBoxShape(swingArm, swingArmWidth, swingArmHeight, 0f))
+  swingArmShape.filter = SHAPE_FILTER_NONE # no collisions
+  swingArmShape.elasticity = 0.0f
+  swingArmShape.friction = 0.7f
+
+  return swingArm
 
 proc rad2deg(rad: float): float =
   return rad * 180.0 / PI
@@ -103,28 +128,24 @@ proc drawChipmunkHello*() =
   eachShape(space, shapeIter, nil)
   eachConstraint(space, constraintIter, nil)
 
-let
-  posA = v(50, 60)
-  posB = v(110, 60)
-  posChassis = v(80, 20)
-
 proc initHello*() {.raises: [].} =
   space = loadLevel("testlevel.json")
   space.gravity = gravity
   wheel1 = space.addWheel(posA)
-  wheel2 = addWheel(space, posB)
-  chassis = addChassis(space, posChassis)
+  wheel2 = space.addWheel(posB)
+  chassis = space.addChassis(posChassis)
+  swingArm = space.addSwingArm(posChassis + swingArmPosOffset)
 
   # NOTE inverted y axis!
   discard space.addConstraint(
     chassis.newGrooveJoint(wheel1, v(-30, 10), v(-30, 40), vzero)
   )
   discard space.addConstraint(
-    chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 40), vzero)
+    chassis.newDampedSpring(wheel1, v(-30,0), vzero, 50f, 20f, 10f)
   )
 
   discard space.addConstraint(
-    chassis.newDampedSpring(wheel1, v(-30,0), vzero, 50f, 20f, 10f)
+    chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 40), vzero)
   )
   discard space.addConstraint(
     chassis.newDampedSpring(wheel2, v(30,0), vzero, 50f, 20f, 10f)
