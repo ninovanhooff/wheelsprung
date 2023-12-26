@@ -17,11 +17,13 @@ var chassis: Body
 var swingArm: Body
 
 let
-  posA = v(50, 60)
+  posA = v(30, 30)
   posB = v(110, 60)
   posChassis = v(80, 20)
-  swingArmPosOffset = v(-30,15)
-  swingArmRestAngle = -0.5f
+  swingArmWidth = 40f
+  swingArmHeight = 5f
+  swingArmPosOffset = v(-30,10)
+  swingArmRestAngle = 0f
 
 var camera: Vect = vzero
 
@@ -29,7 +31,7 @@ proc print(str: auto) =
   playdate.system.logToConsole($str)
 
 proc addWheel(space: Space, pos: Vect): Body =
-  var radius = 15.0f
+  var radius = 10.0f
   var mass = 1.0f
 
   var moment = momentForCircle(mass, 0, radius, vzero)
@@ -61,8 +63,8 @@ proc addChassis(space: Space, pos: Vect): Body =
 
 proc addSwingArm(space: Space, pos: Vect): Body =
   let swingArmMmass = 0.5f
-  let swingArmWidth = 40.0f
-  let swingArmHeight = 5.0f
+  let swingArmWidth = swingArmWidth
+  let swingArmHeight = swingArmHeight
 
   let swingArmMoment = momentForBox(swingArmMmass, swingArmWidth, swingArmHeight)
   let swingArm = space.addBody(newBody(swingArmMmass, swingArmMoment))
@@ -108,7 +110,6 @@ proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
         let a = localToWorld(poly.body, poly.vert(i)) - camera
         let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts)) - camera
         playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-        playdate.graphics.drawText($i, a.x.toInt, a.y.toInt);
 
 proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
   if constraint.isGrooveJoint:
@@ -121,6 +122,11 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     let spring = cast[DampedSpring](constraint)
     let a = localToWorld(spring.bodyA, spring.anchorA) - camera
     let b = localToWorld(spring.bodyB, spring.anchorB) - camera
+    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+  elif constraint.isDampedRotarySpring:
+    let spring = cast[DampedRotarySpring](constraint)
+    let a = localToWorld(spring.bodyA, vzero) - camera
+    let b = localToWorld(spring.bodyB, vzero) - camera
     playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
 proc drawChipmunkHello*() =
@@ -137,12 +143,32 @@ proc initHello*() {.raises: [].} =
   swingArm = space.addSwingArm(posChassis + swingArmPosOffset)
 
   # NOTE inverted y axis!
+  let swingArmStartCenter = v(-swingArmWidth*0.5f, swingArmHeight*0.5f)
+  let swingArmEndCenter = v(swingArmWidth*0.5f, swingArmHeight*0.5f)
+  # attach swing arm to chassis
   discard space.addConstraint(
-    chassis.newGrooveJoint(wheel1, v(-30, 10), v(-30, 40), vzero)
+    chassis.newPivotJoint(
+      swingArm, 
+      swingArmPosOffset + swingArmEndCenter, 
+      swingArmEndCenter
+    )
   )
+  # limit wheel to swing arm
   discard space.addConstraint(
-    chassis.newDampedSpring(wheel1, v(-30,0), vzero, 50f, 20f, 10f)
+    swingArm.newGrooveJoint(wheel1, swingArmStartCenter, swingArmEndCenter, vzero)
   )
+  # push wheel to end of swing arm
+  discard space.addConstraint(
+    swingArm.newDampedSpring(wheel1, swingArmEndCenter, vzero, swingArmWidth*0.5f, 400f, 100f)
+  )
+  
+  # push swing arm down from chassis
+  discard space.addConstraint(
+    chassis.newDampedSpring(swingArm, swingArmPosOffset + v(0, -10f), vzero, 15f, 300f, 60f)
+  )
+  # discard space.addConstraint(
+  #   swingArm.newRotaryLimitJoint(chassis, 5f, 90f)
+  # )
 
   discard space.addConstraint(
     chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 40), vzero)
@@ -193,9 +219,9 @@ proc updateChipmunkHello*() {.cdecl, raises: [].} =
   elif kButtonDown in buttonsState.current:
     playdate.system.logToConsole("Button DOWN held")
     onBrake()
-  elif kButtonLeft in buttonsState.pushed:
-    playdate.system.logToConsole("Button Left pressed")
-    resetPosition()
+  # elif kButtonLeft in buttonsState.pushed:
+  #   playdate.system.logToConsole("Button Left pressed")
+  #   resetPosition()
 
   space.step(timeStep)
   time += timeStep
