@@ -5,6 +5,7 @@ import levels
 
 
 var gravity = v(0, 100)
+const attitudeAdjustTorque = 450_000f
 const brakeTorque = 5_000f
 const wheelFriction = 3.0f
 var timeStep = 1.0/50.0
@@ -209,19 +210,28 @@ proc onBrake*() =
   print("wheel1.torque: " & $wheel1.torque)
   print("wheel2.torque: " & $wheel2.torque)
 
-proc updateChipmunkHello*() {.cdecl, raises: [].} =
-# playdate is the global PlaydateAPI instance, available when playdate/api is imported
-  let buttonsState = playdate.system.getButtonsState()
+proc onAttitudeAdjust(direction: float) =
+  chassis.torque = direction * attitudeAdjustTorque
+  print("chassis.torque: " & $chassis.torque)
 
-  if kButtonUp in buttonsState.current:
-    playdate.system.logToConsole("Button UP held")
-    onThrottle()
-  elif kButtonDown in buttonsState.current:
-    playdate.system.logToConsole("Button DOWN held")
-    onBrake()
-  # elif kButtonLeft in buttonsState.pushed:
-  #   playdate.system.logToConsole("Button Left pressed")
-  #   resetPosition()
+proc handleInput() =
+    let buttonsState = playdate.system.getButtonsState()
+
+    if kButtonUp in buttonsState.current:
+      playdate.system.logToConsole("Button UP held")
+      onThrottle()
+    elif kButtonDown in buttonsState.current:
+      playdate.system.logToConsole("Button DOWN held")
+      onBrake()
+    elif kButtonLeft in buttonsState.pushed:
+      playdate.system.logToConsole("Button Left pressed")
+      onAttitudeAdjust(-1f)
+    elif kButtonRight in buttonsState.pushed:
+      playdate.system.logToConsole("Button Right pressed")
+      onAttitudeAdjust(1f)
+
+proc updateChipmunkHello*() {.cdecl, raises: [].} =
+  handleInput()
 
   space.step(timeStep)
   time += timeStep
