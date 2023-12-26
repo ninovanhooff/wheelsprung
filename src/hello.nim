@@ -16,6 +16,7 @@ var wheel1: Body
 var wheel2: Body
 var chassis: Body
 var swingArm: Body
+var observedConstraint: Constraint
 
 let
   wheelRadius = 15.0f
@@ -145,7 +146,6 @@ proc initHello*() {.raises: [].} =
   swingArm = space.addSwingArm(posChassis + swingArmPosOffset)
 
   # NOTE inverted y axis!
-  let swingArmStartCenter = v(-swingArmWidth*0.5f, swingArmHeight*0.5f)
   let swingArmEndCenter = v(swingArmWidth*0.5f, swingArmHeight*0.5f)
   # attach swing arm to chassis
   discard space.addConstraint(
@@ -155,28 +155,38 @@ proc initHello*() {.raises: [].} =
       swingArmEndCenter
     )
   )
+
   # limit wheel to swing arm
   discard space.addConstraint(
-    swingArm.newGrooveJoint(wheel1, swingArmStartCenter, vzero, vzero)
+    swingArm.newGrooveJoint(
+      wheel1, 
+      v(-swingArmWidth*2f, swingArmHeight*0.5f), 
+      vzero, vzero
+    )
   )
   # push wheel to end of swing arm
   discard space.addConstraint(
     swingArm.newDampedSpring(wheel1, swingArmEndCenter, vzero, swingArmWidth, 100f, 20f)
   )
   
-  # push swing arm down from chassis
-  discard space.addConstraint(
-    chassis.newDampedSpring(swingArm, swingArmPosOffset + v(0, -10f), vzero, 20f, 80f, 20f)
-  )
+  # # push swing arm down from chassis
   # discard space.addConstraint(
-  #   swingArm.newRotaryLimitJoint(chassis, 5f, 90f)
+  #   chassis.newDampedSpring(swingArm, swingArmPosOffset + v(0, -20f), vzero, 30f, 40f, 50f)
   # )
 
+  # observedConstraint = space.addConstraint(
+  #   swingArm.newRotaryLimitJoint(chassis, -0.5f, 0.5f)
+  # )
+  observedConstraint = space.addConstraint(
+    chassis.newDampedRotarySpring(swingArm, 0.2f*PI, 30_000f, 4_000f)
+  )
+
+  # wheel 2
   discard space.addConstraint(
-    chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 40), vzero)
+    chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 80), vzero)
   )
   discard space.addConstraint(
-    chassis.newDampedSpring(wheel2, v(30,0), vzero, 50f, 20f, 10f)
+    chassis.newDampedSpring(wheel2, v(30,0), vzero, 40f, 20f, 10f)
   )
 
 proc resetPosition() =
