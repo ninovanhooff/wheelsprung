@@ -1,5 +1,8 @@
 # Playdate Dirtbike Example
 
+![Screenshot](screenshots/github_banner.png)
+
+
 This sample project demonstrates how to use the Nim programming language with the Chipmunk2D physics library for playdate. It relies on 2 libraries for that:
 
 [Playdate-Nim][pdnim]
