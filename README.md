@@ -10,7 +10,7 @@ This sample project demonstrates how to use the Nim programming language with th
 [Chipmunk2D for Playdate](https://github.com/samdze/chipmunk-2d)
 
 ## Installation
-This project should workk MacOS with Apple Silicon and Windows. See [Playdate-Nim][pdnim] for installation instructions.
+This project should work on MacOS with Apple Silicon and Windows. See [Playdate-Nim][pdnim] for installation instructions.
 
 
 ## Troubleshooting
