@@ -138,7 +138,7 @@ proc drawChipmunkHello*() =
   eachConstraint(space, constraintIter, nil)
 
 proc initHello*() {.raises: [].} =
-  space = loadLevel("testlevel.json")
+  space = loadLevel("levels/fallbackLevel.json")
   space.gravity = gravity
   wheel1 = space.addWheel(posA)
   wheel2 = space.addWheel(posB)
