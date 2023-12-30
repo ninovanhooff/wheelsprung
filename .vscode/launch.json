@@ -77,7 +77,7 @@
             "request": "attach",
             "name": "Build Sim. + Attach & Debug PDX",
             "program": "${env:PLAYDATE_SDK_PATH}/bin/Playdate Simulator",
-            "preLaunchTask": "Build Simulator PDX",
+            "preLaunchTask": "Build & Run Simulator PDX",
             "osx": {
                 "MIMode": "lldb",
                 "program": "${env:PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app"

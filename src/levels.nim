@@ -21,10 +21,13 @@ type
     Level = ref object of RootObj
         layers: seq[Layer]
 
+let kFileReadAny: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
+
+
 proc readDataFileContents(path: string): string {.raises: [].} =
     try:
         let playdateFile = playdate.file
-        let jsonString = playdateFile.open(path, kFileReadData).readString()
+        let jsonString = playdateFile.open(path, kFileReadAny).readString()
         return jsonString
     except:
         playdate.system.logToConsole("Could not read " & $path)

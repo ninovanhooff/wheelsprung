@@ -6,12 +6,25 @@
         {
             "label": "Build Universal PDX",
             "type": "shell",
-            "command": "nimble all",
+            "command": "nimble all"
         },
         {
             "label": "Build Simulator PDX",
             "type": "shell",
-            "command": "nimble simulator"
+            "command": "nimble simulator",
+        },
+        {
+            "label": "Build & Run Simulator PDX",
+            "type": "shell",
+            "dependsOn": [
+                "Build Simulator PDX"
+            ],
+            "command": "open ${workspaceFolder}/${workspaceFolderBasename}.pdx",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "Build Device PDX",
