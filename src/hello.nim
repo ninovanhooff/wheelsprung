@@ -23,17 +23,17 @@ let
   wheelRadius = 10.0f
   posChassis = v(80, 20)
   posA = v(posChassis.x - 20, posChassis.y + 10)
-  posB = v(posChassis.x + 20, posChassis.y + 10)
+  posB = v(posChassis.x + 21, posChassis.y + 12)
   
   swingArmWidth = 20f
   swingArmHeight = 3f
   swingArmPosOffset = v(-10,10)
   swingArmRestAngle = 0f
 
-  forkArmWidth = 20f
-  forkArmHeight = 3f
-  forkArmPosOffset = v(10,10)
-  forkArmRestAngle = 0f
+  forkArmWidth = 3f
+  forkArmHeight = 23f
+  forkArmPosOffset = v(20,2)
+  forkArmRestAngle = 0f#-0.1f*PI
 
 
 var camera: Vect = vzero
@@ -190,19 +190,19 @@ proc setConstraints() =
   )
 
   discard space.addConstraint(
-    chassis.newDampedRotarySpring(swingArm, 0.05f*PI, 30_000f, 4_000f) # todo rest angle?
+    chassis.newDampedRotarySpring(swingArm, 0.1f*PI, 30_000f, 4_000f) # todo rest angle?
   )
 
   # fork arm (arm between chassis and front wheel)
 
-  let forkArmStartCenter = v(-forkArmWidth*0.5f, forkArmHeight*0.5f)
+  let forkArmTopCenter = v(0f, -forkArmHeight*0.5f)
   # let forkArmEndCenter = v(forkArmWidth*0.5f, forkArmHeight*0.5f)
   # attach swing arm to chassis
   discard space.addConstraint(
     chassis.newPivotJoint(
       forkArm, 
-      forkArmPosOffset + forkArmStartCenter, 
-      forkArmStartCenter
+      forkArmPosOffset + forkArmTopCenter, 
+      forkArmTopCenter
     )
   )
   # limit wheel2 to fork arm
@@ -210,17 +210,17 @@ proc setConstraints() =
     forkArm.newGrooveJoint(
       wheel2, 
       vzero,
-      v(forkArmWidth*2f, forkArmHeight*0.5f), 
+      v(0f, forkArmHeight*0.5f), 
       vzero
     )
   )
   # push wheel2 to end of fork arm
   discard space.addConstraint(
-    forkArm.newDampedSpring(wheel2, forkArmStartCenter, vzero, forkArmWidth, 100f, 20f)
+    forkArm.newDampedSpring(wheel2, forkArmTopCenter, vzero, forkArmHeight, 100f, 20f)
   )
 
   discard space.addConstraint(
-    forkArm.newDampedRotarySpring(chassis, 0f*PI, 30_000f, 4_000f) # todo rest angle?
+    chassis.newDampedRotarySpring(forkArm, 0.1f*PI, 10_000f, 2000f) # todo rest angle?
   )
 
 proc initHello*() {.raises: [].} =
