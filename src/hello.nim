@@ -35,7 +35,7 @@ proc print(str: auto) =
 
 proc addWheel(space: Space, pos: Vect): Body =
   var radius = wheelRadius
-  var mass = 1.0f
+  var mass = 0.6f
 
   var moment = momentForCircle(mass, 0, radius, vzero)
 
@@ -48,7 +48,7 @@ proc addWheel(space: Space, pos: Vect): Body =
   return body
 
 proc addChassis(space: Space, pos: Vect): Body =
-  var mass = 4.0f
+  var mass = 3.0f
   var width = 80.0f
   var height = 30.0f
 
@@ -65,7 +65,7 @@ proc addChassis(space: Space, pos: Vect): Body =
   return body
 
 proc addSwingArm(space: Space, pos: Vect): Body =
-  let swingArmMmass = 0.5f
+  let swingArmMmass = 0.25f
   let swingArmWidth = swingArmWidth
   let swingArmHeight = swingArmHeight
 
