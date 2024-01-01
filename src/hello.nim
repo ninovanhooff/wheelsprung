@@ -3,13 +3,17 @@ import chipmunk7
 import playdate/api
 import levels
 
-
-var gravity = v(0, 100)
-const attitudeAdjustTorque = 150_000f
-const brakeTorque = 5_000f
-const wheelFriction = 3.0f
-var timeStep = 1.0/50.0
-var time = 0.0
+const
+  gravity = v(0, 100)
+  initialAttitudeAdjustTorque = 50_000f
+  attitudeAdjustAttentuation = 0.8f
+  attitudeAdjustForceThreshold = 100f
+  # applied to wheel1 and chassis to make bike more unstable
+  throttleTorque = 2_000f
+  # applied to both wheels
+  brakeTorque = 2_000f
+  wheelFriction = 3.0f
+  timeStep = 1.0f/50.0f
 
 var space: Space
 var wheel1: Body
@@ -31,12 +35,14 @@ let
   swingArmRestAngle = 0f
 
   forkArmWidth = 3f
-  forkArmHeight = 23f
-  forkArmPosOffset = v(20,2)
+  forkArmHeight = 25f
+  forkArmPosOffset = v(16,2)
   forkArmRestAngle = 0f#-0.1f*PI
 
-
-var camera: Vect = vzero
+var 
+  time = 0.0
+  camera: Vect = vzero
+  attitudeAdjustForce = 0f
 
 proc print(str: auto) =
   playdate.system.logToConsole($str)
@@ -181,7 +187,8 @@ proc setConstraints() =
     swingArm.newGrooveJoint(
       wheel1, 
       v(-swingArmWidth*2f, swingArmHeight*0.5f), 
-      vzero, vzero
+      vzero, 
+      vzero
     )
   )
   # push wheel1 to end of swing arm
@@ -210,7 +217,7 @@ proc setConstraints() =
     forkArm.newGrooveJoint(
       wheel2, 
       vzero,
-      v(0f, forkArmHeight*0.5f), 
+      v(0f, forkArmHeight), 
       vzero
     )
   )
@@ -256,7 +263,8 @@ proc initHello*() {.raises: [].} =
 #   chassis.torque = 0f
 
 proc onThrottle*() =
-  wheel1.torque = 10000f
+  wheel1.torque = throttleTorque
+  chassis.torque = chassis.torque - throttleTorque * 2f
   print("wheel1.torque: " & $wheel1.torque)
 
 proc onBrake*() =
@@ -265,9 +273,19 @@ proc onBrake*() =
   print("wheel1.torque: " & $wheel1.torque)
   print("wheel2.torque: " & $wheel2.torque)
 
+proc updateAttitudeAdjust() =
+  if attitudeAdjustForce != 0f:
+    chassis.torque = attitudeAdjustForce
+    attitudeAdjustForce *= attitudeAdjustAttentuation
+    if attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
+      attitudeAdjustForce = 0f
+
 proc onAttitudeAdjust(direction: float) =
-  chassis.torque = direction * attitudeAdjustTorque
-  print("chassis.torque: " & $chassis.torque)
+  if attitudeAdjustForce == 0f:
+    attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+  else:
+    print("ignore attitude adjust. Already in progress with remaining force: " & $attitudeAdjustForce)
+    
 
 proc handleInput() =
     let buttonsState = playdate.system.getButtonsState()
@@ -275,10 +293,11 @@ proc handleInput() =
     if kButtonUp in buttonsState.current:
       playdate.system.logToConsole("Button UP held")
       onThrottle()
-    elif kButtonDown in buttonsState.current:
+    if kButtonDown in buttonsState.current:
       playdate.system.logToConsole("Button DOWN held")
       onBrake()
-    elif kButtonLeft in buttonsState.pushed:
+    
+    if kButtonLeft in buttonsState.pushed:
       playdate.system.logToConsole("Button Left pressed")
       onAttitudeAdjust(-1f)
     elif kButtonRight in buttonsState.pushed:
@@ -287,6 +306,7 @@ proc handleInput() =
 
 proc updateChipmunkHello*() {.cdecl, raises: [].} =
   handleInput()
+  updateAttitudeAdjust()
 
   space.step(timeStep)
   time += timeStep
