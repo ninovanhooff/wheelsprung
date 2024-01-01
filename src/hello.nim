@@ -8,7 +8,7 @@ const
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.8f
   attitudeAdjustForceThreshold = 100f
-  maxWheelAngularVelocity = 100f
+  maxWheelAngularVelocity = 50f
   # applied to wheel1 and chassis to make bike more unstable
   throttleTorque = 2_000f
   # applied to both wheels
@@ -22,7 +22,6 @@ var frontWheel: Body
 var chassis: Body
 var swingArm: Body
 var forkArm: Body
-var observedConstraint: Constraint
 
 let
   wheelRadius = 10.0f
@@ -264,6 +263,10 @@ proc initHello*() {.raises: [].} =
 #   chassis.torque = 0f
 
 proc onThrottle*() =
+  if backWheel.angularVelocity > maxWheelAngularVelocity:
+    print("ignore throttle. back wheel already at max angular velocity")
+    return
+
   backWheel.torque = throttleTorque
   chassis.torque = chassis.torque - throttleTorque * 2f
   print("wheel1.torque: " & $backWheel.torque)
