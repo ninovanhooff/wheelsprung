@@ -8,6 +8,7 @@ const
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.8f
   attitudeAdjustForceThreshold = 100f
+  maxWheelAngularVelocity = 100f
   # applied to wheel1 and chassis to make bike more unstable
   throttleTorque = 2_000f
   # applied to both wheels
@@ -16,8 +17,8 @@ const
   timeStep = 1.0f/50.0f
 
 var space: Space
-var wheel1: Body
-var wheel2: Body
+var backWheel: Body
+var frontWheel: Body
 var chassis: Body
 var swingArm: Body
 var forkArm: Body
@@ -185,7 +186,7 @@ proc setConstraints() =
   # limit wheel1 to swing arm
   discard space.addConstraint(
     swingArm.newGrooveJoint(
-      wheel1, 
+      backWheel, 
       v(-swingArmWidth*2f, swingArmHeight*0.5f), 
       vzero, 
       vzero
@@ -193,7 +194,7 @@ proc setConstraints() =
   )
   # push wheel1 to end of swing arm
   discard space.addConstraint(
-    swingArm.newDampedSpring(wheel1, swingArmEndCenter, vzero, swingArmWidth, 100f, 20f)
+    swingArm.newDampedSpring(backWheel, swingArmEndCenter, vzero, swingArmWidth, 100f, 20f)
   )
 
   discard space.addConstraint(
@@ -215,7 +216,7 @@ proc setConstraints() =
   # limit wheel2 to fork arm
   discard space.addConstraint(
     forkArm.newGrooveJoint(
-      wheel2, 
+      frontWheel, 
       vzero,
       v(0f, forkArmHeight), 
       vzero
@@ -223,7 +224,7 @@ proc setConstraints() =
   )
   # push wheel2 to end of fork arm
   discard space.addConstraint(
-    forkArm.newDampedSpring(wheel2, forkArmTopCenter, vzero, forkArmHeight, 100f, 20f)
+    forkArm.newDampedSpring(frontWheel, forkArmTopCenter, vzero, forkArmHeight, 100f, 20f)
   )
 
   discard space.addConstraint(
@@ -233,8 +234,8 @@ proc setConstraints() =
 proc initHello*() {.raises: [].} =
   space = loadLevel("levels/fallbackLevel.json")
   space.gravity = gravity
-  wheel1 = space.addWheel(posA)
-  wheel2 = space.addWheel(posB)
+  backWheel = space.addWheel(posA)
+  frontWheel = space.addWheel(posB)
   chassis = space.addChassis(posChassis)
   swingArm = space.addSwingArm(posChassis + swingArmPosOffset)
   forkArm = space.addForkArm(posChassis + forkArmPosOffset)
@@ -263,15 +264,15 @@ proc initHello*() {.raises: [].} =
 #   chassis.torque = 0f
 
 proc onThrottle*() =
-  wheel1.torque = throttleTorque
+  backWheel.torque = throttleTorque
   chassis.torque = chassis.torque - throttleTorque * 2f
-  print("wheel1.torque: " & $wheel1.torque)
+  print("wheel1.torque: " & $backWheel.torque)
 
 proc onBrake*() =
-  wheel1.torque = -wheel1.angularVelocity * brakeTorque
-  wheel2.torque = -wheel2.angularVelocity * brakeTorque
-  print("wheel1.torque: " & $wheel1.torque)
-  print("wheel2.torque: " & $wheel2.torque)
+  backWheel.torque = -backWheel.angularVelocity * brakeTorque
+  frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
+  print("wheel1.torque: " & $backWheel.torque)
+  print("wheel2.torque: " & $frontWheel.torque)
 
 proc updateAttitudeAdjust() =
   if attitudeAdjustForce != 0f:
