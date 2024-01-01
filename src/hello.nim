@@ -23,6 +23,13 @@ var chassis: Body
 var swingArm: Body
 var forkArm: Body
 
+var actionThrottle = kButtonUp
+if defined device:
+  actionThrottle = kButtonA
+var actionBrake = kButtonDown
+if defined device:
+  actionBrake = kButtonB
+
 let
   wheelRadius = 10.0f
   posChassis = v(80, 20)
@@ -193,7 +200,7 @@ proc setConstraints() =
   )
   # push wheel1 to end of swing arm
   discard space.addConstraint(
-    swingArm.newDampedSpring(backWheel, swingArmEndCenter, vzero, swingArmWidth, 100f, 20f)
+    swingArm.newDampedSpring(backWheel, swingArmEndCenter, vzero, swingArmWidth, 40f, 10f)
   )
 
   discard space.addConstraint(
@@ -294,10 +301,10 @@ proc onAttitudeAdjust(direction: float) =
 proc handleInput() =
     let buttonsState = playdate.system.getButtonsState()
 
-    if kButtonUp in buttonsState.current:
+    if actionThrottle in buttonsState.current:
       playdate.system.logToConsole("Button UP held")
       onThrottle()
-    if kButtonDown in buttonsState.current:
+    if actionBrake in buttonsState.current:
       playdate.system.logToConsole("Button DOWN held")
       onBrake()
     
