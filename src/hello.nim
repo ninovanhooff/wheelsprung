@@ -5,7 +5,7 @@ import levels
 
 
 var gravity = v(0, 100)
-const attitudeAdjustTorque = 450_000f
+const attitudeAdjustTorque = 150_000f
 const brakeTorque = 5_000f
 const wheelFriction = 3.0f
 var timeStep = 1.0/50.0
@@ -16,17 +16,25 @@ var wheel1: Body
 var wheel2: Body
 var chassis: Body
 var swingArm: Body
+var forkArm: Body
 var observedConstraint: Constraint
 
 let
-  wheelRadius = 15.0f
-  posA = v(30, 30)
-  posB = v(110, 60)
+  wheelRadius = 10.0f
   posChassis = v(80, 20)
-  swingArmWidth = 40f
-  swingArmHeight = 5f
-  swingArmPosOffset = v(-30,10)
+  posA = v(posChassis.x - 20, posChassis.y + 10)
+  posB = v(posChassis.x + 20, posChassis.y + 10)
+  
+  swingArmWidth = 20f
+  swingArmHeight = 3f
+  swingArmPosOffset = v(-10,10)
   swingArmRestAngle = 0f
+
+  forkArmWidth = 20f
+  forkArmHeight = 3f
+  forkArmPosOffset = v(10,10)
+  forkArmRestAngle = 0f
+
 
 var camera: Vect = vzero
 
@@ -49,8 +57,8 @@ proc addWheel(space: Space, pos: Vect): Body =
 
 proc addChassis(space: Space, pos: Vect): Body =
   var mass = 3.0f
-  var width = 80.0f
-  var height = 30.0f
+  var width = 34f
+  var height = 20.0f
 
   var moment = momentForBox(mass, width, height)
 
@@ -80,6 +88,23 @@ proc addSwingArm(space: Space, pos: Vect): Body =
   swingArmShape.friction = 0.7f
 
   return swingArm
+
+proc addForkArm(space: Space, pos: Vect): Body =
+  let forkArmMmass = 0.25f
+  let forkArmWidth = forkArmWidth
+  let forkArmHeight = forkArmHeight
+
+  let forkArmMoment = momentForBox(forkArmMmass, forkArmWidth, forkArmHeight)
+  let forkArm = space.addBody(newBody(forkArmMmass, forkArmMoment))
+  forkArm.position = pos
+  forkArm.angle = forkArmRestAngle
+
+  let forkArmShape = space.addShape(newBoxShape(forkArm, forkArmWidth, forkArmHeight, 0f))
+  forkArmShape.filter = SHAPE_FILTER_NONE # no collisions
+  forkArmShape.elasticity = 0.0f
+  forkArmShape.friction = 0.7f
+
+  return forkArm
 
 proc rad2deg(rad: float): float =
   return rad * 180.0 / PI
@@ -137,15 +162,10 @@ proc drawChipmunkHello*() =
   eachShape(space, shapeIter, nil)
   eachConstraint(space, constraintIter, nil)
 
-proc initHello*() {.raises: [].} =
-  space = loadLevel("levels/fallbackLevel.json")
-  space.gravity = gravity
-  wheel1 = space.addWheel(posA)
-  wheel2 = space.addWheel(posB)
-  chassis = space.addChassis(posChassis)
-  swingArm = space.addSwingArm(posChassis + swingArmPosOffset)
-
+proc setConstraints() =
   # NOTE inverted y axis!
+
+  # SwingArm (arm between chassis and rear wheel)
   let swingArmEndCenter = v(swingArmWidth*0.5f, swingArmHeight*0.5f)
   # attach swing arm to chassis
   discard space.addConstraint(
@@ -156,7 +176,7 @@ proc initHello*() {.raises: [].} =
     )
   )
 
-  # limit wheel to swing arm
+  # limit wheel1 to swing arm
   discard space.addConstraint(
     swingArm.newGrooveJoint(
       wheel1, 
@@ -164,52 +184,76 @@ proc initHello*() {.raises: [].} =
       vzero, vzero
     )
   )
-  # push wheel to end of swing arm
+  # push wheel1 to end of swing arm
   discard space.addConstraint(
     swingArm.newDampedSpring(wheel1, swingArmEndCenter, vzero, swingArmWidth, 100f, 20f)
   )
-  
-  # # push swing arm down from chassis
-  # discard space.addConstraint(
-  #   chassis.newDampedSpring(swingArm, swingArmPosOffset + v(0, -20f), vzero, 30f, 40f, 50f)
-  # )
 
-  # observedConstraint = space.addConstraint(
-  #   swingArm.newRotaryLimitJoint(chassis, -0.5f, 0.5f)
-  # )
-  observedConstraint = space.addConstraint(
-    chassis.newDampedRotarySpring(swingArm, 0.2f*PI, 30_000f, 4_000f)
-  )
-
-  # wheel 2
   discard space.addConstraint(
-    chassis.newGrooveJoint(wheel2, v(30, 10), v(30, 80), vzero)
+    chassis.newDampedRotarySpring(swingArm, 0.05f*PI, 30_000f, 4_000f) # todo rest angle?
   )
+
+  # fork arm (arm between chassis and front wheel)
+
+  let forkArmStartCenter = v(-forkArmWidth*0.5f, forkArmHeight*0.5f)
+  # let forkArmEndCenter = v(forkArmWidth*0.5f, forkArmHeight*0.5f)
+  # attach swing arm to chassis
   discard space.addConstraint(
-    chassis.newDampedSpring(wheel2, v(30,0), vzero, 40f, 20f, 10f)
+    chassis.newPivotJoint(
+      forkArm, 
+      forkArmPosOffset + forkArmStartCenter, 
+      forkArmStartCenter
+    )
+  )
+  # limit wheel2 to fork arm
+  discard space.addConstraint(
+    forkArm.newGrooveJoint(
+      wheel2, 
+      vzero,
+      v(forkArmWidth*2f, forkArmHeight*0.5f), 
+      vzero
+    )
+  )
+  # push wheel2 to end of fork arm
+  discard space.addConstraint(
+    forkArm.newDampedSpring(wheel2, forkArmStartCenter, vzero, forkArmWidth, 100f, 20f)
   )
 
-proc resetPosition() =
-  wheel1.position = posA
-  wheel1.velocity = vzero
-  wheel1.force = vzero
-  wheel1.angle = 0f
-  wheel1.angularVelocity = 0f
-  wheel1.torque = 0f
+  discard space.addConstraint(
+    forkArm.newDampedRotarySpring(chassis, 0f*PI, 30_000f, 4_000f) # todo rest angle?
+  )
 
-  wheel2.position = posB
-  wheel2.velocity = vzero
-  wheel2.force = vzero
-  wheel2.angle = 0f
-  wheel2.angularVelocity = 0f
-  wheel2.torque = 0f
+proc initHello*() {.raises: [].} =
+  space = loadLevel("levels/fallbackLevel.json")
+  space.gravity = gravity
+  wheel1 = space.addWheel(posA)
+  wheel2 = space.addWheel(posB)
+  chassis = space.addChassis(posChassis)
+  swingArm = space.addSwingArm(posChassis + swingArmPosOffset)
+  forkArm = space.addForkArm(posChassis + forkArmPosOffset)
+  setConstraints()
 
-  chassis.position = posChassis
-  chassis.velocity = vzero
-  chassis.force = vzero
-  chassis.angle = 0f
-  chassis.angularVelocity = 0f
-  chassis.torque = 0f
+# proc resetPosition() =
+#   wheel1.position = posA
+#   wheel1.velocity = vzero
+#   wheel1.force = vzero
+#   wheel1.angle = 0f
+#   wheel1.angularVelocity = 0f
+#   wheel1.torque = 0f
+
+#   wheel2.position = posB
+#   wheel2.velocity = vzero
+#   wheel2.force = vzero
+#   wheel2.angle = 0f
+#   wheel2.angularVelocity = 0f
+#   wheel2.torque = 0f
+
+#   chassis.position = posChassis
+#   chassis.velocity = vzero
+#   chassis.force = vzero
+#   chassis.angle = 0f
+#   chassis.angularVelocity = 0f
+#   chassis.torque = 0f
 
 proc onThrottle*() =
   wheel1.torque = 10000f
