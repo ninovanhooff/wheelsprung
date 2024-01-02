@@ -7,15 +7,11 @@ const groundFriction = 10.0f
 
 type 
     LevelObject = ref object of RootObj
-        name: string
         x, y: float
-        width, height: float
-        rotation: float
         polygon: Option[seq[Vect]]
         polyline: Option[seq[Vect]]
     
     Layer = ref object of RootObj
-        name: string
         objects: Option[seq[LevelObject]]
     
     Level = ref object of RootObj
