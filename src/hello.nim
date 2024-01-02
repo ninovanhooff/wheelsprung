@@ -2,6 +2,7 @@ import std/math
 import chipmunk7
 import playdate/api
 import levels
+import bike_engine
 
 const
   gravity = v(0, 100)
@@ -246,6 +247,7 @@ proc initHello*() {.raises: [].} =
   swingArm = space.addSwingArm(posChassis + swingArmPosOffset)
   forkArm = space.addForkArm(posChassis + forkArmPosOffset)
   setConstraints()
+  initBikeEngine()
 
 # proc resetPosition() =
 #   wheel1.position = posA
