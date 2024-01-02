@@ -23,6 +23,7 @@ var frontWheel: Body
 var chassis: Body
 var swingArm: Body
 var forkArm: Body
+var isThrottlePressed = false
 
 var actionThrottle = kButtonUp
 if defined device:
@@ -301,10 +302,13 @@ proc onAttitudeAdjust(direction: float) =
     
 
 proc handleInput() =
+    isThrottlePressed = false
+
     let buttonsState = playdate.system.getButtonsState()
 
     if actionThrottle in buttonsState.current:
       playdate.system.logToConsole("Button UP held")
+      isThrottlePressed = true
       onThrottle()
     if actionBrake in buttonsState.current:
       playdate.system.logToConsole("Button DOWN held")
@@ -323,6 +327,8 @@ proc updateChipmunkHello*() {.cdecl, raises: [].} =
 
   space.step(timeStep)
   time += timeStep
+
+  updateBikeEngine(isThrottlePressed, frontWheel.angularVelocity)
 
   camera = chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
 
