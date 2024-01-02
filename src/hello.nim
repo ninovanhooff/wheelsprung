@@ -69,7 +69,7 @@ proc addWheel(space: Space, pos: Vect): Body =
   return body
 
 proc addChassis(space: Space, pos: Vect): Body =
-  var mass = 3.0f
+  var mass = 1.0f
   var width = 34f
   var height = 20.0f
 
