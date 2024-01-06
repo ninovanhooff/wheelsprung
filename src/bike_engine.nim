@@ -27,4 +27,4 @@ proc updateBikeEngine*(throttle: bool, wheelAngularVelocity: float) =
     
     curRpm = lerp(curRpm, targetRpm, 0.1f)
     playdate.system.logToConsole("RPM: " & $curRpm)
-    samplePlayer.setRate(curRpm / idleRpm)
+    samplePlayer.rate=curRpm / idleRpm
