@@ -1,6 +1,7 @@
 import std/math
 import chipmunk7
 import playdate/api
+import utils
 import levels
 import bike_engine
 
@@ -9,7 +10,7 @@ const
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.8f
   attitudeAdjustForceThreshold = 100f
-  maxWheelAngularVelocity = 50f
+  maxWheelAngularVelocity = 100f
   # applied to wheel1 and chassis to make bike more unstable
   throttleTorque = 2_000f
   # applied to both wheels
@@ -52,9 +53,6 @@ var
   time = 0.0
   camera: Vect = vzero
   attitudeAdjustForce = 0f
-
-proc print(str: auto) =
-  playdate.system.logToConsole($str)
 
 proc addWheel(space: Space, pos: Vect): Body =
   var radius = wheelRadius
