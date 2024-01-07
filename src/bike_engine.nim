@@ -4,23 +4,22 @@ import utils
 const
     idleRpm = 1300.0f
     ## The RPM of the first throttle sound in throttlePlayers. The second throttle sound is 200 RPM higher.
-    baseThrottleRpm: float = 1300.0f
-    ## The RPM step between throttle sounds. The third throttle sound is 200 RPM higher than the second throttle sound.
-    throtthleRpmStep: int = 200
+    baseThrottleRpm: float = 1700.0f
 
 var 
     idlePlayer: SamplePlayer
     curRpm: float = idleRpm
-    throttlePlayers: array[3, SamplePlayer]
+    throttlePlayer: SamplePlayer
     currentPlayer: SamplePlayer
     targetPlayer: SamplePlayer
+    fadeoutPlayer: SamplePlayer
 
 proc initBikeEngine*()=
     try:
         idlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1300rpm_idle")
-        throttlePlayers[0] = playdate.sound.newSamplePlayer("/audio/engine/1300rpm_throttle")
-        throttlePlayers[1] = playdate.sound.newSamplePlayer("/audio/engine/1500rpm_throttle")
-        throttlePlayers[2] = playdate.sound.newSamplePlayer("/audio/engine/1700rpm_throttle")
+        throttlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1700rpm_throttle")
+        # throttlePlayers[1] = playdate.sound.newSamplePlayer("/audio/engine/1500rpm_throttle")
+        # throttlePlayers[2] = playdate.sound.newSamplePlayer("/audio/engine/1700rpm_throttle")
     except:
         print(getCurrentExceptionMsg())
 
@@ -36,18 +35,31 @@ proc updateBikeEngine*(throttle: bool, wheelAngularVelocity: float) =
 
     curRpm = lerp(curRpm, targetRpm, 0.1f)
     print("RPM: " & $curRpm)
-    var throttlePlayerIndex: int = (curRpm-baseThrottleRpm).roundToNearest(throtthleRpmStep) div throtthleRpmStep
-    throttlePlayerIndex = throttlePlayerIndex.clamp(0, throttlePlayers.high)
-    targetPlayer = if throttle: throttlePlayers[throttlePlayerIndex] else: idlePlayer
+    targetPlayer = if throttle: throttlePlayer else: idlePlayer
     if currentPlayer != targetPlayer:
         print("switch from currentPlayer: " & $currentPlayer.repr & " targetPlayer: " & targetPlayer.repr)
-        currentPlayer.stop()
+        fadeoutPlayer = currentPlayer
         currentPlayer = targetPlayer
-        currentPlayer.play(0, 1.0f) # rate is set below
+        currentPlayer.play(0, 1.0f) # rate and volume is set below
+
+    # rate
     let playerBaseRpm: float = 
         if throttle: 
-            baseThrottleRpm + (throttlePlayerIndex * throtthleRpmStep).float
-    else:
-        idleRpm
+            baseThrottleRpm
+        else:
+            idleRpm
     currentPlayer.rate=curRpm / playerBaseRpm
-    print("playerBaseRpm: " & $playerBaseRpm & "throttlePlayerIndex" & $throttlePlayerIndex & " rate: " & $currentPlayer.rate)
+
+    #volume
+    if currentPlayer.volume.left < 1.0f:
+        currentPlayer.volume = min(1.0f, currentPlayer.volume.left + 0.1f)
+    if fadeoutPlayer != nil:
+        print("fadeoutPlayer volume: " & $fadeoutPlayer.volume.left & " currentPlayer volume: " & $currentPlayer.volume.left)
+        if fadeoutPlayer.volume.left > 0.0f:
+            fadeoutPlayer.volume = max(0.0f, fadeoutPlayer.volume.left - 0.1f)
+        else:
+            fadeoutPlayer.stop()
+            fadeoutPlayer = nil
+
+
+    print("playerBaseRpm: " & $playerBaseRpm & "throttlePlayerIndex" & " rate: " & $currentPlayer.rate)
