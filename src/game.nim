@@ -170,7 +170,7 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     let b = localToWorld(spring.bodyB, vzero) - camera
     playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
-proc drawChipmunkHello*() =
+proc drawChipmunkGame*() =
   # iterate over all shapes in the space
   eachShape(space, shapeIter, nil)
   eachConstraint(space, constraintIter, nil)
@@ -237,7 +237,7 @@ proc setConstraints() =
     chassis.newDampedRotarySpring(forkArm, 0.1f*PI, 10_000f, 2000f) # todo rest angle?
   )
 
-proc initHello*() {.raises: [].} =
+proc initGame*() {.raises: [].} =
   space = loadLevel("levels/fallbackLevel.json")
   space.gravity = gravity
   backWheel = space.addWheel(posA)
@@ -319,7 +319,7 @@ proc handleInput() =
       playdate.system.logToConsole("Button Right pressed")
       onAttitudeAdjust(1f)
 
-proc updateChipmunkHello*() {.cdecl, raises: [].} =
+proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
   updateAttitudeAdjust()
 
@@ -329,10 +329,3 @@ proc updateChipmunkHello*() {.cdecl, raises: [].} =
   updateBikeEngine(isThrottlePressed, frontWheel.angularVelocity)
 
   camera = chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
-
-
-when defined chipmunkNoDestructors:
-  ballShape.destroy()
-  ballBody.destroy()
-  ground.destroy()
-  space.destroy()

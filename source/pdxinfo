@@ -1,4 +1,4 @@
-name=Dirtbike physics sample
+name=Wheelsprung
 author=Nino van Hooff
-description=chipmunk7 test
-bundleId=com.ninovanhooff.dirtbikesample
+description=Motorcross platformer
+bundleId=com.ninovanhooff.wheelsprung

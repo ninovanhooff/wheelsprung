@@ -3,7 +3,7 @@ import strformat
 
 
 import playdate/api
-import hello
+import game
 
 const FONT_PATH = "/System/Fonts/Asheville-Sans-14-Bold.pft"
 
@@ -11,8 +11,8 @@ var font: LCDFont
 
 proc update(): int {.cdecl, raises: [].} =
     playdate.graphics.clear(kColorWhite)
-    updateChipmunkHello()
-    drawChipmunkHello()
+    updateChipmunkGame()
+    drawChipmunkGame()
     playdate.system.drawFPS(0, 0)
     return 1
 
@@ -42,7 +42,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
         playdate.graphics.setFont(font)
 
         try:
-            initHello()
+            initGame()
         except:
             playdate.system.error(getCurrentExceptionMsg())
 
