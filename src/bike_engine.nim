@@ -7,6 +7,7 @@ const
     baseThrottleRpm: float = 1700.0f
 
 var 
+    isInitialized: bool = false
     idlePlayer: SamplePlayer
     curRpm: float = idleRpm
     throttlePlayer: SamplePlayer
@@ -15,14 +16,16 @@ var
     fadeoutPlayer: SamplePlayer
 
 proc initBikeEngine*()=
+    if isInitialized: return
+    
     try:
         idlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1300rpm_idle")
         throttlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1700rpm_throttle")
+        currentPlayer = idlePlayer
+        currentPlayer.play(0, 1.0f)
+        isInitialized = true
     except:
         print(getCurrentExceptionMsg())
-
-    currentPlayer = idlePlayer
-    currentPlayer.play(0, 1.0f)
 
 proc updateBikeEngine*(throttle: bool, wheelAngularVelocity: float) =
     let targetRpm = 
