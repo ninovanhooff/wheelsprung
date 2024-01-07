@@ -18,8 +18,6 @@ proc initBikeEngine*()=
     try:
         idlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1300rpm_idle")
         throttlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1700rpm_throttle")
-        # throttlePlayers[1] = playdate.sound.newSamplePlayer("/audio/engine/1500rpm_throttle")
-        # throttlePlayers[2] = playdate.sound.newSamplePlayer("/audio/engine/1700rpm_throttle")
     except:
         print(getCurrentExceptionMsg())
 
@@ -37,7 +35,7 @@ proc updateBikeEngine*(throttle: bool, wheelAngularVelocity: float) =
     print("RPM: " & $curRpm)
     targetPlayer = if throttle: throttlePlayer else: idlePlayer
     if currentPlayer != targetPlayer:
-        print("switch from currentPlayer: " & $currentPlayer.repr & " targetPlayer: " & targetPlayer.repr)
+        # print("switch from currentPlayer: " & $currentPlayer.repr & " targetPlayer: " & targetPlayer.repr)
         fadeoutPlayer = currentPlayer
         currentPlayer = targetPlayer
         currentPlayer.play(0, 1.0f) # rate and volume is set below
@@ -50,7 +48,7 @@ proc updateBikeEngine*(throttle: bool, wheelAngularVelocity: float) =
             idleRpm
     currentPlayer.rate=curRpm / playerBaseRpm
 
-    #volume
+    # volume
     if currentPlayer.volume.left < 1.0f:
         currentPlayer.volume = min(1.0f, currentPlayer.volume.left + 0.1f)
     if fadeoutPlayer != nil:
@@ -61,5 +59,4 @@ proc updateBikeEngine*(throttle: bool, wheelAngularVelocity: float) =
             fadeoutPlayer.stop()
             fadeoutPlayer = nil
 
-
-    print("playerBaseRpm: " & $playerBaseRpm & "throttlePlayerIndex" & " rate: " & $currentPlayer.rate)
+    # print("playerBaseRpm: " & $playerBaseRpm & "throttlePlayerIndex" & " rate: " & $currentPlayer.rate)
