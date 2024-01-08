@@ -1,5 +1,7 @@
 include playdate/build/config
 
+--path:"./src"
+
 # Add a search path for libraries based on OS.
 if defined(device):
     switch("passL", "-L" & getCurrentDir() / "lib" / "device")

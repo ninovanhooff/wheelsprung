@@ -3,7 +3,7 @@ import strformat
 
 
 import playdate/api
-import game
+import game/game
 
 const FONT_PATH = "/System/Fonts/Asheville-Sans-14-Bold.pft"
 
