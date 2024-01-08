@@ -276,7 +276,6 @@ proc onThrottle*() =
     return
 
   backWheel.torque = throttleTorque
-  chassis.torque = chassis.torque - throttleTorque * 2f
   print("wheel1.torque: " & $backWheel.torque)
 
 proc onBrake*() =
