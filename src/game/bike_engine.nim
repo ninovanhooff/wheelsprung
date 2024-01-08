@@ -30,7 +30,7 @@ proc initBikeEngine*()=
 proc updateBikeEngine*(throttle: bool, wheelForwardAngularVelocity: float) =
     let targetRpm = 
         if throttle: 
-            1300.0f + (wheelForwardAngularVelocity * 100.0f) 
+            idleRpm + (wheelForwardAngularVelocity * 50.0f) 
         else: 
             idleRpm
 
