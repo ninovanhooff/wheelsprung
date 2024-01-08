@@ -12,7 +12,6 @@ var font: LCDFont
 proc update(): int {.cdecl, raises: [].} =
     playdate.graphics.clear(kColorWhite)
     updateChipmunkGame()
-    drawChipmunkGame()
     playdate.system.drawFPS(0, 0)
     return 1
 

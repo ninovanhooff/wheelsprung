@@ -4,6 +4,8 @@ import playdate/api
 import utils
 import levels
 import bike_engine
+import game_types
+import game_view
 
 const
   gravity = v(0, 100)
@@ -18,7 +20,7 @@ const
   wheelFriction = 3.0f
   timeStep = 1.0f/50.0f
 
-var space: Space
+var state: GameState
 var backWheel: Body
 var frontWheel: Body
 var chassis: Body
@@ -48,11 +50,6 @@ let
   forkArmHeight = 25f
   forkArmPosOffset = v(16,2)
   forkArmRestAngle = 0f#-0.1f*PI
-
-var 
-  time = 0.0
-  camera: Vect = vzero
-  attitudeAdjustForce = 0f
 
 proc addWheel(space: Space, pos: Vect): Body =
   var radius = wheelRadius
@@ -119,63 +116,7 @@ proc addForkArm(space: Space, pos: Vect): Body =
 
   return forkArm
 
-proc rad2deg(rad: float): float =
-  return rad * 180.0 / PI
-
-proc drawCircle(pos: Vect, radius: float, angle:float, color: LCDColor) =
-  # covert from center position to top left
-  let drawPos = pos - camera
-  let x = (drawPos.x - radius).toInt
-  let y = (drawPos.y - radius).toInt
-  let size: int = (radius * 2f).toInt
-  # angle is in radians, convert to degrees
-  let deg = rad2deg(angle)
-  playdate.graphics.drawEllipse(x,y,size, size, 1, deg, deg + 350, color);
-
-proc drawSegment(segment: SegmentShape, color: LCDColor) =
-  let drawAPos = segment.a - camera
-  let drawBPos = segment.b - camera
-  playdate.graphics.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
-
-proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
-    if shape.kind == cpCircleShape:
-      let circle = cast[CircleShape](shape)
-      drawCircle(circle.body.position, circle.radius, circle.body.angle, kColorBlack)
-    elif shape.kind == cpSegmentShape:
-      let segment = cast[SegmentShape](shape)
-      drawSegment(segment, kColorBlack)
-    elif shape.kind == cpPolyShape:
-      let poly = cast[PolyShape](shape)
-      let numVerts = poly.count
-      for i in 0 ..< numVerts:
-        let a = localToWorld(poly.body, poly.vert(i)) - camera
-        let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts)) - camera
-        playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-
-proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
-  if constraint.isGrooveJoint:
-    # discard
-    let groove = cast[GrooveJoint](constraint)
-    let a = localToWorld(groove.bodyA, groove.grooveA) - camera
-    let b = localToWorld(groove.bodyA, groove.grooveB) - camera
-    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-  elif constraint.isDampedSpring:
-    let spring = cast[DampedSpring](constraint)
-    let a = localToWorld(spring.bodyA, spring.anchorA) - camera
-    let b = localToWorld(spring.bodyB, spring.anchorB) - camera
-    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-  elif constraint.isDampedRotarySpring:
-    let spring = cast[DampedRotarySpring](constraint)
-    let a = localToWorld(spring.bodyA, vzero) - camera
-    let b = localToWorld(spring.bodyB, vzero) - camera
-    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-
-proc drawChipmunkGame*() =
-  # iterate over all shapes in the space
-  eachShape(space, shapeIter, nil)
-  eachConstraint(space, constraintIter, nil)
-
-proc setConstraints() =
+proc setConstraints(space: Space) =
   # NOTE inverted y axis!
 
   # SwingArm (arm between chassis and rear wheel)
@@ -238,14 +179,15 @@ proc setConstraints() =
   )
 
 proc initGame*() {.raises: [].} =
-  space = loadLevel("levels/fallbackLevel.json")
+  let space = loadLevel("levels/fallbackLevel.json")
+  state = GameState(space: space)
   space.gravity = gravity
   backWheel = space.addWheel(posA)
   frontWheel = space.addWheel(posB)
   chassis = space.addChassis(posChassis)
   swingArm = space.addSwingArm(posChassis + swingArmPosOffset)
   forkArm = space.addForkArm(posChassis + forkArmPosOffset)
-  setConstraints()
+  space.setConstraints()
   initBikeEngine()
 
 # proc resetPosition() =
@@ -284,18 +226,18 @@ proc onBrake*() =
   print("wheel1.torque: " & $backWheel.torque)
   print("wheel2.torque: " & $frontWheel.torque)
 
-proc updateAttitudeAdjust() =
-  if attitudeAdjustForce != 0f:
-    chassis.torque = attitudeAdjustForce
-    attitudeAdjustForce *= attitudeAdjustAttentuation
-    if attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
-      attitudeAdjustForce = 0f
+proc updateAttitudeAdjust(state: GameState) =
+  if state.attitudeAdjustForce != 0f:
+    chassis.torque = state.attitudeAdjustForce
+    state.attitudeAdjustForce *= attitudeAdjustAttentuation
+    if state.attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
+      state.attitudeAdjustForce = 0f
 
-proc onAttitudeAdjust(direction: float) =
-  if attitudeAdjustForce == 0f:
-    attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+proc onAttitudeAdjust(state: GameState, direction: float) =
+  if state.attitudeAdjustForce == 0f:
+    state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
   else:
-    print("ignore attitude adjust. Already in progress with remaining force: " & $attitudeAdjustForce)
+    print("ignore attitude adjust. Already in progress with remaining force: " & $state.attitudeAdjustForce)
     
 
 proc handleInput() =
@@ -313,18 +255,19 @@ proc handleInput() =
     
     if kButtonLeft in buttonsState.pushed:
       playdate.system.logToConsole("Button Left pressed")
-      onAttitudeAdjust(-1f)
+      state.onAttitudeAdjust(-1f)
     elif kButtonRight in buttonsState.pushed:
       playdate.system.logToConsole("Button Right pressed")
-      onAttitudeAdjust(1f)
+      state.onAttitudeAdjust(1f)
 
 proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
-  updateAttitudeAdjust()
+  state.updateAttitudeAdjust()
 
-  space.step(timeStep)
-  time += timeStep
+  state.space.step(timeStep)
+  state.time += timeStep
 
   updateBikeEngine(isThrottlePressed, frontWheel.angularVelocity)
 
-  camera = chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
+  state.camera = chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
+  drawChipmunkGame(addr state)
