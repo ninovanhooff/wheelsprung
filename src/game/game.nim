@@ -11,7 +11,7 @@ const
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.8f
   attitudeAdjustForceThreshold = 100f
-  maxWheelAngularVelocity = 100f
+  maxWheelAngularVelocity = 20f
   # applied to wheel1 and chassis to make bike more unstable
   throttleTorque = 2_000f
   # applied to both wheels
@@ -31,8 +31,8 @@ if defined device:
 
 proc initGame*() {.raises: [].} =
   let space = loadLevel("levels/fallbackLevel.json")
-  state = GameState(space: space)
   space.gravity = gravity
+  state = GameState(space: space, driveDirection: DD_RIGHT)
   initBikePhysics(state)
   initBikeEngine()
 
@@ -60,11 +60,12 @@ proc initGame*() {.raises: [].} =
 
 proc onThrottle*() =
   let backWheel = state.backWheel
-  if backWheel.angularVelocity > maxWheelAngularVelocity:
+  let dd = state.driveDirection
+  if backWheel.angularVelocity * dd > maxWheelAngularVelocity:
     print("ignore throttle. back wheel already at max angular velocity")
     return
 
-  backWheel.torque = throttleTorque
+  backWheel.torque = throttleTorque * dd
   print("wheel1.torque: " & $backWheel.torque)
 
 proc onBrake*() =
@@ -117,7 +118,7 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   state.space.step(timeStep)
   state.time += timeStep
 
-  updateBikeEngine(isThrottlePressed, state.frontWheel.angularVelocity)
+  updateBikeEngine(isThrottlePressed, state.backWheel.angularVelocity * state.driveDirection)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
   drawChipmunkGame(addr state)

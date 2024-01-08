@@ -27,10 +27,10 @@ proc initBikeEngine*()=
     except:
         print(getCurrentExceptionMsg())
 
-proc updateBikeEngine*(throttle: bool, wheelAngularVelocity: float) =
+proc updateBikeEngine*(throttle: bool, wheelForwardAngularVelocity: float) =
     let targetRpm = 
         if throttle: 
-            1300.0f + (wheelAngularVelocity * 100.0f) 
+            1300.0f + (wheelForwardAngularVelocity * 100.0f) 
         else: 
             idleRpm
 

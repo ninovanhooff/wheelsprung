@@ -4,8 +4,8 @@ type Camera* = Vect
 
 type DriveDirection* = float32
 
-const DD_LEFT: DriveDirection = -1.0f
-const DD_RIGHT: DriveDirection = 1.0f
+const DD_LEFT*: DriveDirection = -1.0f
+const DD_RIGHT*: DriveDirection = 1.0f
 
 type GameState* = ref object of RootObj
     space*: Space
