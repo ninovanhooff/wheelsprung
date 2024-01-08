@@ -13,3 +13,10 @@ type GameState* = ref object of RootObj
     attitudeAdjustForce*: float32
     camera*: Camera
     driveDirection*: DriveDirection
+
+    # bodies
+    backWheel*: Body
+    frontWheel*: Body
+    chassis*: Body
+    swingArm*: Body
+    forkArm*: Body
