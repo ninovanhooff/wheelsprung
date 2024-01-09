@@ -21,12 +21,18 @@ const
 var state: GameState
 var isThrottlePressed = false
 
-var actionThrottle = kButtonUp
-if defined device:
-  actionThrottle = kButtonA
-var actionBrake = kButtonDown
-if defined device:
-  actionBrake = kButtonB
+# device controls
+var actionThrottle = kButtonA
+var actionBrake = kButtonB
+var actionFlipDirection = kButtonUp
+var actionLeanLeft = kButtonLeft
+var actionLeanRight = kButtonRight
+# simulator overrides
+if defined simulator:
+  actionThrottle = kButtonUp
+  actionBrake = kButtonDown
+  actionFlipDirection = kButtonB
+
 
 
 proc initGame*() {.raises: [].} =
@@ -97,19 +103,23 @@ proc handleInput() =
     let buttonsState = playdate.system.getButtonsState()
 
     if actionThrottle in buttonsState.current:
-      playdate.system.logToConsole("Button UP held")
+      print("Throttle held")
       isThrottlePressed = true
       onThrottle()
     if actionBrake in buttonsState.current:
-      playdate.system.logToConsole("Button DOWN held")
+      print("Brake held")
       onBrake()
     
-    if kButtonLeft in buttonsState.pushed:
-      playdate.system.logToConsole("Button Left pressed")
+    if actionLeanLeft in buttonsState.pushed:
+      print("Lean left pressed")
       state.onAttitudeAdjust(-1f)
-    elif kButtonRight in buttonsState.pushed:
-      playdate.system.logToConsole("Button Right pressed")
+    elif actionLeanRight in buttonsState.pushed:
+      print("Lean Right pressed")
       state.onAttitudeAdjust(1f)
+
+    if actionFlipDirection in buttonsState.pushed:
+      print("Flip direction pressed")
+      state.driveDirection = -state.driveDirection
 
 proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
