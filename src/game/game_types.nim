@@ -20,3 +20,5 @@ type GameState* = ref object of RootObj
     chassis*: Body
     swingArm*: Body
     forkArm*: Body
+
+    bikeConstraints*: seq[Constraint]

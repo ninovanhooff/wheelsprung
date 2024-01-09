@@ -119,7 +119,7 @@ proc handleInput() =
 
     if actionFlipDirection in buttonsState.pushed:
       print("Flip direction pressed")
-      state.driveDirection = -state.driveDirection
+      state.flipDriveDirection()
 
 proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
@@ -127,6 +127,7 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
 
   state.space.step(timeStep)
   state.time += timeStep
+  print(state.bikeConstraints.len)
 
   updateBikeEngine(isThrottlePressed, state.backWheel.angularVelocity * state.driveDirection)
 
