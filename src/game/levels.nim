@@ -1,5 +1,6 @@
 import chipmunk7
 import options
+import utils
 import std/json
 import playdate/api
 
@@ -26,8 +27,8 @@ proc readDataFileContents(path: string): string {.raises: [].} =
         let jsonString = playdateFile.open(path, kFileReadAny).readString()
         return jsonString
     except:
-        playdate.system.logToConsole("Could not read " & $path)
-        playdate.system.logToConsole(getCurrentExceptionMsg())
+        print("Could not read " & $path)
+        print(getCurrentExceptionMsg())
         return ""
 
 proc parseLevel(path: string): Level {.raises: [].} =
@@ -35,8 +36,8 @@ proc parseLevel(path: string): Level {.raises: [].} =
     try:
         return parseJson(jsonString).to(Level)
     except:
-        playdate.system.logToConsole("Level parse failed:")
-        playdate.system.logToConsole(getCurrentExceptionMsg())
+        print("Level parse failed:")
+        print(getCurrentExceptionMsg())
         return nil
 
 proc getSegments(obj: LevelObject): seq[Vect] {.raises: [].} =
