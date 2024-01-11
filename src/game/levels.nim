@@ -62,9 +62,11 @@ proc loadLayer(layer: Layer, space: Space) {.raises: [].} =
 
         let lastIndex = segments.high
 
+        # Offset the segments by the object's position (localToWorld)
         for i in 0..lastIndex:
             segments[i] = segments[i] + objOffset
 
+        # Add the segments to the space
         for i in 1..lastIndex:
             var groundSegment = newSegmentShape(space.staticBody, segments[i-1], segments[i], 0f)
             groundSegment.friction = groundFriction

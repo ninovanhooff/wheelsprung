@@ -42,28 +42,6 @@ proc initGame*() {.raises: [].} =
   initBikePhysics(state)
   initBikeEngine()
 
-# proc resetPosition() =
-#   wheel1.position = posA
-#   wheel1.velocity = vzero
-#   wheel1.force = vzero
-#   wheel1.angle = 0f
-#   wheel1.angularVelocity = 0f
-#   wheel1.torque = 0f
-
-#   wheel2.position = posB
-#   wheel2.velocity = vzero
-#   wheel2.force = vzero
-#   wheel2.angle = 0f
-#   wheel2.angularVelocity = 0f
-#   wheel2.torque = 0f
-
-#   chassis.position = posChassis
-#   chassis.velocity = vzero
-#   chassis.force = vzero
-#   chassis.angle = 0f
-#   chassis.angularVelocity = 0f
-#   chassis.torque = 0f
-
 proc onThrottle*() =
   let backWheel = state.backWheel
   let dd = state.driveDirection
