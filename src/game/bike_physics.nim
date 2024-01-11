@@ -17,24 +17,19 @@ let
   forkArmWidth = 3f
   forkArmHeight = 25f
   forkArmPosOffset = v(16,2)
-  forkArmRestAngle = 0f#-0.1f*PI
-
-# proc transformDriveDirection*(dir: DriveDirection): Vect =
-#   case dir
-#   of DD_RIGHT: return v(1, 1)
-#   of DD_LEFT: return v(-1, 1)
 
 proc transform(v1:Vect, dir: DriveDirection): Vect =
   result = v(v1.x * dir, v1.y)
 
-proc addWheel(space: Space, pos: Vect): Body =
+proc addWheel(state: GameState, chassisOffset: Vect): Body =
+  let space = state.space
   var radius = wheelRadius
   var mass = 0.6f
 
   var moment = momentForCircle(mass, 0, radius, vzero)
 
   var body = space.addBody(newBody(mass, moment))
-  body.position = pos
+  body.position = localToWorld(state.chassis, chassisOffset)
 
   var shape = space.addShape(newCircleShape(body, radius, vzero))
   shape.friction = wheelFriction
@@ -50,6 +45,7 @@ proc addChassis(space: Space, pos: Vect): Body =
 
   var body = space.addBody(newBody(mass, moment))
   body.position = pos
+  body.angle = 0.5f*PI
 
   var shape = space.addShape(newBoxShape(body, width, height, 0f))
   shape.filter = SHAPE_FILTER_NONE # no collisions
@@ -58,14 +54,16 @@ proc addChassis(space: Space, pos: Vect): Body =
 
   return body
 
-proc addSwingArm(space: Space, pos: Vect): Body =
+proc addSwingArm(state: GameState, chassisOffset: Vect): Body =
+  let space = state.space
   let swingArmMass = 0.25f
   let swingArmWidth = swingArmWidth
   let swingArmHeight = swingArmHeight
 
   let swingArmMoment = momentForBox(swingArmMass, swingArmWidth, swingArmHeight)
   let swingArm = space.addBody(newBody(swingArmMass, swingArmMoment))
-  swingArm.position = pos
+  swingArm.position = localToWorld(state.chassis, chassisOffset)
+  swingArm.angle = state.chassis.angle
 
   # let swingArmShape = space.addShape(newBoxShape(swingArm, swingArmWidth, swingArmHeight, 0f))
   # swingArmShape.filter = SHAPE_FILTER_NONE # no collisions
@@ -74,15 +72,16 @@ proc addSwingArm(space: Space, pos: Vect): Body =
 
   return swingArm
 
-proc addForkArm(space: Space, pos: Vect): Body =
+proc addForkArm(state: GameState, chassisOffset: Vect): Body =
+  let space = state.space
   let forkArmMmass = 0.25f
   let forkArmWidth = forkArmWidth
   let forkArmHeight = forkArmHeight
 
   let forkArmMoment = momentForBox(forkArmMmass, forkArmWidth, forkArmHeight)
   let forkArm = space.addBody(newBody(forkArmMmass, forkArmMoment))
-  forkArm.position = pos
-  forkArm.angle = forkArmRestAngle
+  forkArm.position = localToWorld(state.chassis, chassisOffset)
+  forkArm.angle = state.chassis.angle
 
   # let forkArmShape = space.addShape(newBoxShape(forkArm, forkArmWidth, forkArmHeight, 0f))
   # forkArmShape.filter = SHAPE_FILTER_NONE # no collisions
@@ -179,21 +178,15 @@ proc setBikeConstraints(state: GameState) =
 
 proc flipDriveDirection*(state: GameState) =
   let space = state.space
-  let chassisPos = state.chassis.position
   state.driveDirection = -state.driveDirection
   swap(state.backWheel, state.frontWheel)
   
   state.removeBikeConstraints()
-
-
-
-  state.forkArm.angle = -state.forkArm.angle
-  state.swingArm.angle = -state.swingArm.angle
-
-  # space.removeBody(state.swingArm)
-  # space.removeBody(state.forkArm)
-  state.swingArm.position = chassisPos + swingArmPosOffset.transform(state.driveDirection)
-  state.forkArm.position = chassisPos + forkArmPosOffset.transform(state.driveDirection)
+  
+  space.removeBody(state.swingArm)
+  space.removeBody(state.forkArm)
+  state.swingArm = state.addSwingArm(swingArmPosOffset.transform(state.driveDirection))
+  state.forkArm = state.addForkArm(forkArmPosOffset.transform(state.driveDirection))
   
   state.setBikeConstraints()
 
@@ -202,9 +195,9 @@ proc initBikePhysics*(state: GameState) =
   let dd = state.driveDirection
 
   state.chassis = space.addChassis(initialChassisPos)
-  state.backWheel = space.addWheel(initialChassisPos + backWheelOffset.transform(dd))
-  state.frontWheel = space.addWheel(initialChassisPos + frontWheelOffset.transform(dd))
-  state.swingArm = space.addSwingArm(initialChassisPos + swingArmPosOffset.transform(dd))
-  state.forkArm = space.addForkArm(initialChassisPos + forkArmPosOffset.transform(dd))
+  state.backWheel = state.addWheel(backWheelOffset.transform(dd))
+  state.frontWheel = state.addWheel(frontWheelOffset.transform(dd))
+  state.swingArm = state.addSwingArm(swingArmPosOffset.transform(dd))
+  state.forkArm = state.addForkArm(forkArmPosOffset.transform(dd))
   
   state.setBikeConstraints()
