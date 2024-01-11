@@ -23,31 +23,30 @@ proc transform(v1:Vect, dir: DriveDirection): Vect =
 
 proc addWheel(state: GameState, chassisOffset: Vect): Body =
   let space = state.space
-  var radius = wheelRadius
-  var mass = 0.6f
+  let radius = wheelRadius
+  let mass = 0.6f
 
-  var moment = momentForCircle(mass, 0, radius, vzero)
+  let moment = momentForCircle(mass, 0, radius, vzero)
 
-  var body = space.addBody(newBody(mass, moment))
+  let body = space.addBody(newBody(mass, moment))
   body.position = localToWorld(state.chassis, chassisOffset)
 
-  var shape = space.addShape(newCircleShape(body, radius, vzero))
+  let shape = space.addShape(newCircleShape(body, radius, vzero))
   shape.friction = wheelFriction
 
   return body
 
 proc addChassis(space: Space, pos: Vect): Body =
-  var mass = 1.0f
-  var width = 34f
-  var height = 20.0f
+  let mass = 1.0f
+  let width = 34f
+  let height = 20.0f
 
-  var moment = momentForBox(mass, width, height)
+  let moment = momentForBox(mass, width, height)
 
-  var body = space.addBody(newBody(mass, moment))
+  let body = space.addBody(newBody(mass, moment))
   body.position = pos
-  body.angle = 0.5f*PI
 
-  var shape = space.addShape(newBoxShape(body, width, height, 0f))
+  let shape = space.addShape(newBoxShape(body, width, height, 0f))
   shape.filter = SHAPE_FILTER_NONE # no collisions
   shape.elasticity = 0.0f
   shape.friction = 0.7f
