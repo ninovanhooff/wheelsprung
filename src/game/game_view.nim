@@ -1,5 +1,7 @@
 import playdate/api
 import math
+import std/sequtils
+import std/sugar
 import chipmunk7
 import game_types
 
@@ -55,7 +57,19 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     let b = localToWorld(spring.bodyB, vzero) - camera
     playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
-proc drawChipmunkGame*(state: ptr GameState) =
-  # iterate over all shapes in the space
-  eachShape(state.space, shapeIter, state)
-  eachConstraint(state.space, constraintIter, state)
+proc offset(polygon: Polygon, camera: Camera): Polygon =
+  let camX: int32 = camera.x.int32
+  let camY: int32 = camera.y.int32
+  polygon.map(vertex => [vertex[0] - camX, vertex[1] - camY])
+
+proc drawGroundPolygons(state: GameState) =
+  let camera = state.camera
+  for polygon in state.groundPolygons:
+    # todo optimise: only draw if polygon is visible and not drawn to offscreen buffer yet
+    playdate.graphics.fillPolygon(polygon.offset(camera), kColorBlack, kPolygonFillNonZero)
+
+proc drawChipmunkGame*(statePtr: ptr GameState) =
+  statePtr[].drawGroundPolygons()
+  # Debug draw: iterate over all shapes in the space
+  eachShape(statePtr.space, shapeIter, statePtr)
+  eachConstraint(statePtr.space, constraintIter, statePtr)

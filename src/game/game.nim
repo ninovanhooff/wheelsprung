@@ -7,7 +7,6 @@ import game_types
 import game_view
 
 const
-  gravity = v(0, 100)
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.8f
   attitudeAdjustForceThreshold = 100f
@@ -36,9 +35,7 @@ if defined simulator:
 
 
 proc initGame*() {.raises: [].} =
-  let space = loadLevel("levels/fallbackLevel.json")
-  space.gravity = gravity
-  state = GameState(space: space, driveDirection: DD_RIGHT)
+  state = loadLevel("levels/fallbackLevel.json")
   initBikePhysics(state)
   initBikeEngine()
 

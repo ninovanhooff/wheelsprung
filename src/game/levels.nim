@@ -2,9 +2,14 @@ import chipmunk7
 import options
 import utils
 import std/json
+import std/sequtils
+import std/sugar
 import playdate/api
+import game_types
 
-const groundFriction = 10.0f
+const 
+    gravity = v(0, 100)
+    groundFriction = 10.0f
 
 type 
     LevelObject = ref object of RootObj
@@ -50,9 +55,10 @@ proc getSegments(obj: LevelObject): seq[Vect] {.raises: [].} =
     else:
         return @[]
 
-proc loadLayer(layer: Layer, space: Space) {.raises: [].} =
-    if layer.objects.isNone:
-        return
+proc loadLayer(state: GameState, layer: Layer) {.raises: [].} =
+    if layer.objects.isNone: return
+
+    let space = state.space
 
     for obj in layer.objects.get:
         let objOffset = v(obj.x, obj.y)
@@ -66,17 +72,24 @@ proc loadLayer(layer: Layer, space: Space) {.raises: [].} =
         for i in 0..lastIndex:
             segments[i] = segments[i] + objOffset
 
+        # todo add groundPolygons
+        let poly: Polygon = segments.map( vect => [vect.x.int32, vect.y.int32])
+        state.groundPolygons.add(poly)
+
         # Add the segments to the space
         for i in 1..lastIndex:
             var groundSegment = newSegmentShape(space.staticBody, segments[i-1], segments[i], 0f)
             groundSegment.friction = groundFriction
             discard space.addShape(groundSegment)
 
-proc loadLevel*(path: string): Space {.raises: [].} =
+proc loadLevel*(path: string): GameState =
     let space = newSpace()
+    space.gravity = gravity
+    let state = GameState(space: space, driveDirection: DD_RIGHT)
+  
     let level = parseLevel(path)
 
     for layer in level.layers:
-        loadLayer(layer, space)
+        state.loadLayer(layer)
       
-    return space
+    return state
