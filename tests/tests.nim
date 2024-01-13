@@ -1,8 +1,12 @@
 import std/math
 import utils
 
+proc testNotify(messag: string): bool =
+    print("Test: " & messag)
+    return true
+
 proc runTests*() =
-    print "Running tests..."
+    assert testNotify "Running tests..."
     
     assert normalizeAngle(0) == 0
     assert normalizeAngle(PI) == PI
@@ -19,4 +23,4 @@ proc runTests*() =
     assert lerp(0, 10, 1) == 10
     assert lerp(0, 10, 0.5) == 5
     
-    print "Tests passed."
+    assert testNotify "Tests passed."

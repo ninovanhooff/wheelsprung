@@ -34,7 +34,7 @@ proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
 
 proc catchingUpdate(): int = 
     runCatching(update)
-    return 0
+    return 1 ## 1: update display
 
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
