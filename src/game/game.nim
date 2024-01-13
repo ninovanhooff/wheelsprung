@@ -23,7 +23,7 @@ var isThrottlePressed = false
 # device controls
 var actionThrottle = kButtonA
 var actionBrake = kButtonB
-var actionFlipDirection = kButtonUp
+var actionFlipDirection = kButtonDown
 var actionLeanLeft = kButtonLeft
 var actionLeanRight = kButtonRight
 # simulator overrides

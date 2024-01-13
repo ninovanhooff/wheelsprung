@@ -3,9 +3,10 @@
  "infinite":false,
  "layers":[
         {
+         "color":"#63b062",
          "draworder":"topdown",
          "id":2,
-         "name":"Object Layer 1",
+         "name":"ground",
          "objects":[
                 {
                  "height":0,
@@ -50,6 +51,154 @@
                  "width":0,
                  "x":1605.72773,
                  "y":151.921
+                }, 
+                {
+                 "height":0,
+                 "id":21,
+                 "name":"",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":220,
+                         "y":0
+                        }, 
+                        {
+                         "x":120,
+                         "y":80
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":24,
+                 "y":170
+                }, 
+                {
+                 "height":0,
+                 "id":22,
+                 "name":"",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":72,
+                         "y":4
+                        }, 
+                        {
+                         "x":184,
+                         "y":36
+                        }, 
+                        {
+                         "x":240,
+                         "y":76
+                        }, 
+                        {
+                         "x":312,
+                         "y":112
+                        }, 
+                        {
+                         "x":408,
+                         "y":128
+                        }, 
+                        {
+                         "x":444,
+                         "y":126
+                        }, 
+                        {
+                         "x":466,
+                         "y":114
+                        }, 
+                        {
+                         "x":500,
+                         "y":88
+                        }, 
+                        {
+                         "x":514,
+                         "y":210
+                        }, 
+                        {
+                         "x":-12,
+                         "y":208
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":324,
+                 "y":190
+                }, 
+                {
+                 "height":0,
+                 "id":23,
+                 "name":"",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":8
+                        }, 
+                        {
+                         "x":294,
+                         "y":-6
+                        }, 
+                        {
+                         "x":294,
+                         "y":4
+                        }, 
+                        {
+                         "x":0,
+                         "y":20
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":910,
+                 "y":192
+                }, 
+                {
+                 "height":0,
+                 "id":24,
+                 "name":"",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":136,
+                         "y":0
+                        }, 
+                        {
+                         "x":196,
+                         "y":34
+                        }, 
+                        {
+                         "x":216,
+                         "y":68
+                        }, 
+                        {
+                         "x":138,
+                         "y":68
+                        }, 
+                        {
+                         "x":88,
+                         "y":36
+                        }, 
+                        {
+                         "x":40,
+                         "y":24
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":1312,
+                 "y":212
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -58,9 +207,11 @@
          "y":0
         }, 
         {
+         "class":"cloud",
+         "color":"#7bd9dd",
          "draworder":"topdown",
          "id":5,
-         "name":"Object Layer 2",
+         "name":"clouds",
          "objects":[
                 {
                  "height":0,
@@ -115,116 +266,44 @@
                  "y":273.806
                 }, 
                 {
-                 "height":0,
-                 "id":14,
-                 "name":"",
-                 "polyline":[
+                 "id":15,
+                 "properties":[
                         {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":778,
-                         "y":0
+                         "name":"collidesObj",
+                         "type":"bool",
+                         "value":true
                         }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":26,
-                 "y":160
+                 "template":"..\/..\/..\/..\/temp\/cloud_template.tx",
+                 "type":"cloud",
+                 "x":662,
+                 "y":76
                 }, 
                 {
-                 "height":0,
-                 "id":15,
-                 "name":"",
-                 "polygon":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":58,
-                         "y":-18
-                        }, 
-                        {
-                         "x":100,
-                         "y":4
-                        }, 
-                        {
-                         "x":10,
-                         "y":20
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":620,
-                 "y":96
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":6,
-         "name":"rects",
-         "objects":[
+                 "id":17,
+                 "template":"..\/..\/..\/..\/temp\/cloud_template.tx",
+                 "x":530,
+                 "y":50
+                }, 
                 {
-                 "height":0,
-                 "id":13,
-                 "name":"",
-                 "polygon":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":56,
-                         "y":-16
-                        }, 
-                        {
-                         "x":150,
-                         "y":-20
-                        }, 
-                        {
-                         "x":188,
-                         "y":-14
-                        }, 
-                        {
-                         "x":154,
-                         "y":12
-                        }, 
-                        {
-                         "x":100,
-                         "y":16
-                        }, 
-                        {
-                         "x":62,
-                         "y":34
-                        }, 
-                        {
-                         "x":16,
-                         "y":16
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":242,
-                 "y":80
+                 "id":18,
+                 "template":"..\/..\/..\/..\/temp\/cloud_template.tx",
+                 "x":538,
+                 "y":104
                 }],
          "opacity":1,
+         "properties":[
+                {
+                 "name":"collides",
+                 "type":"bool",
+                 "value":false
+                }],
          "type":"objectgroup",
          "visible":true,
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":16,
+ "nextlayerid":8,
+ "nextobjectid":25,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",

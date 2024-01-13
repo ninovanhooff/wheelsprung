@@ -72,11 +72,11 @@ proc loadLayer(state: GameState, layer: Layer) {.raises: [].} =
         for i in 0..lastIndex:
             segments[i] = segments[i] + objOffset
 
-        # todo add groundPolygons
+        # add groundPolygons for drawing
         let poly: Polygon = segments.map( vect => [vect.x.int32, vect.y.int32])
         state.groundPolygons.add(poly)
 
-        # Add the segments to the space
+        # Add the segments to the physics space
         for i in 1..lastIndex:
             var groundSegment = newSegmentShape(space.staticBody, segments[i-1], segments[i], 0f)
             groundSegment.friction = groundFriction
