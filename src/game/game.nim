@@ -7,13 +7,10 @@ import game_rider
 import game_types
 import game_view
 
-import strutils, typetraits, unicode
-
-
 const
   riderOffset = v(-7f, -20f) # offset from chassis center
   initialAttitudeAdjustTorque = 50_000f
-  attitudeAdjustAttentuation = 0.8f
+  attitudeAdjustAttentuation = 0.7f
   attitudeAdjustForceThreshold = 100f
   maxWheelAngularVelocity = 20f
   # applied to wheel1 and chassis to make bike more unstable

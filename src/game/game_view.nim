@@ -80,13 +80,20 @@ proc drawGroundPolygons(state: GameState) =
     # todo optimise: only draw if polygon is visible and not drawn to offscreen buffer yet
     gfx.fillPolygon(polygon.offset(camera), kColorBlack, kPolygonFillNonZero)
 
+proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
+  table.drawRotated(
+    center, 
+    (if driveDirection == DD_LEFT: -angle else: angle),
+    (if driveDirection == DD_LEFT: kBitmapFlippedX else: kBitmapUnflipped)
+  )
+
 proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   state.drawGroundPolygons()
 
   let chassis = state.chassis
   let chassisScreenPos = chassis.position - state.camera
-  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle)
+  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, state.driveDirection)
 
 
   # Debug draw: iterate over all shapes in the space
