@@ -6,6 +6,8 @@ proc testNotify(messag: string): bool =
     return true
 
 proc runTests*() =
+    # All calls should be passed to assert, so that this proc gets optimized out in release builds
+
     assert testNotify "Running tests..."
     
     assert normalizeAngle(0) == 0
