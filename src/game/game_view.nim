@@ -4,6 +4,18 @@ import std/sequtils
 import std/sugar
 import chipmunk7
 import game_types
+import utils
+import graphics_utils
+
+template gfx: untyped = playdate.graphics
+
+var bikeChassisImageTable: LCDBitmapTable
+
+proc initGameView*() =
+  try:
+    bikeChassisImageTable = gfx.newBitmapTable("images/bike-chassis")
+  except:
+    print("Error loading bike chassis image table")
 
 proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: LCDColor) =
   # covert from center position to top left
@@ -13,12 +25,12 @@ proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: L
   let size: int = (radius * 2f).toInt
   # angle is in radians, convert to degrees
   let deg = radTodeg(angle)
-  playdate.graphics.drawEllipse(x,y,size, size, 1, deg, deg + 350, color);
+  gfx.drawEllipse(x,y,size, size, 1, deg, deg + 350, color);
 
 proc drawSegment(camera: Camera, segment: SegmentShape, color: LCDColor) =
   let drawAPos = segment.a - camera
   let drawBPos = segment.b - camera
-  playdate.graphics.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
+  gfx.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
 
 proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
   let state = cast[ptr GameState](data)
@@ -35,7 +47,7 @@ proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
     for i in 0 ..< numVerts:
       let a = localToWorld(poly.body, poly.vert(i)) - camera
       let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts)) - camera
-      playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+      gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
 proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
   let state = cast[ptr GameState](data)
@@ -45,17 +57,17 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     let groove = cast[GrooveJoint](constraint)
     let a = localToWorld(groove.bodyA, groove.grooveA) - camera
     let b = localToWorld(groove.bodyA, groove.grooveB) - camera
-    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
   elif constraint.isDampedSpring:
     let spring = cast[DampedSpring](constraint)
     let a = localToWorld(spring.bodyA, spring.anchorA) - camera
     let b = localToWorld(spring.bodyB, spring.anchorB) - camera
-    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
   elif constraint.isDampedRotarySpring:
     let spring = cast[DampedRotarySpring](constraint)
     let a = localToWorld(spring.bodyA, vzero) - camera
     let b = localToWorld(spring.bodyB, vzero) - camera
-    playdate.graphics.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
 proc offset(polygon: Polygon, camera: Camera): Polygon =
   let camX: int32 = camera.x.int32
@@ -66,10 +78,17 @@ proc drawGroundPolygons(state: GameState) =
   let camera = state.camera
   for polygon in state.groundPolygons:
     # todo optimise: only draw if polygon is visible and not drawn to offscreen buffer yet
-    playdate.graphics.fillPolygon(polygon.offset(camera), kColorBlack, kPolygonFillNonZero)
+    gfx.fillPolygon(polygon.offset(camera), kColorBlack, kPolygonFillNonZero)
 
 proc drawChipmunkGame*(statePtr: ptr GameState) =
-  statePtr[].drawGroundPolygons()
+  let state = statePtr[]
+  state.drawGroundPolygons()
+
+  let chassis = state.chassis
+  let chassisScreenPos = chassis.position - state.camera
+  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle)
+
+
   # Debug draw: iterate over all shapes in the space
   eachShape(statePtr.space, shapeIter, statePtr)
   eachConstraint(statePtr.space, constraintIter, statePtr)

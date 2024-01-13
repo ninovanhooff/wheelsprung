@@ -7,6 +7,9 @@ import game_rider
 import game_types
 import game_view
 
+import strutils, typetraits, unicode
+
+
 const
   riderOffset = v(-7f, -20f) # offset from chassis center
   initialAttitudeAdjustTorque = 50_000f
@@ -42,6 +45,7 @@ proc initGame*() {.raises: [].} =
   let riderPosition = state.initialChassisPosition + riderOffset * state.driveDirection
   initRiderPhysics(state, riderPosition)
   initBikeEngine()
+  initGameView()
 
 proc onThrottle*() =
   let backWheel = state.backWheel
@@ -104,9 +108,8 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
   state.updateAttitudeAdjust()
 
-  # todo no commit
-  # state.space.step(timeStep)
-  # state.time += timeStep
+  state.space.step(timeStep)
+  state.time += timeStep
 
   updateBikeEngine(isThrottlePressed, state.backWheel.angularVelocity * state.driveDirection)
 
