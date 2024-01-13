@@ -85,7 +85,9 @@ proc loadLayer(state: GameState, layer: Layer) {.raises: [].} =
 proc loadLevel*(path: string): GameState =
     let space = newSpace()
     space.gravity = gravity
-    let state = GameState(space: space, driveDirection: DD_RIGHT)
+    let state = GameState(space: space)
+    state.driveDirection = DD_RIGHT
+    state.initialChassisPosition = v(80f, 20f)
   
     let level = parseLevel(path)
 

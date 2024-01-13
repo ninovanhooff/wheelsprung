@@ -6,7 +6,6 @@ let
   # offset for driveDirection DD_RIGHT
   wheelRadius = 10.0f
   wheelFriction = 3.0f
-  initialChassisPos = v(80, 20)
   backWheelOffset = v(-20, 10)
   frontWheelOffset = v(21, 12)
   
@@ -48,8 +47,6 @@ proc addChassis(space: Space, pos: Vect): Body =
 
   let shape = space.addShape(newBoxShape(body, width, height, 0f))
   shape.filter = SHAPE_FILTER_NONE # no collisions
-  shape.elasticity = 0.0f
-  shape.friction = 0.7f
 
   return body
 
@@ -193,7 +190,7 @@ proc initBikePhysics*(state: GameState) =
   let space = state.space
   let dd = state.driveDirection
 
-  state.chassis = space.addChassis(initialChassisPos)
+  state.chassis = space.addChassis(state.initialChassisPosition)
   state.backWheel = state.addWheel(backWheelOffset.transform(dd))
   state.frontWheel = state.addWheel(frontWheelOffset.transform(dd))
   state.swingArm = state.addSwingArm(swingArmPosOffset.transform(dd))

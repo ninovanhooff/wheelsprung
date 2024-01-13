@@ -3,10 +3,12 @@ import playdate/api
 import utils
 import levels
 import bike_engine, bike_physics
+import game_rider
 import game_types
 import game_view
 
 const
+  riderOffset = v(-7f, -20f) # offset from chassis center
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.8f
   attitudeAdjustForceThreshold = 100f
@@ -37,6 +39,8 @@ if defined simulator:
 proc initGame*() {.raises: [].} =
   state = loadLevel("levels/fallbackLevel.json")
   initBikePhysics(state)
+  let riderPosition = state.initialChassisPosition + riderOffset * state.driveDirection
+  initRiderPhysics(state, riderPosition)
   initBikeEngine()
 
 proc onThrottle*() =
@@ -100,8 +104,9 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
   state.updateAttitudeAdjust()
 
-  state.space.step(timeStep)
-  state.time += timeStep
+  # todo no commit
+  # state.space.step(timeStep)
+  # state.time += timeStep
 
   updateBikeEngine(isThrottlePressed, state.backWheel.angularVelocity * state.driveDirection)
 

@@ -20,12 +20,24 @@ type GameState* = ref object of RootObj
     camera*: Camera
     driveDirection*: DriveDirection
 
-    # bodies
+    initialChassisPosition*: Vect
+
+    # bike bodies
     backWheel*: Body
     frontWheel*: Body
     chassis*: Body
     swingArm*: Body
     forkArm*: Body
+
+    # rider bodies
+    riderHead*: Body
+    riderTorso*: Body
+    riderUpperArm*: Body
+    riderLowerArm*: Body
+    riderUpperLeg*: Body
+    riderLowerLeg*: Body
+    riderFoot*: Body
+    riderHand*: Body
 
     # Level Objects
     groundPolygons*: seq[Polygon]
