@@ -1,8 +1,8 @@
 import std/math
 import utils
 
-proc testNotify(messag: string): bool =
-    print("Test: " & messag)
+proc testNotify(message: string): bool =
+    print("Test: " & message)
     return true
 
 proc runTests*() =
