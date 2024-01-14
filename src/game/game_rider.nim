@@ -12,7 +12,6 @@ const
     headRadius = 6f
     headMass = 0.1f
     headOffset = v(0f, -20f)
-    neckLength = 2f
     
     # offset from torso, align top of arm with top of torso
     upperArmSize = v(5f, 14f)
@@ -54,7 +53,6 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
 
 proc setRiderConstraints(state: GameState) =
   let space = state.space
-  let dd = state.driveDirection
 
   var riderConstraints : seq[Constraint] = state.riderConstraints
 
