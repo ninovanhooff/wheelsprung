@@ -68,6 +68,43 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
+  let riderUpperArmShoulderLocalPosition = v(0f, -upperArmSize.y/2f + upperArmSize.x/2f) # + half upper arm width
+  let riderShoulderWorldPosition = localToWorld(state.riderUpperArm, riderUpperArmShoulderLocalPosition)
+  riderConstraints.add(space.addConstraint(
+    # pivot torso around ass, and joint ass to bike chassis
+    state.riderTorso.newPivotJoint(
+      state.riderUpperArm,
+      worldToLocal(state.riderTorso, riderShoulderWorldPosition),
+      riderUpperArmShoulderLocalPosition
+    )
+  ))
+
+  let riderLowerArmElbowLocalPosition = v(0f, -lowerArmSize.y/2f + lowerArmSize.x/2f)
+  let riderElbowWorldPosition = localToWorld(state.riderLowerArm, riderLowerArmElbowLocalPosition)
+  riderConstraints.add(space.addConstraint(
+    state.riderUpperArm.newPivotJoint(
+      state.riderLowerArm,
+      worldToLocal(state.riderUpperArm, riderElbowWorldPosition),
+      riderLowerArmElbowLocalPosition
+    )
+  ))
+
+  let riderHandWristLocalPosition = v(0f, -handRadius)
+  let riderHandWorldPosition = localToWorld(state.riderHand, riderHandWristLocalPosition)
+  riderConstraints.add(space.addConstraint(
+    state.riderLowerArm.newPivotJoint(
+      state.riderHand,
+      worldToLocal(state.riderLowerArm, riderHandWorldPosition),
+      riderHandWristLocalPosition
+    )
+  ))
+
+  state.riderConstraints = riderConstraints
+
+
+
+
+
 
 
 proc initRiderPhysics*(state: GameState, riderPosition: Vect) =
