@@ -51,8 +51,26 @@ proc addRider*(state: Gamestate, torsoPosition: Vect) =
     let handPosition = localToWorld(state.riderLowerArm, handOffset.transform(dd))
     state.riderHand = space.addCircle(handPosition, handRadius, handMass)
 
+proc setRiderConstraints(state: GameState) =
+  let space = state.space
+  let dd = state.driveDirection
+
+  var riderConstraints : seq[Constraint] = state.riderConstraints
+
+  let riderAssLocalPosition = v(0, torsoSize.y/2f)
+  let riderAssWorldPosition = localToWorld(state.riderTorso, riderAssLocalPosition)
+  riderConstraints.add(space.addConstraint(
+    # pivot torso around ass, and joint ass to bike chassis
+    state.chassis.newPivotJoint(
+      state.riderTorso,
+      worldToLocal(state.chassis, riderAssWorldPosition),
+      riderAssLocalPosition
+    )
+  ))
+
 
 
 proc initRiderPhysics*(state: GameState, riderPosition: Vect) =
   state.addRider(riderPosition)
+  state.setRiderConstraints()
     

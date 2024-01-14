@@ -43,3 +43,4 @@ type GameState* = ref object of RootObj
     groundPolygons*: seq[Polygon]
 
     bikeConstraints*: seq[Constraint]
+    riderConstraints*: seq[Constraint]
