@@ -1,6 +1,7 @@
 import chipmunk7
 import std/math
 import game_types
+import chipmunk_utils
 
 let
   # offset for driveDirection DD_RIGHT
@@ -16,9 +17,6 @@ let
   forkArmWidth = 3f
   forkArmHeight = 25f
   forkArmPosOffset = v(16,2)
-
-proc transform(v1:Vect, dir: DriveDirection): Vect =
-  result = v(v1.x * dir, v1.y)
 
 proc addWheel(state: GameState, chassisOffset: Vect): Body =
   let space = state.space
@@ -149,7 +147,7 @@ proc setBikeConstraints(state: GameState) =
   bikeConstraints.add(space.addConstraint(
     chassis.newPivotJoint(
       forkArm, 
-      forkArmPosOffset*dd + forkArmTopCenter, 
+      forkArmPosOffset.transform(dd) + forkArmTopCenter, 
       forkArmTopCenter
     )
   ))

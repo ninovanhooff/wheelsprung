@@ -1,4 +1,8 @@
 import chipmunk7
+import game/game_types
+
+proc transform*(v1:Vect, dir: DriveDirection): Vect =
+  result = v(v1.x * dir, v1.y)
 
 proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f) : Body =
     let body = space.addBody(

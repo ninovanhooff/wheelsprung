@@ -1983,7 +1983,8 @@ proc closestPointOnSegment*(p: Vect; a: Vect; b: Vect): Vect {.inline, cdecl.} =
 
 
 
-proc `*`*(v: Vect; s: Float): Vect = vmult(v, s)
+# Nino: disable * because it clashes with DriveDirection
+# proc `*`*(v: Vect; s: Float): Vect = vmult(v, s)
 proc `+`*(v1, v2: Vect): Vect = vadd(v1, v2)
 proc `-`*(v1, v2: Vect): Vect = vsub(v1, v2)
 proc `==`*(v1, v2: Vect): bool = veql(v1, v2)

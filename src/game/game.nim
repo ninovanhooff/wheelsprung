@@ -1,6 +1,6 @@
 import chipmunk7
 import playdate/api
-import utils
+import utils, chipmunk_utils
 import levels
 import bike_engine, bike_physics
 import game_rider
@@ -39,7 +39,7 @@ if defined simulator:
 proc initGame*() {.raises: [].} =
   state = loadLevel("levels/fallbackLevel.json")
   initBikePhysics(state)
-  let riderPosition = state.initialChassisPosition + riderOffset * state.driveDirection
+  let riderPosition = state.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initRiderPhysics(state, riderPosition)
   initBikeEngine()
   initGameView()

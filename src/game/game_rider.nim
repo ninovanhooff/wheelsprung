@@ -37,19 +37,21 @@ proc addRider*(state: Gamestate, torsoPosition: Vect) =
     let torsoAngle = torsoRotation * dd
     state.riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)
     
-    let headPosition = localToWorld(state.ridertorso, headOffset * dd)
+    let headPosition = localToWorld(state.ridertorso, headOffset.transform(dd))
     state.riderHead = space.addCircle(headPosition, headRadius, headMass)
     
-    let upperArmPosition = localToWorld(state.riderTorso, upperArmOffset * dd)
+    let upperArmPosition = localToWorld(state.riderTorso, upperArmOffset.transform(dd))
     let upperArmAngle = torsoAngle + upperArmRotationOffset * dd
     state.riderUpperArm = space.addBox(upperArmPosition, upperArmSize, upperArmMass, upperArmAngle)
     
-    let lowerArmPosition = localToWorld(state.riderUpperArm, lowerArmOffset * dd)
+    let lowerArmPosition = localToWorld(state.riderUpperArm, lowerArmOffset.transform(dd))
     let lowerArmAngle = upperArmAngle + lowerArmRotationOffset * dd
     state.riderLowerArm = space.addBox(lowerArmPosition, lowerArmSize, lowerArmMass, lowerArmAngle)
 
-    let handPosition = localToWorld(state.riderLowerArm, handOffset * dd)
+    let handPosition = localToWorld(state.riderLowerArm, handOffset.transform(dd))
     state.riderHand = space.addCircle(handPosition, handRadius, handMass)
+
+
 
 proc initRiderPhysics*(state: GameState, riderPosition: Vect) =
   state.addRider(riderPosition)
