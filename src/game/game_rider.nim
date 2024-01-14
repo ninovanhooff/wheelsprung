@@ -16,19 +16,19 @@ const
     # offset from torso, align top of arm with top of torso
     upperArmSize = v(5f, 14f)
     upperArmMass = 0.25f
-    upperArmRotationOffset = degToRad(-65f)
+    upperArmRotationOffset = degToRad(-70f)
     upperArmOffset = v(5f, -3f)
 
     # offset from upper arm
-    lowerArmSize = v(3f, 10f)
+    lowerArmSize = v(3f, 12f)
     lowerArmOffset = v(3f, 9f)
     lowerArmMass = 0.2f
-    lowerArmRotationOffset = degToRad(-70f)
+    lowerArmRotationOffset = degToRad(-75f)
 
     # offset from lower arm
     handRadius = 2f
     handMass = 0.1f
-    handOffset = v(-1f, 6f)
+    handOffset = v(-1f, 7f)
 
 proc addRider*(state: Gamestate, torsoPosition: Vect) =
     let space = state.space
