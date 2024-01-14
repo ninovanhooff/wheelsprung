@@ -25,6 +25,11 @@ const
     lowerArmMass = 0.2f
     lowerArmRotationOffset = degToRad(-70f)
 
+    # offset from lower arm
+    handRadius = 2f
+    handMass = 0.1f
+    handOffset = v(-1f, 6f)
+
 proc addRider*(state: Gamestate, torsoPosition: Vect) =
     let space = state.space
     let dd = state.driveDirection
@@ -42,6 +47,9 @@ proc addRider*(state: Gamestate, torsoPosition: Vect) =
     let lowerArmPosition = localToWorld(state.riderUpperArm, lowerArmOffset * dd)
     let lowerArmAngle = upperArmAngle + lowerArmRotationOffset * dd
     state.riderLowerArm = space.addBox(lowerArmPosition, lowerArmSize, lowerArmMass, lowerArmAngle)
+
+    let handPosition = localToWorld(state.riderLowerArm, handOffset * dd)
+    state.riderHand = space.addCircle(handPosition, handRadius, handMass)
 
 proc initRiderPhysics*(state: GameState, riderPosition: Vect) =
   state.addRider(riderPosition)
