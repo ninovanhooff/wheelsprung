@@ -35,12 +35,13 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
     let dd = state.driveDirection
 
     let torsoAngle = torsoRotation * dd
-    state.riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)
+    let riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)
+    state.riderTorso = riderTorso
     
-    let headPosition = localToWorld(state.riderTorso, headOffset.transform(dd))
+    let headPosition = localToWorld(riderTorso, headOffset.transform(dd))
     state.riderHead = space.addCircle(headPosition, headRadius, headMass)
     
-    let upperArmPosition = localToWorld(state.riderTorso, upperArmOffset.transform(dd))
+    let upperArmPosition = localToWorld(riderTorso, upperArmOffset.transform(dd))
     let upperArmAngle = torsoAngle + upperArmRotationOffset * dd
     state.riderUpperArm = space.addBox(upperArmPosition, upperArmSize, upperArmMass, upperArmAngle)
     
@@ -53,15 +54,16 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
 
 proc setRiderConstraints(state: GameState) =
   let space = state.space
+  let riderTorso = state.riderTorso
 
   var riderConstraints : seq[Constraint] = state.riderConstraints
 
   let riderAssLocalPosition = v(0, torsoSize.y/2f)
-  let riderAssWorldPosition = localToWorld(state.riderTorso, riderAssLocalPosition)
+  let riderAssWorldPosition = localToWorld(riderTorso, riderAssLocalPosition)
   riderConstraints.add(space.addConstraint(
     # pivot torso around ass, and joint ass to bike chassis
     state.chassis.newPivotJoint(
-      state.riderTorso,
+      riderTorso,
       worldToLocal(state.chassis, riderAssWorldPosition),
       riderAssLocalPosition
     )
@@ -71,19 +73,22 @@ proc setRiderConstraints(state: GameState) =
   let riderShoulderWorldPosition = localToWorld(state.riderUpperArm, riderUpperArmShoulderLocalPosition)
   riderConstraints.add(space.addConstraint(
     # pivot torso around ass, and joint ass to bike chassis
-    state.riderTorso.newPivotJoint(
+    riderTorso.newPivotJoint(
       state.riderUpperArm,
-      worldToLocal(state.riderTorso, riderShoulderWorldPosition),
+      worldToLocal(riderTorso, riderShoulderWorldPosition),
       riderUpperArmShoulderLocalPosition
     )
+  ))
+  riderConstraints.add(space.addConstraint(
+    riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle, 10_000f, 4_000f) # todo rest angle?
   ))
 
   let riderHeadNeckLocalPosition = v(0f, 0f) # head on a stick, to reduce chaos don't allow head to move relative to torso
   let riderHeadAnchorWorldPosition = localToWorld(state.riderHead, riderHeadNeckLocalPosition)
   riderConstraints.add(space.addConstraint(
-    state.riderTorso.newPinJoint( # head on a stick, to reduce chaos don't allow head to move relative to torso
+    riderTorso.newPinJoint( # head on a stick, to reduce chaos don't allow head to move relative to torso
       state.riderHead,
-      worldToLocal(state.riderTorso, riderHeadAnchorWorldPosition),
+      worldToLocal(riderTorso, riderHeadAnchorWorldPosition),
       riderHeadNeckLocalPosition
     )
   ))
