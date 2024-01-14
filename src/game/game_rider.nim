@@ -12,6 +12,7 @@ const
     headRadius = 6f
     headMass = 0.1f
     headOffset = v(0f, -20f)
+    neckLength = 2f
     
     # offset from torso, align top of arm with top of torso
     upperArmSize = v(5f, 14f)
@@ -30,14 +31,14 @@ const
     handMass = 0.1f
     handOffset = v(-1f, 7f)
 
-proc addRider*(state: Gamestate, torsoPosition: Vect) =
+proc addRider*(state: GameState, torsoPosition: Vect) =
     let space = state.space
     let dd = state.driveDirection
 
     let torsoAngle = torsoRotation * dd
     state.riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)
     
-    let headPosition = localToWorld(state.ridertorso, headOffset.transform(dd))
+    let headPosition = localToWorld(state.riderTorso, headOffset.transform(dd))
     state.riderHead = space.addCircle(headPosition, headRadius, headMass)
     
     let upperArmPosition = localToWorld(state.riderTorso, upperArmOffset.transform(dd))
@@ -76,6 +77,16 @@ proc setRiderConstraints(state: GameState) =
       state.riderUpperArm,
       worldToLocal(state.riderTorso, riderShoulderWorldPosition),
       riderUpperArmShoulderLocalPosition
+    )
+  ))
+
+  let riderHeadNeckLocalPosition = v(0f, 0f) # head on a stick, to reduce chaos don't allow head to move relative to torso
+  let riderHeadAnchorWorldPosition = localToWorld(state.riderHead, riderHeadNeckLocalPosition)
+  riderConstraints.add(space.addConstraint(
+    state.riderTorso.newPinJoint( # head on a stick, to reduce chaos don't allow head to move relative to torso
+      state.riderHead,
+      worldToLocal(state.riderTorso, riderHeadAnchorWorldPosition),
+      riderHeadNeckLocalPosition
     )
   ))
 
