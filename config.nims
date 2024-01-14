@@ -1,6 +1,7 @@
 include playdate/build/config
 
 --path:"./src"
+--styleCheck:hint
 
 # Add a search path for libraries based on OS.
 if defined(device):
