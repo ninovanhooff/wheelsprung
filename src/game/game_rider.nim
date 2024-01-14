@@ -14,13 +14,13 @@ const
     headOffset = v(0f, -20f)
     
     # offset from torso, align top of arm with top of torso
-    upperArmSize = v(5f, 14f)
+    upperArmSize = v(5f, 12f)
     upperArmMass = 0.25f
     upperArmRotationOffset = degToRad(-70f)
     upperArmOffset = v(5f, -3f)
 
     # offset from upper arm
-    lowerArmSize = v(3f, 12f)
+    lowerArmSize = v(3f, 11f)
     lowerArmOffset = v(3f, 9f)
     lowerArmMass = 0.2f
     lowerArmRotationOffset = degToRad(-75f)
@@ -80,7 +80,7 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
   riderConstraints.add(space.addConstraint(
-    riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle, 10_000f, 4_000f) # todo rest angle?
+    riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle, 10_000f, 7_000f) # todo rest angle?
   ))
 
   let riderHeadNeckLocalPosition = v(0f, 0f) # head on a stick, to reduce chaos don't allow head to move relative to torso
@@ -103,13 +103,22 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
-  let riderHandWristLocalPosition = v(0f, -handRadius)
+  let riderHandWristLocalPosition = v(0f, 0f)
   let riderHandWorldPosition = localToWorld(state.riderHand, riderHandWristLocalPosition)
   riderConstraints.add(space.addConstraint(
-    state.riderLowerArm.newPivotJoint(
+    state.riderLowerArm.newPinJoint(
       state.riderHand,
       worldToLocal(state.riderLowerArm, riderHandWorldPosition),
       riderHandWristLocalPosition
+    )
+  ))
+
+  # pin hand to handlebar
+  riderConstraints.add(space.addConstraint(
+    state.chassis.newPinJoint( # 
+      state.riderHand,
+      worldToLocal(state.chassis, localToWorld(state.riderHand, vzero)),
+      riderHeadNeckLocalPosition
     )
   ))
 
