@@ -25,7 +25,7 @@ proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: L
   let size: int = (radius * 2f).toInt
   # angle is in radians, convert to degrees
   let deg = radTodeg(angle)
-  gfx.drawEllipse(x,y,size, size, 1, deg, deg + 350, color);
+  gfx.drawEllipse(x,y,size, size, 1, deg+10, deg + 350, color);
 
 proc drawSegment(camera: Camera, segment: SegmentShape, color: LCDColor) =
   let drawAPos = segment.a - camera

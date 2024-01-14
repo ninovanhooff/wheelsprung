@@ -16,11 +16,12 @@ proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 
 
     return body
 
-proc addCircle*(space: Space, pos: Vect, radius: float32, mass: float32) : Body =
+proc addCircle*(space: Space, pos: Vect, radius: float32, mass: float32, angle: float32 = 0f) : Body =
     let body = space.addBody(
         newBody(mass, momentForCircle(mass, 0f, radius, vzero))
     )
     body.position = pos
+    body.angle = angle
 
     let shape = space.addShape(newCircleShape(body, radius, vzero))
     shape.filter = SHAPE_FILTER_NONE # no collisions

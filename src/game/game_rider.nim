@@ -39,7 +39,7 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
     state.riderTorso = riderTorso
     
     let headPosition = localToWorld(riderTorso, headOffset.transform(dd))
-    state.riderHead = space.addCircle(headPosition, headRadius, headMass)
+    state.riderHead = space.addCircle(headPosition, headRadius, headMass, torsoAngle) # head angle matches torso angle
     
     let upperArmPosition = localToWorld(riderTorso, upperArmOffset.transform(dd))
     let upperArmAngle = torsoAngle + upperArmRotationOffset * dd
@@ -91,6 +91,9 @@ proc setRiderConstraints(state: GameState) =
       worldToLocal(riderTorso, riderHeadAnchorWorldPosition),
       riderHeadNeckLocalPosition
     )
+  ))
+  riderConstraints.add(space.addConstraint(
+    state.riderHead.newDampedRotarySpring(riderTorso, state.riderHead.angle, 1000f, 9000f) # todo rest angle?
   ))
 
   let riderLowerArmElbowLocalPosition = v(0f, -lowerArmSize.y/2f + lowerArmSize.x/2f)
