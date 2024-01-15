@@ -78,6 +78,7 @@ proc setRiderConstraints(state: GameState) =
       riderAssWorldPosition
     )
   ))
+
   # torso rotation spring
   riderConstraints.add(space.addConstraint(
     riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle * 0.85, 20_000f, 7_000f)
@@ -131,7 +132,7 @@ proc setRiderConstraints(state: GameState) =
   let riderUpperLegHipLocalPosition = v(0f, -upperLegSize.y/2f + upperLegSize.x/2f)
   let riderHipWorldPosition = localToWorld(state.riderUpperLeg, riderUpperLegHipLocalPosition)
   riderConstraints.add(space.addConstraint(
-    riderTorso.newPivotJoint(
+    state.chassis.newPivotJoint(
       state.riderUpperLeg,
       riderHipWorldPosition
     )
