@@ -105,8 +105,8 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
   state.updateAttitudeAdjust()
 
-  state.space.step(timeStep)
-  state.time += timeStep
+  # state.space.step(timeStep)
+  # state.time += timeStep
 
   updateBikeEngine(isThrottlePressed, state.backWheel.angularVelocity * state.driveDirection)
 

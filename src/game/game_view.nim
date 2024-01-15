@@ -98,4 +98,4 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
 
   # Debug draw: iterate over all shapes in the space
   eachShape(statePtr.space, shapeIter, statePtr)
-  eachConstraint(statePtr.space, constraintIter, statePtr)
+  # eachConstraint(statePtr.space, constraintIter, statePtr)

@@ -30,6 +30,17 @@ const
     handMass = 0.1f
     handOffset = v(-1f, 7f)
 
+    # offset from torso, align top of leg with bottom of torso
+    upperLegSize = v(6f, 20f)
+    upperLegMass = 0.25f
+    upperLegRotationOffset = degToRad(-80f)
+    upperLegOffset = v(5f, torsoSize.y/2f - upperLegSize.x/2f)
+    # offset from upper leg
+    lowerLegSize = v(4f, 13f)
+    lowerLegOffset = v(-3.5, 14f)
+    lowerLegMass = 0.2f
+    lowerLegRotationOffset = degToRad(40f)
+
 proc addRider*(state: GameState, torsoPosition: Vect) =
     let space = state.space
     let dd = state.driveDirection
@@ -51,6 +62,14 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
 
     let handPosition = localToWorld(state.riderLowerArm, handOffset.transform(dd))
     state.riderHand = space.addCircle(handPosition, handRadius, handMass)
+
+    let upperLegPosition = localToWorld(riderTorso, upperLegOffset.transform(dd))
+    let upperLegAngle = torsoAngle + upperLegRotationOffset * dd
+    state.riderUpperLeg = space.addBox(upperLegPosition, upperLegSize, upperLegMass, upperLegAngle)
+
+    let lowerLegPosition = localToWorld(state.riderUpperLeg, lowerLegOffset.transform(dd))
+    let lowerLegAngle = upperLegAngle + lowerLegRotationOffset * dd
+    state.riderLowerLeg = space.addBox(lowerLegPosition, lowerLegSize, lowerLegMass, lowerLegAngle)
 
 proc setRiderConstraints(state: GameState) =
   let space = state.space
@@ -80,7 +99,7 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
   riderConstraints.add(space.addConstraint(
-    riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle, 10_000f, 7_000f) # todo rest angle?
+    riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle, 10_000f, 7_000f)
   ))
 
   let riderHeadNeckLocalPosition = v(0f, 0f) # head on a stick, to reduce chaos don't allow head to move relative to torso
@@ -135,5 +154,5 @@ proc setRiderConstraints(state: GameState) =
 
 proc initRiderPhysics*(state: GameState, riderPosition: Vect) =
   state.addRider(riderPosition)
-  state.setRiderConstraints()
-    
+  # state.setRiderConstraints()
+
