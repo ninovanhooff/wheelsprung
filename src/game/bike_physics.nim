@@ -43,8 +43,8 @@ proc addChassis(space: Space, pos: Vect): Body =
   let body = space.addBody(newBody(mass, moment))
   body.position = pos
 
-  let shape = space.addShape(newBoxShape(body, width, height, 0f))
-  shape.filter = SHAPE_FILTER_NONE # no collisions
+  # let shape = space.addShape(newBoxShape(body, width, height, 0f))
+  # shape.filter = SHAPE_FILTER_NONE # no collisions
 
   return body
 
