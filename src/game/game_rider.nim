@@ -117,13 +117,43 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
-  # Pivot hand
+  # Pivot hand to handlebars
   let riderLowerArmHandLocalPosition = v(0.0, lowerArmSize.y/2)
   let riderHandWorldPosition = localToWorld(state.riderLowerArm, riderLowerArmHandLocalPosition)
   riderConstraints.add(space.addConstraint(
     state.chassis.newPivotJoint(
       state.riderLowerArm,
       riderHandWorldPosition
+    )
+  ))
+
+  # Pivot upper leg
+  let riderUpperLegHipLocalPosition = v(0f, -upperLegSize.y/2f + upperLegSize.x/2f)
+  let riderHipWorldPosition = localToWorld(state.riderUpperLeg, riderUpperLegHipLocalPosition)
+  riderConstraints.add(space.addConstraint(
+    riderTorso.newPivotJoint(
+      state.riderUpperLeg,
+      riderHipWorldPosition
+    )
+  ))
+
+  # Pivot lower leg
+  let riderLowerLegKneeLocalPosition = v(0f, -lowerLegSize.y/2f + lowerLegSize.x/2f)
+  let riderKneeWorldPosition = localToWorld(state.riderLowerLeg, riderLowerLegKneeLocalPosition)
+  riderConstraints.add(space.addConstraint(
+    state.riderUpperLeg.newPivotJoint(
+      state.riderLowerLeg,
+      riderKneeWorldPosition
+    )
+  ))
+
+  # Pivot foot to pedal
+  let riderLowerLegFootLocalPosition = v(0.0, lowerLegSize.y/2)
+  let riderFootWorldPosition = localToWorld(state.riderLowerLeg, riderLowerLegFootLocalPosition)
+  riderConstraints.add(space.addConstraint(
+    state.chassis.newPivotJoint(
+      state.riderLowerLeg,
+      riderFootWorldPosition
     )
   ))
 
