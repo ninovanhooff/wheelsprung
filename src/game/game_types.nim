@@ -36,8 +36,6 @@ type GameState* = ref object of RootObj
     riderLowerArm*: Body
     riderUpperLeg*: Body
     riderLowerLeg*: Body
-    riderFoot*: Body # todo used?
-    riderHand*: Body
 
     # Level Objects
     groundPolygons*: seq[Polygon]

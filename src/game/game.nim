@@ -8,7 +8,7 @@ import game_types
 import game_view
 
 const
-  riderOffset = v(-7f, -20f) # offset from chassis center
+  riderOffset = v(-5.0, -20.0) # offset from chassis center
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.7f
   attitudeAdjustForceThreshold = 100f
@@ -105,8 +105,8 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
   state.updateAttitudeAdjust()
 
-  # state.space.step(timeStep)
-  # state.time += timeStep
+  state.space.step(timeStep)
+  state.time += timeStep
 
   updateBikeEngine(isThrottlePressed, state.backWheel.angularVelocity * state.driveDirection)
 

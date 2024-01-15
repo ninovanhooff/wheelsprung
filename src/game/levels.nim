@@ -86,7 +86,7 @@ proc loadLevel*(path: string): GameState =
     let space = newSpace()
     space.gravity = gravity
     let state = GameState(space: space)
-    state.driveDirection = DD_LEFT
+    state.driveDirection = DD_RIGHT
     state.initialChassisPosition = v(80f, 20f)
   
     let level = parseLevel(path)
