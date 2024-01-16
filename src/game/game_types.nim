@@ -36,6 +36,7 @@ type GameState* = ref object of RootObj
     riderLowerArm*: Body
     riderUpperLeg*: Body
     riderLowerLeg*: Body
+    # keep in sync with game_rider#removeRider
 
     # Level Objects
     groundPolygons*: seq[Polygon]

@@ -40,7 +40,7 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
     let space = state.space
     let dd = state.driveDirection
 
-    let torsoAngle = torsoRotation * dd
+    let torsoAngle = state.chassis.angle + torsoRotation * dd
     let riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)
     state.riderTorso = riderTorso
 
@@ -81,7 +81,7 @@ proc setRiderConstraints(state: GameState) =
 
   # torso rotation spring
   riderConstraints.add(space.addConstraint(
-    riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle * 0.85, 20_000f, 7_000f)
+    riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle, 20_000f, 7_000f)
   ))
 
   # shoulder pivot
@@ -160,8 +160,20 @@ proc setRiderConstraints(state: GameState) =
 
   state.riderConstraints = riderConstraints
 
+proc removeRider(state: GameState) =
+  let space = state.space
+  for constraint in state.riderConstraints:
+    space.removeConstraint(constraint)
+  state.riderConstraints = @[]
+
+  for body in @[state.riderTorso, state.riderHead, state.riderUpperArm, state.riderLowerArm, state.riderUpperLeg, state.riderLowerLeg]:
+    space.removeBody(body)
 
 proc initRiderPhysics*(state: GameState, riderPosition: Vect) =
   state.addRider(riderPosition)
   state.setRiderConstraints()
+
+proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
+  state.removeRider()
+  state.initRiderPhysics(riderPosition)
 

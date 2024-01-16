@@ -170,9 +170,9 @@ proc setBikeConstraints(state: GameState) =
 
   state.bikeConstraints = bikeConstraints
 
-proc flipDriveDirection*(state: GameState) =
+proc flipBikeDirection*(state: GameState) =
   let space = state.space
-  state.driveDirection = -state.driveDirection
+
   swap(state.backWheel, state.frontWheel)
   
   state.removeBikeConstraints()

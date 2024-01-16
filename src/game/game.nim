@@ -62,6 +62,18 @@ proc onBrake*() =
   print("wheel1.torque: " & $backWheel.torque)
   print("wheel2.torque: " & $frontWheel.torque)
 
+proc onAttitudeAdjust(state: GameState, direction: float) =
+  if state.attitudeAdjustForce == 0f:
+    state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+  else:
+    print("ignore attitude adjust. Already in progress with remaining force: " & $state.attitudeAdjustForce)
+
+proc onFlipDirection(state: GameState) =
+  state.driveDirection *= -1
+  state.flipBikeDirection()
+  let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
+  state.flipRiderDirection(riderPosition)
+
 proc updateAttitudeAdjust(state: GameState) =
   let chassis = state.chassis
   if state.attitudeAdjustForce != 0f:
@@ -69,13 +81,6 @@ proc updateAttitudeAdjust(state: GameState) =
     state.attitudeAdjustForce *= attitudeAdjustAttentuation
     if state.attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
       state.attitudeAdjustForce = 0f
-
-proc onAttitudeAdjust(state: GameState, direction: float) =
-  if state.attitudeAdjustForce == 0f:
-    state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
-  else:
-    print("ignore attitude adjust. Already in progress with remaining force: " & $state.attitudeAdjustForce)
-    
 
 proc handleInput() =
     isThrottlePressed = false
@@ -99,7 +104,7 @@ proc handleInput() =
 
     if actionFlipDirection in buttonsState.pushed:
       print("Flip direction pressed")
-      state.flipDriveDirection()
+      state.onFlipDirection()
 
 proc updateChipmunkGame*() {.cdecl, raises: [].} =
   handleInput()
