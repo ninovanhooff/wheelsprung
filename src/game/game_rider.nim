@@ -63,6 +63,11 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
     let lowerLegAngle = upperLegAngle + lowerLegRotationOffset * dd
     state.riderLowerLeg = space.addBox(lowerLegPosition, lowerLegSize, lowerLegMass, lowerLegAngle)
 
+    # match velocity of rider to bike
+    let velocity: Vect = state.chassis.velocity
+    for body in state.getRiderBodies():
+      body.velocity = velocity
+
 proc setRiderConstraints(state: GameState) =
   let space = state.space
   let riderTorso = state.riderTorso
@@ -157,11 +162,6 @@ proc setRiderConstraints(state: GameState) =
       riderFootWorldPosition
     )
   ))
-
-  # match velocity of rider to bike
-  let velocity: Vect = state.chassis.velocity
-  for body in state.getRiderBodies():
-    body.velocity = velocity
 
   state.riderConstraints = riderConstraints
 
