@@ -84,10 +84,17 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
-  # torso rotation spring
+  # pivot should to bike chassis
+  let riderTorsoShoulderLocalPosition = v(0.0, -torsoSize.y/2)
+  let riderTorsoShoulderWorldPosition = localToWorld(riderTorso, riderTorsoShoulderLocalPosition)
   riderConstraints.add(space.addConstraint(
-    riderTorso.newDampedRotarySpring(state.chassis, riderTorso.angle, 20_000f, 7_000f)
+    state.chassis.newPivotJoint(
+      riderTorso,
+      riderTorsoShoulderWorldPosition
+    )
   ))
+  riderConstraints[^1].maxForce = 900.0 # allow shoulders to sag towards bike on impact
+
 
   # shoulder pivot
   let riderUpperArmShoulderLocalPosition = v(0f, -upperArmSize.y/2f + upperArmSize.x/2f) # + half upper arm width
