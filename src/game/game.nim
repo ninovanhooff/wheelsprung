@@ -12,9 +12,9 @@ const
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.7f
   attitudeAdjustForceThreshold = 100f
-  maxWheelAngularVelocity = 20f
-  # applied to wheel1 and chassis to make bike more unstable
-  throttleTorque = 2_000f
+  maxWheelAngularVelocity = 30.0
+  # applied to wheel1 when throttle is pressed
+  throttleTorque = 3_000.0
   # applied to both wheels
   brakeTorque = 2_000f
   timeStep = 1.0f/50.0f
