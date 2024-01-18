@@ -158,7 +158,13 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
+  # match velocity of rider to bike
+  let velocity: Vect = state.chassis.velocity
+  for body in state.getRiderBodies():
+    body.velocity = velocity
+
   state.riderConstraints = riderConstraints
+
 
 proc removeRider(state: GameState) =
   let space = state.space
@@ -166,7 +172,7 @@ proc removeRider(state: GameState) =
     space.removeConstraint(constraint)
   state.riderConstraints = @[]
 
-  for body in @[state.riderTorso, state.riderHead, state.riderUpperArm, state.riderLowerArm, state.riderUpperLeg, state.riderLowerLeg]:
+  for body in state.getRiderBodies():
     space.removeBody(body)
 
 proc initRiderPhysics*(state: GameState, riderPosition: Vect) =

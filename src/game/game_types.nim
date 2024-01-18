@@ -36,10 +36,20 @@ type GameState* = ref object of RootObj
     riderLowerArm*: Body
     riderUpperLeg*: Body
     riderLowerLeg*: Body
-    # keep in sync with game_rider#removeRider
+    # keep in sync with getRiderBodies()
 
     # Level Objects
     groundPolygons*: seq[Polygon]
 
     bikeConstraints*: seq[Constraint]
     riderConstraints*: seq[Constraint]
+
+proc getRiderBodies*(state: GameState): seq[Body] =
+    result = @[
+        state.riderHead,
+        state.riderTorso,
+        state.riderUpperArm,
+        state.riderLowerArm,
+        state.riderUpperLeg,
+        state.riderLowerLeg,
+    ]
