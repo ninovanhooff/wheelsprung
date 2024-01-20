@@ -99,6 +99,9 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   let frontWheel = state.frontWheel
   let frontWheelScreenPos = frontWheel.position - state.camera
   bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, state.driveDirection)
+  let rearWheel = state.rearWheel
+  let rearWheelScreenPos = rearWheel.position - state.camera
+  bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, state.driveDirection)
 
 
   # Debug draw: iterate over all shapes in the space
