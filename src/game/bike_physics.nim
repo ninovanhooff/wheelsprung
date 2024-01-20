@@ -12,7 +12,7 @@ let
   
   swingArmWidth = 20f
   swingArmHeight = 3f
-  swingArmPosOffset = v(-10,10)
+  swingArmPosOffset = v(-10,5.0)
 
   forkArmWidth = 3f
   forkArmHeight = 25f
@@ -103,13 +103,15 @@ proc setBikeConstraints(state: GameState) =
   var bikeConstraints: seq[Constraint] = state.bikeConstraints
 
   # SwingArm (arm between chassis and rear wheel)
-  let swingArmEndCenter = v(swingArmWidth*0.5f*dd, swingArmHeight*0.5f)
+  # attachment point to chassis
+  let swingArmStartCenter = v(swingArmWidth*0.5f*dd, swingArmHeight*0.5f)
+  state.swingArmChassisAttachmentOffset = swingArmPosOffset.transform(dd) + swingArmStartCenter
   # attach swing arm to chassis
   bikeConstraints.add(space.addConstraint(
     chassis.newPivotJoint(
       swingArm, 
-      swingArmPosOffset.transform(dd) + swingArmEndCenter, 
-      swingArmEndCenter
+      swingArmPosOffset.transform(dd) + swingArmStartCenter, 
+      swingArmStartCenter
     )
   ))
 
@@ -124,11 +126,11 @@ proc setBikeConstraints(state: GameState) =
   ))
   # push wheel1 to end of swing arm
   bikeConstraints.add(space.addConstraint(
-    swingArm.newDampedSpring(rearWheel, swingArmEndCenter, vzero, swingArmWidth, 40f, 10f)
+    swingArm.newDampedSpring(rearWheel, swingArmStartCenter, vzero, swingArmWidth, 40f, 10f)
   ))
 
   bikeConstraints.add(space.addConstraint(
-    chassis.newDampedRotarySpring(swingArm, 0.1f*PI*dd, 30_000f, 4_000f) # todo rest angle?
+    chassis.newDampedRotarySpring(swingArm, 0.1f*PI*dd, 40_000f, 8_000f) # todo rest angle?
   ))
 
   # fork arm (arm between chassis and front wheel)

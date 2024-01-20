@@ -9,7 +9,6 @@ import graphics_utils
 import chipmunk_utils
 
 const
-  swingArmChassisAttachmentOffset = v(0.0, 5.0)
   frontForkChassisAttachmentOffset = v(15.0, -3.0)
 
 var 
@@ -115,7 +114,7 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   # Draw swingArm and front fork
   gfx.setLineCapStyle(kLineCapStyleRound)
   swingArmAttachmentScreenPos = 
-    localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - state.camera
+    localToWorld(chassis, state.swingArmChassisAttachmentOffset) - state.camera
 
   drawLineOutlined(
     swingArmAttachmentScreenPos, 

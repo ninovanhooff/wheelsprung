@@ -21,6 +21,8 @@ type GameState* = ref object of RootObj
     driveDirection*: DriveDirection
 
     initialChassisPosition*: Vect
+    ## The local coordinates of the chassis attachment point, corrected for DriveDirection
+    swingArmChassisAttachmentOffset*: Vect
 
     # bike bodies
     rearWheel*: Body
