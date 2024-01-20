@@ -12,6 +12,9 @@ proc drawRotated*(table: LCDBitmapTable, center: Vect, angle: float32, flip: LCD
     let index = ((normalizeAngle(angle) / TwoPi) * imageRotations).int32 mod imageRotations
     let bitmap = table.getBitmap(index)
 
+    if bitmap == nil:
+        return
+
     # todo optimize: cache for table
     let x: int32 = (center.x - bitmap.width.float32 / 2f).int32
     let y: int32 = (center.y - bitmap.height.float32 / 2f).int32

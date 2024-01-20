@@ -2,9 +2,9 @@ import playdate/api
 import math
 import std/sequtils
 import std/sugar
+import std/logging
 import chipmunk7
 import game_types
-import utils
 import graphics_utils
 import chipmunk_utils
 
@@ -16,6 +16,13 @@ var
   bikeChassisImageTable: LCDBitmapTable
   bikeWheelImageTable: LCDBitmapTable
 
+  riderTorsoImageTable: LCDBitmapTable
+  riderHeadImageTable: LCDBitmapTable
+  riderUpperArmImageTable: LCDBitmapTable
+  riderLowerArmImageTable: LCDBitmapTable
+  riderUpperLegImageTable: LCDBitmapTable
+  riderLowerLegImageTable: LCDBitmapTable
+
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
   frontForkAttachmentScreenPos: Vect
@@ -24,8 +31,15 @@ proc initGameView*() =
   try:
     bikeChassisImageTable = gfx.newBitmapTable("images/bike-chassis")
     bikeWheelImageTable = gfx.newBitmapTable("images/bike-wheel")
+    riderTorsoImageTable = gfx.newBitmapTable("images/rider/torso")
+    riderHeadImageTable = gfx.newBitmapTable("images/rider/head")
+    riderUpperArmImageTable = gfx.newBitmapTable("images/rider/upper-arm")
+    riderLowerArmImageTable = gfx.newBitmapTable("images/rider/lower-arm")
+    riderUpperLegImageTable = gfx.newBitmapTable("images/rider/upper-leg")
+    riderLowerLegImageTable = gfx.newBitmapTable("images/rider/lower-leg")
   except:
-    print("Error loading bike chassis image table")
+    let msg = getCurrentExceptionMsg()
+    echo msg
 
 proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: LCDColor) =
   # covert from center position to top left
@@ -97,6 +111,14 @@ proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirec
     (if driveDirection == DD_LEFT: kBitmapFlippedX else: kBitmapUnflipped)
   )
 
+proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState) {.inline.} =
+  let driveDirection = state.driveDirection
+  table.drawRotated(
+    body.position - state.camera, 
+    (if driveDirection == DD_LEFT: -body.angle else: body.angle),
+    (if driveDirection == DD_LEFT: kBitmapFlippedX else: kBitmapUnflipped)
+  )
+
 proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let chassis = state.chassis
@@ -132,11 +154,18 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     kColorWhite, 
   )
 
-  # chassis
+    # chassis
   let chassisScreenPos = chassis.position - state.camera
   bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
-  
+
+  # rider
+  riderHeadImageTable.drawRotated(state.riderHead, state)
+  riderTorsoImageTable.drawRotated(state.riderTorso, state)
+  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
+  riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+  riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
+  riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
 
   # Debug draw: iterate over all shapes in the space
-  eachShape(statePtr.space, shapeIter, statePtr)
+  # eachShape(statePtr.space, shapeIter, statePtr)
   # eachConstraint(statePtr.space, constraintIter, statePtr)
