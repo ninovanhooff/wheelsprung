@@ -1,5 +1,6 @@
 import playdate/api
 import chipmunk7
+import std/math
 import utils
 
 template gfx*: untyped = playdate.graphics
@@ -16,8 +17,8 @@ proc drawRotated*(table: LCDBitmapTable, center: Vect, angle: float32, flip: LCD
         return
 
     # todo optimize: cache for table
-    let x: int32 = (center.x - bitmap.width.float32 / 2f).int32
-    let y: int32 = (center.y - bitmap.height.float32 / 2f).int32
+    let x: int32 = (center.x - bitmap.width.float * 0.5).round.int32
+    let y: int32 = (center.y - bitmap.height.float * 0.5).round.int32
     bitmap.draw(x, y, flip)
 
 proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidColor) =

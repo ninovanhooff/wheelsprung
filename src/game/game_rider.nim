@@ -5,13 +5,13 @@ import game_types
 
 const 
     torsoMass = 1f
-    torsoSize = v(7.0, 18.0)
+    torsoSize = v(7.0, 16.0)
     torsoRotation = degToRad(35f)
     
      # offset from torso, align top of head with top of torso
     headRadius = 6f
     headMass = 0.1f
-    headOffset = v(-2.0, -14.0)
+    headOffset = v(-3.0, -12.0)
     headAngle = degToRad(-35.0)
     
     # offset from torso, align top of arm with top of torso

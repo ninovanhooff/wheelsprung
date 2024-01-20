@@ -159,13 +159,16 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
 
   # rider
-  riderHeadImageTable.drawRotated(state.riderHead, state)
-  riderTorsoImageTable.drawRotated(state.riderTorso, state)
-  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
-  riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
-  riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
-  riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
+  if true:
+    riderHeadImageTable.drawRotated(state.riderHead, state)
+    riderTorsoImageTable.drawRotated(state.riderTorso, state)
+    riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
+    riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+    riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
+    riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
+  else: 
+    eachShape(statePtr.space, shapeIter, statePtr)
+
 
   # Debug draw: iterate over all shapes in the space
-  # eachShape(statePtr.space, shapeIter, statePtr)
   # eachConstraint(statePtr.space, constraintIter, statePtr)
