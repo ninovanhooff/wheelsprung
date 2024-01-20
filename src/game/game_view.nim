@@ -10,10 +10,12 @@ import graphics_utils
 template gfx: untyped = playdate.graphics
 
 var bikeChassisImageTable: LCDBitmapTable
+var bikeWheelImageTable: LCDBitmapTable
 
 proc initGameView*() =
   try:
     bikeChassisImageTable = gfx.newBitmapTable("images/bike-chassis")
+    bikeWheelImageTable = gfx.newBitmapTable("images/bike-wheel")
   except:
     print("Error loading bike chassis image table")
 
@@ -94,6 +96,9 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   let chassis = state.chassis
   let chassisScreenPos = chassis.position - state.camera
   bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, state.driveDirection)
+  let frontWheel = state.frontWheel
+  let frontWheelScreenPos = frontWheel.position - state.camera
+  bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, state.driveDirection)
 
 
   # Debug draw: iterate over all shapes in the space
