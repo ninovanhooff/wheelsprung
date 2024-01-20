@@ -99,20 +99,19 @@ proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirec
 
 proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
+  let chassis = state.chassis
   let driveDirection = state.driveDirection
   state.drawGroundPolygons()
 
-  let chassis = state.chassis
-  let chassisScreenPos = chassis.position - state.camera
-  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
+  # wheels
   let frontWheel = state.frontWheel
   let frontWheelScreenPos = frontWheel.position - state.camera
   bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
   let rearWheel = state.rearWheel
   let rearWheelScreenPos = rearWheel.position - state.camera
   bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
-
-  # Draw swingArm and front fork
+  
+  # swingArm and front fork
   gfx.setLineCapStyle(kLineCapStyleRound)
   swingArmAttachmentScreenPos = 
     localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - state.camera
@@ -126,13 +125,17 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
 
   frontForkAttachmentScreenPos = 
     localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - state.camera
-
   drawLineOutlined(
     frontForkAttachmentScreenPos, 
     frontWheelScreenPos, 
     4, 
     kColorWhite, 
   )
+
+  # chassis
+  let chassisScreenPos = chassis.position - state.camera
+  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
+  
 
   # Debug draw: iterate over all shapes in the space
   eachShape(statePtr.space, shapeIter, statePtr)
