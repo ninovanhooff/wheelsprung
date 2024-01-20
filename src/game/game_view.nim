@@ -6,11 +6,19 @@ import chipmunk7
 import game_types
 import utils
 import graphics_utils
+import chipmunk_utils
 
-template gfx: untyped = playdate.graphics
+const
+  swingArmChassisAttachmentOffset = v(0.0, 5.0)
+  frontForkChassisAttachmentOffset = v(15.0, -3.0)
 
-var bikeChassisImageTable: LCDBitmapTable
-var bikeWheelImageTable: LCDBitmapTable
+var 
+  bikeChassisImageTable: LCDBitmapTable
+  bikeWheelImageTable: LCDBitmapTable
+
+  # pre-allocated vars for drawing
+  swingArmAttachmentScreenPos: Vect
+  frontForkAttachmentScreenPos: Vect
 
 proc initGameView*() =
   try:
@@ -91,18 +99,40 @@ proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirec
 
 proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
+  let driveDirection = state.driveDirection
   state.drawGroundPolygons()
 
   let chassis = state.chassis
   let chassisScreenPos = chassis.position - state.camera
-  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, state.driveDirection)
+  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
   let frontWheel = state.frontWheel
   let frontWheelScreenPos = frontWheel.position - state.camera
-  bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, state.driveDirection)
+  bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
   let rearWheel = state.rearWheel
   let rearWheelScreenPos = rearWheel.position - state.camera
-  bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, state.driveDirection)
+  bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
 
+  # Draw swingArm and front fork
+  gfx.setLineCapStyle(kLineCapStyleRound)
+  swingArmAttachmentScreenPos = 
+    localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - state.camera
+
+  drawLineOutlined(
+    swingArmAttachmentScreenPos, 
+    rearWheelScreenPos, 
+    4, 
+    kColorWhite, 
+  )
+
+  frontForkAttachmentScreenPos = 
+    localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - state.camera
+
+  drawLineOutlined(
+    frontForkAttachmentScreenPos, 
+    frontWheelScreenPos, 
+    4, 
+    kColorWhite, 
+  )
 
   # Debug draw: iterate over all shapes in the space
   eachShape(statePtr.space, shapeIter, statePtr)

@@ -113,15 +113,7 @@ proc setBikeConstraints(state: GameState) =
     )
   ))
 
-  # limit wheel1 to swing arm
-  bikeConstraints.add(space.addConstraint(
-    chassis.newPivotJoint(
-      swingArm, 
-      swingArmPosOffset.transform(dd) + swingArmEndCenter, 
-      swingArmEndCenter
-    )
-  ))
-  
+  # limit rearWheel to swing arm
   bikeConstraints.add(space.addConstraint(
     swingArm.newGrooveJoint(
       rearWheel, 
