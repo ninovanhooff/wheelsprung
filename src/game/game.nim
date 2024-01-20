@@ -45,21 +45,21 @@ proc initGame*() {.raises: [].} =
   initGameView()
 
 proc onThrottle*() =
-  let backWheel = state.backWheel
+  let rearWheel = state.rearWheel
   let dd = state.driveDirection
-  if backWheel.angularVelocity * dd > maxWheelAngularVelocity:
+  if rearWheel.angularVelocity * dd > maxWheelAngularVelocity:
     print("ignore throttle. back wheel already at max angular velocity")
     return
 
-  backWheel.torque = throttleTorque * dd
-  print("wheel1.torque: " & $backWheel.torque)
+  rearWheel.torque = throttleTorque * dd
+  print("wheel1.torque: " & $rearWheel.torque)
 
 proc onBrake*() =
-  let backWheel = state.backWheel
+  let rearWheel = state.rearWheel
   let frontWheel = state.frontWheel
-  backWheel.torque = -backWheel.angularVelocity * brakeTorque
+  rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
-  print("wheel1.torque: " & $backWheel.torque)
+  print("wheel1.torque: " & $rearWheel.torque)
   print("wheel2.torque: " & $frontWheel.torque)
 
 proc onAttitudeAdjust(state: GameState, direction: float) =
@@ -113,7 +113,7 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   state.space.step(timeStep)
   state.time += timeStep
 
-  updateBikeEngine(isThrottlePressed, state.backWheel.angularVelocity * state.driveDirection)
+  updateBikeEngine(isThrottlePressed, state.rearWheel.angularVelocity * state.driveDirection)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
   drawChipmunkGame(addr state)

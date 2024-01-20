@@ -7,7 +7,7 @@ let
   # offset for driveDirection DD_RIGHT
   wheelRadius = 10.0f
   wheelFriction = 3.0f
-  backWheelOffset = v(-20, 10)
+  rearWheelOffset = v(-20, 10)
   frontWheelOffset = v(21, 12)
   
   swingArmWidth = 20f
@@ -96,7 +96,7 @@ proc setBikeConstraints(state: GameState) =
   let space = state.space
   let dd = state.driveDirection
   let chassis = state.chassis
-  let backWheel = state.backWheel
+  let rearWheel = state.rearWheel
   let frontWheel = state.frontWheel
   let swingArm = state.swingArm
   let forkArm = state.forkArm
@@ -124,7 +124,7 @@ proc setBikeConstraints(state: GameState) =
   
   bikeConstraints.add(space.addConstraint(
     swingArm.newGrooveJoint(
-      backWheel, 
+      rearWheel, 
       v(-swingArmWidth*2f*dd, swingArmHeight*0.5f), 
       vzero, 
       vzero
@@ -132,7 +132,7 @@ proc setBikeConstraints(state: GameState) =
   ))
   # push wheel1 to end of swing arm
   bikeConstraints.add(space.addConstraint(
-    swingArm.newDampedSpring(backWheel, swingArmEndCenter, vzero, swingArmWidth, 40f, 10f)
+    swingArm.newDampedSpring(rearWheel, swingArmEndCenter, vzero, swingArmWidth, 40f, 10f)
   ))
 
   bikeConstraints.add(space.addConstraint(
@@ -173,7 +173,7 @@ proc setBikeConstraints(state: GameState) =
 proc flipBikeDirection*(state: GameState) =
   let space = state.space
 
-  swap(state.backWheel, state.frontWheel)
+  swap(state.rearWheel, state.frontWheel)
   
   state.removeBikeConstraints()
   
@@ -189,7 +189,7 @@ proc initBikePhysics*(state: GameState) =
   let dd = state.driveDirection
 
   state.chassis = space.addChassis(state.initialChassisPosition)
-  state.backWheel = state.addWheel(backWheelOffset.transform(dd))
+  state.rearWheel = state.addWheel(rearWheelOffset.transform(dd))
   state.frontWheel = state.addWheel(frontWheelOffset.transform(dd))
   state.swingArm = state.addSwingArm(swingArmPosOffset.transform(dd))
   state.forkArm = state.addForkArm(forkArmPosOffset.transform(dd))

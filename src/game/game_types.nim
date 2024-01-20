@@ -23,7 +23,7 @@ type GameState* = ref object of RootObj
     initialChassisPosition*: Vect
 
     # bike bodies
-    backWheel*: Body
+    rearWheel*: Body
     frontWheel*: Body
     chassis*: Body
     swingArm*: Body
