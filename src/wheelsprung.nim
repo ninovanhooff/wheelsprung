@@ -2,6 +2,8 @@ import sugar
 import std/strutils
 import strformat
 import ../tests/tests
+import utils
+import globals
 
 
 import playdate/api
@@ -49,6 +51,24 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
 
         # Set the update callback
         playdate.system.setUpdateCallback(catchingUpdate)
-
+    elif event == kEventKeyReleased:
+        if keycode == 117:
+            print("U")
+            debugDrawLevel = not debugDrawLevel
+            print("debugDrawLevel:" & $debugDrawLevel)
+        elif keycode == 105:
+            print("I")
+            debugDrawShapes = not debugDrawShapes
+            print("debugDrawShapes:" & $debugDrawShapes)
+        elif keycode == 111:
+            print("O")
+            debugDrawTextures = not debugDrawTextures
+            print("debugDrawTextures:" & $debugDrawTextures)
+        elif keycode == 112:
+            print("P")
+            debugDrawConstraints = not debugDrawConstraints
+            print("debugDrawConstraints:" & $debugDrawConstraints)
+        else:
+            print("keycode:" & $keycode)
 # Used to setup the SDK entrypoint
 initSDK()

@@ -16,7 +16,7 @@ const
   # applied to wheel1 when throttle is pressed
   throttleTorque = 3_000.0
   # applied to both wheels
-  brakeTorque = 2_000f
+  brakeTorque = 2_000.0
   timeStep = 1.0f/50.0f
 
 var state: GameState

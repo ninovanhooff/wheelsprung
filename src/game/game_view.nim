@@ -6,6 +6,7 @@ import chipmunk7
 import game_types
 import graphics_utils
 import chipmunk_utils
+import globals
 
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
@@ -122,52 +123,54 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let chassis = state.chassis
   let driveDirection = state.driveDirection
-  state.drawGroundPolygons()
+  if debugDrawLevel:
+    state.drawGroundPolygons()
 
-  # wheels
-  let frontWheel = state.frontWheel
-  let frontWheelScreenPos = frontWheel.position - state.camera
-  bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
-  let rearWheel = state.rearWheel
-  let rearWheelScreenPos = rearWheel.position - state.camera
-  bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
-  
-  # swingArm and front fork
-  gfx.setLineCapStyle(kLineCapStyleRound)
-  swingArmAttachmentScreenPos = 
-    localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - state.camera
+  if debugDrawTextures:
+     # wheels
+    let frontWheel = state.frontWheel
+    let frontWheelScreenPos = frontWheel.position - state.camera
+    bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
+    let rearWheel = state.rearWheel
+    let rearWheelScreenPos = rearWheel.position - state.camera
+    bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
 
-  drawLineOutlined(
-    swingArmAttachmentScreenPos, 
-    rearWheelScreenPos, 
-    4, 
-    kColorWhite, 
-  )
+    # swingArm and front fork
+    gfx.setLineCapStyle(kLineCapStyleRound)
+    swingArmAttachmentScreenPos = 
+      localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - state.camera
 
-  frontForkAttachmentScreenPos = 
-    localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - state.camera
-  drawLineOutlined(
-    frontForkAttachmentScreenPos, 
-    frontWheelScreenPos, 
-    4, 
-    kColorWhite, 
-  )
+    drawLineOutlined(
+      swingArmAttachmentScreenPos, 
+      rearWheelScreenPos, 
+      4, 
+      kColorWhite, 
+    )
+
+    frontForkAttachmentScreenPos = 
+      localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - state.camera
+    drawLineOutlined(
+      frontForkAttachmentScreenPos, 
+      frontWheelScreenPos, 
+      4, 
+      kColorWhite, 
+    )
+
 
     # chassis
-  let chassisScreenPos = chassis.position - state.camera
-  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
+    let chassisScreenPos = chassis.position - state.camera
+    bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
 
-  # rider
-  if true:
+    # rider
     riderHeadImageTable.drawRotated(state.riderHead, state)
     riderTorsoImageTable.drawRotated(state.riderTorso, state)
     riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
     riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
     riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
     riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
-  else: 
+  
+  if debugDrawShapes:
     eachShape(statePtr.space, shapeIter, statePtr)
 
-
-  # Debug draw: iterate over all shapes in the space
-  # eachConstraint(statePtr.space, constraintIter, statePtr)
+  if debugDrawConstraints:
+    eachConstraint(statePtr.space, constraintIter, statePtr)
