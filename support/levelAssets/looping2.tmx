@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="400" height="50" tilewidth="8" tileheight="8" infinite="0" nextlayerid="8" nextobjectid="30">
+ <editorsettings>
+  <export target="../../../../Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.wheelsprung/levels/fallbackLevel.json" format="json"/>
+ </editorsettings>
+ <objectgroup color="#73fa79" id="2" name="ground">
+  <object id="21" x="0" y="136">
+   <polygon points="0,0 243.2,0 243.2,24 0,24"/>
+  </object>
+  <object id="22" x="243.2" y="136">
+   <polygon points="0,0 48,-3.2 48,24 0,24"/>
+  </object>
+  <object id="26" x="412.864" y="116.693">
+   <polygon points="0,2.73067 13.6533,0 35.4987,-5.46133 57.344,-21.8453 70.9973,-40.96 79.1893,-60.0747 79.1893,-84.6507 73.728,-106.496 60.0747,-125.611 40.96,-141.995 21.8453,-150.187 0,-152.917 0,-177.493 109.227,-177.493 109.227,27.3067 0,27.3067"/>
+  </object>
+  <object id="27" x="382.827" y="116.693">
+   <polygon points="-79.1893,-60.0747 -79.1893,-84.6507 -73.728,-106.496 -60.0747,-125.611 -40.96,-141.995 -21.8453,-150.187 0,-152.917 0,-177.493 -109.227,-177.493 -109.227,-60.0747"/>
+  </object>
+  <object id="28" x="382.827" y="-60.8">
+   <polygon points="0,0 30.0373,0 30.0373,24.576 0,24.576"/>
+  </object>
+  <object id="29" x="360.981" y="124.885">
+   <polygon points="0,0 51.8827,-5.46133 51.8827,19.1147 0,19.1147"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="7" name="refs">
+  <object id="25" x="92.8" y="14.4" width="89.4182" height="89.4182">
+   <ellipse/>
+  </object>
+ </objectgroup>
+</map>

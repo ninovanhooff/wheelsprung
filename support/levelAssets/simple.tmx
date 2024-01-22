@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="400" height="50" tilewidth="8" tileheight="8" infinite="0" nextlayerid="7" nextobjectid="21">
+ <editorsettings>
+  <export format="json"/>
+ </editorsettings>
+ <objectgroup color="#73fa79" id="2" name="Object Layer 1">
+  <object id="1" x="1605.73" y="151.921">
+   <polygon points="3.16409,-22.0352 193.539,-22.4664 261.745,-27.5334 310.775,-60.3272 356.13,-116.311 386.548,-140.964 293.11,52.0791 93.92,60.5254"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="5" name="Object Layer 2">
+  <object id="5" x="2074.45" y="68.7285">
+   <polyline points="0,0 27.7131,47.6666 97.5502,95.3331 181.39,120.79 294.868,130.806"/>
+  </object>
+  <object id="6" x="2480.17" y="273.806">
+   <polyline points="0,0 334.774,1.10852"/>
+  </object>
+  <object id="20" x="0" y="144">
+   <polygon points="0,0 240,0 240,32 0,32"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="rects"/>
+</map>
