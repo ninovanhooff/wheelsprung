@@ -3,10 +3,10 @@ import chipmunk7
 
 type Camera* = Vect
 
-type DriveDirection* = float32
+type DriveDirection* = Float
 
-const DD_LEFT*: DriveDirection = -1.0f
-const DD_RIGHT*: DriveDirection = 1.0f
+const DD_LEFT*: DriveDirection = -1.0
+const DD_RIGHT*: DriveDirection = 1.0
 
 type
     Int32x2 = array[2, int32]

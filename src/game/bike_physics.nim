@@ -34,7 +34,7 @@ proc addWheel(state: GameState, chassisOffset: Vect): Body =
   return body
 
 proc addChassis(space: Space, pos: Vect): Body =
-  let mass = 1.0f
+  let mass = 1.5
   let width = 34f
   let height = 20.0f
 
@@ -50,7 +50,7 @@ proc addChassis(space: Space, pos: Vect): Body =
 
 proc addSwingArm(state: GameState, chassisOffset: Vect): Body =
   let space = state.space
-  let swingArmMass = 0.25f
+  let swingArmMass = 1.5
   let swingArmWidth = swingArmWidth
   let swingArmHeight = swingArmHeight
 
@@ -118,7 +118,7 @@ proc setBikeConstraints(state: GameState) =
     swingArm.newGrooveJoint(
       rearWheel, 
       v(-swingArmWidth*2.0*dd, swingArmHeight*0.5), 
-      v(swingArmWidth*dd, swingArmHeight*0.5), 
+      v(swingArmWidth*0.3*dd, swingArmHeight*0.5), 
       vzero
     )
   ))
@@ -128,7 +128,7 @@ proc setBikeConstraints(state: GameState) =
   ))
 
   bikeConstraints.add(space.addConstraint(
-    chassis.newDampedRotarySpring(swingArm, 0.1f*PI*dd, 30_000f, 4_000f) # todo rest angle?
+    chassis.newDampedRotarySpring(swingArm, 0.15*PI*dd, 30_000, 4_000)
   ))
 
   # fork arm (arm between chassis and front wheel)
