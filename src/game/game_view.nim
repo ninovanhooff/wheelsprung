@@ -12,6 +12,9 @@ const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
   frontForkChassisAttachmentOffset = v(15.0, -3.0)
 
+let
+  bgPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
+
 var 
   bikeChassisImageTable: LCDBitmapTable
   bikeWheelImageTable: LCDBitmapTable
@@ -54,7 +57,8 @@ proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: L
 proc drawSegment(camera: Camera, segment: SegmentShape, color: LCDColor) =
   let drawAPos = segment.a - camera
   let drawBPos = segment.b - camera
-  gfx.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
+  # gfx.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
+  gfx.drawLine(drawAPos.x.int32, drawAPos.y.int32, drawBPos.x.int32, drawBPos.y.int32, 1, color);
 
 proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
   let state = cast[ptr GameState](data)
@@ -94,9 +98,10 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
 proc offset(polygon: Polygon, camera: Camera): Polygon =
-  let camX: int32 = camera.x.int32
-  let camY: int32 = camera.y.int32
-  polygon.map(vertex => [vertex[0] - camX, vertex[1] - camY])
+  polygon.map(vertex => [
+    (vertex[0].float - camera.x).round.int32, 
+    (vertex[1].float - camera.y).round.int32
+    ])
 
 proc drawGroundPolygons(state: GameState) =
   let camera = state.camera
@@ -122,23 +127,28 @@ proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState) {.inline.}
 proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let chassis = state.chassis
+  let camera = state.camera
+  # print("camera: " & $camera)
   let driveDirection = state.driveDirection
+
+  gfx.clear(bgPattern)
+
   if debugDrawLevel:
     state.drawGroundPolygons()
 
   if debugDrawTextures:
      # wheels
     let frontWheel = state.frontWheel
-    let frontWheelScreenPos = frontWheel.position - state.camera
+    let frontWheelScreenPos = frontWheel.position - camera
     bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
     let rearWheel = state.rearWheel
-    let rearWheelScreenPos = rearWheel.position - state.camera
+    let rearWheelScreenPos = rearWheel.position - camera
     bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
 
     # swingArm and front fork
     gfx.setLineCapStyle(kLineCapStyleRound)
     swingArmAttachmentScreenPos = 
-      localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - state.camera
+      localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - camera
 
     drawLineOutlined(
       swingArmAttachmentScreenPos, 
@@ -148,7 +158,7 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     )
 
     frontForkAttachmentScreenPos = 
-      localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - state.camera
+      localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - camera
     drawLineOutlined(
       frontForkAttachmentScreenPos, 
       frontWheelScreenPos, 
@@ -158,7 +168,7 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
 
 
     # chassis
-    let chassisScreenPos = chassis.position - state.camera
+    let chassisScreenPos = chassis.position - camera
     bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
 
     # rider

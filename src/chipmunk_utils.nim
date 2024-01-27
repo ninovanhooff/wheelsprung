@@ -1,8 +1,15 @@
+import std/math
 import chipmunk7
 import game/game_types
 
 proc transform*(v1:Vect, dir: DriveDirection): Vect =
   result = v(v1.x * dir, v1.y)
+
+proc round*(v: Vect): Vect =
+  result = v(v.x.round, v.y.round)
+
+proc floor*(v: Vect): Vect =
+  result = v(v.x.floor, v.y.floor)
 
 proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f) : Body =
     let body = space.addBody(

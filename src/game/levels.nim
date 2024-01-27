@@ -1,6 +1,7 @@
 import chipmunk7
 import options
 import utils
+import chipmunk_utils
 import std/json
 import std/sequtils
 import std/sugar
@@ -70,7 +71,8 @@ proc loadLayer(state: GameState, layer: Layer) {.raises: [].} =
 
         # Offset the segments by the object's position (localToWorld)
         for i in 0..lastIndex:
-            segments[i] = segments[i] + objOffset
+            segments[i] = round(segments[i] + objOffset)
+            print("segment: " & $segments[i])
 
         # add groundPolygons for drawing
         let poly: Polygon = segments.map( vect => [vect.x.int32, vect.y.int32])
@@ -78,7 +80,7 @@ proc loadLayer(state: GameState, layer: Layer) {.raises: [].} =
 
         # Add the segments to the physics space
         for i in 1..lastIndex:
-            var groundSegment = newSegmentShape(space.staticBody, segments[i-1], segments[i], 0f)
+            var groundSegment = newSegmentShape(space.staticBody, segments[i-1], segments[i], 0.0)
             groundSegment.friction = groundFriction
             discard space.addShape(groundSegment)
 
@@ -87,7 +89,7 @@ proc loadLevel*(path: string): GameState =
     space.gravity = gravity
     let state = GameState(space: space)
     state.driveDirection = DD_RIGHT
-    state.initialChassisPosition = v(80f, 20f)
+    state.initialChassisPosition = v(80.0, 80.0)
   
     let level = parseLevel(path)
 
