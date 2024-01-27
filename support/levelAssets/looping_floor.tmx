@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="400" height="50" tilewidth="8" tileheight="8" infinite="0" nextlayerid="7" nextobjectid="21">
+ <editorsettings>
+  <export target="../../../../Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.wheelsprung/levels/fallbackLevel.json" format="json"/>
+ </editorsettings>
+ <objectgroup color="#73fa79" id="2" name="Object Layer 1">
+  <object id="1" x="1605" y="151">
+   <polygon points="3,-22 193,-22 261,-27 310,-60 356,-116 386,-140 293,52 93,60"/>
+  </object>
+  <object id="17" x="889" y="253">
+   <polygon points="-39,2 43,-3 105,-34 123,-72 130,-126 123,-161 108,-203 76,-230 32,-241 -32,-237 -61,-218 -94,-180 -108,-130 -108,-99 -137,-99 -134,-287 119,-283 199,-214 203,-92 119,7 54,34 -3,34"/>
+  </object>
+  <object id="18" x="851" y="305">
+   <polygon points="234,156 138,186 84,200 24,202 -23,185 -44,170 -68,140 -79,101 -82,78 -100,77 -97,224 86,221 210,222 328,208 404,198 428,132 348,108"/>
+  </object>
+  <object id="20" x="632" y="248">
+   <polygon points="0,0 120,-3 120,72 0,72"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="5" name="Object Layer 2">
+  <object id="5" x="2074" y="68">
+   <polyline points="0,0 27,47 97,95 181,120 294,130"/>
+  </object>
+  <object id="6" x="2480" y="273">
+   <polyline points="0,0 334,1"/>
+  </object>
+  <object id="14" x="4" y="240">
+   <polygon points="4,15 628,7 628,79 4,79"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="rects"/>
+</map>
