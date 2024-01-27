@@ -8,7 +8,7 @@ import game_types
 import game_view
 
 const
-  riderOffset = v(-2.0, -18.0) # offset from chassis center
+  riderOffset = v(-4.0, -18.0) # offset from chassis center
   initialAttitudeAdjustTorque = 50_000f
   attitudeAdjustAttentuation = 0.7f
   attitudeAdjustForceThreshold = 100f
