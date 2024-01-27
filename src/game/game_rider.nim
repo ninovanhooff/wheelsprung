@@ -12,7 +12,7 @@ const
     headRadius = 6f
     headMass = 0.1f
     headOffset = v(-3.0, -12.0)
-    headAngle = degToRad(-35.0)
+    headRotationOffset = degToRad(-35.0)
     
     # offset from torso, align top of arm with top of torso
     upperArmSize = v(4f, 14f)
@@ -46,7 +46,8 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
     state.riderTorso = riderTorso
 
     let headPosition = localToWorld(riderTorso, headOffset.transform(dd))
-    state.riderHead = space.addCircle(headPosition, headRadius, headMass, torsoAngle + headAngle)
+    let headAngle = torsoAngle + headRotationOffset * dd
+    state.riderHead = space.addCircle(headPosition, headRadius, headMass, headAngle)
     
     let upperArmPosition = localToWorld(riderTorso, upperArmOffset.transform(dd))
     let upperArmAngle = torsoAngle + upperArmRotationOffset * dd
