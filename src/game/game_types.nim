@@ -1,4 +1,5 @@
 import chipmunk7
+import options
 
 
 type Camera* = Vect
@@ -12,11 +13,13 @@ type
     Int32x2 = array[2, int32]
     Vertex* = Int32x2
     Polygon* = seq[Vertex]
+    Time* = float32
 
 type GameState* = ref object of RootObj
     space*: Space
-    time*: float32
-    attitudeAdjustForce*: float32
+    time*: Time
+    finishFlipDirectionAt*: Option[Time]
+    attitudeAdjustForce*: Float
     camera*: Camera
     driveDirection*: DriveDirection
 
@@ -43,7 +46,19 @@ type GameState* = ref object of RootObj
     groundPolygons*: seq[Polygon]
 
     bikeConstraints*: seq[Constraint]
-    riderConstraints*: seq[Constraint]
+    riderConstraints*: seq[Constraint] # todo remove if unused
+    headRotarySpring*: DampedRotarySpring
+    assPivot*: PivotJoint
+    # shoulder to chassis
+    shoulderPivot*: PivotJoint
+    # upper arm to torso
+    upperArmPivot*: PivotJoint
+    elbowPivot*: PivotJoint
+    hipPivot*: PivotJoint
+    chassisKneePivot*: PivotJoint
+    footPivot*: PivotJoint
+    handPivot*: PivotJoint
+    headPivot*: PivotJoint
     riderShapes*: seq[Shape]
 
 proc getRiderBodies*(state: GameState): seq[Body] =

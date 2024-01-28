@@ -16,7 +16,7 @@
  </objectgroup>
  <objectgroup id="5" name="Object Layer 2">
   <object id="14" x="-4" y="105">
-   <polygon points="4,15 628,7 628,79 4,79"/>
+   <polygon points="4,15 264,15 628,7 628,79 4,79"/>
   </object>
   <object id="21" x="1692" y="269">
    <polygon points="0,0 -320,0 -320,8 0,8"/>

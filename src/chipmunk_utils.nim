@@ -1,9 +1,13 @@
 import std/math
+import utils
 import chipmunk7
 import game/game_types
 
 proc transform*(v1:Vect, dir: DriveDirection): Vect =
   result = v(v1.x * dir, v1.y)
+
+proc flip*(v1:Vect): Vect =
+  result = v(-v1.x, v1.y)
 
 proc round*(v: Vect): Vect =
   result = v(v.x.round, v.y.round)
