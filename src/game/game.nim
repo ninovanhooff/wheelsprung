@@ -1,17 +1,19 @@
+import options
 import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
 import levels
-import bike_engine, bike_physics
+import bike_engine
+import game_bike
 import game_rider
 import game_types
 import game_view
 
 const
   riderOffset = v(-4.0, -18.0) # offset from chassis center
-  initialAttitudeAdjustTorque = 50_000f
-  attitudeAdjustAttentuation = 0.7f
-  attitudeAdjustForceThreshold = 100f
+  initialAttitudeAdjustTorque = 50_000.0
+  attitudeAdjustAttentuation = 0.7
+  attitudeAdjustForceThreshold = 100.0
   maxWheelAngularVelocity = 30.0
   # applied to wheel1 when throttle is pressed
   throttleTorque = 3_500.0
@@ -69,18 +71,31 @@ proc onAttitudeAdjust(state: GameState, direction: float) =
     print("ignore attitude adjust. Already in progress with remaining force: " & $state.attitudeAdjustForce)
 
 proc onFlipDirection(state: GameState) =
-  state.driveDirection *= -1
+  state.driveDirection *= -1.0
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
   state.flipRiderDirection(riderPosition)
+  state.finishFlipDirectionAt = some(state.time + 0.5f)
 
 proc updateAttitudeAdjust(state: GameState) =
   let chassis = state.chassis
-  if state.attitudeAdjustForce != 0f:
+  if state.attitudeAdjustForce != 0.0:
     chassis.torque = state.attitudeAdjustForce
     state.attitudeAdjustForce *= attitudeAdjustAttentuation
     if state.attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
       state.attitudeAdjustForce = 0f
+
+proc updateTimers(state: GameState) =
+  state.time += timeStep
+  
+  if state.finishFlipDirectionAt.isSome:
+    # apply a torque to the chassis to compensate for the rider's inertia
+    state.chassis.torque = state.driveDirection * -15_500.0
+
+    if state.time > state.finishFlipDirectionAt.get:
+      state.finishFlipDirectionAt = none[Time]()
+      state.resetRiderConstraintForces()
+    
 
 proc handleInput() =
     isThrottlePressed = false
@@ -111,7 +126,11 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   state.updateAttitudeAdjust()
 
   state.space.step(timeStep)
-  state.time += timeStep
+  state.updateTimers()
+
+  print("torso-head angle: " & $(state.riderTorso.angle - state.riderHead.angle))
+  print("rotary spring rest angle: " & $state.headRotarySpring.restAngle)
+  print("rotary spring force: " & $state.headRotarySpring.impulse)
 
   updateBikeEngine(isThrottlePressed, state.rearWheel.angularVelocity * state.driveDirection)
 
