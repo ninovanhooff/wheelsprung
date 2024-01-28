@@ -11,7 +11,9 @@ import game/game
 
 const FONT_PATH = "/System/Fonts/Asheville-Sans-14-Bold.pft"
 
-var font: LCDFont
+var 
+    font: LCDFont
+    refreshRate = 50.0f
 
 proc update() =
     playdate.graphics.clear(kColorWhite)
@@ -41,7 +43,7 @@ proc catchingUpdate(): int =
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     if event == kEventInit:
-        playdate.display.setRefreshRate(50)
+        playdate.display.setRefreshRate(refreshRate)
 
         font = try: playdate.graphics.newFont(FONT_PATH) except: nil
         playdate.graphics.setFont(font)
@@ -68,6 +70,16 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
             print("P")
             debugDrawConstraints = not debugDrawConstraints
             print("debugDrawConstraints:" & $debugDrawConstraints)
+        elif keycode == 106:
+            print("J")
+            refreshRate -= 5.0f
+            playdate.display.setRefreshRate(refreshRate)
+            print("refreshRate:" & $refreshRate)
+        elif keycode == 108:
+            print("L")
+            refreshRate += 5.0f
+            playdate.display.setRefreshRate(refreshRate)
+            print("refreshRate:" & $refreshRate)
         else:
             print("keycode:" & $keycode)
 # Used to setup the SDK entrypoint
