@@ -94,12 +94,12 @@ proc removeBikeConstraints(state: GameState) =
     space.removeConstraint(constraint)
   state.bikeConstraints.setLen(0)
 
-proc removeBikeShapes(state: GameState) =
-  let space = state.space
+# proc removeBikeShapes(state: GameState) =
+#   let space = state.space
 
-  for shape in state.bikeShapes:
-    space.removeShape(shape)
-  state.bikeShapes.setLen(0)
+#   for shape in state.bikeShapes:
+#     space.removeShape(shape)
+#   state.bikeShapes.setLen(0)
 
 proc setBikeConstraints(state: GameState) =
   # NOTE inverted y axis!
@@ -173,37 +173,15 @@ proc setBikeConstraints(state: GameState) =
 
   state.bikeConstraints = bikeConstraints
 
-proc flip(body: Body, relativeTo: Body) =
-  body.angle = -body.angle
-  body.position = localToWorld(relativeTo, worldToLocal(relativeTo, body.position).transform(-1.0))
-
 proc flipBikeDirection*(state: GameState) =
-  let space = state.space
   let chassis = state.chassis
-  let oldForkArm = state.forkArm
-  let oldSwingArm = state.swingArm
 
   state.removeBikeConstraints()
+
   swap(state.rearWheel, state.frontWheel)
+  state.forkArm.flip(relativeTo = chassis)
+  state.swingArm.flip(relativeTo = chassis)  
 
-  space.removeBody(state.swingArm)
-  space.removeBody(state.forkArm)
-
-  state.swingArm = state.addSwingArm(swingArmPosOffset.transform(state.driveDirection))
-  state.forkArm = state.addForkArm(forkArmPosOffset.transform(state.driveDirection))
-
-  state.swingArm.angle = chassis.angle + (chassis.angle - oldSwingArm.angle)
-  state.forkArm.angle = chassis.angle + (chassis.angle - oldForkArm.angle)
-
-  state.swingArm.position = localToWorld(chassis, worldToLocal(chassis, oldSwingArm.position).transform(-1.0))
-  state.forkArm.position = localToWorld(chassis, worldToLocal(chassis, oldForkArm.position).transform(-1.0))
-
-  state.swingArm.velocity= oldSwingArm.velocity
-  state.forkArm.velocity= oldForkArm.velocity
-
-  state.swingArm.angularVelocity= oldSwingArm.angularVelocity
-  state.forkArm.angularVelocity= oldForkArm.angularVelocity
-  
   state.setBikeConstraints()
 
 proc initBikePhysics*(state: GameState) =

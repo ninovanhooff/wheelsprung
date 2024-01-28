@@ -11,7 +11,10 @@ proc round*(v: Vect): Vect =
 proc floor*(v: Vect): Vect =
   result = v(v.x.floor, v.y.floor)
 
-# type BodyWithShape = tuple[body: Body, shape: Shape]
+proc flip*(body: Body, relativeTo: Body) =
+  ## Flip body horizontally relative to relativeTo
+  body.angle = relativeTo.angle + (relativeTo.angle - body.angle)
+  body.position = localToWorld(relativeTo, worldToLocal(relativeTo, body.position).transform(-1.0))
 
 proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f, shapeStore: var seq[Shape]) : Body =
     let body = space.addBody(
