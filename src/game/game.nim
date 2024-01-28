@@ -128,10 +128,6 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   state.space.step(timeStep)
   state.updateTimers()
 
-  print("torso-head angle: " & $(state.riderTorso.angle - state.riderHead.angle))
-  print("rotary spring rest angle: " & $state.headRotarySpring.restAngle)
-  print("rotary spring force: " & $state.headRotarySpring.impulse)
-
   updateBikeEngine(isThrottlePressed, state.rearWheel.angularVelocity * state.driveDirection)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)

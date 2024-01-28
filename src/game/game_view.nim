@@ -177,7 +177,7 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     let riderHead = state.riderHead    
     if state.finishFlipDirectionAt.isSome:
       # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
-      let flipThreshold = (state.riderUpperLeg.angle.signbit != state.driveDirection.signbit)
+      let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
       let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
       let riderHeadScreenPos = riderHead.position - camera
       riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
