@@ -11,7 +11,9 @@ proc round*(v: Vect): Vect =
 proc floor*(v: Vect): Vect =
   result = v(v.x.floor, v.y.floor)
 
-proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f) : Body =
+# type BodyWithShape = tuple[body: Body, shape: Shape]
+
+proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f, shapeStore: var seq[Shape]) : Body =
     let body = space.addBody(
         newBody(mass, momentForBox(mass, size.x, size.y))
     )
@@ -20,6 +22,7 @@ proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 
 
     let shape = space.addShape(newBoxShape(body, size.x, size.y, 0f))
     shape.filter = SHAPE_FILTER_NONE # no collisions
+    shapeStore.add(shape)
 
     return body
 

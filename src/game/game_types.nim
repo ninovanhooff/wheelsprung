@@ -28,6 +28,7 @@ type GameState* = ref object of RootObj
     chassis*: Body
     swingArm*: Body
     forkArm*: Body
+    bikeShapes*: seq[Shape]
 
     # rider bodies
     riderHead*: Body
@@ -43,6 +44,7 @@ type GameState* = ref object of RootObj
 
     bikeConstraints*: seq[Constraint]
     riderConstraints*: seq[Constraint]
+    riderShapes*: seq[Shape]
 
 proc getRiderBodies*(state: GameState): seq[Body] =
     result = @[
