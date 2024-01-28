@@ -4,21 +4,21 @@
   <export target="../../../../Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.wheelsprung/levels/fallbackLevel.json" format="json"/>
  </editorsettings>
  <objectgroup color="#73fa79" id="2" name="Object Layer 1">
-  <object id="17" x="889" y="253">
+  <object id="17" x="881" y="118">
    <polygon points="-39,2 43,-3 105,-34 123,-72 130,-126 123,-161 108,-203 76,-230 32,-241 -32,-237 -61,-218 -94,-180 -108,-130 -108,-99 -137,-99 -134,-287 119,-283 199,-214 203,-92 119,7 54,34 -3,34"/>
   </object>
-  <object id="18" x="851" y="305">
+  <object id="18" x="843" y="170">
    <polygon points="234,156 138,186 84,200 24,202 -23,185 -44,170 -68,140 -79,101 -82,78 -100,77 -97,224 86,221 210,222 328,208 404,198 428,132 348,108"/>
   </object>
-  <object id="20" x="632" y="248">
+  <object id="20" x="624" y="113">
    <polygon points="0,0 120,-3 120,72 0,72"/>
   </object>
  </objectgroup>
  <objectgroup id="5" name="Object Layer 2">
-  <object id="14" x="4" y="240">
+  <object id="14" x="-4" y="105">
    <polygon points="4,15 628,7 628,79 4,79"/>
   </object>
-  <object id="21" x="1700" y="404">
+  <object id="21" x="1692" y="269">
    <polygon points="0,0 -320,0 -320,8 0,8"/>
   </object>
  </objectgroup>
