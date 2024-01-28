@@ -2,6 +2,7 @@ import playdate/api
 import math
 import std/sequtils
 import std/sugar
+import options
 import chipmunk7
 import game_types
 import graphics_utils
@@ -116,7 +117,7 @@ proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirec
     (if driveDirection == DD_LEFT: kBitmapFlippedX else: kBitmapUnflipped)
   )
 
-proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState) {.inline.} =
+proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState, inverse: bool = false) {.inline.} =
   let driveDirection = state.driveDirection
   table.drawRotated(
     body.position - state.camera, 
@@ -172,7 +173,18 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
 
     # rider
-    riderHeadImageTable.drawRotated(state.riderHead, state)
+    
+    let riderHead = state.riderHead    
+    if state.finishFlipDirectionAt.isSome:
+      # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
+      let flipThreshold = (state.riderUpperLeg.angle.signbit != state.driveDirection.signbit)
+      let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
+      let riderHeadScreenPos = riderHead.position - camera
+      riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
+    else:
+      riderHeadImageTable.drawRotated(riderHead, state)
+    
+    
     riderTorsoImageTable.drawRotated(state.riderTorso, state)
     riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
     riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)

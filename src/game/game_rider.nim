@@ -125,7 +125,7 @@ proc setRiderConstraints(state: GameState) =
   ))
 
   # head rotation spring
-  state.headRotarySpring = state.riderHead.newDampedRotarySpring(riderTorso, headRotationOffset * dd, 100.0, 90.0)
+  state.headRotarySpring = state.riderHead.newDampedRotarySpring(riderTorso, headRotationOffset * dd, 1_000.0, 100.0)
   riderConstraints.add(space.addConstraint(
     state.headRotarySpring  
   ))
@@ -241,17 +241,8 @@ proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.handPivot.flip()
   state.headPivot.flip()
 
-  let headRotary = state.headRotarySpring
-  headRotary.restAngle = -headRotary.restAngle
-  state.headRotarySpring = headRotary
+  state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
   # state.riderHead.angle=0.0
-
-  state.space.removeConstraint(state.headRotarySpring)
-    # head rotation spring
-  # state.headRotarySpring = state.riderHead.newDampedRotarySpring(state.riderTorso, headRotationOffset * state.driveDirection, 10000.0, 900.0)
-  discard state.space.addConstraint(
-    state.headRotarySpring  
-  )
 
   # state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
 
