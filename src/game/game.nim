@@ -54,15 +54,15 @@ proc onThrottle*() =
     return
 
   rearWheel.torque = throttleTorque * dd
-  print("wheel1.torque: " & $rearWheel.torque)
+  print("rearwheel torque: " & $rearWheel.torque)
 
 proc onBrake*() =
   let rearWheel = state.rearWheel
   let frontWheel = state.frontWheel
   rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
-  print("wheel1.torque: " & $rearWheel.torque)
-  print("wheel2.torque: " & $frontWheel.torque)
+  print("rearwheel torque: " & $rearWheel.torque)
+  print("frontwheel torque: " & $frontWheel.torque)
 
 proc onAttitudeAdjust(state: GameState, direction: float) =
   if state.attitudeAdjustForce == 0f:
