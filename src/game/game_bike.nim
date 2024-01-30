@@ -112,7 +112,8 @@ proc setBikeConstraints(state: GameState) =
   let forkArm = state.forkArm
   var bikeConstraints: seq[Constraint] = state.bikeConstraints
 
-  # SwingArm (arm between chassis and rear wheel)
+  ## SwingArm (arm between chassis and rear wheel)
+  
   let swingArmEndCenter = v(swingArmWidth*0.5f*dd, swingArmHeight*0.5f)
   # attach swing arm to chassis
   bikeConstraints.add(space.addConstraint(
@@ -122,7 +123,6 @@ proc setBikeConstraints(state: GameState) =
       swingArmEndCenter
     )
   ))
-
   # limit rearWheel to swing arm
   bikeConstraints.add(space.addConstraint(
     swingArm.newGrooveJoint(
@@ -136,12 +136,12 @@ proc setBikeConstraints(state: GameState) =
   bikeConstraints.add(space.addConstraint(
     swingArm.newDampedSpring(rearWheel, swingArmEndCenter, vzero, swingArmWidth, 40f, 10f)
   ))
-
+  # swing arm rotation
   bikeConstraints.add(space.addConstraint(
-    chassis.newDampedRotarySpring(swingArm, 0.15*PI*dd, 30_000, 4_000)
+    chassis.newDampedRotarySpring(swingArm, 0.15*PI*dd, 30_000.0, 2_000.0)
   ))
 
-  # fork arm (arm between chassis and front wheel)
+  ## fork arm (arm between chassis and front wheel)
 
   let forkArmTopCenter = v(0f, -forkArmHeight*0.5f)
   # let forkArmEndCenter = v(forkArmWidth*0.5f, forkArmHeight*0.5f)
@@ -162,7 +162,7 @@ proc setBikeConstraints(state: GameState) =
       vzero
     )
   ))
-  # push wheel2 to end of fork arm
+  # push front wheel to end of fork arm
   bikeConstraints.add(space.addConstraint(
     forkArm.newDampedSpring(frontWheel, forkArmTopCenter, vzero, forkArmHeight, 70.0, 10.0)
   ))
