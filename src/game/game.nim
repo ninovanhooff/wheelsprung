@@ -11,8 +11,8 @@ import game_view
 
 const
   riderOffset = v(-4.0, -18.0) # offset from chassis center
-  initialAttitudeAdjustTorque = 50_000.0
-  attitudeAdjustAttentuation = 0.7
+  initialAttitudeAdjustTorque = 90_000.0
+  attitudeAdjustAttentuation = 0.75
   attitudeAdjustForceThreshold = 100.0
   maxWheelAngularVelocity = 30.0
   # applied to wheel1 when throttle is pressed
@@ -110,10 +110,10 @@ proc handleInput() =
       print("Brake held")
       onBrake()
     
-    if actionLeanLeft in buttonsState.pushed:
+    if actionLeanLeft in buttonsState.current:
       print("Lean left pressed")
       state.onAttitudeAdjust(-1f)
-    elif actionLeanRight in buttonsState.pushed:
+    elif actionLeanRight in buttonsState.current:
       print("Lean Right pressed")
       state.onAttitudeAdjust(1f)
 
