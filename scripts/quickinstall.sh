@@ -20,15 +20,18 @@ do
      sleep 1
 done
 echo "Game Dir mounted"
-#echo "Input anything to continue"
-#trap 'tput setaf 1;tput bold;echo $BASH_COMMAND;read;tput init' DEBUG
+# #echo "Input anything to continue"
+# trap 'tput setaf 1;tput bold;echo $BASH_COMMAND;read;tput init' DEBUG
 
-# Only copy files with changed file sizes. To copy all files, remove "--size-only"
-rsync -zarvi --size-only --prune-empty-dirs "${PRODUCT}" "/Volumes/PLAYDATE/Games/"
+# Only copy files which changed and are newer than the destination
+rsync -zavrti --update --modify-window=1 --prune-empty-dirs "${PRODUCT}" "/Volumes/PLAYDATE/Games/"
+
+# Unmount
 MOUNT_DEVICE="$(diskutil list | grep PLAYDATE | grep -oE '[^ ]+$')"
 diskutil unmount "${MOUNT_DEVICE}"
 diskutil eject PLAYDATE
 
+# Wait for usb command mode connection
 echo "Waiting for USB Device to be mounted ... "
 until ls "${PDUTIL_DEVICE}"
 do
