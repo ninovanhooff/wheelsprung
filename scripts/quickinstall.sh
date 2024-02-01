@@ -1,9 +1,16 @@
 #!/bin/bash
 
+# Get the absolute path of the directory containing the current file
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+
 # Get Game name from pdxinfo and remove whitespace. pdutil cannot run files with whitespace in them
 PRODUCT="$(cat source/pdxinfo | grep name | cut -d "=" -f 2- | sed '/^$/d;s/[[:blank:]]//g')"
 echo "PRODUCT ${PRODUCT}"
-DEVICE_PDX = "${PRODUCT}_device.pdx"
+DEVICE_PDX="${PRODUCT}_device.pdx"
+
+
+# Create a PDX file for the device
+"$SCRIPT_DIR"/bundle_device.sh $PRODUCT
 
 # Put device in data disk mode
 until ls /dev/cu.usbmodemPD*
