@@ -10,7 +10,7 @@ DEVICE_PDX="${PRODUCT}_device.pdx"
 
 
 # Create a PDX file for the device
-"$SCRIPT_DIR"/bundle_device.sh $PRODUCT
+"$SCRIPT_DIR"/bundle_device.sh "$PRODUCT.pdx" "$DEVICE_PDX"
 
 # Put device in data disk mode
 until ls /dev/cu.usbmodemPD*
