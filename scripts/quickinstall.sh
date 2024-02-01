@@ -3,8 +3,13 @@
 # Get the absolute path of the directory containing the current file
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
-# Get Game name from pdxinfo and remove whitespace. pdutil cannot run files with whitespace in them
-PRODUCT="$(cat source/pdxinfo | grep name | cut -d "=" -f 2- | sed '/^$/d;s/[[:blank:]]//g')"
+# Get Game name from pdxinfo and remove whitespace and lowercase. pdutil cannot run files with whitespace in them
+# PRODUCT="$(cat source/pdxinfo | grep name | cut -d "=" -f 2- | sed '/^$/d;s/[[:blank:]]//g' | tr '[:upper:]' '[:lower:]')"
+
+# For nim, the name of the root folder is used as pdx name
+# Get the name of the current working directory
+PRODUCT="$(basename "$(pwd)")"
+
 echo "PRODUCT ${PRODUCT}"
 DEVICE_PDX="${PRODUCT}_device.pdx"
 
