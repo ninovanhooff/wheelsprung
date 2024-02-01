@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Get Game name from pdxinfo and remove whitespace. pdutil cannot run files with whitespace in them
-PRODUCT="$(cat source/pdxinfo | grep name | cut -d "=" -f 2- | sed '/^$/d;s/[[:blank:]]//g').pdx"
+PRODUCT="$(cat source/pdxinfo | grep name | cut -d "=" -f 2- | sed '/^$/d;s/[[:blank:]]//g')"
 echo "PRODUCT ${PRODUCT}"
+DEVICE_PDX = "${PRODUCT}_device.pdx"
 
 # Put device in data disk mode
 until ls /dev/cu.usbmodemPD*
@@ -24,7 +25,7 @@ echo "Game Dir mounted"
 # trap 'tput setaf 1;tput bold;echo $BASH_COMMAND;read;tput init' DEBUG
 
 # Only copy files which changed and are newer than the destination
-rsync -zavrti --update --modify-window=1 --prune-empty-dirs "${PRODUCT}" "/Volumes/PLAYDATE/Games/"
+rsync -zavrti --update --modify-window=1 --prune-empty-dirs "${DEVICE_PDX}" "/Volumes/PLAYDATE/Games/"
 
 # Unmount
 MOUNT_DEVICE="$(diskutil list | grep PLAYDATE | grep -oE '[^ ]+$')"
@@ -40,5 +41,5 @@ done
 echo "Usb Device Connected"
 
 # run
-echo "Running ${PRODUCT}"
-pdutil "${PDUTIL_DEVICE}" run "/Games/${PRODUCT}"
+echo "Running ${DEVICE_PDX}"
+pdutil "${PDUTIL_DEVICE}" run "/Games/${DEVICE_PDX}"

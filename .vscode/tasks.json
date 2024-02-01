@@ -14,6 +14,11 @@
             "command": "nimble simulator",
         },
         {
+            "label": "Build Device PDX",
+            "type": "shell",
+            "command": "nimble device"
+        },
+        {
             "label": "Build & Run Simulator PDX",
             "type": "shell",
             "dependsOn": [
@@ -27,9 +32,16 @@
             }
         },
         {
-            "label": "Build Device PDX",
+            "label": "Build & Run Device PDX",
             "type": "shell",
-            "command": "nimble device"
-        }
+            "dependsOn": [
+                "Build Device PDX"
+            ],
+            "command": "./scripts/quickinstall.sh",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+            }
+        },
     ]
 }
