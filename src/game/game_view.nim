@@ -196,3 +196,5 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
 
   if debugDrawConstraints:
     eachConstraint(statePtr.space, constraintIter, statePtr)
+    let forkImpulse: int32 = state.forkArmSpring.impulse.int32
+    gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)

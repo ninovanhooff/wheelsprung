@@ -163,8 +163,12 @@ proc setBikeConstraints(state: GameState) =
     )
   ))
   # push front wheel to end of fork arm
+  state.forkArmSpring = forkArm.newDampedSpring(
+    frontWheel, forkArmTopCenter, vzero, forkArmHeight, 70.0, 10.0
+  )
+  
   bikeConstraints.add(space.addConstraint(
-    forkArm.newDampedSpring(frontWheel, forkArmTopCenter, vzero, forkArmHeight, 70.0, 10.0)
+    state.forkArmSpring
   ))
   # fork arm rotation
   bikeConstraints.add(space.addConstraint(

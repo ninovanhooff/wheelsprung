@@ -3,9 +3,8 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
 import levels
-import bike_engine
-import game_bike
-import game_rider
+import bike_engine, bike_squeak
+import game_bike, game_rider
 import game_types
 import game_view
 
@@ -44,6 +43,7 @@ proc initGame*() {.raises: [].} =
   let riderPosition = state.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initRiderPhysics(state, riderPosition)
   initBikeEngine()
+  initBikeSqueak()
   initGameView()
 
 proc onThrottle*() =
@@ -129,6 +129,7 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   state.updateTimers()
 
   updateBikeEngine(isThrottlePressed, state.rearWheel.angularVelocity * state.driveDirection)
+  updateBikeSqueak(state)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
   drawChipmunkGame(addr state)

@@ -45,7 +45,11 @@ type GameState* = ref object of RootObj
     # Level Objects
     groundPolygons*: seq[Polygon]
 
+    # Bike Constraints
+    forkArmSpring*: DampedSpring
     bikeConstraints*: seq[Constraint]
+
+    # Rider Constraints
     riderConstraints*: seq[Constraint] # todo remove if unused
     headRotarySpring*: DampedRotarySpring
     assPivot*: PivotJoint
@@ -59,6 +63,8 @@ type GameState* = ref object of RootObj
     footPivot*: PivotJoint
     handPivot*: PivotJoint
     headPivot*: PivotJoint
+
+    # Rider Shapes
     riderShapes*: seq[Shape]
 
 proc getRiderBodies*(state: GameState): seq[Body] =
