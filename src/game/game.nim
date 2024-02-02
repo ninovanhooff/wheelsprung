@@ -3,7 +3,7 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
 import levels
-import bike_engine, bike_squeak
+import sound/bike_sound
 import game_bike, game_rider
 import game_types
 import game_view
@@ -21,7 +21,6 @@ const
   timeStep = 1.0f/50.0f
 
 var state: GameState
-var isThrottlePressed = false
 
 # device controls
 var actionThrottle = kButtonA
@@ -42,8 +41,7 @@ proc initGame*() {.raises: [].} =
   initBikePhysics(state)
   let riderPosition = state.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initRiderPhysics(state, riderPosition)
-  initBikeEngine()
-  initBikeSqueak()
+  initBikeSound()
   initGameView()
 
 proc onThrottle*() =
@@ -54,15 +52,12 @@ proc onThrottle*() =
     return
 
   rearWheel.torque = throttleTorque * dd
-  print("rearwheel torque: " & $rearWheel.torque)
 
 proc onBrake*() =
   let rearWheel = state.rearWheel
   let frontWheel = state.frontWheel
   rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
-  print("rearwheel torque: " & $rearWheel.torque)
-  print("frontwheel torque: " & $frontWheel.torque)
 
 proc onAttitudeAdjust(state: GameState, direction: float) =
   if state.attitudeAdjustForce == 0f:
@@ -98,16 +93,14 @@ proc updateTimers(state: GameState) =
     
 
 proc handleInput() =
-    isThrottlePressed = false
+    state.isThrottlePressed = false
 
     let buttonsState = playdate.system.getButtonsState()
 
     if actionThrottle in buttonsState.current:
-      print("Throttle held")
-      isThrottlePressed = true
+      state.isThrottlePressed = true
       onThrottle()
     if actionBrake in buttonsState.current:
-      print("Brake held")
       onBrake()
     
     if actionLeanLeft in buttonsState.current:
@@ -128,8 +121,7 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   state.space.step(timeStep)
   state.updateTimers()
 
-  updateBikeEngine(isThrottlePressed, state.rearWheel.angularVelocity * state.driveDirection)
-  updateBikeSqueak(state)
+  updateBikeSound(state)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
   drawChipmunkGame(addr state)

@@ -3,3 +3,4 @@ source/pdex.*
 *.dSYM
 .DS_Store
 game.map
+**.aup3-wal

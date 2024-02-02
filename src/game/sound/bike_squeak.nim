@@ -1,10 +1,10 @@
 import playdate/api
 import chipmunk7
 import utils
-import game_types
+import game/game_types
 
 const
-  contractThreshold = 20.0
+  contractImpulseThreshold = 25.0
 
 var
   contractPlayer: SamplePlayer
@@ -17,9 +17,9 @@ proc initBikeSqueak*()=
 
 proc updateBikeSqueak*(state: GameState) =
   let forkImpulse: Float = state.forkArmSpring.impulse
-  if not contractPlayer.isPlaying and forkImpulse > contractThreshold:
+  if not contractPlayer.isPlaying and forkImpulse > contractImpulseThreshold:
+    print("playing contract squeak for impulse: " & $forkImpulse)
     contractPlayer.play(1, 1.0)
     contractPlayer.volume=lerp(0.0, 1.0, forkImpulse/50.0)
   elif contractPlayer.isPlaying and forkImpulse <= 0.0:
     contractPlayer.stop()
-  print("forkImpulse: " & $forkImpulse)

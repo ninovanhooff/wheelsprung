@@ -16,6 +16,11 @@ type
     Time* = float32
 
 type GameState* = ref object of RootObj
+    ## Input
+    isThrottlePressed*: bool
+
+
+    ## Physics
     space*: Space
     time*: Time
     finishFlipDirectionAt*: Option[Time]

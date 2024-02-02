@@ -44,6 +44,7 @@ proc catchingUpdate(): int =
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     if event == kEventInit:
         playdate.display.setRefreshRate(refreshRate)
+        playdate.system.randomize() # seed the random number generator
 
         font = try: playdate.graphics.newFont(FONT_PATH) except: nil
         playdate.graphics.setFont(font)

@@ -21,4 +21,8 @@ proc roundToNearest*(num: float, increment: int = 1): int =
     math.floor(num / increment.float + 0.5).int * increment
 
 proc lerp*(initial: float, target: float, factor: float): float =
-    result = (initial * (1.0 - factor)) + (target * factor)
+  ## linear interpolation between initial and target
+  ## factor is a value between 0.0 and 1.0
+  ## the result is clamped between initial and target
+  result = (initial * (1.0 - factor)) + (target * factor)
+  result = min(max(result, initial), target)

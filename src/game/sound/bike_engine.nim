@@ -1,10 +1,14 @@
 import playdate/api
+import chipmunk7
 import utils
+import game/game_types
 
 const
     idleRpm = 1300.0f
     ## The RPM of the first throttle sound in throttlePlayers. The second throttle sound is 200 RPM higher.
-    baseThrottleRpm: float = 1700.0f
+    baseThrottleRpm: float32 = 1700.0f
+    maxVolume: float32 = 0.3f
+    volumeFadeSpeed: float32 = 0.05f
 
 var 
     isInitialized: bool = false
@@ -22,12 +26,15 @@ proc initBikeEngine*()=
         idlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1300rpm_idle")
         throttlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1700rpm_throttle")
         currentPlayer = idlePlayer
-        currentPlayer.play(0, 1.0f)
+        # currentPlayer.play(0, 1.0f)
+        currentPlayer.volume = maxVolume
         isInitialized = true
     except:
         print(getCurrentExceptionMsg())
 
-proc updateBikeEngine*(throttle: bool, wheelForwardAngularVelocity: float) =
+proc updateBikeEngine*(state: GameState) =
+    let throttle = state.isThrottlePressed
+    let wheelForwardAngularVelocity = state.rearWheel.angularVelocity * state.driveDirection
     let targetRpm = 
         if throttle: 
             idleRpm + (wheelForwardAngularVelocity * 50.0f) 
@@ -41,7 +48,8 @@ proc updateBikeEngine*(throttle: bool, wheelForwardAngularVelocity: float) =
         # print("switch from currentPlayer: " & $currentPlayer.repr & " targetPlayer: " & targetPlayer.repr)
         fadeoutPlayer = currentPlayer
         currentPlayer = targetPlayer
-        currentPlayer.play(0, 1.0f) # rate and volume is set below
+        currentPlayer.play(0, 1.0f) 
+        currentPlayer.volume = maxVolume
 
     # rate
     let playerBaseRpm: float = 
@@ -52,12 +60,12 @@ proc updateBikeEngine*(throttle: bool, wheelForwardAngularVelocity: float) =
     currentPlayer.rate=curRpm / playerBaseRpm
 
     # volume
-    if currentPlayer.volume.left < 1.0f:
-        currentPlayer.volume = min(1.0f, currentPlayer.volume.left + 0.1f)
+    if currentPlayer.volume.left < maxVolume:
+        currentPlayer.volume = min(maxVolume, currentPlayer.volume.left + volumeFadeSpeed)
     if fadeoutPlayer != nil:
         print("fadeoutPlayer volume: " & $fadeoutPlayer.volume.left & " currentPlayer volume: " & $currentPlayer.volume.left)
-        if fadeoutPlayer.volume.left > 0.0f:
-            fadeoutPlayer.volume = max(0.0f, fadeoutPlayer.volume.left - 0.1f)
+        if fadeoutPlayer.volume.left > 0.01f:
+            fadeoutPlayer.volume = max(0.0f, fadeoutPlayer.volume.left - volumeFadeSpeed)
         else:
             fadeoutPlayer.stop()
             fadeoutPlayer = nil

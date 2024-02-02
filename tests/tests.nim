@@ -24,5 +24,8 @@ proc runTests*() =
     assert lerp(0, 10, 0) == 0
     assert lerp(0, 10, 1) == 10
     assert lerp(0, 10, 0.5) == 5
+    # test clamping
+    assert lerp(0, 10, -1) == 0
+    assert lerp(0, 10, 2) == 10
     
     assert testNotify "Tests passed."
