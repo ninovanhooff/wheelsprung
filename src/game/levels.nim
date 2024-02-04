@@ -6,10 +6,6 @@ import std/sequtils
 import playdate/api
 import game_types
 
-const 
-    gravity = v(0, 100)
-    groundFriction = 10.0f
-
 type 
     LevelVertexEntity {.bycopy.} = object
         x*: int32

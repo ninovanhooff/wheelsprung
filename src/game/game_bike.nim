@@ -7,7 +7,7 @@ import chipmunk_utils
 let
   # offset for driveDirection DD_RIGHT
   wheelRadius = 10.0f
-  wheelFriction = 3.0f
+  wheelFriction = 30.0
   rearWheelOffset = v(-20, 10)
   frontWheelOffset = v(21, 12)
   
