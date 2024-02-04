@@ -201,25 +201,6 @@ proc setRiderConstraints(state: GameState) =
 
   state.riderConstraints = riderConstraints
 
-# proc removeRiderConstraints(state: GameState) =
-#   let space = state.space
-#   for constraint in state.riderConstraints:
-#     space.removeConstraint(constraint)
-#   state.riderConstraints.setLen(0)
-
-
-# proc removeRider(state: GameState) =
-#   let space = state.space
-  
-#   state.removeRiderConstraints()
-
-#   for body in state.getRiderBodies():
-#     space.removeBody(body)
-  
-#   for shape in state.riderShapes:
-#     space.removeShape(shape)
-#   state.riderShapes.setLen(0)
-
 proc initGameRider*(state: GameState, riderPosition: Vect) =
   state.addRider(riderPosition)
   state.setRiderConstraints()

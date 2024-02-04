@@ -15,7 +15,14 @@ type
     Polygon* = seq[Vertex]
     Time* = float32
 
+type Level* = ref object of RootObj
+    groundPolygons*: seq[Polygon]
+    initialChassisPosition*: Vect
+    initialDriveDirection*: DriveDirection
+
 type GameState* = ref object of RootObj
+    level*: Level
+
     ## Input
     isThrottlePressed*: bool
 
@@ -27,10 +34,6 @@ type GameState* = ref object of RootObj
     attitudeAdjustForce*: Float
     camera*: Camera
     driveDirection*: DriveDirection
-
-    ## Level properties
-    groundPolygons*: seq[Polygon]
-    initialChassisPosition*: Vect
 
     ## Player
 

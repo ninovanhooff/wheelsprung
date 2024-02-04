@@ -1,4 +1,5 @@
 import options
+import std/sequtils
 import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
@@ -8,6 +9,7 @@ import game_types
 import game_view
 
 const
+  groundFriction = 10.0
   riderOffset = v(-4.0, -18.0) # offset from chassis center
   initialAttitudeAdjustTorque = 90_000.0
   attitudeAdjustAttentuation = 0.75
@@ -19,7 +21,7 @@ const
   brakeTorque = 2_000.0
   timeStep = 1.0f/50.0f
 
-var state: GameState
+var gameState: GameState
 
 # device controls
 var actionThrottle = kButtonA
@@ -33,23 +35,45 @@ if defined simulator:
   actionBrake = kButtonDown
   actionFlipDirection = kButtonB
 
+proc toVect(vertex: Vertex): Vect =
+  return v(vertex[0].Float, vertex[1].Float)
 
+proc createSpace(level: Level): Space =
+  let space = newSpace()
+  space.gravity = v(0.0, 100.0)
 
-proc initGame*() {.raises: [].} =
-  state = loadLevel("levels/fallbackLevel.json")
-  initGameBike(state)
-  let riderPosition = state.initialChassisPosition + riderOffset.transform(state.driveDirection)
-  initGameRider(state, riderPosition)
-  initGameView()
+  # Add the polygons as segment shapes to the physics space
+  for polygon in level.groundPolygons:
+    let vects: seq[Vect] = polygon.map(toVect)
+    for i in 1..vects.high:
+      let shape = newSegmentShape(space.staticBody, vects[i-1], vects[i], 0.0)
+      shape.friction = groundFriction
+      discard space.addShape(shape) 
+
+  return space
+
+proc newGameState(level: Level): GameState =
+  let space = level.createSpace()
+  gameState = GameState(
+    level: level, 
+    space: space,
+    driveDirection: level.initialDriveDirection,
+  )
+  initGameBike(gameState)
+  let riderPosition = level.initialChassisPosition + riderOffset.transform(gameState.driveDirection)
+  initGameRider(gameState, riderPosition)
+  return gameState
 
 proc onResetGame() {.raises: [].} =
-  initGameBike(state)
-  let riderPosition = state.initialChassisPosition + riderOffset.transform(state.driveDirection)
-  initGameRider(state, riderPosition)
+  gameState = newGameState(gameState.level)
+
+proc initGame*() {.raises: [].} =
+  gameState = newGameState(loadLevel("levels/fallbackLevel.json"))
+  initGameView()
 
 proc onThrottle*() =
-  let rearWheel = state.rearWheel
-  let dd = state.driveDirection
+  let rearWheel = gameState.rearWheel
+  let dd = gameState.driveDirection
   if rearWheel.angularVelocity * dd > maxWheelAngularVelocity:
     print("ignore throttle. back wheel already at max angular velocity")
     return
@@ -57,8 +81,8 @@ proc onThrottle*() =
   rearWheel.torque = throttleTorque * dd
 
 proc onBrake*() =
-  let rearWheel = state.rearWheel
-  let frontWheel = state.frontWheel
+  let rearWheel = gameState.rearWheel
+  let frontWheel = gameState.frontWheel
   rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
@@ -95,31 +119,32 @@ proc updateTimers(state: GameState) =
       state.resetRiderConstraintForces()
     
 
-proc handleInput() =
-    state.isThrottlePressed = false
+proc handleInput(state: GameState) =
+  state.isThrottlePressed = false
 
-    let buttonsState = playdate.system.getButtonsState()
+  let buttonsState = playdate.system.getButtonsState()
 
-    if actionThrottle in buttonsState.current:
-      state.isThrottlePressed = true
-      onThrottle()
-    if actionBrake in buttonsState.current:
-      onBrake()
-    
-    if actionLeanLeft in buttonsState.current:
-      print("Lean left pressed")
-      state.onAttitudeAdjust(-1f)
-    elif actionLeanRight in buttonsState.current:
-      print("Lean Right pressed")
-      state.onAttitudeAdjust(1f)
+  if actionThrottle in buttonsState.current:
+    state.isThrottlePressed = true
+    onThrottle()
+  if actionBrake in buttonsState.current:
+    onBrake()
+  
+  if actionLeanLeft in buttonsState.current:
+    print("Lean left pressed")
+    state.onAttitudeAdjust(-1f)
+  elif actionLeanRight in buttonsState.current:
+    print("Lean Right pressed")
+    state.onAttitudeAdjust(1f)
 
-    if actionFlipDirection in buttonsState.pushed:
-      print("Flip direction pressed")
-      state.onFlipDirection()
+  if actionFlipDirection in buttonsState.pushed:
+    print("Flip direction pressed")
+    state.onFlipDirection()
 
 proc updateChipmunkGame*() {.cdecl, raises: [].} =
-  handleInput()
-  state.updateAttitudeAdjust()
+  let state = gameState
+  handleInput(gameState)
+  gameState.updateAttitudeAdjust()
 
   state.space.step(timeStep)
   state.updateTimers()
@@ -127,4 +152,4 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   updateGameBike(state)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
-  drawChipmunkGame(addr state)
+  drawChipmunkGame(addr gameState) # todo pass as object?

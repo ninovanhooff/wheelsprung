@@ -1,10 +1,8 @@
 import chipmunk7
 import options
 import utils
-import chipmunk_utils
 import std/json
 import std/sequtils
-import std/sugar
 import playdate/api
 import game_types
 
@@ -13,16 +11,19 @@ const
     groundFriction = 10.0f
 
 type 
-    LevelObject = ref object of RootObj
-        x, y: float
-        polygon: Option[seq[Vect]]
-        polyline: Option[seq[Vect]]
+    LevelVertexEntity {.bycopy.} = object
+        x*: int32
+        y*: int32
+    LevelObjectEntity = ref object of RootObj
+        x, y: int32
+        polygon: Option[seq[LevelVertexEntity]]
+        polyline: Option[seq[LevelVertexEntity]]
     
-    Layer = ref object of RootObj
-        objects: Option[seq[LevelObject]]
+    LayerEntity = ref object of RootObj
+        objects: Option[seq[LevelObjectEntity]]
     
-    Level = ref object of RootObj
-        layers: seq[Layer]
+    LevelEntity = ref object of RootObj
+        layers: seq[LayerEntity]
 
 let kFileReadAny: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
@@ -37,63 +38,59 @@ proc readDataFileContents(path: string): string {.raises: [].} =
         print(getCurrentExceptionMsg())
         return ""
 
-proc parseLevel(path: string): Level {.raises: [].} =
+proc parseLevel(path: string): LevelEntity {.raises: [].} =
     let jsonString = readDataFileContents(path)
     try:
-        return parseJson(jsonString).to(Level)
+        return parseJson(jsonString).to(LevelEntity)
     except:
         print("Level parse failed:")
         print(getCurrentExceptionMsg())
         return nil
 
-proc getSegments(obj: LevelObject): seq[Vect] {.raises: [].} =
+proc toVertex(obj: LevelVertexEntity): Vertex =
+    return [obj.x, obj.y]
+
+proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
     if obj.polyline.isSome:
-        return obj.polyline.get
+        return obj.polyline.get.map(toVertex)
     elif obj.polygon.isSome:
-        var segments: seq[Vect] = obj.polygon.get
+        var segments: seq[LevelVertexEntity] = obj.polygon.get
+        # close the polygon by adding the first vertex to the end
         segments.add(segments[0])
-        return segments
+        return segments.map(toVertex)
     else:
         return @[]
 
-proc loadLayer(state: GameState, layer: Layer) {.raises: [].} =
+proc `+`*(v1, v2: Vertex): Vertex = [v1[0] + v2[0], v1[1] + v2[1]]
+
+proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
     if layer.objects.isNone: return
 
-    let space = state.space
-
     for obj in layer.objects.get:
-        let objOffset = v(obj.x, obj.y)
-        var segments: seq[Vect] = obj.getSegments()
-        if segments.len < 2:
+        let objOffset: Vertex = [obj.x, obj.y]
+        var polygon: Polygon = obj.getPolygon()
+        if polygon.len < 2:
             continue
 
-        let lastIndex = segments.high
+        let lastIndex = polygon.high
 
-        # Offset the segments by the object's position (localToWorld)
+        # Offset the polygon by the object's position (localToWorld)
         for i in 0..lastIndex:
-            segments[i] = round(segments[i] + objOffset)
-            print("segment: " & $segments[i])
+            polygon[i] = polygon[i] + objOffset
+            print("segment: " & $polygon[i])
 
-        # add groundPolygons for drawing
-        let poly: Polygon = segments.map( vect => [vect.x.int32, vect.y.int32])
-        state.groundPolygons.add(poly)
+        level.groundPolygons.add(polygon)
 
-        # Add the segments to the physics space
-        for i in 1..lastIndex:
-            var groundSegment = newSegmentShape(space.staticBody, segments[i-1], segments[i], 0.0)
-            groundSegment.friction = groundFriction
-            discard space.addShape(groundSegment)
-
-proc loadLevel*(path: string): GameState =
-    let space = newSpace()
-    space.gravity = gravity
-    let state = GameState(space: space)
-    state.driveDirection = DD_RIGHT
-    state.initialChassisPosition = v(80.0, 80.0)
+proc loadLevel*(path: string): Level =
+    let level = Level(
+        groundPolygons: @[],
+        initialChassisPosition: v(80.0, 80.0),
+        initialDriveDirection: DD_RIGHT,
+    )
   
-    let level = parseLevel(path)
+    let levelEntity = parseLevel(path)
 
-    for layer in level.layers:
-        state.loadLayer(layer)
+    for layer in levelEntity.layers:
+        level.loadLayer(layer)
       
-    return state
+    return level

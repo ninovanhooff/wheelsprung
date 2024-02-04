@@ -193,7 +193,7 @@ proc initGameBike*(state: GameState) =
   let space = state.space
   let dd = state.driveDirection
 
-  state.chassis = space.addChassis(state.initialChassisPosition)
+  state.chassis = space.addChassis(state.level.initialChassisPosition)
   state.rearWheel = state.addWheel(rearWheelOffset.transform(dd))
   state.frontWheel = state.addWheel(frontWheelOffset.transform(dd))
   state.swingArm = state.addSwingArm(swingArmPosOffset.transform(dd))

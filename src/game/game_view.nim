@@ -106,7 +106,7 @@ proc offset(polygon: Polygon, camera: Camera): Polygon =
 
 proc drawGroundPolygons(state: GameState) =
   let camera = state.camera
-  for polygon in state.groundPolygons:
+  for polygon in state.level.groundPolygons:
     # todo optimise: only draw if polygon is visible and not drawn to offscreen buffer yet
     gfx.fillPolygon(polygon.offset(camera), kColorBlack, kPolygonFillNonZero)
 
