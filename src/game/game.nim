@@ -21,7 +21,7 @@ const
   brakeTorque = 2_000.0
   timeStep = 1.0f/50.0f
 
-var gameState: GameState
+var state: GameState
 
 # device controls
 var actionThrottle = kButtonA
@@ -56,26 +56,26 @@ proc createSpace(level: Level): Space =
 
 proc newGameState(level: Level): GameState =
   let space = level.createSpace()
-  gameState = GameState(
+  state = GameState(
     level: level, 
     space: space,
     driveDirection: level.initialDriveDirection,
   )
-  initGameBike(gameState)
-  let riderPosition = level.initialChassisPosition + riderOffset.transform(gameState.driveDirection)
-  initGameRider(gameState, riderPosition)
-  return gameState
+  initGameBike(state)
+  let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)
+  initGameRider(state, riderPosition)
+  return state
 
 proc onResetGame() {.raises: [].} =
-  gameState = newGameState(gameState.level)
+  state = newGameState(state.level)
 
 proc initGame*() {.raises: [].} =
-  gameState = newGameState(loadLevel("levels/fallbackLevel.json"))
+  state = newGameState(loadLevel("levels/fallbackLevel.json"))
   initGameView()
 
 proc onThrottle*() =
-  let rearWheel = gameState.rearWheel
-  let dd = gameState.driveDirection
+  let rearWheel = state.rearWheel
+  let dd = state.driveDirection
   if rearWheel.angularVelocity * dd > maxWheelAngularVelocity:
     print("ignore throttle. back wheel already at max angular velocity")
     return
@@ -83,8 +83,8 @@ proc onThrottle*() =
   rearWheel.torque = throttleTorque * dd
 
 proc onBrake*() =
-  let rearWheel = gameState.rearWheel
-  let frontWheel = gameState.frontWheel
+  let rearWheel = state.rearWheel
+  let frontWheel = state.frontWheel
   rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
@@ -148,9 +148,8 @@ proc handleInput(state: GameState) =
     state.onFlipDirection()
 
 proc updateChipmunkGame*() {.cdecl, raises: [].} =
-  handleInput(gameState)
-  let state = gameState
-  gameState.updateAttitudeAdjust()
+  handleInput(state)
+  state.updateAttitudeAdjust()
 
   state.space.step(timeStep)
   state.updateTimers()
@@ -159,4 +158,4 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
   print("camera: " & $state.camera)
-  drawChipmunkGame(addr gameState) # todo pass as object?
+  drawChipmunkGame(addr state) # todo pass as object?
