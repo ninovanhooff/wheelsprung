@@ -42,8 +42,7 @@ proc initGameView*() =
     riderUpperLegImageTable = gfx.newBitmapTable("images/rider/upper-leg")
     riderLowerLegImageTable = gfx.newBitmapTable("images/rider/lower-leg")
   except:
-    let msg = getCurrentExceptionMsg()
-    echo msg
+    echo getCurrentExceptionMsg()
 
 proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: LCDColor) =
   # covert from center position to top left

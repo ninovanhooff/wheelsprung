@@ -29,11 +29,13 @@ var actionBrake = kButtonB
 var actionFlipDirection = kButtonDown
 var actionLeanLeft = kButtonLeft
 var actionLeanRight = kButtonRight
+var actionResetGame = kButtonUp
 # simulator overrides
 if defined simulator:
   actionThrottle = kButtonUp
   actionBrake = kButtonDown
   actionFlipDirection = kButtonB
+  actionResetGame = kButtonA
 
 proc toVect(vertex: Vertex): Vect =
   return v(vertex[0].Float, vertex[1].Float)
@@ -124,6 +126,10 @@ proc handleInput(state: GameState) =
 
   let buttonsState = playdate.system.getButtonsState()
 
+  if actionResetGame in buttonsState.pushed:
+    onResetGame()
+    return
+
   if actionThrottle in buttonsState.current:
     state.isThrottlePressed = true
     onThrottle()
@@ -142,8 +148,8 @@ proc handleInput(state: GameState) =
     state.onFlipDirection()
 
 proc updateChipmunkGame*() {.cdecl, raises: [].} =
-  let state = gameState
   handleInput(gameState)
+  let state = gameState
   gameState.updateAttitudeAdjust()
 
   state.space.step(timeStep)
@@ -152,4 +158,5 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   updateGameBike(state)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
+  print("camera: " & $state.camera)
   drawChipmunkGame(addr gameState) # todo pass as object?
