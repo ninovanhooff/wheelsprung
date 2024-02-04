@@ -3,7 +3,6 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
 import levels
-import sound/bike_sound
 import game_bike, game_rider
 import game_types
 import game_view
@@ -38,11 +37,15 @@ if defined simulator:
 
 proc initGame*() {.raises: [].} =
   state = loadLevel("levels/fallbackLevel.json")
-  initBikePhysics(state)
+  initGameBike(state)
   let riderPosition = state.initialChassisPosition + riderOffset.transform(state.driveDirection)
-  initRiderPhysics(state, riderPosition)
-  initBikeSound()
+  initGameRider(state, riderPosition)
   initGameView()
+
+proc onResetGame() {.raises: [].} =
+  initGameBike(state)
+  let riderPosition = state.initialChassisPosition + riderOffset.transform(state.driveDirection)
+  initGameRider(state, riderPosition)
 
 proc onThrottle*() =
   let rearWheel = state.rearWheel
@@ -121,7 +124,7 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   state.space.step(timeStep)
   state.updateTimers()
 
-  updateBikeSound(state)
+  updateGameBike(state)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
   drawChipmunkGame(addr state)

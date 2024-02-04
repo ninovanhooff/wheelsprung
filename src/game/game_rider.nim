@@ -220,7 +220,7 @@ proc setRiderConstraints(state: GameState) =
 #     space.removeShape(shape)
 #   state.riderShapes.setLen(0)
 
-proc initRiderPhysics*(state: GameState, riderPosition: Vect) =
+proc initGameRider*(state: GameState, riderPosition: Vect) =
   state.addRider(riderPosition)
   state.setRiderConstraints()
 

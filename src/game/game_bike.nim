@@ -1,6 +1,7 @@
 import chipmunk7
 import std/math
 import game_types
+import sound/bike_sound
 import chipmunk_utils
 
 let
@@ -188,7 +189,7 @@ proc flipBikeDirection*(state: GameState) =
 
   state.setBikeConstraints()
 
-proc initBikePhysics*(state: GameState) =
+proc initGameBike*(state: GameState) =
   let space = state.space
   let dd = state.driveDirection
 
@@ -199,3 +200,7 @@ proc initBikePhysics*(state: GameState) =
   state.forkArm = state.addForkArm(forkArmPosOffset.transform(dd))
   
   state.setBikeConstraints()
+  initBikeSound()
+
+proc updateGameBike*(state: GameState) =
+  updateBikeSound(state)

@@ -28,7 +28,11 @@ type GameState* = ref object of RootObj
     camera*: Camera
     driveDirection*: DriveDirection
 
+    ## Level properties
+    groundPolygons*: seq[Polygon]
     initialChassisPosition*: Vect
+
+    ## Player
 
     # bike bodies
     rearWheel*: Body
@@ -46,9 +50,6 @@ type GameState* = ref object of RootObj
     riderUpperLeg*: Body
     riderLowerLeg*: Body
     # keep in sync with getRiderBodies()
-
-    # Level Objects
-    groundPolygons*: seq[Polygon]
 
     # Bike Constraints
     forkArmSpring*: DampedSpring
