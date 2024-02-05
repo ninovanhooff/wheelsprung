@@ -72,12 +72,10 @@ proc onResetGame() {.raises: [].} =
 proc initGame*() {.raises: [].} =
   state = newGameState(loadLevel("levels/fallbackLevel.json"))
 
-  # Add a checkmark menu item that plays a sound when switched and unpaused
-  discard playdate.system.addMenuItem("Restart level",
-      proc(menuItem: PDMenuItemButton) =
-        onResetGame()
+  discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
+    onResetGame()
   )
-
+  
   initGameView()
 
 proc onThrottle*() =
