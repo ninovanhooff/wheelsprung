@@ -29,13 +29,11 @@ var actionBrake = kButtonB
 var actionFlipDirection = kButtonDown
 var actionLeanLeft = kButtonLeft
 var actionLeanRight = kButtonRight
-var actionResetGame = kButtonUp
 # simulator overrides
 if defined simulator:
   actionThrottle = kButtonUp
   actionBrake = kButtonDown
   actionFlipDirection = kButtonB
-  actionResetGame = kButtonA
 
 proc toVect(vertex: Vertex): Vect =
   return v(vertex[0].Float, vertex[1].Float)
@@ -75,7 +73,7 @@ proc initGame*() {.raises: [].} =
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     onResetGame()
   )
-  
+
   initGameView()
 
 proc onThrottle*() =
@@ -130,10 +128,6 @@ proc handleInput(state: GameState) =
   state.isThrottlePressed = false
 
   let buttonsState = playdate.system.getButtonsState()
-
-  if actionResetGame in buttonsState.pushed:
-    onResetGame()
-    return
 
   if actionThrottle in buttonsState.current:
     state.isThrottlePressed = true
