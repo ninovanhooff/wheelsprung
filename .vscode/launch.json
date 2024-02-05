@@ -5,24 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "cppdbg",
+            "type": "lldb",
             "request": "launch",
             "name": "Debug PDX",
             "program": "${env:PLAYDATE_SDK_PATH}/bin/Playdate Simulator",
             "args": [
                 "${workspaceFolder}/${workspaceFolderBasename}.pdx"
             ],
+            "initCommands": ["command source ${workspaceRoot}/.lldbinit"],
             "cwd": "${workspaceFolder}",
             "osx": {
-                "MIMode": "lldb",
                 "program": "${env:PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app"
             },
             "linux": {
-                "MIMode": "gdb",
                 "program": "${env:PLAYDATE_SDK_PATH}/bin/PlaydateSimulator"
             },
             "windows": {
-                "MIMode": "gdb",
                 "program": "${env:PLAYDATE_SDK_PATH}/bin/PlaydateSimulator.exe"
             }
         },
@@ -50,7 +48,7 @@
             }
         },
         {
-            "type": "cppdbg",
+            "type": "lldb",
             "request": "launch",
             "name": "Build Sim. & Debug PDX",
             "program": "${env:PLAYDATE_SDK_PATH}/bin/Playdate Simulator",
@@ -59,16 +57,14 @@
                 "${workspaceFolder}/${workspaceFolderBasename}.pdx"
             ],
             "cwd": "${workspaceFolder}",
+            "initCommands": ["command source ${workspaceRoot}/.lldbinit"],
             "osx": {
-                "MIMode": "lldb",
                 "program": "${env:PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app"
             },
             "linux": {
-                "MIMode": "gdb",
                 "program": "${env:PLAYDATE_SDK_PATH}/bin/PlaydateSimulator"
             },
             "windows": {
-                "MIMode": "gdb",
                 "program": "${env:PLAYDATE_SDK_PATH}/bin/PlaydateSimulator.exe"
             }
         },
