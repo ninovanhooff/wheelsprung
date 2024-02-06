@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="400" height="50" tilewidth="8" tileheight="8" infinite="0" nextlayerid="7" nextobjectid="22">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="400" height="50" tilewidth="8" tileheight="8" infinite="0" nextlayerid="8" nextobjectid="24">
  <editorsettings>
   <export target="../../../../Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.wheelsprung/levels/fallbackLevel.json" format="json"/>
  </editorsettings>
+ <tileset firstgid="1" source="../editor/game_objects.tsx"/>
  <objectgroup color="#73fa79" id="2" name="Object Layer 1">
   <object id="17" x="881" y="118">
    <polygon points="-39,2 43,-3 105,-34 123,-72 130,-126 123,-161 108,-203 76,-230 32,-241 -32,-237 -61,-218 -94,-180 -108,-130 -108,-99 -137,-99 -134,-287 119,-283 199,-214 203,-92 119,7 54,34 -3,34"/>
@@ -22,5 +23,10 @@
    <polygon points="0,0 -320,0 -320,8 0,8"/>
   </object>
  </objectgroup>
- <objectgroup id="6" name="rects"/>
+ <objectgroup id="7" name="coinLayer">
+  <object id="23" gid="2" x="886" y="-82" width="20" height="20"/>
+ </objectgroup>
+ <objectgroup id="6" name="playerLayer">
+  <object id="22" gid="1" x="638" y="109" width="66" height="59"/>
+ </objectgroup>
 </map>

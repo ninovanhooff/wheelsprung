@@ -131,7 +131,7 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   # print("camera: " & $camera)
   let driveDirection = state.driveDirection
 
-  gfx.clear(bgPattern)
+  # gfx.clear(bgPattern)
 
   if debugDrawLevel:
     state.drawGroundPolygons()

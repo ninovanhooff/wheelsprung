@@ -12,6 +12,7 @@ type
         y*: int32
     LevelObjectEntity = ref object of RootObj
         x, y: int32
+        gid: Option[int32]
         polygon: Option[seq[LevelVertexEntity]]
         polyline: Option[seq[LevelVertexEntity]]
     
@@ -59,23 +60,28 @@ proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
 
 proc `+`*(v1, v2: Vertex): Vertex = [v1[0] + v2[0], v1[1] + v2[1]]
 
+proc loadPolygon(level: Level, obj: LevelObjectEntity) =
+    let objOffset: Vertex = [obj.x, obj.y]
+    var polygon: Polygon = obj.getPolygon()
+    if polygon.len < 2:
+        return
+
+    let lastIndex = polygon.high
+
+    # Offset the polygon by the object's position (localToWorld)
+    for i in 0..lastIndex:
+        polygon[i] = polygon[i] + objOffset
+        print("segment: " & $polygon[i])
+
+    level.groundPolygons.add(polygon)
+
+
+
 proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
     if layer.objects.isNone: return
 
     for obj in layer.objects.get:
-        let objOffset: Vertex = [obj.x, obj.y]
-        var polygon: Polygon = obj.getPolygon()
-        if polygon.len < 2:
-            continue
-
-        let lastIndex = polygon.high
-
-        # Offset the polygon by the object's position (localToWorld)
-        for i in 0..lastIndex:
-            polygon[i] = polygon[i] + objOffset
-            print("segment: " & $polygon[i])
-
-        level.groundPolygons.add(polygon)
+        level.loadPolygon(obj)
 
 proc loadLevel*(path: string): Level =
     let level = Level(
