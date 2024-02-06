@@ -14,9 +14,11 @@ type
     Vertex* = Int32x2
     Polygon* = seq[Vertex]
     Time* = float32
+    Coin* = Vect
 
 type Level* = ref object of RootObj
     groundPolygons*: seq[Polygon]
+    coins*: seq[Coin]
     initialChassisPosition*: Vect
     initialDriveDirection*: DriveDirection
 
