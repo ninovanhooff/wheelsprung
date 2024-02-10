@@ -1,5 +1,6 @@
 import chipmunk7
 import options
+import graphics_types
 
 
 type Camera* = Vect
@@ -10,11 +11,8 @@ const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
 
 type
-    Int32x2 = array[2, int32]
-    Vertex* = Int32x2
-    Polygon* = seq[Vertex]
     Time* = float32
-    Coin* = Vect
+    Coin* = Vertex
 
 type Level* = ref object of RootObj
     groundPolygons*: seq[Polygon]
@@ -24,6 +22,8 @@ type Level* = ref object of RootObj
 
 type GameState* = ref object of RootObj
     level*: Level
+
+    remainingCoins*: seq[Coin]
 
     ## Input
     isThrottlePressed*: bool

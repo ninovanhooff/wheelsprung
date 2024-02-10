@@ -2,9 +2,9 @@ import options
 import std/sequtils
 import chipmunk7
 import playdate/api
-import utils, chipmunk_utils
+import utils, chipmunk_utils, graphics_utils
 import levels
-import game_bike, game_rider
+import game_bike, game_rider, game_coin
 import game_types
 import game_view
 
@@ -19,6 +19,8 @@ const
   throttleTorque = 3_500.0
   # applied to both wheels
   brakeTorque = 2_000.0
+  coinRadius = 10.0
+  vCoinOffset = v(coinRadius, coinRadius)
   timeStep = 1.0f/50.0f
 
 var state: GameState
@@ -35,9 +37,6 @@ if defined simulator:
   actionBrake = kButtonDown
   actionFlipDirection = kButtonB
 
-proc toVect(vertex: Vertex): Vect =
-  return v(vertex[0].Float, vertex[1].Float)
-
 proc createSpace(level: Level): Space =
   let space = newSpace()
   space.gravity = v(0.0, 100.0)
@@ -48,7 +47,11 @@ proc createSpace(level: Level): Space =
     for i in 1..vects.high:
       let shape = newSegmentShape(space.staticBody, vects[i-1], vects[i], 0.0)
       shape.friction = groundFriction
-      discard space.addShape(shape) 
+      discard space.addShape(shape)
+
+    for coin in level.coins:
+      let shape = newCircleShape(space.staticBody, coinRadius, toVect(coin) + vCoinOffset)
+      discard space.addShape(shape)
 
   return space
 
@@ -62,6 +65,8 @@ proc newGameState(level: Level): GameState =
   initGameBike(state)
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initGameRider(state, riderPosition)
+  
+  initGameCoins(state)
   return state
 
 proc onResetGame() {.raises: [].} =

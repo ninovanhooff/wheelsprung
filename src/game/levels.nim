@@ -5,6 +5,8 @@ import std/json
 import std/sequtils
 import playdate/api
 import game_types
+import graphics_types
+import graphics_utils
 
 type 
   LevelVertexEntity {.bycopy.} = object
@@ -33,6 +35,8 @@ const
   GID_UNUSED_FLIP_MASK: uint32 = 1 shl 28
   GID_FLIP_MASK: uint32 = GID_HFLIP_MASK or GID_VFLIP_MASK or GID_DIAG_FLIP_MASK or GID_UNUSED_FLIP_MASK
   GID_CLASS_MASK: uint32 = not GID_FLIP_MASK
+
+  vPlayerChassisOffset: Vect = v(0.0, 39.0)
 
 let kFileReadAny: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
@@ -96,19 +100,19 @@ proc loadGid(level: Level, obj: LevelObjectEntity) =
   let classId: ClassIds = (gid and GID_CLASS_MASK).ClassIds
   print("classId: " & $classId)
 
-  let vCenter = v(obj.x.Float, obj.y.Float)
+  let position: Vertex = [obj.x, obj.y]
 
   case classId:
     of ClassIds.Player:
       # player = bike + rider. chassis center is 7 pixels below the player center
-      level.initialChassisPosition = vCenter + v(0.0, 10.0)
+      level.initialChassisPosition = position.toVect + vPlayerChassisOffset
       if hFlip:
         level.initialDriveDirection = DD_LEFT
       else:
         level.initialDriveDirection = DD_RIGHT
         
     of ClassIds.Coin:
-      level.coins.add(vCenter)
+      level.coins.add(position)
 
 proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return

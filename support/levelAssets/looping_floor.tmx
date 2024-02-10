@@ -25,9 +25,9 @@
  </objectgroup>
  <objectgroup id="7" name="coinLayer">
   <object id="23" gid="2" x="886" y="-82" width="20" height="20"/>
-  <object id="26" gid="2" x="106" y="110" width="20" height="20"/>
+  <object id="26" gid="2" x="110" y="100" width="20" height="20"/>
  </objectgroup>
  <objectgroup id="6" name="playerLayer">
-  <object id="22" gid="2147483649" x="33" y="82" width="66" height="60"/>
+  <object id="22" gid="2147483649" x="30" y="60" width="66" height="60"/>
  </objectgroup>
 </map>

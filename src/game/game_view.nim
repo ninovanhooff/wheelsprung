@@ -4,7 +4,8 @@ import std/sequtils
 import std/sugar
 import options
 import chipmunk7
-import game_types
+import game_types, graphics_types
+import utils
 import graphics_utils
 import chipmunk_utils
 import globals
@@ -27,14 +28,12 @@ var
   riderLowerArmImageTable: LCDBitmapTable
   riderUpperLegImageTable: LCDBitmapTable
   riderLowerLegImageTable: LCDBitmapTable
+  coinImage: LCDBitmap
   bgImageTile: LCDBitmap
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
   frontForkAttachmentScreenPos: Vect
-
-proc toVertex(v: Vect): Vertex = 
-  [v.x.round.int32, v.y.round.int32]
 
 
 proc initGameView*() =
@@ -47,6 +46,8 @@ proc initGameView*() =
     riderLowerArmImageTable = gfx.newBitmapTable("images/rider/lower-arm")
     riderUpperLegImageTable = gfx.newBitmapTable("images/rider/upper-leg")
     riderLowerLegImageTable = gfx.newBitmapTable("images/rider/lower-leg")
+
+    coinImage = gfx.newBitmap("images/coin")
 
     bgImageTile = gfx.newBitmap(patternSize,patternSize, bgPattern)
   except:
@@ -73,7 +74,7 @@ proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
   let camera = state.camera
   if shape.kind == cpCircleShape:
     let circle = cast[CircleShape](shape)
-    drawCircle(camera, circle.body.position, circle.radius, circle.body.angle, kColorBlack)
+    drawCircle(camera, circle.body.position + circle.offset, circle.radius, circle.body.angle, kColorBlack)
   elif shape.kind == cpSegmentShape:
     let segment = cast[SegmentShape](shape)
     drawSegment(camera, segment, kColorBlack)
@@ -152,12 +153,12 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     let rearWheel = state.rearWheel
     let rearWheelScreenPos = rearWheel.position - camera
     bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
-
-    # swingArm and front fork
+    
     gfx.setLineCapStyle(kLineCapStyleRound)
+
+    # swingArm
     swingArmAttachmentScreenPos = 
       localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - camera
-
     drawLineOutlined(
       swingArmAttachmentScreenPos, 
       rearWheelScreenPos, 
@@ -165,6 +166,7 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
       kColorWhite, 
     )
 
+    # frontFork
     frontForkAttachmentScreenPos = 
       localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - camera
     drawLineOutlined(
@@ -173,7 +175,6 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
       4, 
       kColorWhite, 
     )
-
 
     # chassis
     let chassisScreenPos = chassis.position - camera
@@ -197,6 +198,11 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
     riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
     riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
+
+    # coins
+    for coin in state.remainingCoins:
+      let coinScreenPos = coin - camVertex
+      coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
   
   if debugDrawShapes:
     eachShape(statePtr.space, shapeIter, statePtr)
