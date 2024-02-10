@@ -13,9 +13,10 @@ type
     x*: int32
     y*: int32
   LevelObjectEntity = ref object of RootObj
+    id: int32 # unique object id
+    gid: Option[uint32] # tile id including flip flags
     x, y: int32
     width*, height*: int32
-    gid: Option[uint32]
     polygon: Option[seq[LevelVertexEntity]]
     polyline: Option[seq[LevelVertexEntity]]
   

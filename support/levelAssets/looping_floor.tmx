@@ -28,6 +28,6 @@
   <object id="26" gid="2" x="110" y="100" width="20" height="20"/>
  </objectgroup>
  <objectgroup id="6" name="playerLayer">
-  <object id="22" gid="2147483649" x="30" y="60" width="66" height="60"/>
+  <object id="22" gid="1" x="30" y="60" width="66" height="60"/>
  </objectgroup>
 </map>

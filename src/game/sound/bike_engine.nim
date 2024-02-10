@@ -63,7 +63,6 @@ proc updateBikeEngine*(state: GameState) =
     if currentPlayer.volume.left < maxVolume:
         currentPlayer.volume = min(maxVolume, currentPlayer.volume.left + volumeFadeSpeed)
     if fadeoutPlayer != nil:
-        print("fadeoutPlayer volume: " & $fadeoutPlayer.volume.left & " currentPlayer volume: " & $currentPlayer.volume.left)
         if fadeoutPlayer.volume.left > 0.01f:
             fadeoutPlayer.volume = max(0.0f, fadeoutPlayer.volume.left - volumeFadeSpeed)
         else:

@@ -37,9 +37,36 @@ if defined simulator:
   actionBrake = kButtonDown
   actionFlipDirection = kButtonB
 
+let coinPostStepCallback: PostStepFunc = proc(space: Space, key: pointer, data: pointer) {.cdecl.} =
+  print("post step callback for space: " & repr(space) & " key: " & repr(key) & " data: " & repr(data))
+  let shape = cast[Shape](key)
+  let coinIndex = cast[int](shape.userData)
+  print("shape data:" & repr(shape))
+  space.removeShape(shape)
+  let coinToDelete = state.level.coins[coinIndex]
+  print("deleting coin: " & repr(coinToDelete))
+  let deleteIndex = state.remainingCoins.find(coinToDelete)
+  if deleteIndex == -1:
+    print("coin not found in remaining coins: " & repr(coinToDelete))
+  else:
+    print("deleting coin at index: " & repr(deleteIndex))
+    state.remainingCoins.delete(deleteIndex)
+
+let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; data: pointer): bool {.cdecl.} =
+  print("coin collision for arbiter: " & repr(arb) & " space: " & repr(space) & " data: " & repr(data))
+  print("space locked: " & $space.isLocked)
+  var 
+    shapeA: Shape
+    shapeB: Shape
+  arb.shapes(addr(shapeA), addr(shapeB))
+  space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
+
 proc createSpace(level: Level): Space =
   let space = newSpace()
   space.gravity = v(0.0, 100.0)
+
+  var handler = space.addCollisionHandler(collisionTypeCoin, collisionTypeWheel)
+  handler.beginFunc = coinBeginFunc
 
   # Add the polygons as segment shapes to the physics space
   for polygon in level.groundPolygons:
@@ -49,8 +76,11 @@ proc createSpace(level: Level): Space =
       shape.friction = groundFriction
       discard space.addShape(shape)
 
-    for coin in level.coins:
-      let shape = newCircleShape(space.staticBody, coinRadius, toVect(coin) + vCoinOffset)
+    for index, coin in level.coins:
+      let shape: Shape = newCircleShape(space.staticBody, coinRadius, toVect(coin) + vCoinOffset)
+      shape.sensor = true # only detect collisions, don't apply forces to colliders
+      shape.collisionType = collisionTypeCoin
+      shape.userData = cast[DataPointer](index)
       discard space.addShape(shape)
 
   return space

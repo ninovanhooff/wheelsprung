@@ -1,3 +1,4 @@
+import std/tables
 import chipmunk7
 import options
 import graphics_types
@@ -9,6 +10,11 @@ type DriveDirection* = Float
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
+
+# todo create enum
+const collisionTypeCoin* = cast[CollisionType](1)
+const collisionTypeWheel* = cast[CollisionType](2)
+const collisionTypeHelmet* = cast[CollisionType](3)
 
 type
     Time* = float32
