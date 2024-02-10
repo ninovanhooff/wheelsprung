@@ -41,8 +41,6 @@ proc updateBikeThud*(state: GameState) =
     curContactImpulse > minContactImpulse and 
     not curPlayer.isPlaying:
       curPlayer = getRandomThud()
-      print("playing contact thud for impulse: " & $curContactImpulse)
       curPlayer.play(1, rand(0.9f .. 1.1f))
       curPlayer.volume=lerp(0.0, 1.0, curContactImpulse / maxContactImpulse)
-  print("curContactImpulse: " & $curContactImpulse)
   prevContactImpulse = curContactImpulse

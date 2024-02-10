@@ -156,5 +156,4 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   updateGameBike(state)
 
   state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
-  print("camera: " & $state.camera)
   drawChipmunkGame(addr state) # todo pass as object?

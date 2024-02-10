@@ -128,16 +128,15 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let chassis = state.chassis
   let camera = state.camera
-  # print("camera: " & $camera)
   let driveDirection = state.driveDirection
 
-  # gfx.clear(bgPattern)
+  gfx.fillRect(0,0, 400, 240, bgPattern)
 
   if debugDrawLevel:
     state.drawGroundPolygons()
 
   if debugDrawTextures:
-     # wheels
+    # wheels
     let frontWheel = state.frontWheel
     let frontWheelScreenPos = frontWheel.position - camera
     bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
