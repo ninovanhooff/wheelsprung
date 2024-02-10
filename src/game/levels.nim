@@ -24,13 +24,14 @@ type
     layers: seq[LayerEntity]
 
   ClassIds {.pure.} = enum
-    Player = 1, Coin = 2
+    Player = 1'u32, Coin = 2'u32
 
-const 
+const
   GID_HFLIP_MASK: uint32 = 1 shl 31
   GID_VFLIP_MASK: uint32 = 1 shl 30
   GID_DIAG_FLIP_MASK: uint32 = 1 shl 29
-  GID_FLIP_MASK: uint32 = GID_HFLIP_MASK or GID_VFLIP_MASK or GID_DIAG_FLIP_MASK
+  GID_UNUSED_FLIP_MASK: uint32 = 1 shl 28
+  GID_FLIP_MASK: uint32 = GID_HFLIP_MASK or GID_VFLIP_MASK or GID_DIAG_FLIP_MASK or GID_UNUSED_FLIP_MASK
   GID_CLASS_MASK: uint32 = not GID_FLIP_MASK
 
 let kFileReadAny: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
@@ -87,29 +88,27 @@ proc loadPolygon(level: Level, obj: LevelObjectEntity) =
   level.groundPolygons.add(polygon)
 
 proc loadGid(level: Level, obj: LevelObjectEntity) =
-  if obj.gid.isSome:
-    let gid = obj.gid.get
-    let hFlip: bool = (gid and GID_HFLIP_MASK).bool
-    let blah = GID_CLASS_MASK
-    let classId: ClassIds = (gid and GID_CLASS_MASK).ClassIds
+  if obj.gid.isNone:
+    return
 
-    # TODO check if tyhe uint32 are correct, casting probably not needed
-    let vCenter = v(
-      obj.x.Float + obj.width.Float*0.5, 
-      obj.y.Float - obj.height.Float*0.5 # Tiled uses bottom-left as origin
-    )
+  let gid = obj.gid.get
+  let hFlip: bool = (gid and GID_HFLIP_MASK).bool
+  let classId: ClassIds = (gid and GID_CLASS_MASK).ClassIds
+  print("classId: " & $classId)
 
-    case classId:
-      of ClassIds.Player:
-        # player = bike + rider. chassis center is 7 pixels below the player center
-        level.initialChassisPosition = vCenter + v(0.0, 7.0)
-        if hFlip:
-          level.initialDriveDirection = DD_LEFT
-        else:
-          level.initialDriveDirection = DD_RIGHT
-          
-      of ClassIds.Coin:
-        level.coins.add(vCenter)
+  let vCenter = v(obj.x.Float, obj.y.Float)
+
+  case classId:
+    of ClassIds.Player:
+      # player = bike + rider. chassis center is 7 pixels below the player center
+      level.initialChassisPosition = vCenter + v(0.0, 10.0)
+      if hFlip:
+        level.initialDriveDirection = DD_LEFT
+      else:
+        level.initialDriveDirection = DD_RIGHT
+        
+    of ClassIds.Coin:
+      level.coins.add(vCenter)
 
 proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
