@@ -12,6 +12,7 @@ import globals
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
   frontForkChassisAttachmentOffset = v(15.0, -3.0)
+  patternSize: int32 = 8'i32
 
 let
   bgPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
@@ -26,10 +27,15 @@ var
   riderLowerArmImageTable: LCDBitmapTable
   riderUpperLegImageTable: LCDBitmapTable
   riderLowerLegImageTable: LCDBitmapTable
+  bgImageTile: LCDBitmap
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
   frontForkAttachmentScreenPos: Vect
+
+proc toVertex(v: Vect): Vertex = 
+  [v.x.round.int32, v.y.round.int32]
+
 
 proc initGameView*() =
   try:
@@ -41,6 +47,8 @@ proc initGameView*() =
     riderLowerArmImageTable = gfx.newBitmapTable("images/rider/lower-arm")
     riderUpperLegImageTable = gfx.newBitmapTable("images/rider/upper-leg")
     riderLowerLegImageTable = gfx.newBitmapTable("images/rider/lower-leg")
+
+    bgImageTile = gfx.newBitmap(patternSize,patternSize, bgPattern)
   except:
     echo getCurrentExceptionMsg()
 
@@ -128,9 +136,10 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let chassis = state.chassis
   let camera = state.camera
+  let camVertex = camera.toVertex()
   let driveDirection = state.driveDirection
 
-  gfx.fillRect(0,0, 400, 240, bgPattern)
+  bgImageTile.drawTiled(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, 400, 240, kBitmapUnflipped)
 
   if debugDrawLevel:
     state.drawGroundPolygons()
