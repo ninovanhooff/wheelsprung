@@ -37,7 +37,8 @@ const
   GID_FLIP_MASK: uint32 = GID_HFLIP_MASK or GID_VFLIP_MASK or GID_DIAG_FLIP_MASK or GID_UNUSED_FLIP_MASK
   GID_CLASS_MASK: uint32 = not GID_FLIP_MASK
 
-  vPlayerChassisOffset: Vect = v(0.0, 39.0)
+  ## offset of Chassis position (center Vect) from Player object top-left position
+  vPlayerChassisOffset: Vect = v(30.0, 39.0)
 
 let kFileReadAny: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
