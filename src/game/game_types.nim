@@ -11,10 +11,11 @@ type DriveDirection* = Float
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
 
-# todo create enum
-const collisionTypeCoin* = cast[CollisionType](1)
-const collisionTypeWheel* = cast[CollisionType](2)
-const collisionTypeHelmet* = cast[CollisionType](3)
+const GameCollisionTypes* = (
+    Coin: cast[CollisionType](1), 
+    Wheel: cast[CollisionType](2),
+    Helmet: cast[CollisionType](3),
+)
 
 type
     Time* = float32
@@ -33,7 +34,6 @@ type GameState* = ref object of RootObj
 
     ## Input
     isThrottlePressed*: bool
-
 
     ## Physics
     space*: Space
