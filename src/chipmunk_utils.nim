@@ -33,7 +33,9 @@ proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 
 
     return body
 
-proc addCircle*(space: Space, pos: Vect, radius: float32, mass: float32, angle: float32 = 0f) : Body =
+proc addCircle*(
+  space: Space, pos: Vect, radius: float32, mass: float32, angle: float32 = 0f, 
+  collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE) : Body =
     let body = space.addBody(
         newBody(mass, momentForCircle(mass, 0f, radius, vzero))
     )
@@ -41,6 +43,7 @@ proc addCircle*(space: Space, pos: Vect, radius: float32, mass: float32, angle: 
     body.angle = angle
 
     let shape = space.addShape(newCircleShape(body, radius, vzero))
-    shape.filter = SHAPE_FILTER_NONE # no collisions
+    shape.filter = shapeFilter
+    shape.collisionType = collisionType
 
     return body

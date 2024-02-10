@@ -4,22 +4,30 @@ import options
 import graphics_types
 
 
-type Camera* = Vect
+type 
+    Camera* = Vect
+    DriveDirection* = Float
 
-type DriveDirection* = Float
+    Time* = float32
+    Coin* = Vertex
+    GameCollisionType* = CollisionType
+
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
 
 const GameCollisionTypes* = (
-    Coin: cast[CollisionType](1), 
-    Wheel: cast[CollisionType](2),
-    Helmet: cast[CollisionType](3),
+    None: cast[GameCollisionType](0), 
+    Coin: cast[GameCollisionType](1), 
+    Player: cast[GameCollisionType](2), # wheels and rider head
 )
 
-type
-    Time* = float32
-    Coin* = Vertex
+const PLAYER_MASK_BIT* = cuint(1 shl 31)
+const TERRAIN_MASK_BIT* = cuint(1 shl 30)
+const PLAYER_SHAPE_FILTER*: ShapeFilter =  ShapeFilter(
+    categories: PLAYER_MASK_BIT,
+    mask: TERRAIN_MASK_BIT
+)
 
 type Level* = ref object of RootObj
     groundPolygons*: seq[Polygon]

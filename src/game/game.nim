@@ -64,7 +64,7 @@ proc createSpace(level: Level): Space =
   let space = newSpace()
   space.gravity = v(0.0, 100.0)
 
-  var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Wheel)
+  var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Player)
   handler.beginFunc = coinBeginFunc
 
   # Add the polygons as segment shapes to the physics space

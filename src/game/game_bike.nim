@@ -30,7 +30,8 @@ proc addWheel(state: GameState, chassisOffset: Vect): Body =
   body.position = localToWorld(state.chassis, chassisOffset)
 
   let shape = space.addShape(newCircleShape(body, radius, vzero))
-  shape.collision_type = GameCollisionTypes.Wheel
+  shape.filter = PLAYER_SHAPE_FILTER
+  shape.collision_type = GameCollisionTypes.Player
   shape.friction = wheelFriction
   state.bikeShapes.add(shape)
 
