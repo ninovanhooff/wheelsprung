@@ -17,15 +17,35 @@ const DD_RIGHT*: DriveDirection = 1.0
 
 const GameCollisionTypes* = (
     None: cast[GameCollisionType](0), 
-    Coin: cast[GameCollisionType](1), 
-    Player: cast[GameCollisionType](2), # wheels and rider head
+    Player: cast[GameCollisionType](1), # wheels and rider head
+    Terrain: cast[GameCollisionType](2),
+    Coin: cast[GameCollisionType](3), 
+    Killer: cast[GameCollisionType](4),
 )
 
-const PLAYER_MASK_BIT* = cuint(1 shl 31)
-const TERRAIN_MASK_BIT* = cuint(1 shl 30)
-const PLAYER_SHAPE_FILTER*: ShapeFilter =  ShapeFilter(
-    categories: PLAYER_MASK_BIT,
-    mask: TERRAIN_MASK_BIT
+
+const PLAYER_MASK_BIT = cuint(1 shl 31)
+const TERRAIN_MASK_BIT = cuint(1 shl 30)
+const COIN_MASK_BIT = cuint(1 shl 29)
+const KILLER_MASK_BIT = cuint(1 shl 28)
+
+const GameShapeFilters* = (
+    Player: ShapeFilter(
+        categories: PLAYER_MASK_BIT,
+        mask: TERRAIN_MASK_BIT or COIN_MASK_BIT or KILLER_MASK_BIT
+    ),
+    Terrain: ShapeFilter(
+        categories: TERRAIN_MASK_BIT,
+        mask: PLAYER_MASK_BIT
+    ),
+    Coin: ShapeFilter(
+        categories: COIN_MASK_BIT,
+        mask: PLAYER_MASK_BIT
+    ),
+    Killer: ShapeFilter(
+        categories: KILLER_MASK_BIT,
+        mask: PLAYER_MASK_BIT
+    ),
 )
 
 type Level* = ref object of RootObj

@@ -8,6 +8,8 @@ proc initGameKillers*(state: GameState) =
     pos = v(80.0,100.0),
     radius = 8.0,
     mass = 1.0,
+    shapeFilter = GameShapeFilters.Killer,
+    collisionType = GameCollisionTypes.Killer,
   )
 
   body.bodyType = BODY_TYPE_KINEMATIC

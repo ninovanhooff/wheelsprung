@@ -53,12 +53,21 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
     state.remainingCoins.delete(deleteIndex)
 
 let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  print("coin collision for arbiter")
   var 
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
-  space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
+  print("coin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
+  false # don't process the collision further
+
+let killerBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  var 
+    shapeA: Shape
+    shapeB: Shape
+  arb.shapes(addr(shapeA), addr(shapeB))
+  print("killer collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  false # don't process the collision further
 
 proc createSpace(level: Level): Space =
   let space = newSpace()
@@ -66,12 +75,16 @@ proc createSpace(level: Level): Space =
 
   var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Player)
   handler.beginFunc = coinBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Killer, GameCollisionTypes.Player)
+  handler.beginFunc = killerBeginFunc
 
   # Add the polygons as segment shapes to the physics space
   for polygon in level.groundPolygons:
     let vects: seq[Vect] = polygon.map(toVect)
     for i in 1..vects.high:
       let shape = newSegmentShape(space.staticBody, vects[i-1], vects[i], 0.0)
+      shape.filter = GameShapeFilters.Terrain
+      shape.collisionType = GameCollisionTypes.Terrain
       shape.friction = groundFriction
       discard space.addShape(shape)
 
@@ -79,6 +92,7 @@ proc createSpace(level: Level): Space =
       let shape: Shape = newCircleShape(space.staticBody, coinRadius, toVect(coin) + vCoinOffset)
       shape.sensor = true # only detect collisions, don't apply forces to colliders
       shape.collisionType = GameCollisionTypes.Coin
+      shape.filter = GameShapeFilters.Coin
       shape.userData = cast[DataPointer](index)
       discard space.addShape(shape)
 
