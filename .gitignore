@@ -3,4 +3,7 @@ source/pdex.*
 *.dSYM
 .DS_Store
 game.map
+# Audacity autosave files
 **.aup3-wal
+# Blender autosave files
+**.blend[0-9]

@@ -28,6 +28,7 @@ var
   riderLowerArmImageTable: LCDBitmapTable
   riderUpperLegImageTable: LCDBitmapTable
   riderLowerLegImageTable: LCDBitmapTable
+  killerImageTable: LCDBitmapTable
   coinImage: LCDBitmap
   bgImageTile: LCDBitmap
 
@@ -46,6 +47,7 @@ proc initGameView*() =
     riderLowerArmImageTable = gfx.newBitmapTable("images/rider/lower-arm")
     riderUpperLegImageTable = gfx.newBitmapTable("images/rider/upper-leg")
     riderLowerLegImageTable = gfx.newBitmapTable("images/rider/lower-leg")
+    killerImageTable = gfx.newBitmapTable("images/killer/killer")
 
     coinImage = gfx.newBitmap("images/coin")
 
@@ -115,7 +117,7 @@ proc offset(polygon: Polygon, camera: Camera): Polygon =
 proc drawGroundPolygons(state: GameState) =
   let camera = state.camera
   for polygon in state.level.groundPolygons:
-    # todo optimise: only draw if polygon is visible and not drawn to offscreen buffer yet
+    # todo optimize: only draw if polygon is visible and not drawn to offscreen buffer yet
     gfx.fillPolygon(polygon.offset(camera), kColorBlack, kPolygonFillNonZero)
 
 proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
@@ -203,6 +205,11 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     for coin in state.remainingCoins:
       let coinScreenPos = coin - camVertex
       coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+
+    # killer
+    for killer in state.killers:
+      let killerScreenPos = killer.position - camera
+      killerImageTable.drawRotated(killerScreenPos, killer.angle)
   
   if debugDrawShapes:
     eachShape(statePtr.space, shapeIter, statePtr)

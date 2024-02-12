@@ -1,4 +1,3 @@
-import std/tables
 import chipmunk7
 import options
 import graphics_types
@@ -39,6 +38,7 @@ type GameState* = ref object of RootObj
     level*: Level
 
     remainingCoins*: seq[Coin]
+    killers*: seq[Body]
 
     ## Input
     isThrottlePressed*: bool
@@ -89,7 +89,7 @@ type GameState* = ref object of RootObj
     handPivot*: PivotJoint
     headPivot*: PivotJoint
 
-    # Rider Shapes
+    # Rider Shapes # optimize unused
     riderShapes*: seq[Shape]
 
 proc getRiderBodies*(state: GameState): seq[Body] =

@@ -4,7 +4,7 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils, graphics_utils
 import levels
-import game_bike, game_rider, game_coin
+import game_bike, game_rider, game_coin, game_killer
 import game_types
 import game_view
 
@@ -96,6 +96,7 @@ proc newGameState(level: Level): GameState =
   initGameRider(state, riderPosition)
   
   initGameCoins(state)
+  initGameKillers(state)
   return state
 
 proc onResetGame() {.raises: [].} =
