@@ -7,7 +7,7 @@ const
   killerRadius = 10.0
   vKillerOffset = v(killerRadius, killerRadius)
 
-proc addKLiller(space: Space, killer: Killer): Body =
+proc addKiller(space: Space, killer: Killer): Body =
   let body = space.addCircle(
     pos = toVect(killer) + vKillerOffset,
     radius = killerRadius,
@@ -21,4 +21,4 @@ proc addKLiller(space: Space, killer: Killer): Body =
   body
 
 proc addKillers*(space: Space, level: Level): seq[Body] =
-  level.killers.map(killer => space.addKLiller(killer))
+  level.killers.map(killer => space.addKiller(killer))
