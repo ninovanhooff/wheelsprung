@@ -27,7 +27,7 @@ type
     layers: seq[LayerEntity]
 
   ClassIds {.pure.} = enum
-    Player = 1'u32, Coin = 2'u32
+    Player = 1'u32, Coin = 2'u32, Killer = 3'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1 shl 31
@@ -115,6 +115,8 @@ proc loadGid(level: Level, obj: LevelObjectEntity) =
         
     of ClassIds.Coin:
       level.coins.add(position)
+    of ClassIds.Killer:
+      level.killers.add(position)
 
 proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return

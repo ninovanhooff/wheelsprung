@@ -9,6 +9,7 @@ type
 
     Time* = float32
     Coin* = Vertex
+    Killer* = Vertex
     GameCollisionType* = CollisionType
 
 
@@ -51,6 +52,7 @@ const GameShapeFilters* = (
 type Level* = ref object of RootObj
     groundPolygons*: seq[Polygon]
     coins*: seq[Coin]
+    killers*: seq[Killer]
     initialChassisPosition*: Vect
     initialDriveDirection*: DriveDirection
 

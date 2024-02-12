@@ -37,6 +37,9 @@ if defined simulator:
   actionBrake = kButtonDown
   actionFlipDirection = kButtonB
 
+# forward declarations
+proc onResetGame() {.raises: [].}
+
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl.} =
   print("coin post step callback")
   let shape = cast[Shape](coinShape)
@@ -67,6 +70,7 @@ let killerBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("killer collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  onResetGame()
   false # don't process the collision further
 
 proc createSpace(level: Level): Space =
@@ -87,15 +91,15 @@ proc createSpace(level: Level): Space =
       shape.collisionType = GameCollisionTypes.Terrain
       shape.friction = groundFriction
       discard space.addShape(shape)
-
-    for index, coin in level.coins:
-      let shape: Shape = newCircleShape(space.staticBody, coinRadius, toVect(coin) + vCoinOffset)
-      shape.sensor = true # only detect collisions, don't apply forces to colliders
-      shape.collisionType = GameCollisionTypes.Coin
-      shape.filter = GameShapeFilters.Coin
-      shape.userData = cast[DataPointer](index)
-      discard space.addShape(shape)
-
+    
+  for index, coin in level.coins:
+    let shape: Shape = newCircleShape(space.staticBody, coinRadius, toVect(coin) + vCoinOffset)
+    shape.sensor = true # only detect collisions, don't apply forces to colliders
+    shape.collisionType = GameCollisionTypes.Coin
+    shape.filter = GameShapeFilters.Coin
+    shape.userData = cast[DataPointer](index)
+    discard space.addShape(shape)
+      
   return space
 
 proc newGameState(level: Level): GameState =
@@ -110,7 +114,7 @@ proc newGameState(level: Level): GameState =
   initGameRider(state, riderPosition)
   
   initGameCoins(state)
-  initGameKillers(state)
+  state.killers = space.addKillers(level)
   return state
 
 proc onResetGame() {.raises: [].} =

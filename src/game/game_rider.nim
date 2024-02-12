@@ -9,7 +9,7 @@ const
     torsoSize = v(7.0, 16.0)
     torsoRotation = degToRad(35f)
     
-     # offset from torso, align top of head with top of torso
+    # offset from torso, align top of head with top of torso
     headRadius = 6f
     headMass = 0.1f
     headOffset = v(-3.0, -12.0)
