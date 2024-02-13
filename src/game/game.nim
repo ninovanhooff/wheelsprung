@@ -64,12 +64,12 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
   discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
   false # don't process the collision further
 
-let killerBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var 
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
-  print("killer collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  print("gameOver collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
   onResetGame()
   false # don't process the collision further
 
@@ -77,10 +77,16 @@ proc createSpace(level: Level): Space =
   let space = newSpace()
   space.gravity = v(0.0, 100.0)
 
-  var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Player)
+  var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Wheel)
   handler.beginFunc = coinBeginFunc
-  handler = space.addCollisionHandler(GameCollisionTypes.Killer, GameCollisionTypes.Player)
-  handler.beginFunc = killerBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Head)
+  handler.beginFunc = coinBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Killer, GameCollisionTypes.Wheel)
+  handler.beginFunc = gameOverBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Killer, GameCollisionTypes.Head)
+  handler.beginFunc = gameOverBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Terrain, GameCollisionTypes.Head)
+  handler.beginFunc = gameOverBeginFunc
 
   # Add the polygons as segment shapes to the physics space
   for polygon in level.groundPolygons:

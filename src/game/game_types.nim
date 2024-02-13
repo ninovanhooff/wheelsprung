@@ -18,10 +18,11 @@ const DD_RIGHT*: DriveDirection = 1.0
 
 const GameCollisionTypes* = (
     None: cast[GameCollisionType](0), 
-    Player: cast[GameCollisionType](1), # wheels and rider head
-    Terrain: cast[GameCollisionType](2),
-    Coin: cast[GameCollisionType](3), 
-    Killer: cast[GameCollisionType](4),
+    Wheel: cast[GameCollisionType](1),
+    Head: cast[GameCollisionType](2),
+    Terrain: cast[GameCollisionType](3),
+    Coin: cast[GameCollisionType](4), 
+    Killer: cast[GameCollisionType](5),
 )
 
 
