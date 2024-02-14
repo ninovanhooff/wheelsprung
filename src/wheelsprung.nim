@@ -55,20 +55,20 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
         # Set the update callback
         playdate.system.setUpdateCallback(catchingUpdate)
     elif event == kEventKeyReleased:
-        if keycode == 117:
-            print("U")
+        if keycode == 116:
+            print("T")
             debugDrawLevel = not debugDrawLevel
             print("debugDrawLevel:" & $debugDrawLevel)
-        elif keycode == 105:
-            print("I")
-            debugDrawShapes = not debugDrawShapes
-            print("debugDrawShapes:" & $debugDrawShapes)
         elif keycode == 111:
             print("O")
+            debugDrawShapes = not debugDrawShapes
+            print("debugDrawShapes:" & $debugDrawShapes)
+        elif keycode == 105:
+            print("I")
             debugDrawTextures = not debugDrawTextures
             print("debugDrawTextures:" & $debugDrawTextures)
-        elif keycode == 112:
-            print("P")
+        elif keycode == 99:
+            print("C")
             debugDrawConstraints = not debugDrawConstraints
             print("debugDrawConstraints:" & $debugDrawConstraints)
         elif keycode == 106:
