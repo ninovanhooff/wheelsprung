@@ -54,6 +54,7 @@ type Level* = ref object of RootObj
     groundPolygons*: seq[Polygon]
     coins*: seq[Coin]
     killers*: seq[Killer]
+    finishPosition*: Vertex
     initialChassisPosition*: Vect
     initialDriveDirection*: DriveDirection
 

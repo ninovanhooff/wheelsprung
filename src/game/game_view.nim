@@ -5,7 +5,6 @@ import std/sugar
 import options
 import chipmunk7
 import game_types, graphics_types
-import utils
 import graphics_utils
 import chipmunk_utils
 import globals
@@ -29,6 +28,7 @@ var
   riderUpperLegImageTable: LCDBitmapTable
   riderLowerLegImageTable: LCDBitmapTable
   killerImageTable: LCDBitmapTable
+  trophyImageTable: LCDBitmapTable
   coinImage: LCDBitmap
   bgImageTile: LCDBitmap
 
@@ -48,6 +48,7 @@ proc initGameView*() =
     riderUpperLegImageTable = gfx.newBitmapTable("images/rider/upper-leg")
     riderLowerLegImageTable = gfx.newBitmapTable("images/rider/lower-leg")
     killerImageTable = gfx.newBitmapTable("images/killer/killer")
+    trophyImageTable = gfx.newBitmapTable("images/trophy")
 
     coinImage = gfx.newBitmap("images/coin")
 
@@ -137,6 +138,7 @@ proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState, inverse: b
 
 proc drawChipmunkGame*(statePtr: ptr GameState) =
   let state = statePtr[]
+  let level = state.level
   let chassis = state.chassis
   let camera = state.camera
   let camVertex = camera.toVertex()
@@ -210,6 +212,11 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     for killer in state.killers:
       let killerScreenPos = killer.position - camera
       killerImageTable.drawRotated(killerScreenPos, killer.angle)
+
+    # trophy
+    let finishScreenPos = level.finishPosition - camVertex
+    let finishTableIndex = if state.remainingCoins.len == 0: 1 else: 0
+    trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
   
   if debugDrawShapes:
     eachShape(statePtr.space, shapeIter, statePtr)
