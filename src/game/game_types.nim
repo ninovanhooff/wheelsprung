@@ -23,6 +23,7 @@ const GameCollisionTypes* = (
     Terrain: cast[GameCollisionType](3),
     Coin: cast[GameCollisionType](4), 
     Killer: cast[GameCollisionType](5),
+    Finish: cast[GameCollisionType](6),
 )
 
 
@@ -30,6 +31,7 @@ const PLAYER_MASK_BIT = cuint(1 shl 31)
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
 const COIN_MASK_BIT = cuint(1 shl 29)
 const KILLER_MASK_BIT = cuint(1 shl 28)
+const FINISH_MASK_BIT = cuint(1 shl 27)
 
 const GameShapeFilters* = (
     Player: ShapeFilter(
@@ -46,6 +48,10 @@ const GameShapeFilters* = (
     ),
     Killer: ShapeFilter(
         categories: KILLER_MASK_BIT,
+        mask: PLAYER_MASK_BIT
+    ),
+    Finish: ShapeFilter(
+        categories: FINISH_MASK_BIT,
         mask: PLAYER_MASK_BIT
     ),
 )
@@ -112,9 +118,6 @@ type GameState* = ref object of RootObj
     footPivot*: PivotJoint
     handPivot*: PivotJoint
     headPivot*: PivotJoint
-
-    # Rider Shapes # optimize unused
-    riderShapes*: seq[Shape]
 
 proc getRiderBodies*(state: GameState): seq[Body] =
     result = @[

@@ -19,7 +19,9 @@ proc flip*(body: Body, relativeTo: Body) =
   body.angle = relativeTo.angle + (relativeTo.angle - body.angle)
   body.position = localToWorld(relativeTo, worldToLocal(relativeTo, body.position).transform(-1.0))
 
-proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f, shapeStore: var seq[Shape]) : Body =
+proc addBox*(
+  space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f,
+  collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE) : Body =
     let body = space.addBody(
         newBody(mass, momentForBox(mass, size.x, size.y))
     )
@@ -27,8 +29,8 @@ proc addBox*(space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 
     body.angle = angle
 
     let shape = space.addShape(newBoxShape(body, size.x, size.y, 0f))
-    shape.filter = SHAPE_FILTER_NONE # no collisions
-    shapeStore.add(shape)
+    shape.filter = shapeFilter
+    shape.collisionType = collisionType
 
     return body
 

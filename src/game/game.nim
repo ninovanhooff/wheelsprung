@@ -1,15 +1,13 @@
 import options
-import std/sequtils
 import chipmunk7
 import playdate/api
-import utils, chipmunk_utils, graphics_utils
+import utils, chipmunk_utils
 import levels
-import game_bike, game_rider, game_coin, game_killer
+import game_bike, game_rider, game_coin, game_killer, game_terrain
 import game_types
 import game_view
 
 const
-  groundFriction = 10.0
   riderOffset = v(-4.0, -18.0) # offset from chassis center
   initialAttitudeAdjustTorque = 90_000.0
   attitudeAdjustAttentuation = 0.75
@@ -19,8 +17,6 @@ const
   throttleTorque = 3_500.0
   # applied to both wheels
   brakeTorque = 2_000.0
-  coinRadius = 10.0
-  vCoinOffset = v(coinRadius, coinRadius)
   timeStep = 1.0f/50.0f
 
 var state: GameState
@@ -73,6 +69,15 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
   onResetGame()
   false # don't process the collision further
 
+let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  var 
+    shapeA: Shape
+    shapeB: Shape
+  arb.shapes(addr(shapeA), addr(shapeB))
+  print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  onResetGame()
+  false # don't process the collision further
+
 proc createSpace(level: Level): Space =
   let space = newSpace()
   space.gravity = v(0.0, 100.0)
@@ -87,24 +92,12 @@ proc createSpace(level: Level): Space =
   handler.beginFunc = gameOverBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.Terrain, GameCollisionTypes.Head)
   handler.beginFunc = gameOverBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Finish, GameCollisionTypes.Wheel)
+  handler.beginFunc = finishBeginFunc
 
-  # Add the polygons as segment shapes to the physics space
-  for polygon in level.groundPolygons:
-    let vects: seq[Vect] = polygon.map(toVect)
-    for i in 1..vects.high:
-      let shape = newSegmentShape(space.staticBody, vects[i-1], vects[i], 0.0)
-      shape.filter = GameShapeFilters.Terrain
-      shape.collisionType = GameCollisionTypes.Terrain
-      shape.friction = groundFriction
-      discard space.addShape(shape)
+  space.addTerrain(level.groundPolygons)
     
-  for index, coin in level.coins:
-    let shape: Shape = newCircleShape(space.staticBody, coinRadius, toVect(coin) + vCoinOffset)
-    shape.sensor = true # only detect collisions, don't apply forces to colliders
-    shape.collisionType = GameCollisionTypes.Coin
-    shape.filter = GameShapeFilters.Coin
-    shape.userData = cast[DataPointer](index)
-    discard space.addShape(shape)
+  space.addCoins(level.coins)
       
   return space
 
