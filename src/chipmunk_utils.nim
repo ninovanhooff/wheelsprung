@@ -14,6 +14,9 @@ proc round*(v: Vect): Vect =
 proc floor*(v: Vect): Vect =
   result = v(v.x.floor, v.y.floor)
 
+proc `/`*(v: Vect, s: Float): Vect =
+  result = v(v.x / s, v.y / s)
+
 proc flip*(body: Body, relativeTo: Body) =
   ## Flip body horizontally relative to relativeTo
   body.angle = relativeTo.angle + (relativeTo.angle - body.angle)

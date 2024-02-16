@@ -3,7 +3,7 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
 import levels
-import game_bike, game_rider, game_coin, game_killer, game_terrain
+import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
 import game_types
 import game_view
 
@@ -94,10 +94,12 @@ proc createSpace(level: Level): Space =
   handler.beginFunc = gameOverBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.Finish, GameCollisionTypes.Wheel)
   handler.beginFunc = finishBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Finish, GameCollisionTypes.Head)
+  handler.beginFunc = finishBeginFunc
 
   space.addTerrain(level.groundPolygons)
-    
   space.addCoins(level.coins)
+  space.addFinish(level.finishPosition)
       
   return space
 

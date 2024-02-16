@@ -10,6 +10,7 @@ type
     Time* = float32
     Coin* = Vertex
     Killer* = Vertex
+    Finish* = Vertex
     GameCollisionType* = CollisionType
 
 
@@ -36,7 +37,7 @@ const FINISH_MASK_BIT = cuint(1 shl 27)
 const GameShapeFilters* = (
     Player: ShapeFilter(
         categories: PLAYER_MASK_BIT,
-        mask: TERRAIN_MASK_BIT or COIN_MASK_BIT or KILLER_MASK_BIT
+        mask: TERRAIN_MASK_BIT or COIN_MASK_BIT or KILLER_MASK_BIT or FINISH_MASK_BIT
     ),
     Terrain: ShapeFilter(
         categories: TERRAIN_MASK_BIT,
