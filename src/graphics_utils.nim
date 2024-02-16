@@ -54,3 +54,6 @@ proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidCol
       (width/2).int32, 
       innerColor
   )
+
+proc getDisplaySize*(): Vect =
+  return v(playdate.display.getWidth().Float, playdate.display.getHeight().Float)

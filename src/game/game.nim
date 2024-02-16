@@ -1,7 +1,7 @@
 import options
 import chipmunk7
 import playdate/api
-import utils, chipmunk_utils
+import utils, chipmunk_utils, graphics_utils
 import levels
 import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
 import game_types
@@ -19,14 +19,17 @@ const
   brakeTorque = 2_000.0
   timeStep = 1.0f/50.0f
 
-var state: GameState
+var 
+  state: GameState
+  halfDisplaySize: Vect = v(0.0,0.0)
 
-# device controls
-var actionThrottle = kButtonA
-var actionBrake = kButtonB
-var actionFlipDirection = kButtonDown
-var actionLeanLeft = kButtonLeft
-var actionLeanRight = kButtonRight
+  # device controls
+  actionThrottle = kButtonA
+  actionBrake = kButtonB
+  actionFlipDirection = kButtonDown
+  actionLeanLeft = kButtonLeft
+  actionLeanRight = kButtonRight
+
 # simulator overrides
 if defined simulator:
   actionThrottle = kButtonUp
@@ -97,7 +100,7 @@ proc createSpace(level: Level): Space =
   handler = space.addCollisionHandler(GameCollisionTypes.Finish, GameCollisionTypes.Head)
   handler.beginFunc = finishBeginFunc
 
-  space.addTerrain(level.groundPolygons)
+  space.addTerrain(level.terrainPolygons)
   space.addCoins(level.coins)
   space.addFinish(level.finishPosition)
       
@@ -123,6 +126,9 @@ proc onResetGame() {.raises: [].} =
 
 proc initGame*() {.raises: [].} =
   state = newGameState(loadLevel("levels/fallbackLevel.json"))
+  let height = playdate.display.getHeight()
+  let width = playdate.display.getHeight()
+  halfDisplaySize = getDisplaySize() / 2.0
 
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     onResetGame()
@@ -209,5 +215,5 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
 
   updateGameBike(state)
 
-  state.camera = state.chassis.position - v(playdate.display.getWidth()/2, playdate.display.getHeight()/2)
+  state.camera = state.chassis.position - halfDisplaySize
   drawChipmunkGame(addr state) # todo pass as object?

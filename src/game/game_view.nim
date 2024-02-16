@@ -17,7 +17,9 @@ const
 let
   bgPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
 
-var 
+var
+  displaySize: Vect
+
   bikeChassisImageTable: LCDBitmapTable
   bikeWheelImageTable: LCDBitmapTable
 
@@ -30,7 +32,7 @@ var
   killerImageTable: LCDBitmapTable
   trophyImageTable: LCDBitmapTable
   coinImage: LCDBitmap
-  bgImageTile: LCDBitmap
+  bgImage: LCDBitmap
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -38,6 +40,7 @@ var
 
 
 proc initGameView*() =
+  displaySize = getDisplaySize()
   try:
     bikeChassisImageTable = gfx.newBitmapTable("images/bike-chassis")
     bikeWheelImageTable = gfx.newBitmapTable("images/bike-wheel")
@@ -52,7 +55,7 @@ proc initGameView*() =
 
     coinImage = gfx.newBitmap("images/coin")
 
-    bgImageTile = gfx.newBitmap(patternSize,patternSize, bgPattern)
+    bgImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, bgPattern)
   except:
     echo getCurrentExceptionMsg()
 
@@ -109,17 +112,17 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     let b = localToWorld(spring.bodyB, vzero) - camera
     gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
-proc offset(polygon: Polygon, camera: Camera): Polygon =
+
+proc offset(polygon: Polygon, off: Vertex): Polygon =
   polygon.map(vertex => [
-    (vertex[0].float - camera.x).round.int32, 
-    (vertex[1].float - camera.y).round.int32
+    (vertex[0] - off[0]), 
+    (vertex[1] - off[1])
     ])
 
-proc drawGroundPolygons(state: GameState) =
-  let camera = state.camera
-  for polygon in state.level.groundPolygons:
+proc drawTerrain(camVertex: Vertex, terrainPolygons: seq[Polygon]) =
+  for polygon in terrainPolygons:
     # todo optimize: only draw if polygon is visible and not drawn to offscreen buffer yet
-    gfx.fillPolygon(polygon.offset(camera), kColorBlack, kPolygonFillNonZero)
+    gfx.fillPolygon(polygon.offset(camVertex), kColorBlack, kPolygonFillNonZero)
 
 proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
@@ -144,10 +147,8 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
   let camVertex = camera.toVertex()
   let driveDirection = state.driveDirection
 
-  bgImageTile.drawTiled(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, 400, 240, kBitmapUnflipped)
-
   if debugDrawLevel:
-    state.drawGroundPolygons()
+    drawTerrain(camVertex, level.terrainPolygons)
 
   if debugDrawTextures:
     # wheels
@@ -219,6 +220,7 @@ proc drawChipmunkGame*(statePtr: ptr GameState) =
     trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
   
   if debugDrawShapes:
+    bgImage.draw(-camVertex[0]mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
     eachShape(statePtr.space, shapeIter, statePtr)
 
   if debugDrawConstraints:

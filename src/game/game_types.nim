@@ -27,12 +27,11 @@ const GameCollisionTypes* = (
     Finish: cast[GameCollisionType](6),
 )
 
-
-const PLAYER_MASK_BIT = cuint(1 shl 31)
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
 const COIN_MASK_BIT = cuint(1 shl 29)
 const KILLER_MASK_BIT = cuint(1 shl 28)
 const FINISH_MASK_BIT = cuint(1 shl 27)
+const PLAYER_MASK_BIT = cuint(1 shl 26)
 
 const GameShapeFilters* = (
     Player: ShapeFilter(
@@ -55,10 +54,11 @@ const GameShapeFilters* = (
         categories: FINISH_MASK_BIT,
         mask: PLAYER_MASK_BIT
     ),
+    # remember that collisions only happen when mask of both shapes match the category of the other
 )
 
 type Level* = ref object of RootObj
-    groundPolygons*: seq[Polygon]
+    terrainPolygons*: seq[Polygon]
     coins*: seq[Coin]
     killers*: seq[Killer]
     finishPosition*: Vertex

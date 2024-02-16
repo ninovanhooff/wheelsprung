@@ -30,7 +30,7 @@ type
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32
 
 const
-  GID_HFLIP_MASK: uint32 = 1 shl 31
+  GID_HFLIP_MASK: uint32 = 1'u32 shl 31
   GID_VFLIP_MASK: uint32 = 1 shl 30
   GID_DIAG_FLIP_MASK: uint32 = 1 shl 29
   GID_UNUSED_FLIP_MASK: uint32 = 1 shl 28
@@ -91,7 +91,7 @@ proc loadPolygon(level: Level, obj: LevelObjectEntity) =
     polygon[i] = polygon[i] + objOffset
     print("segment: " & $polygon[i])
 
-  level.groundPolygons.add(polygon)
+  level.terrainPolygons.add(polygon)
 
 proc loadGid(level: Level, obj: LevelObjectEntity) =
   if obj.gid.isNone:
@@ -129,7 +129,7 @@ proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
 
 proc loadLevel*(path: string): Level =
   let level = Level(
-    groundPolygons: @[],
+    terrainPolygons: @[],
     initialChassisPosition: v(80.0, 80.0),
     initialDriveDirection: DD_RIGHT,
   )
