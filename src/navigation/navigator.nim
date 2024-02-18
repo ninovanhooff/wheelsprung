@@ -2,12 +2,12 @@
 
 import screen
 
-var activeScreen: Screen
+var backStack: seq[Screen] = @[]
 
 proc getActiveScreen*(): Screen =
-    return activeScreen
+    return backStack[^1]
 
 proc navigate*(toScreen: Screen) =
-    activeScreen = toScreen
-    activeScreen.resume()
-    activeScreen.init()
+    backStack.add(toScreen)
+    toScreen.init()
+    toScreen.resume()
