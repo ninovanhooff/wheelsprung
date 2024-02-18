@@ -1,7 +1,7 @@
 import playdate/api
 import chipmunk7
 import utils
-import game/game_types
+import screens/game/game_types
 
 const
     idleRpm = 1300.0f

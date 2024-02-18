@@ -1,6 +1,6 @@
 import std/math
 import chipmunk7
-import game/game_types
+import screens/game/game_types
 
 proc transform*(v1:Vect, dir: DriveDirection): Vect =
   result = v(v1.x * dir, v1.y)

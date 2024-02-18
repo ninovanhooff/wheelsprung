@@ -2,7 +2,7 @@ import std/random
 import playdate/api
 import chipmunk7
 import utils
-import game/game_types
+import screens/game/game_types
 import system
 
 const
