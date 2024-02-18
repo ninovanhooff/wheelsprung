@@ -4,6 +4,7 @@ import strformat
 import ../tests/tests
 import utils
 import globals
+import navigation/[navigator, screen]
 
 
 import playdate/api
@@ -15,9 +16,9 @@ var
     font: LCDFont
     refreshRate = 50.0f
 
-proc update() =
+proc update() {.raises: [].} =
     playdate.graphics.clear(kColorWhite)
-    updateChipmunkGame()
+    discard getActiveScreen().update()
     playdate.system.drawFPS(0, 0)
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
@@ -36,7 +37,7 @@ proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
 
         playdate.system.error(message) # this will stop the program
 
-proc catchingUpdate(): int = 
+proc catchingUpdate(): int {.raises: [].} = 
     runCatching(update)
     return 1 ## 1: update display
 
@@ -49,9 +50,9 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
         font = try: playdate.graphics.newFont(FONT_PATH) except: nil
         playdate.graphics.setFont(font)
 
-        runCatching(initGame, "initGame FAILED")
         runCatching(runTests, "UNIT TESTS FAILED")
-
+        newGameScreen("levels/fallbackLevel.json").navigate()
+        
         # Set the update callback
         playdate.system.setUpdateCallback(catchingUpdate)
     elif event == kEventKeyReleased:

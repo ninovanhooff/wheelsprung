@@ -6,6 +6,9 @@ import levels
 import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
 import game_types
 import game_view
+import navigation/screen
+
+type GameScreen* = ref object of Screen
 
 const
   riderOffset = v(-4.0, -18.0) # offset from chassis center
@@ -124,18 +127,6 @@ proc newGameState(level: Level): GameState =
 proc onResetGame() {.raises: [].} =
   state = newGameState(state.level)
 
-proc initGame*() {.raises: [].} =
-  state = newGameState(loadLevel("levels/fallbackLevel.json"))
-  let height = playdate.display.getHeight()
-  let width = playdate.display.getHeight()
-  halfDisplaySize = getDisplaySize() / 2.0
-
-  discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
-    onResetGame()
-  )
-
-  initGameView()
-
 proc onThrottle*() =
   let rearWheel = state.rearWheel
   let dd = state.driveDirection
@@ -206,7 +197,22 @@ proc handleInput(state: GameState) =
     print("Flip direction pressed")
     state.onFlipDirection()
 
-proc updateChipmunkGame*() {.cdecl, raises: [].} =
+proc initGame*(levelPath: string) {.raises: [].} =
+  state = newGameState(loadLevel(levelPath))
+  halfDisplaySize = getDisplaySize() / 2.0
+
+  initGameView()
+
+proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
+  initGame(levelPath)
+  return GameScreen()
+
+method resume*(gameScreen: GameScreen) =
+  discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
+    onResetGame()
+  )
+
+method update*(gameScreen: GameScreen): int {.locks:0.} =
   handleInput(state)
   state.updateAttitudeAdjust()
 
@@ -216,4 +222,5 @@ proc updateChipmunkGame*() {.cdecl, raises: [].} =
   updateGameBike(state)
 
   state.camera = state.chassis.position - halfDisplaySize
-  drawChipmunkGame(addr state) # todo pass as object?
+  drawGame(addr state) # todo pass as object?
+  return 1

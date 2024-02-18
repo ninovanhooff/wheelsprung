@@ -1,3 +1,5 @@
+{.push locks:0.}
+
 import playdate/api
 import math
 import std/sequtils
@@ -139,7 +141,7 @@ proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState, inverse: b
     (if driveDirection == DD_LEFT: kBitmapFlippedX else: kBitmapUnflipped)
   )
 
-proc drawChipmunkGame*(statePtr: ptr GameState) =
+proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
   let chassis = state.chassis
