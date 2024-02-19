@@ -6,7 +6,8 @@ import levels
 import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
 import game_types
 import game_view
-import navigation/screen
+import navigation/[screen, navigator]
+import screens/dialog/dialog_screen
 
 type GameScreen* = ref object of Screen
 
@@ -81,7 +82,7 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
-  onResetGame()
+  newDialogScreen("Winner!!").navigate()
   false # don't process the collision further
 
 proc createSpace(level: Level): Space =

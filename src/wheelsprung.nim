@@ -17,7 +17,6 @@ var
     refreshRate = 50.0f
 
 proc update() {.raises: [].} =
-    playdate.graphics.clear(kColorWhite)
     discard getActiveScreen().update()
     playdate.system.drawFPS(0, 0)
 

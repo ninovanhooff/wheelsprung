@@ -149,6 +149,8 @@ proc drawGame*(statePtr: ptr GameState) =
   let camVertex = camera.toVertex()
   let driveDirection = state.driveDirection
 
+  playdate.graphics.clear(kColorWhite)
+
   if debugDrawLevel:
     drawTerrain(camVertex, level.terrainPolygons)
 
