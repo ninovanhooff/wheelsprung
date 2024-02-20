@@ -16,6 +16,15 @@ proc getActiveScreen(): Screen =
   else:
     return backStack[^1]
 
+proc popScreenImmediately() =
+  let activeScreen = getActiveScreen()
+  if activeScreen == nil:
+    print("TODO No active screen")
+  else:
+    print("Popping screen: " & $activeScreen)
+    backStack.del(backStack.high)
+    activeScreen.destroy()
+
 proc resumeActiveScreen() =
   let activeScreen = getActiveScreen()
   if activeScreen == nil:
@@ -29,6 +38,9 @@ proc pushScreen*(toScreen: Screen) =
     backStack.add(toScreen)
   )
 
+proc popScreen*() =
+  pendingNavigators.add(popScreenImmediately)
+
 proc executePendingNavigators() =
   if pendingNavigators.len == 0: return
 
@@ -37,10 +49,12 @@ proc executePendingNavigators() =
     navigation()
   pendingNavigators.setLen(0)
 
-  if activeScreen != nil and backStack.find(activeScreen) != backStack.high:
-    # the activeScreen was moved from the top of the stack to another position
-    print("Pausing screen: " & $activeScreen)
-    activeScreen.pause()
+  let activeScreenIndex = backStack.find(activeScreen)
+  if activeScreen != nil and activeScreenIndex != backStack.high:
+    if activeScreenIndex != -1:
+      # the activeScreen was moved from the top of the stack to another position
+      print("Pausing screen: " & $activeScreen)
+      activeScreen.pause()
 
   playdate.system.removeAllMenuItems()
   resumeActiveScreen()
