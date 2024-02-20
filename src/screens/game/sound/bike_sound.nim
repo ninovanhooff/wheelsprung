@@ -10,3 +10,6 @@ proc updateBikeSound*(state: GameState)=
   updateBikeEngine(state)
   updateBikeSqueak(state)
   updateBikeThud(state)
+
+proc pauseBikeSound*() =
+  pauseBikeEngine()

@@ -70,3 +70,10 @@ proc updateBikeEngine*(state: GameState) =
             fadeoutPlayer = nil
 
     # print("playerBaseRpm: " & $playerBaseRpm & "throttlePlayerIndex" & " rate: " & $currentPlayer.rate)
+
+proc pauseBikeEngine*()=
+    if not isInitialized: return
+    
+    currentPlayer.stop()
+    if fadeoutPlayer != nil:
+        fadeoutPlayer.stop()

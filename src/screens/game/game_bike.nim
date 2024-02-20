@@ -206,3 +206,6 @@ proc initGameBike*(state: GameState) =
 
 proc updateGameBike*(state: GameState) =
   updateBikeSound(state)
+
+proc pauseGameBike*() =
+  pauseBikeSound()

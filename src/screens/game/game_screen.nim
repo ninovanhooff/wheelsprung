@@ -73,6 +73,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameOver collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  newDialogScreen("Game Over").pushScreen()
   onResetGame()
   false # don't process the collision further
 
@@ -83,6 +84,7 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
   newDialogScreen("Winner!!").pushScreen()
+  onResetGame()
   false # don't process the collision further
 
 proc createSpace(level: Level): Space =
@@ -214,6 +216,9 @@ method resume*(gameScreen: GameScreen) =
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     onResetGame()
   )
+
+method pause*(gameScreen: GameScreen) =
+  pauseGameBike()
 
 method update*(gameScreen: GameScreen): int {.locks:0.} =
   handleInput(state)
