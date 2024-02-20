@@ -8,7 +8,7 @@ import navigation/[navigator, screen]
 
 
 import playdate/api
-import screens/game/game
+import screens/game/game_screen
 
 const FONT_PATH = "/System/Fonts/Asheville-Sans-14-Bold.pft"
 
