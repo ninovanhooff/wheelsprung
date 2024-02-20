@@ -3,16 +3,27 @@ import navigation/[screen, navigator]
 import graphics_utils
 import utils
 
-type DialogScreen = ref object of Screen
-  text: string
+type DialogType* {.pure.} = enum
+  GameOver, LevelComplete
 
-proc newDialogScreen*(text:string): DialogScreen {.raises:[].} =
-  return DialogScreen(text: text)
+type DialogScreen = ref object of Screen
+  dialogType: DialogType
+
+
+proc newDialogScreen*(dialogType: DialogType): DialogScreen {.raises:[].} =
+  return DialogScreen(dialogType: dialogType)
+
+proc displayText(dialogType: DialogType): string {.raises: [], tags: [].} =
+  case dialogType
+  of DialogType.GameOver:
+    return "Game Over"
+  of DialogType.LevelComplete:
+    return "Level Complete"
 
 method resume*(self: DialogScreen) {.locks:0.} =
   print("DialogScreen resume")
   playdate.graphics.clear(kColorWhite)
-  discard gfx.drawText(self.text, 100,100)
+  discard gfx.drawText(self.dialogType.displayText, 100,100)
 
 method update*(self: DialogScreen): int {.locks:0.} =
   let buttonState = playdate.system.getButtonsState()
@@ -23,4 +34,4 @@ method update*(self: DialogScreen): int {.locks:0.} =
   return 0
 
 method `$`*(self: DialogScreen): string {.raises: [], tags: [].} =
-  return "DialogScreen text: " & self.text
+  return "DialogScreen; type: " & repr(self.dialogType)

@@ -73,7 +73,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameOver collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
-  newDialogScreen("Game Over").pushScreen()
+  newDialogScreen(DialogType.GameOver).pushScreen()
   onResetGame()
   false # don't process the collision further
 
@@ -83,7 +83,7 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
-  newDialogScreen("Winner!!").pushScreen()
+  newDialogScreen(DialogType.LevelComplete).pushScreen()
   onResetGame()
   false # don't process the collision further
 
