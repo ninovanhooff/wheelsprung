@@ -17,7 +17,7 @@ var
     refreshRate = 50.0f
 
 proc update() {.raises: [].} =
-    discard getActiveScreen().update()
+    discard updateNavigator()
     playdate.system.drawFPS(0, 0)
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
@@ -50,7 +50,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
         playdate.graphics.setFont(font)
 
         runCatching(runTests, "UNIT TESTS FAILED")
-        newGameScreen("levels/fallbackLevel.json").navigate()
+        newGameScreen("levels/fallbackLevel.json").pushScreen()
         
         # Set the update callback
         playdate.system.setUpdateCallback(catchingUpdate)

@@ -82,7 +82,7 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
-  newDialogScreen("Winner!!").navigate()
+  newDialogScreen("Winner!!").pushScreen()
   false # don't process the collision further
 
 proc createSpace(level: Level): Space =
@@ -208,6 +208,8 @@ proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
   initGame(levelPath)
   return GameScreen()
 
+### Screen methods
+
 method resume*(gameScreen: GameScreen) =
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     onResetGame()
@@ -225,3 +227,6 @@ method update*(gameScreen: GameScreen): int {.locks:0.} =
   state.camera = state.chassis.position - halfDisplaySize
   drawGame(addr state) # todo pass as object?
   return 1
+
+method `$`*(gameScreen: GameScreen): string =
+  return "GameScreen"

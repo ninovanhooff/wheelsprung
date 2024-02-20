@@ -14,8 +14,11 @@ method resume*(self: DialogScreen) {.locks:0.} =
   playdate.graphics.clear(kColorWhite)
   discard gfx.drawText(self.text, 100,100)
 
-method update*(self: DialogScreen): int {.locks:0.} =
-  print("DialogScreen update")
-  playdate.graphics.clear(kColorWhite)
-  discard gfx.drawText(self.text, 100,100)
-  return 1
+# method update*(self: DialogScreen): int {.locks:0.} =
+#   print("DialogScreen update")
+#   playdate.graphics.clear(kColorWhite)
+#   discard gfx.drawText(self.text, 100,100)
+#   return 1
+
+method `$`*(self: DialogScreen): string {.raises: [], tags: [].} =
+  return "DialogScreen text: " & self.text
