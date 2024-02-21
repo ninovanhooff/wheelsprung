@@ -78,6 +78,10 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
   false # don't process the collision further
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  if state.remainingCoins.len > 0:
+    print("finish collision but not all coins collected")
+    return false
+  
   var 
     shapeA: Shape
     shapeB: Shape
