@@ -9,6 +9,7 @@ import navigation/[navigator, screen]
 
 import playdate/api
 import screens/game/game_screen
+import screens/level_select/level_select_screen
 
 const FONT_PATH = "/System/Fonts/Asheville-Sans-14-Bold.pft"
 
@@ -50,7 +51,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
         playdate.graphics.setFont(font)
 
         runCatching(runTests, "UNIT TESTS FAILED")
-        newGameScreen("levels/fallbackLevel.json").pushScreen()
+        pushScreen(newLevelSelectScreen())
         
         # Set the update callback
         playdate.system.setUpdateCallback(catchingUpdate)

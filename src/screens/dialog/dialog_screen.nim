@@ -20,7 +20,7 @@ proc displayText(dialogType: DialogType): string {.raises: [], tags: [].} =
   of DialogType.LevelComplete:
     return "Level Complete"
 
-method resume*(self: DialogScreen) {.locks:0.} =
+method resume*(self: DialogScreen) =
   print("DialogScreen resume")
   playdate.graphics.clear(kColorWhite)
   discard gfx.drawText(self.dialogType.displayText, 100,100)
