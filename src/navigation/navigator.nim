@@ -10,6 +10,9 @@ type Navigator = () -> (void)
 var backStack: seq[Screen] = @[]
 var pendingNavigators: seq[Navigator] = @[]
 
+proc printNavigation(message: string, screen: Screen) =
+  print(message & ": " & $screen & "(" & repr(unsafeAddr screen) & ") stack size: " & $backStack.len & " pending.len: " & $pendingNavigators.len)
+
 proc getActiveScreen(): Screen =
   if backStack.len == 0:
     return nil
@@ -21,7 +24,7 @@ proc popScreenImmediately() =
   if activeScreen == nil:
     print("TODO No active screen")
   else:
-    print("Popping screen: " & $activeScreen)
+    printNavigation("Popping screen", activeScreen)
     backStack.del(backStack.high)
     activeScreen.destroy()
 
@@ -30,7 +33,7 @@ proc resumeActiveScreen() =
   if activeScreen == nil:
     print("TODO No active screen")
   else:
-    print("Resuming screen: " & $activeScreen)
+    printNavigation("Resuming screen", activeScreen)
     activeScreen.resume()
 
 proc pushScreen*(toScreen: Screen) =
@@ -53,7 +56,7 @@ proc executePendingNavigators() =
   if activeScreen != nil and activeScreenIndex != backStack.high:
     if activeScreenIndex != -1:
       # the activeScreen was moved from the top of the stack to another position
-      print("Pausing screen: " & $activeScreen)
+      printNavigation("Pausing screen", activeScreen)
       activeScreen.pause()
 
   playdate.system.removeAllMenuItems()
