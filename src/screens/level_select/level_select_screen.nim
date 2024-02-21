@@ -5,12 +5,12 @@ import utils
 
 import screens/game/game_screen
 
-const borderInset = 16
+const borderInset = 24
 const levelsBasePath = "levels/"
 
 type LevelSelectScreen = ref object of Screen
   levelPaths: seq[string]
-  selectedIndex: int32
+  selectedIndex: int
 
 proc getLevelPaths(): seq[string] {.locks:0.} =
   playdate.file.listFiles(levelsBasePath)
@@ -26,12 +26,24 @@ proc updateInput(screen: LevelSelectScreen) {.locks:0.} =
     popScreen()
     let levelPath = levelsBasePath & screen.levelPaths[screen.selectedIndex]
     pushScreen(newGameScreen(levelPath))
+  elif kButtonUp in buttonState.pushed:
+    screen.selectedIndex -= 1
+    if screen.selectedIndex < 0:
+      screen.selectedIndex = screen.levelPaths.len - 1
+  elif kButtonDown in buttonState.pushed:
+    screen.selectedIndex += 1
+    if screen.selectedIndex >= screen.levelPaths.len:
+      screen.selectedIndex = 0
+  elif kButtonDown in buttonState.pushed:
+    screen.selectedIndex += 1
+    if screen.selectedIndex >= screen.levelPaths.len:
+      screen.selectedIndex = 0
 
 proc drawBackground() =
   gfx.drawRect(borderInset, borderInset, 400 - 2 * borderInset, 240 - 2 * borderInset, kColorBlack)
 
 proc drawTitle(title: string) =
-  gfx.drawTextAligned(title, 200, 0)
+  gfx.drawTextAligned(title, 200, 2)
 
 proc drawLevelPaths(screen: LevelSelectScreen) =
   var y = 40
@@ -41,10 +53,16 @@ proc drawLevelPaths(screen: LevelSelectScreen) =
   
   gfx.drawText(">", borderInset + 8, 40 + screen.selectedIndex * 20)
 
+proc drawButtons(screen: LevelSelectScreen) =
+  let selectedFileName = screen.levelPaths[screen.selectedIndex]
+  gfx.drawTextAligned("Ⓐ: Play " & selectedFileName, 200, 218)
+
 proc draw(screen: LevelSelectScreen) =
+  gfx.clear(kColorWhite)
   drawBackground()
   drawTitle("Select a level")
   drawLevelPaths(screen)
+  drawButtons(screen)
 
 
 method resume*(screen: LevelSelectScreen) {.locks:0.} =
