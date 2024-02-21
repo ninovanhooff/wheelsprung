@@ -23,7 +23,7 @@ proc displayText(dialogType: DialogType): string {.raises: [], tags: [].} =
 method resume*(self: DialogScreen) =
   print("DialogScreen resume")
   playdate.graphics.clear(kColorWhite)
-  discard gfx.drawText(self.dialogType.displayText, 100,100)
+  gfx.drawTextAligned(self.dialogType.displayText, 200,100)
 
 method update*(self: DialogScreen): int {.locks:0.} =
   let buttonState = playdate.system.getButtonsState()
