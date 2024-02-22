@@ -20,8 +20,6 @@ let
   bgPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
 
 var
-  displaySize: Vect
-
   bikeChassisImageTable: LCDBitmapTable
   bikeWheelImageTable: LCDBitmapTable
 
@@ -42,7 +40,6 @@ var
 
 
 proc initGameView*() =
-  displaySize = getDisplaySize()
   try:
     bikeChassisImageTable = gfx.newBitmapTable("images/bike-chassis")
     bikeWheelImageTable = gfx.newBitmapTable("images/bike-wheel")

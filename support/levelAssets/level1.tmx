@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="400" height="30" tilewidth="8" tileheight="8" infinite="0" nextlayerid="8" nextobjectid="40">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="104" height="30" tilewidth="8" tileheight="8" infinite="0" nextlayerid="8" nextobjectid="42">
  <editorsettings>
-  <export target="../../../../Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.wheelsprung/levels/levvel1.json" format="json"/>
+  <export target="../../../../Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.wheelsprung/levels/level1.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../editor/game_objects.tsx"/>
  <objectgroup color="#73fa79" id="2" name="Object Layer 1">
   <object id="39" name="right side" x="258" y="232">
-   <polygon points="175,8 575,8 575,-232 175,-232 175,-200 559,-200 559,-104 519,-40 447,0 279,-32 175,0"/>
+   <polygon points="175,8 574,8 574,-232 175,-232 175,-200 559,-200 559,-104 519,-40 447,0 279,-32 175,0"/>
   </object>
  </objectgroup>
  <objectgroup color="#7a81ff" id="5" name="Object Layer 2">
@@ -15,7 +15,7 @@
   </object>
  </objectgroup>
  <objectgroup id="7" name="coinLayer">
-  <object id="30" gid="2" x="766" y="74" width="20" height="20"/>
+  <object id="30" gid="2" x="794" y="92" width="20" height="20"/>
   <object id="36" gid="4" x="19" y="173" width="38" height="38"/>
  </objectgroup>
  <objectgroup id="6" name="playerLayer">

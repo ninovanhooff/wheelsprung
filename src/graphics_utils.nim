@@ -6,8 +6,11 @@ import graphics_types
 
 template gfx*: untyped = playdate.graphics
 
-## Amount of rotation images (angle steps) in the table
-const imageRotations = 64
+const
+  displaySize* = v(400.0, 240.0)
+  halfDisplaySize*: Vect = displaySize.vmult(0.5)
+  ## Amount of rotation images (angle steps) in the table
+  imageRotations = 64
 
 proc toVertex*(v: Vect): Vertex = 
   [v.x.round.int32, v.y.round.int32]
@@ -54,6 +57,3 @@ proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidCol
       (width/2).int32, 
       innerColor
   )
-
-proc getDisplaySize*(): Vect =
-  return v(playdate.display.getWidth().Float, playdate.display.getHeight().Float)

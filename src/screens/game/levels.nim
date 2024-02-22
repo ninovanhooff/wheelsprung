@@ -24,6 +24,8 @@ type
     objects: Option[seq[LevelObjectEntity]]
   
   LevelEntity = ref object of RootObj
+    width, height: int32
+    tilewidth, tileheight: int32
     layers: seq[LayerEntity]
 
   ClassIds {.pure.} = enum
@@ -135,6 +137,12 @@ proc loadLevel*(path: string): Level =
   )
   
   let levelEntity = parseLevel(path)
+
+  level.cameraBounds = newBB(
+    l = 0.0, t = 0.0, 
+    r = (levelEntity.width * levelEntity.tilewidth).Float - displaySize.x, 
+    b = (levelEntity.height * levelEntity.tileheight).Float - displaySize.y
+  )
 
   for layer in levelEntity.layers:
     level.loadLayer(layer)

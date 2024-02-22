@@ -25,7 +25,6 @@ const
 
 var 
   state: GameState
-  halfDisplaySize: Vect = v(0.0,0.0)
 
   # device controls
   actionThrottle = kButtonA
@@ -206,7 +205,6 @@ proc handleInput(state: GameState) =
 
 proc initGame*(levelPath: string) {.raises: [].} =
   state = newGameState(loadLevel(levelPath))
-  halfDisplaySize = getDisplaySize() / 2.0
 
   initGameView()
 
@@ -233,7 +231,9 @@ method update*(gameScreen: GameScreen): int {.locks:0.} =
 
   updateGameBike(state)
 
-  state.camera = state.chassis.position - halfDisplaySize
+  state.camera = state.level.cameraBounds.clampVect(
+    state.chassis.position - halfDisplaySize
+  )
   drawGame(addr state) # todo pass as object?
   return 1
 
