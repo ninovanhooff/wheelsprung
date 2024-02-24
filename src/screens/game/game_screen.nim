@@ -215,6 +215,9 @@ proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
+  discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
+      popScreen()
+  )
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     onResetGame()
   )
