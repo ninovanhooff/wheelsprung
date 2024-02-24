@@ -1,7 +1,7 @@
 import std/random
 import playdate/api
 import chipmunk7
-import utils
+import utils, audio_utils
 import screens/game/game_types
 import system
 
@@ -41,6 +41,6 @@ proc updateBikeThud*(state: GameState) =
     curContactImpulse > minContactImpulse and 
     not curPlayer.isPlaying:
       curPlayer = getRandomThud()
-      curPlayer.play(1, rand(0.9f .. 1.1f))
+      curPlayer.playVariation()
       curPlayer.volume=lerp(0.0, 1.0, curContactImpulse / maxContactImpulse)
   prevContactImpulse = curContactImpulse

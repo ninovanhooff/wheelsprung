@@ -4,6 +4,7 @@ import playdate/api
 import utils, chipmunk_utils, graphics_utils
 import levels
 import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
+import sound/game_sound
 import game_types
 import game_view
 import navigation/[screen, navigator]
@@ -63,6 +64,7 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("coin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  playCoinSound()
   discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
   false # don't process the collision further
 
@@ -72,6 +74,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameOver collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  playCollisionSound()
   newDialogScreen(DialogType.GameOver).pushScreen()
   state.resetGameOnResume = true
   false # don't process the collision further
@@ -86,6 +89,7 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  playFinishSound()
   newDialogScreen(DialogType.LevelComplete).pushScreen()
   state.resetGameOnResume = true
   false # don't process the collision further
@@ -205,7 +209,7 @@ proc handleInput(state: GameState) =
 
 proc initGame*(levelPath: string) {.raises: [].} =
   state = newGameState(loadLevel(levelPath))
-
+  initGameSound()
   initGameView()
 
 proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
