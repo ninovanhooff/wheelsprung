@@ -3,10 +3,11 @@
     {
      "export":
         {
-         "format":"json"
+         "format":"json",
+         "target":"..\/..\/..\/..\/Developer\/PlaydateSDK\/Disk\/Data\/com.ninovanhooff.wheelsprung\/levels\/level2.tmj"
         }
     },
- "height":100,
+ "height":50,
  "infinite":false,
  "layers":[
         {
@@ -53,7 +54,7 @@
                  "visible":true,
                  "width":0,
                  "x":8,
-                 "y":432
+                 "y":392
                 }, 
                 {
                  "height":0,
@@ -105,7 +106,7 @@
                  "visible":true,
                  "width":0,
                  "x":200,
-                 "y":424
+                 "y":384
                 }, 
                 {
                  "height":0,
@@ -145,7 +146,7 @@
                  "visible":true,
                  "width":0,
                  "x":520,
-                 "y":408
+                 "y":368
                 }, 
                 {
                  "height":0,
@@ -197,7 +198,7 @@
                  "visible":true,
                  "width":0,
                  "x":728,
-                 "y":372
+                 "y":332
                 }, 
                 {
                  "height":0,
@@ -237,7 +238,7 @@
                  "visible":true,
                  "width":0,
                  "x":1288,
-                 "y":352
+                 "y":312
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -277,7 +278,7 @@
                  "visible":true,
                  "width":0,
                  "x":8,
-                 "y":216
+                 "y":176
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -317,7 +318,7 @@
                  "visible":true,
                  "width":0,
                  "x":1764,
-                 "y":208
+                 "y":168
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -340,7 +341,7 @@
                  "visible":true,
                  "width":66,
                  "x":8,
-                 "y":372
+                 "y":332
                 }, 
                 {
                  "gid":4,
@@ -352,7 +353,7 @@
                  "visible":true,
                  "width":38,
                  "x":1604,
-                 "y":280
+                 "y":240
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -374,5 +375,5 @@
  "tilewidth":8,
  "type":"map",
  "version":"1.10",
- "width":500
+ "width":222
 }
