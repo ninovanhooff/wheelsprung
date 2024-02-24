@@ -143,6 +143,7 @@ proc loadLevel*(path: string): Level =
     r = (levelEntity.width * levelEntity.tilewidth).Float - displaySize.x, 
     b = (levelEntity.height * levelEntity.tileheight).Float - displaySize.y
   )
+  print("cameraBounds: " & $level.cameraBounds)
 
   for layer in levelEntity.layers:
     level.loadLayer(layer)
