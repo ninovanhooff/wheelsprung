@@ -56,7 +56,10 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
 
         runCatching(runTests, "UNIT TESTS FAILED")
         initNavigator(initialScreenProvider)
-        pushScreen(newLevelSelectScreen())
+        if playdate.file.exists("levels/editor.tmj"):
+          pushScreen(newGameScreen("levels/editor.tmj"))
+        else:
+          pushScreen(newLevelSelectScreen())
         
         # Set the update callback
         playdate.system.setUpdateCallback(catchingUpdate)
