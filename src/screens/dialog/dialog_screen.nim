@@ -25,6 +25,8 @@ method resume*(self: DialogScreen) =
   playdate.graphics.clear(kColorWhite)
   gfx.drawTextAligned(self.dialogType.displayText, 200,100)
 
+  gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
+
 method update*(self: DialogScreen): int {.locks:0.} =
   let buttonState = playdate.system.getButtonsState()
 
