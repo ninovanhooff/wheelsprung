@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="400" height="50" tilewidth="8" tileheight="8" infinite="0" nextlayerid="7" nextobjectid="21">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="221" height="80" tilewidth="8" tileheight="8" infinite="0" nextlayerid="8" nextobjectid="38">
  <editorsettings>
   <export target="../../../../Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.wheelsprung/levels/fallbackLevel.json" format="json"/>
  </editorsettings>
+ <tileset firstgid="1" source="../editor/game_objects.tsx"/>
  <objectgroup color="#73fa79" id="2" name="Object Layer 1">
-  <object id="1" x="1605.73" y="151.921">
-   <polygon points="3.16409,-22.0352 193.539,-22.4664 261.745,-27.5334 310.775,-60.3272 356.13,-116.311 386.548,-140.964 293.11,52.0791 93.92,60.5254"/>
+  <object id="17" x="881" y="326">
+   <polygon points="-39,2 43,-3 105,-34 123,-72 130,-126 123,-161 108,-203 76,-230 32,-241 -32,-237 -61,-218 -94,-180 -108,-130 -108,-99 -137,-99 -134,-287 119,-283 199,-214 203,-92 119,7 54,34 -3,34"/>
   </object>
-  <object id="17" x="889.791" y="253.628">
-   <polygon points="-39.7909,2.37245 43.5129,-3.83503 105.156,-34.5153 123.287,-72.8656 130.539,-126.556 123.287,-161.071 108.782,-203.257 76.1476,-230.102 32.6347,-241.607 -32.6347,-237.772 -61.6433,-218.597 -94.278,-180.247 -108.782,-130.391 -108.782,-99.7109 -137.791,-99.7109 -134.165,-287.628 119.66,-283.793 199.434,-214.762 203.06,-92.0408 119.66,7.67007 54.3911,34.5153 -3.62608,34.5153"/>
+  <object id="18" x="843" y="378">
+   <polygon points="234,156 138,186 84,200 24,202 -23,185 -44,170 -68,140 -79,101 -82,78 -100,77 -97,224 86,221 210,222 328,208 404,198 428,132 348,108"/>
   </object>
-  <object id="18" x="851.2" y="305.6">
-   <polygon points="234,156 138,186 84,200 24,202 -23.7209,185.271 -44.8062,170.329 -68.5271,140.447 -79.0698,101.6 -82.155,78.1176 -100.155,77.6941 -97.5194,224.118 86.9767,221.129 210,222 328,208 404,198 428,132 348,108"/>
-  </object>
-  <object id="20" x="632" y="248">
-   <polygon points="0,0 120,-3.2 120,72 0,72"/>
+  <object id="20" x="624" y="321">
+   <polygon points="0,0 120,-3 120,72 0,72"/>
   </object>
  </objectgroup>
  <objectgroup id="5" name="Object Layer 2">
-  <object id="5" x="2074.45" y="68.7285">
-   <polyline points="0,0 27.7131,47.6666 97.5502,95.3331 181.39,120.79 294.868,130.806"/>
+  <object id="14" x="-4" y="313">
+   <polygon points="4,15 264,15 628,7 628,79 4,79"/>
   </object>
-  <object id="6" x="2480.17" y="273.806">
-   <polyline points="0,0 334.774,1.10852"/>
-  </object>
-  <object id="14" x="4" y="240.154">
-   <polygon points="4,15.846 628,7.84615 628,79.8462 4,79.8462"/>
+  <object id="21" x="1692" y="477">
+   <polygon points="0,0 -320,0 -320,8 0,8"/>
   </object>
  </objectgroup>
- <objectgroup id="6" name="rects"/>
+ <objectgroup id="7" name="coinLayer">
+  <object id="23" gid="2" x="886" y="126" width="20" height="20"/>
+  <object id="26" gid="2" x="154" y="304" width="20" height="20"/>
+  <object id="30" gid="2" x="0" y="308" width="20" height="20"/>
+  <object id="33" gid="3" x="876" y="197" width="20" height="20"/>
+  <object id="36" gid="4" x="1654" y="434" width="38" height="38"/>
+ </objectgroup>
+ <objectgroup id="6" name="playerLayer">
+  <object id="22" gid="1" x="3" y="235" width="66" height="60"/>
+ </objectgroup>
 </map>
