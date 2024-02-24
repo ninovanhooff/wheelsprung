@@ -55,7 +55,7 @@ proc drawLevelPaths(screen: LevelSelectScreen) =
 
 proc drawButtons(screen: LevelSelectScreen) =
   let selectedFileName = screen.levelPaths[screen.selectedIndex]
-  gfx.drawTextAligned("Ⓐ: Play " & selectedFileName, 200, 218)
+  gfx.drawTextAligned("Ⓐ Play " & selectedFileName, 200, 218)
 
 proc draw(screen: LevelSelectScreen) =
   gfx.clear(kColorWhite)
