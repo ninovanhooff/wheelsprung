@@ -32,6 +32,10 @@ method update*(self: DialogScreen): int {.locks:0.} =
 
   if kButtonA in buttonState.pushed:
     popScreen()
+  elif kButtonB in buttonState.pushed:
+    clearNavigationStack()
+    # navigator will push new level select screen. We cannoto do it here 
+    # bevause that would create a circular dependency
 
   return 0
 

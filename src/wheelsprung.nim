@@ -13,6 +13,10 @@ import screens/level_select/level_select_screen
 
 const FONT_PATH = "/System/Fonts/Roobert-11-Medium.pft"
 
+let initialScreenProvider: InitialScreenProvider = 
+    proc(): Screen =
+        result = newLevelSelectScreen()
+
 var 
     font: LCDFont
     refreshRate = 50.0f
@@ -51,6 +55,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
         playdate.graphics.setFont(font)
 
         runCatching(runTests, "UNIT TESTS FAILED")
+        initNavigator(initialScreenProvider)
         pushScreen(newLevelSelectScreen())
         
         # Set the update callback
