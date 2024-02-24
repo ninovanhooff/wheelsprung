@@ -138,10 +138,12 @@ proc loadLevel*(path: string): Level =
   
   let levelEntity = parseLevel(path)
 
+  # BB uses a y-axis that points up
   level.cameraBounds = newBB(
-    l = 0.0, t = 0.0, 
-    r = (levelEntity.width * levelEntity.tilewidth).Float - displaySize.x, 
-    b = (levelEntity.height * levelEntity.tileheight).Float - displaySize.y
+    l = 0.0,
+    b = 0.0,
+    r = (levelEntity.width * levelEntity.tilewidth).Float - displaySize.x,
+    t = (levelEntity.height * levelEntity.tileheight).Float - displaySize.y
   )
   print("cameraBounds: " & $level.cameraBounds)
 

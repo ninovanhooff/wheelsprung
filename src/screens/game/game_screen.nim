@@ -231,7 +231,9 @@ method update*(gameScreen: GameScreen): int {.locks:0.} =
 
   updateGameBike(state)
 
-  state.camera = (state.chassis.position - halfDisplaySize).clampTo(state.level.cameraBounds)
+  state.camera = state.level.cameraBounds.clampVect(
+    state.chassis.position - halfDisplaySize
+  )
   drawGame(addr state) # todo pass as object?
   return 1
 

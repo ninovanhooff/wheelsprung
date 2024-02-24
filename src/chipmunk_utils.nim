@@ -17,12 +17,6 @@ proc floor*(v: Vect): Vect =
 proc `/`*(v: Vect, s: Float): Vect =
   result = v(v.x / s, v.y / s)
 
-proc clampTo*(v: Vect, bb: BB): Vect {.inline, cdecl.} =
-  ## Clamp a vector to a bounding box.
-  assert bb.l <= bb.r, "Invalid bounding box; r larger than l:  $bb"
-  assert bb.t <= bb.b, "Invalid bounding box; b larger than t:  $bb"
-  return v(fclamp(v.x, bb.l, bb.r), fclamp(v.y, bb.t, bb.b))
-
 proc flip*(body: Body, relativeTo: Body) =
   ## Flip body horizontally relative to relativeTo
   body.angle = relativeTo.angle + (relativeTo.angle - body.angle)
