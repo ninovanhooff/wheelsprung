@@ -40,6 +40,8 @@ var
 
 
 proc initGameView*() =
+  if bikeChassisImageTable != nil: return # already initialized
+
   try:
     bikeChassisImageTable = gfx.newBitmapTable("images/bike-chassis")
     bikeWheelImageTable = gfx.newBitmapTable("images/bike-wheel")
