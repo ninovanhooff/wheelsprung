@@ -1,6 +1,7 @@
 import chipmunk7
 import options
 import graphics_types
+import utils
 
 
 type 
@@ -133,3 +134,7 @@ proc getRiderBodies*(state: GameState): seq[Body] =
     state.riderUpperLeg,
     state.riderLowerLeg,
   ]
+
+proc destroy*(state: GameState) =
+  print("Destroying game state")
+  state.space.destroy()
