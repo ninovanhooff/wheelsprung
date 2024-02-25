@@ -1,11 +1,13 @@
 import std/math
+import std/strutils
 import playdate/api
 
 const
   TwoPi*: float = 2 * PI
 
-proc print*(str: auto) =
-  playdate.system.logToConsole($str)
+proc print*(things: varargs[string, `$`]) =
+  ## Print any type by calling $ on it to convert it to string
+  playdate.system.logToConsole(things.join("\t"))
 
 proc normalizeAngle*(angle: float): float =
     ## normalize angle to be between 0 and 2 * PI
