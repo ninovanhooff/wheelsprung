@@ -10,6 +10,8 @@ var
   contractPlayer: SamplePlayer
 
 proc initBikeSqueak*()=
+  if contractPlayer != nil: return # already initialized
+
   try:
     contractPlayer = playdate.sound.newSamplePlayer("/audio/suspension/suspension_contract_adpcm")
   except:

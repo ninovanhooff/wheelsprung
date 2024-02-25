@@ -9,6 +9,8 @@ var
   collisionPlayers: seq[SamplePlayer]
 
 proc initGameSound*() =
+  if finishPlayer != nil: return # already initialized
+
   ## Load the sounds
   try:
     finishPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish")

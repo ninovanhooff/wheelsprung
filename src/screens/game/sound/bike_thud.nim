@@ -19,6 +19,8 @@ proc getRandomThud(): SamplePlayer=
   thudPlayers[rand(thudPlayers.high)]
 
 proc initBikeThud*() =
+  if thudPlayers.len > 0: return # already initialized
+
   try:
     for i in 1..3:
       thudPlayers.add(playdate.sound.newSamplePlayer("/audio/thud/thud_" & $i))
