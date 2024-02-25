@@ -11,6 +11,7 @@ var
 
 proc initBikeSqueak*()=
   if contractPlayer != nil: return # already initialized
+  print("initializing bike squeak")
 
   try:
     contractPlayer = playdate.sound.newSamplePlayer("/audio/suspension/suspension_contract_adpcm")

@@ -20,6 +20,7 @@ proc getRandomThud(): SamplePlayer=
 
 proc initBikeThud*() =
   if thudPlayers.len > 0: return # already initialized
+  print("initBikeThud")
 
   try:
     for i in 1..3:
