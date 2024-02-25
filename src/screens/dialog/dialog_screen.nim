@@ -1,17 +1,25 @@
+import std/strformat
 import playdate/api
 import navigation/[screen, navigator]
 import graphics_utils
 import utils
+import shared_types
 
 type DialogType* {.pure.} = enum
   GameOver, LevelComplete
 
 type DialogScreen = ref object of Screen
   dialogType: DialogType
+  time: Time
 
 
-proc newDialogScreen*(dialogType: DialogType): DialogScreen {.raises:[].} =
-  return DialogScreen(dialogType: dialogType)
+proc newDialogScreen*(dialogType: DialogType, time: Time): DialogScreen {.raises:[].} =
+  return DialogScreen(dialogType: dialogType, time: time)
+
+proc formatTime(time: Time): string {.raises: [], tags: [].} =
+  try: 
+    fmt"{time:.2f}" 
+  except: "unknown time"
 
 proc displayText(dialogType: DialogType): string {.raises: [], tags: [].} =
   case dialogType
@@ -24,6 +32,7 @@ method resume*(self: DialogScreen) =
   print("DialogScreen resume")
   playdate.graphics.clear(kColorWhite)
   gfx.drawTextAligned(self.dialogType.displayText, 200,100)
+  gfx.drawTextAligned("Your time: " & formatTime(self.time) , 200, 140)
 
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
 

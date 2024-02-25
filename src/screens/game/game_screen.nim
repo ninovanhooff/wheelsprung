@@ -5,7 +5,7 @@ import utils, chipmunk_utils, graphics_utils
 import levels
 import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
 import sound/game_sound
-import game_types
+import game_types, shared_types
 import game_view
 import navigation/[screen, navigator]
 import screens/dialog/dialog_screen
@@ -75,7 +75,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameOver collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
   playCollisionSound()
-  newDialogScreen(DialogType.GameOver).pushScreen()
+  newDialogScreen(DialogType.GameOver, state.time).pushScreen()
   state.resetGameOnResume = true
   false # don't process the collision further
 
@@ -90,7 +90,8 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
   playFinishSound()
-  newDialogScreen(DialogType.LevelComplete).pushScreen()
+  state.finishTime = some(state.time)
+  newDialogScreen(DialogType.LevelComplete, state.time).pushScreen()
   state.resetGameOnResume = true
   false # don't process the collision further
 
@@ -164,7 +165,7 @@ proc onFlipDirection(state: GameState) =
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
   state.flipRiderDirection(riderPosition)
-  state.finishFlipDirectionAt = some(state.time + 0.5f)
+  state.finishFlipDirectionAt = some(state.time + 0.5.Time)
 
 proc updateAttitudeAdjust(state: GameState) =
   let chassis = state.chassis

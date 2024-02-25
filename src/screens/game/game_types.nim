@@ -2,13 +2,13 @@ import chipmunk7
 import options
 import graphics_types
 import utils
+import shared_types
 
 
 type 
   Camera* = Vect
   DriveDirection* = Float
 
-  Time* = float32
   Coin* = Vertex
   Killer* = Vertex
   Finish* = Vertex
@@ -72,6 +72,7 @@ type GameState* = ref object of RootObj
 
   remainingCoins*: seq[Coin]
   killers*: seq[Body]
+  finishTime*: Option[Time]
 
   ## Input
   isThrottlePressed*: bool
