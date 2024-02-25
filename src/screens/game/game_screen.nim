@@ -135,6 +135,7 @@ proc newGameState(level: Level): GameState =
   return state
 
 proc onResetGame() {.raises: [].} =
+  state.destroy()
   state = newGameState(state.level)
 
 proc onThrottle*() =
@@ -230,7 +231,7 @@ method resume*(gameScreen: GameScreen) =
     onResetGame()
     state.resetGameOnResume = false
 
-method pause*(gameScreen: GameScreen) =
+method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
 
 method update*(gameScreen: GameScreen): int {.locks:0.} =
@@ -247,6 +248,10 @@ method update*(gameScreen: GameScreen): int {.locks:0.} =
   )
   drawGame(addr state) # todo pass as object?
   return 1
+
+method destroy*(gameScreen: GameScreen) =
+  gameScreen.pause()
+  state.destroy()
 
 method `$`*(gameScreen: GameScreen): string =
   return "GameScreen"
