@@ -1,4 +1,5 @@
 import options
+import sugar
 import chipmunk7
 import playdate/api
 import utils, chipmunk_utils, graphics_utils
@@ -69,17 +70,23 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
   false # don't process the collision further
 
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var 
-    shapeA: Shape
-    shapeB: Shape
-  arb.shapes(addr(shapeA), addr(shapeB))
-  print("gameOver collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
   playCollisionSound()
+  if state.finishTime.isSome:
+    # Can'r be game over if the game was already won
+    return false
+
   newDialogScreen(DialogType.GameOver, state.time).pushScreen()
   state.resetGameOnResume = true
   false # don't process the collision further
 
+let finishSoundCallback: PDSoundCallbackFunction = () =>
+  newDialogScreen(DialogType.LevelComplete, state.finishTime.get).pushScreen()
+
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  if state.finishTime.isSome:
+    # Can't finish the game if it was already finished
+    return false
+
   if state.remainingCoins.len > 0:
     print("finish collision but not all coins collected")
     return false
@@ -89,9 +96,9 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
-  playFinishSound()
   state.finishTime = some(state.time)
-  newDialogScreen(DialogType.LevelComplete, state.time).pushScreen()
+  playFinishSound()
+
   state.resetGameOnResume = true
   false # don't process the collision further
 
@@ -177,12 +184,19 @@ proc updateAttitudeAdjust(state: GameState) =
 
 proc updateTimers(state: GameState) =
   state.time += timeStep
-  
+  let currentTime = state.time
+
+  if state.finishTime.isSome:
+    let finishTime = state.finishTime.get
+    if currentTime > finishTime + 1.5.Time:
+      newDialogScreen(DialogType.LevelComplete, finishTime).pushScreen()
+      state.resetGameOnResume = true
+
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
     state.chassis.torque = state.driveDirection * -15_500.0
 
-    if state.time > state.finishFlipDirectionAt.get:
+    if currentTime > state.finishFlipDirectionAt.get:
       state.finishFlipDirectionAt = none[Time]()
       state.resetRiderConstraintForces()
     
