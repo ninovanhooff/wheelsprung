@@ -13,7 +13,7 @@ var pendingNavigators: seq[Navigator] = @[]
 var initialScreenProvider: InitialScreenProvider
 
 proc printNavigation(message: string, screen: Screen) =
-  print(message & ": " & $screen & "(" & repr(unsafeAddr screen) & ") stack size: " & $backStack.len & " pending.len: " & $pendingNavigators.len)
+  print(message & ": " & $screen & " | stack size: " & $backStack.len & " pending.len: " & $pendingNavigators.len)
 
 proc initNavigator*(screenProvider: InitialScreenProvider) =
   initialScreenProvider = screenProvider

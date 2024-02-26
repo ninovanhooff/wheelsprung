@@ -10,6 +10,7 @@ import game_types, shared_types
 import game_view
 import navigation/[screen, navigator]
 import screens/dialog/dialog_screen
+import screens/sleep/sleep_screen
 
 type GameScreen* = ref object of Screen
 
@@ -75,12 +76,13 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     # Can'r be game over if the game was already won
     return false
 
-  newDialogScreen(DialogType.GameOver, state.time).pushScreen()
+  newSleepScreen(
+    nextScreen = newDialogScreen(DialogType.GameOver, state.time),
+    millis = 1000
+  ).pushScreen()
+
   state.resetGameOnResume = true
   false # don't process the collision further
-
-let finishSoundCallback: PDSoundCallbackFunction = () =>
-  newDialogScreen(DialogType.LevelComplete, state.finishTime.get).pushScreen()
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   if state.finishTime.isSome:
