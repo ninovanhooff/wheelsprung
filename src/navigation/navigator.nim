@@ -49,7 +49,7 @@ proc resumeActiveScreen() =
   activeScreen.resume()
 
 proc pushScreen*(toScreen: Screen) =
-  pendingNavigators.add(() => 
+  pendingNavigators.add(() =>
     backStack.add(toScreen)
   )
 

@@ -50,6 +50,9 @@ proc setGameResult(state: GameState, resultType: GameResultType) =
   ))
   state.resetGameOnResume = true
 
+proc navigateToGameResult(result: GameResult) =
+  newDialogScreen(result).pushScreen()
+
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl.} =
   print("coin post step callback")
   let shape = cast[Shape](coinShape)
@@ -194,8 +197,8 @@ proc updateTimers(state: GameState) =
   if state.gameResult.isSome:
     let gameResult = state.gameResult.get
     let finishTime = gameResult.time
-    if currentTime > finishTime + 1.5.Time:
-      newDialogScreen(gameResult).pushScreen()
+    if currentTime > finishTime + 2.5.Time: # this timeout can be skipped by pressing any button
+      navigateToGameResult(gameResult)
 
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
@@ -209,10 +212,15 @@ proc updateTimers(state: GameState) =
 proc handleInput(state: GameState) =
   state.isThrottlePressed = false
 
+  let buttonsState = playdate.system.getButtonsState()
+
   if state.gameResult.isSome:
+    # when the game is over, the bike cannot be controlled anymore,
+    # but any button can be pressed to navigate to the result screen
+    if buttonsState.pushed.len > 0:
+      navigateToGameResult(state.gameResult.get)
     return
 
-  let buttonsState = playdate.system.getButtonsState()
 
   if actionThrottle in buttonsState.current:
     state.isThrottlePressed = true
