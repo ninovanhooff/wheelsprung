@@ -148,7 +148,11 @@ proc drawGame*(statePtr: ptr GameState) =
   let camVertex = camera.toVertex()
   let driveDirection = state.driveDirection
 
-  playdate.graphics.clear(kColorWhite)
+  # draw background
+  if debugDrawShapes:
+    bgImage.draw(-camVertex[0]mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
+  else:
+    playdate.graphics.clear(kColorWhite)
 
   if debugDrawLevel:
     drawTerrain(camVertex, level.terrainPolygons)
@@ -164,25 +168,25 @@ proc drawGame*(statePtr: ptr GameState) =
     
     gfx.setLineCapStyle(kLineCapStyleRound)
 
-    # swingArm
-    swingArmAttachmentScreenPos = 
-      localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - camera
-    drawLineOutlined(
-      swingArmAttachmentScreenPos, 
-      rearWheelScreenPos, 
-      4, 
-      kColorWhite, 
-    )
+    # # swingArm
+    # swingArmAttachmentScreenPos = 
+    #   localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - camera
+    # drawLineOutlined(
+    #   swingArmAttachmentScreenPos, 
+    #   rearWheelScreenPos, 
+    #   4, 
+    #   kColorWhite, 
+    # )
 
-    # frontFork
-    frontForkAttachmentScreenPos = 
-      localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - camera
-    drawLineOutlined(
-      frontForkAttachmentScreenPos, 
-      frontWheelScreenPos, 
-      4, 
-      kColorWhite, 
-    )
+    # # frontFork
+    # frontForkAttachmentScreenPos = 
+    #   localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - camera
+    # drawLineOutlined(
+    #   frontForkAttachmentScreenPos, 
+    #   frontWheelScreenPos, 
+    #   4, 
+    #   kColorWhite, 
+    # )
 
     # chassis
     let chassisScreenPos = chassis.position - camera
@@ -223,7 +227,6 @@ proc drawGame*(statePtr: ptr GameState) =
     trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
   
   if debugDrawShapes:
-    bgImage.draw(-camVertex[0]mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
     eachShape(statePtr.space, shapeIter, statePtr)
 
   if debugDrawConstraints:

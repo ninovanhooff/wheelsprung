@@ -4,19 +4,26 @@ import game_types
 import sound/bike_sound
 import chipmunk_utils
 
-let
+const
+  chassisMass = 1.5
+  # note: collision shape smaller than texture (34x20)
+  chassisWidth = 24.0
+  chassisHeight = 12.0
+  chassisFriction = 10.0
+
+
   # offset for driveDirection DD_RIGHT
-  wheelRadius = 10.0f
+  wheelRadius = 10.0
   wheelFriction = 30.0
   rearWheelOffset = v(-20, 10)
   frontWheelOffset = v(21, 12)
   
-  swingArmWidth = 18f
-  swingArmHeight = 3f
+  swingArmWidth = 18.0
+  swingArmHeight = 3.0
   swingArmPosOffset = v(-10,10)
 
-  forkArmWidth = 3f
-  forkArmHeight = 27f
+  forkArmWidth = 3.0
+  forkArmHeight = 27.0
   forkArmPosOffset = v(16,2)
 
 proc addWheel(state: GameState, chassisOffset: Vect): Body =
@@ -37,18 +44,19 @@ proc addWheel(state: GameState, chassisOffset: Vect): Body =
 
   return body
 
-proc addChassis(space: Space, pos: Vect): Body =
-  let mass = 1.5
-  let width = 34f
-  let height = 20.0f
+proc addChassis(state: GameState, pos: Vect): Body =
+  let space = state.space
 
-  let moment = momentForBox(mass, width, height)
+  let moment = momentForBox(chassisMass, chassisWidth, chassisHeight)
 
-  let body = space.addBody(newBody(mass, moment))
+  let body = space.addBody(newBody(chassisMass, moment))
   body.position = pos
 
-  # let shape = space.addShape(newBoxShape(body, width, height, 0f))
-  # shape.filter = SHAPE_FILTER_NONE # no collisions
+  let shape = space.addShape(newBoxShape(body, chassisWidth, chassisHeight, 0.0))
+  shape.filter = GameShapeFilters.Player
+  shape.collision_type = GameCollisionTypes.Chassis
+  shape.friction = chassisFriction
+  state.bikeShapes.add(shape)
 
   return body
 
@@ -90,7 +98,7 @@ proc addForkArm(state: GameState, chassisOffset: Vect): Body =
 
   return forkArm
 
-proc removeBikeConstraints(state: GameState) =
+proc removeBikeConstraints*(state: GameState) =
   let space = state.space
 
   for constraint in state.bikeConstraints:
@@ -192,10 +200,9 @@ proc flipBikeDirection*(state: GameState) =
   state.setBikeConstraints()
 
 proc initGameBike*(state: GameState) =
-  let space = state.space
   let dd = state.driveDirection
 
-  state.chassis = space.addChassis(state.level.initialChassisPosition)
+  state.chassis = state.addChassis(state.level.initialChassisPosition)
   state.rearWheel = state.addWheel(rearWheelOffset.transform(dd))
   state.frontWheel = state.addWheel(frontWheelOffset.transform(dd))
   state.swingArm = state.addSwingArm(swingArmPosOffset.transform(dd))

@@ -1,5 +1,4 @@
 import options
-import sugar
 import chipmunk7
 import playdate/api
 import utils, chipmunk_utils, graphics_utils
@@ -10,7 +9,6 @@ import game_types, shared_types
 import game_view
 import navigation/[screen, navigator]
 import screens/dialog/dialog_screen
-import screens/sleep/sleep_screen
 
 type GameScreen* = ref object of Screen
 
@@ -60,6 +58,19 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
     print("deleting coin at index: " & repr(deleteIndex))
     state.remainingCoins.delete(deleteIndex)
 
+let gameOverPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
+  print("game over post step callback")
+  state.removeBikeConstraints()
+
+  # let space = state.space
+  # space.removeConstraint(state.assPivot)
+  # space.removeConstraint(state.shoulderPivot)
+  # space.removeConstraint(state.chassisKneePivot)
+  # space.removeConstraint(state.footPivot)
+  # space.removeConstraint(state.handPivot)
+  # space.removeConstraint(state.elbowPivot)
+  # space.removeConstraint(state.hipPivot)
+
 let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var 
     shapeA: Shape
@@ -74,15 +85,12 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
   playCollisionSound()
   if state.finishTime.isSome:
     # Can'r be game over if the game was already won
-    return false
+    return true # process collision normally
 
-  newSleepScreen(
-    nextScreen = newDialogScreen(DialogType.GameOver, state.time),
-    millis = 1000
-  ).pushScreen()
-
+  state.finishTime = some(state.time)
+  discard space.addPostStepCallback(gameOverPostStepCallback, nil, nil)
   state.resetGameOnResume = true
-  false # don't process the collision further
+  true # we still want to collide
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   if state.finishTime.isSome:
@@ -205,6 +213,9 @@ proc updateTimers(state: GameState) =
 
 proc handleInput(state: GameState) =
   state.isThrottlePressed = false
+
+  if state.finishTime.isSome:
+    return
 
   let buttonsState = playdate.system.getButtonsState()
 

@@ -26,6 +26,7 @@ const GameCollisionTypes* = (
   Coin: cast[GameCollisionType](4), 
   Killer: cast[GameCollisionType](5),
   Finish: cast[GameCollisionType](6),
+  Chassis: cast[GameCollisionType](7),
 )
 
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
