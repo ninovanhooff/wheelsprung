@@ -19,12 +19,16 @@ const
   frontWheelOffset = v(21, 12)
   
   swingArmWidth = 18.0
+  halfSwingArmWidth* = swingArmWidth*0.5
   swingArmHeight = 3.0
   swingArmPosOffset = v(-10,10)
 
   forkArmWidth = 3.0
   forkArmHeight = 27.0
   forkArmPosOffset = v(16,2)
+  forkArmTopCenterOffset* = v(0.0, -forkArmHeight*0.5)
+  forkArmBottomCenterOffset* = v(0.0, forkArmHeight*0.5)
+
 
 proc addWheel(state: GameState, chassisOffset: Vect): Body =
   let space = state.space
@@ -52,13 +56,19 @@ proc addChassis(state: GameState, pos: Vect): Body =
   let body = space.addBody(newBody(chassisMass, moment))
   body.position = pos
 
-  let shape = space.addShape(newBoxShape(body, chassisWidth, chassisHeight, 0.0))
+  return body
+
+proc addChassisShape*(state: GameState): Shape =
+  let space = state.space
+  let chassis = state.chassis
+
+  let shape = space.addShape(newBoxShape(chassis, chassisWidth, chassisHeight, 0f))
   shape.filter = GameShapeFilters.Player
   shape.collision_type = GameCollisionTypes.Chassis
   shape.friction = chassisFriction
   state.bikeShapes.add(shape)
 
-  return body
+  return shape
 
 proc addSwingArm(state: GameState, chassisOffset: Vect): Body =
   let space = state.space
@@ -76,6 +86,7 @@ proc addSwingArm(state: GameState, chassisOffset: Vect): Body =
   swingArmShape.elasticity = 0.0f
   swingArmShape.friction = 0.7f
   state.bikeShapes.add(swingArmShape)
+  state.swingArmShape = swingArmShape
 
   return swingArm
 
@@ -95,6 +106,7 @@ proc addForkArm(state: GameState, chassisOffset: Vect): Body =
   forkArmShape.elasticity = 0.0f
   forkArmShape.friction = 0.7f
   state.bikeShapes.add(forkArmShape)
+  state.forkArmShape = forkArmShape
 
   return forkArm
 
@@ -154,14 +166,12 @@ proc setBikeConstraints(state: GameState) =
 
   ## fork arm (arm between chassis and front wheel)
 
-  let forkArmTopCenter = v(0f, -forkArmHeight*0.5f)
-  # let forkArmEndCenter = v(forkArmWidth*0.5f, forkArmHeight*0.5f)
   # attach fork arm to chassis
   bikeConstraints.add(space.addConstraint(
     chassis.newPivotJoint(
       forkArm, 
-      forkArmPosOffset.transform(dd) + forkArmTopCenter, 
-      forkArmTopCenter
+      forkArmPosOffset.transform(dd) + forkArmTopCenterOffset,
+      forkArmTopCenterOffset
     )
   ))
   # limit front wheel to fork arm
@@ -175,7 +185,7 @@ proc setBikeConstraints(state: GameState) =
   ))
   # push front wheel to end of fork arm
   state.forkArmSpring = forkArm.newDampedSpring(
-    frontWheel, forkArmTopCenter, vzero, forkArmHeight, 70.0, 10.0
+    frontWheel, forkArmTopCenterOffset, vzero, forkArmHeight, 70.0, 10.0
   )
   
   bikeConstraints.add(space.addConstraint(

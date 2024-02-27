@@ -6,7 +6,8 @@ import std/sequtils
 import std/sugar
 import options
 import chipmunk7
-import game_types, graphics_types
+import game_types, graphics_types, shared_types
+import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, swingArmRightCenter
 import graphics_utils
 import chipmunk_utils
 import globals
@@ -14,6 +15,7 @@ import globals
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
   frontForkChassisAttachmentOffset = v(15.0, -3.0)
+  forkOutlineWidth: int32 = 4'i32
   patternSize: int32 = 8'i32
 
 let
@@ -140,6 +142,58 @@ proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState, inverse: b
     (if driveDirection == DD_LEFT: kBitmapFlippedX else: kBitmapUnflipped)
   )
 
+proc drawBikeForks*(state: GameState) =
+  let chassis = state.chassis
+  let camera = state.camera
+  let driveDirection = state.driveDirection
+
+  if state.gameResult.isSome and state.gameResult.get.resultType == GameResultType.GameOver:
+    #drawLineOutlined from top of forkArm to bottom of forkArm
+    let forkArm = state.forkArm
+    let forkArmTopCenter = localToWorld(forkArm, forkArmTopCenterOffset) - camera
+    let forkArmBottomCenter = localToWorld(forkArm, forkArmBottomCenterOffset) - camera
+    drawLineOutlined(
+      forkArmTopCenter,
+      forkArmBottomCenter,
+      forkOutlineWidth,
+      kColorWhite,
+    )
+
+    # #drawLineOutlined from left of swingArm to right of swingArm
+    let swingArm = state.swingArm
+    let swingArmLeftCenter = localToWorld(swingArm, v(-halfSwingArmWidth, 0.0)) - camera
+    let swingArmRightCenter = localToWorld(swingArm, v(halfSwingArmWidth, 0.0)) - camera
+    drawLineOutlined(
+      swingArmLeftCenter,
+      swingArmRightCenter,
+      forkOutlineWidth,
+      kColorWhite,
+    )
+  else:
+    let rearWheel = state.rearWheel
+    let frontWheel = state.frontWheel
+    let rearWheelScreenPos = rearWheel.position - camera
+    let frontWheelScreenPos = frontWheel.position - camera
+    # swingArm
+    swingArmAttachmentScreenPos =
+      localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - camera
+    drawLineOutlined(
+      swingArmAttachmentScreenPos,
+      rearWheelScreenPos,
+      forkOutlineWidth,
+      kColorWhite,
+    )
+
+    # frontFork
+    frontForkAttachmentScreenPos =
+      localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - camera
+    drawLineOutlined(
+      frontForkAttachmentScreenPos,
+      frontWheelScreenPos,
+      forkOutlineWidth,
+      kColorWhite,
+    )
+
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
@@ -168,25 +222,7 @@ proc drawGame*(statePtr: ptr GameState) =
     
     gfx.setLineCapStyle(kLineCapStyleRound)
 
-    # # swingArm
-    # swingArmAttachmentScreenPos = 
-    #   localToWorld(chassis, swingArmChassisAttachmentOffset.transform(driveDirection)) - camera
-    # drawLineOutlined(
-    #   swingArmAttachmentScreenPos, 
-    #   rearWheelScreenPos, 
-    #   4, 
-    #   kColorWhite, 
-    # )
-
-    # # frontFork
-    # frontForkAttachmentScreenPos = 
-    #   localToWorld(chassis, frontForkChassisAttachmentOffset.transform(driveDirection)) - camera
-    # drawLineOutlined(
-    #   frontForkAttachmentScreenPos, 
-    #   frontWheelScreenPos, 
-    #   4, 
-    #   kColorWhite, 
-    # )
+    drawBikeForks(state)
 
     # chassis
     let chassisScreenPos = chassis.position - camera

@@ -67,16 +67,10 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
 
 let gameOverPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
   print("game over post step callback")
+  # detach wheels
   state.removeBikeConstraints()
-
-  # let space = state.space
-  # space.removeConstraint(state.assPivot)
-  # space.removeConstraint(state.shoulderPivot)
-  # space.removeConstraint(state.chassisKneePivot)
-  # space.removeConstraint(state.footPivot)
-  # space.removeConstraint(state.handPivot)
-  # space.removeConstraint(state.elbowPivot)
-  # space.removeConstraint(state.hipPivot)
+  # and make chassis collidable
+  discard addChassisShape(state)
 
 let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var 
