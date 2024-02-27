@@ -5,34 +5,31 @@ import graphics_utils
 import utils
 import shared_types
 
-type DialogType* {.pure.} = enum
-  GameOver, LevelComplete
-
 type DialogScreen = ref object of Screen
-  dialogType: DialogType
-  time: Time
+  gameResult: GameResult
 
 
-proc newDialogScreen*(dialogType: DialogType, time: Time): DialogScreen {.raises:[].} =
-  return DialogScreen(dialogType: dialogType, time: time)
+proc newDialogScreen*(gameResult: GameResult): DialogScreen {.raises:[].} =
+  return DialogScreen(gameResult: gameResult)
 
 proc formatTime(time: Time): string {.raises: [], tags: [].} =
   try: 
     fmt"{time:.2f}" 
   except: "unknown time"
 
-proc displayText(dialogType: DialogType): string {.raises: [], tags: [].} =
-  case dialogType
-  of DialogType.GameOver:
+proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].} =
+  case gameResultType
+  of GameResultType.GameOver:
     return "Game Over"
-  of DialogType.LevelComplete:
+  of GameResultType.LevelComplete:
     return "Level Complete"
 
 method resume*(self: DialogScreen) =
   print("DialogScreen resume")
   playdate.graphics.clear(kColorWhite)
-  gfx.drawTextAligned(self.dialogType.displayText, 200,100)
-  gfx.drawTextAligned("Your time: " & formatTime(self.time) , 200, 140)
+  let gameResult = self.gameResult
+  gfx.drawTextAligned(gameResult.resultType.displayText, 200,100)
+  gfx.drawTextAligned("Your time: " & formatTime(gameResult.time) , 200, 140)
 
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
 
@@ -49,4 +46,4 @@ method update*(self: DialogScreen): int {.locks:0.} =
   return 0
 
 method `$`*(self: DialogScreen): string {.raises: [], tags: [].} =
-  return "DialogScreen; type: " & repr(self.dialogType)
+  return "DialogScreen; type: " & repr(self.gameResult.resultType)

@@ -73,7 +73,7 @@ type GameState* = ref object of RootObj
 
   remainingCoins*: seq[Coin]
   killers*: seq[Body]
-  finishTime*: Option[Time]
+  gameResult*: Option[GameResult]
 
   ## Input
   isThrottlePressed*: bool

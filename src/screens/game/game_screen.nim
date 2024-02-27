@@ -43,6 +43,13 @@ if defined simulator:
 # forward declarations
 proc onResetGame() {.raises: [].}
 
+proc setGameResult(state: GameState, resultType: GameResultType) =
+  state.gameResult = some(GameResult(
+    resultType: resultType,
+    time: state.time
+  ))
+  state.resetGameOnResume = true
+
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl.} =
   print("coin post step callback")
   let shape = cast[Shape](coinShape)
@@ -83,17 +90,16 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
 
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   playCollisionSound()
-  if state.finishTime.isSome:
+  if state.gameResult.isSome:
     # Can'r be game over if the game was already won
     return true # process collision normally
 
-  state.finishTime = some(state.time)
+  state.setGameResult(GameResultType.GameOver)
   discard space.addPostStepCallback(gameOverPostStepCallback, nil, nil)
-  state.resetGameOnResume = true
-  true # we still want to collide
+  return true # we still want to collide
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  if state.finishTime.isSome:
+  if state.gameResult.isSome:
     # Can't finish the game if it was already finished
     return false
 
@@ -101,16 +107,11 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     print("finish collision but not all coins collected")
     return false
   
-  var 
-    shapeA: Shape
-    shapeB: Shape
-  arb.shapes(addr(shapeA), addr(shapeB))
-  print("gameWin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
-  state.finishTime = some(state.time)
+  print("gameWin collision")
+  state.setGameResult(GameResultType.LevelComplete)
   playFinishSound()
 
-  state.resetGameOnResume = true
-  false # don't process the collision further
+  return false # don't process the collision further
 
 proc createSpace(level: Level): Space =
   let space = newSpace()
@@ -196,11 +197,11 @@ proc updateTimers(state: GameState) =
   state.time += timeStep
   let currentTime = state.time
 
-  if state.finishTime.isSome:
-    let finishTime = state.finishTime.get
+  if state.gameResult.isSome:
+    let gameResult = state.gameResult.get
+    let finishTime = gameResult.time
     if currentTime > finishTime + 1.5.Time:
-      newDialogScreen(DialogType.LevelComplete, finishTime).pushScreen()
-      state.resetGameOnResume = true
+      newDialogScreen(gameResult).pushScreen()
 
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
@@ -214,7 +215,7 @@ proc updateTimers(state: GameState) =
 proc handleInput(state: GameState) =
   state.isThrottlePressed = false
 
-  if state.finishTime.isSome:
+  if state.gameResult.isSome:
     return
 
   let buttonsState = playdate.system.getButtonsState()
