@@ -12,7 +12,7 @@ type DialogScreen = ref object of Screen
 proc newDialogScreen*(gameResult: GameResult): DialogScreen {.raises:[].} =
   return DialogScreen(gameResult: gameResult)
 
-proc formatTime(time: Time): string {.raises: [], tags: [].} =
+proc formatTime(time: Seconds): string {.raises: [], tags: [].} =
   try: 
     fmt"{time:.2f}" 
   except: "unknown time"

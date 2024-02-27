@@ -83,8 +83,8 @@ type GameState* = ref object of RootObj
 
   ## Physics
   space*: Space
-  time*: Time
-  finishFlipDirectionAt*: Option[Time]
+  time*: Seconds
+  finishFlipDirectionAt*: Option[Seconds]
   attitudeAdjustForce*: Float
   camera*: Camera
   driveDirection*: DriveDirection

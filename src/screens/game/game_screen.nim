@@ -180,7 +180,7 @@ proc onFlipDirection(state: GameState) =
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
   state.flipRiderDirection(riderPosition)
-  state.finishFlipDirectionAt = some(state.time + 0.5.Time)
+  state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
 
 proc updateAttitudeAdjust(state: GameState) =
   let chassis = state.chassis
@@ -197,7 +197,7 @@ proc updateTimers(state: GameState) =
   if state.gameResult.isSome:
     let gameResult = state.gameResult.get
     let finishTime = gameResult.time
-    if currentTime > finishTime + 2.5.Time: # this timeout can be skipped by pressing any button
+    if currentTime > finishTime + 2.5.Seconds: # this timeout can be skipped by pressing any button
       navigateToGameResult(gameResult)
 
   if state.finishFlipDirectionAt.isSome:
@@ -205,7 +205,7 @@ proc updateTimers(state: GameState) =
     state.chassis.torque = state.driveDirection * -15_500.0
 
     if currentTime > state.finishFlipDirectionAt.get:
-      state.finishFlipDirectionAt = none[Time]()
+      state.finishFlipDirectionAt = none[Seconds]()
       state.resetRiderConstraintForces()
     
 
