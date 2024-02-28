@@ -1,3 +1,4 @@
+var debugDrawGrid* = false
 var debugDrawLevel* = true;
 var debugDrawShapes* = false;
 var debugDrawTextures* = true;

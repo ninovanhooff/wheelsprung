@@ -203,10 +203,10 @@ proc drawGame*(statePtr: ptr GameState) =
   let driveDirection = state.driveDirection
 
   # draw background
-  if debugDrawShapes:
-    bgImage.draw(-camVertex[0]mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
+  if debugDrawGrid:
+    bgImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
   else:
-    playdate.graphics.clear(kColorWhite)
+    gfx.clear(kColorWhite)
 
   if debugDrawLevel:
     drawTerrain(camVertex, level.terrainPolygons)
