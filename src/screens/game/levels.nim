@@ -19,6 +19,7 @@ type
     width*, height*: int32
     polygon: Option[seq[LevelVertexEntity]]
     polyline: Option[seq[LevelVertexEntity]]
+    ellipse: Option[bool]
   
   LayerEntity = ref object of RootObj
     objects: Option[seq[LevelObjectEntity]]
@@ -80,11 +81,11 @@ proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
 
 proc `+`*(v1, v2: Vertex): Vertex = [v1[0] + v2[0], v1[1] + v2[1]]
 
-proc loadPolygon(level: Level, obj: LevelObjectEntity) =
+proc loadPolygon(level: Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = [obj.x, obj.y]
   var polygon: Polygon = obj.getPolygon()
   if polygon.len < 2:
-    return
+    return false
 
   let lastIndex = polygon.high
 
@@ -95,9 +96,9 @@ proc loadPolygon(level: Level, obj: LevelObjectEntity) =
 
   level.terrainPolygons.add(polygon)
 
-proc loadGid(level: Level, obj: LevelObjectEntity) =
+proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   if obj.gid.isNone:
-    return
+    return false
 
   let gid = obj.gid.get
   let hFlip: bool = (gid and GID_HFLIP_MASK).bool
@@ -121,13 +122,34 @@ proc loadGid(level: Level, obj: LevelObjectEntity) =
       level.killers.add(position)
     of ClassIds.Finish:
       level.finishPosition = position
+  return true
+
+proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
+  if obj.polygon.isSome or obj.polyline.isSome or obj.ellipse.get(false):
+    # it's a rectangle only if it is not a polygon, polyline or ellipse
+    return false
+
+  if obj.width < 1 or obj.height < 1:
+    return false
+
+  let objOffset: Vertex = [obj.x, obj.y]
+  let width = obj.width
+  let height = obj.height
+  let rect: seq[Vertex] = @[
+    objOffset,
+    objOffset + [width, 0'i32],
+    objOffset + [width, height],
+    objOffset + [0'i32, height],
+    objOffset
+  ]
+  level.terrainPolygons.add(rect)
+  return true
 
 proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
-    level.loadPolygon(obj)
-    level.loadGid(obj)
+    discard level.loadPolygon(obj) or level.loadGid(obj) or level.loadRectangle(obj)
 
 proc loadLevel*(path: string): Level =
   let level = Level(
