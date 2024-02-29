@@ -212,6 +212,22 @@ proc drawGame*(statePtr: ptr GameState) =
     drawTerrain(camVertex, level.terrainPolygons)
 
   if debugDrawTextures:
+    # coins
+    for coin in state.remainingCoins:
+      let coinScreenPos = coin - camVertex
+      coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+
+    # killer
+    for killer in state.killers:
+      let killerScreenPos = killer.position - camera
+      killerImageTable.drawRotated(killerScreenPos, killer.angle)
+
+    # trophy
+    let finishScreenPos = level.finishPosition - camVertex
+    let finishTableIndex = if state.remainingCoins.len == 0: 1 else: 0
+    trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
+  
+
     # wheels
     let frontWheel = state.frontWheel
     let frontWheelScreenPos = frontWheel.position - camera
@@ -247,21 +263,6 @@ proc drawGame*(statePtr: ptr GameState) =
     riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
     riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
 
-    # coins
-    for coin in state.remainingCoins:
-      let coinScreenPos = coin - camVertex
-      coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
-
-    # killer
-    for killer in state.killers:
-      let killerScreenPos = killer.position - camera
-      killerImageTable.drawRotated(killerScreenPos, killer.angle)
-
-    # trophy
-    let finishScreenPos = level.finishPosition - camVertex
-    let finishTableIndex = if state.remainingCoins.len == 0: 1 else: 0
-    trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
-  
   if debugDrawShapes:
     eachShape(statePtr.space, shapeIter, statePtr)
 
