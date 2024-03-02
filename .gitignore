@@ -7,3 +7,5 @@ game.map
 **.aup3-wal
 # Blender autosave files
 **.blend[0-9]
+
+support/editor/wheelsprung_template.tiled-session
