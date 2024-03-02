@@ -1,9 +1,11 @@
 import sugar
 import std/strutils
 import strformat
+import options
 import ../tests/tests
 import utils
 import globals
+import configuration
 import navigation/[navigator, screen]
 
 
@@ -56,8 +58,9 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
 
     runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
-    if playdate.file.exists("levels/editor.tmj"):
-      pushScreen(newGameScreen("levels/editor.tmj"))
+    let lastOpenedLevelPath = getConfig().lastOpenedLevel
+    if lastOpenedLevelPath.isSome:
+      pushScreen(newGameScreen(lastOpenedLevelPath.get()))
     else:
       pushScreen(newLevelSelectScreen())
     

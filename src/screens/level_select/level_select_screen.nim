@@ -2,6 +2,7 @@ import playdate/api
 import navigation/[screen, navigator]
 import graphics_utils
 import utils
+import configuration
 
 import screens/game/game_screen
 
@@ -25,7 +26,10 @@ proc updateInput(screen: LevelSelectScreen) {.locks:0.} =
     popScreen()
     popScreen()
     let levelPath = levelsBasePath & screen.levelPaths[screen.selectedIndex]
-    pushScreen(newGameScreen(levelPath))
+    let gameScreen = newGameScreen(levelPath)
+    # the ganme screen loaded successfully, save as last opened level
+    setLastOpenedLevel(levelPath)
+    pushScreen(gameScreen)
   elif kButtonUp in buttonState.pushed:
     screen.selectedIndex -= 1
     if screen.selectedIndex < 0:
