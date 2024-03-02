@@ -1,5 +1,6 @@
 import playdate/api
 import std/json
+import sugar
 import options
 import utils
 
@@ -40,7 +41,12 @@ proc getConfig*(): Config =
     config = loadConfig()
   return config
 
-proc setLastOpenedLevel*(levelPath: string) =
-  discard getConfig()
-  config.lastOpenedLevel = some(levelPath)
+proc updateConfig*(update: Config -> void) =
+  discard getConfig() # Ensure config is loaded
+  update(config)
   saveConfig(config)
+
+proc setLastOpenedLevel*(levelPath: string) =
+  updateConfig(proc (config: Config) = 
+    config.lastOpenedLevel = some(levelPath)
+  )
