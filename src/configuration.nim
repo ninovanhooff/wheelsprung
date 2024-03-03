@@ -26,6 +26,13 @@ proc createAndSaveConfig(): Config =
   saveConfig(config)
   return config
 
+proc makeDir(dir: string) =
+  print "Creating directory", dir
+  try:
+    playdate.file.mkdir(dir)
+  except:
+    print "Failed to create directory", dir, getCurrentExceptionMsg()
+
 proc loadConfig(): Config =
   try:
     let jsonString = playdate.file.open("config.json", kFileReadData).readString()
@@ -34,6 +41,9 @@ proc loadConfig(): Config =
     return config
   except:
     print "Failed to load config file:", getCurrentExceptionMsg()
+    # we usually end up here when the data folder doesn't exist yet.
+    # this is a good time to create the levels folder too.
+    makeDir("levels")
     return createAndSaveConfig()
 
 proc getConfig*(): Config =
