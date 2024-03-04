@@ -1,5 +1,5 @@
 import std/random
-import audio_utils
+import utils, audio_utils
 import playdate/api
 ## Non-bike sounds, such as win and collision sounds
 
@@ -24,8 +24,9 @@ proc initGameSound*() =
 proc playFinishSound*() =
   finishPlayer.playVariation()
 
-proc playCoinSound*() =
-  coinPlayer.playVariation()
+proc playCoinSound*(coinProgress: float32) =
+  ## coinProgress the fraction of coins collected
+  coinPlayer.play(1, lerp(0.9, 1.1, coinProgress))
 
 proc playCollisionSound*() =
   collisionPlayers[rand(collisionPlayers.high)].playVariation()

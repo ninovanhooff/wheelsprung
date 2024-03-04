@@ -66,6 +66,9 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
     print("coin not found in remaining coins: " & repr(coinToDelete))
   else:
     print("deleting coin at index: " & repr(deleteIndex))
+    let coinProgress = 1f - (state.remainingCoins.len.float32 / state.level.coins.len.float32)
+    print ("coin progress: " & $coinProgress)
+    playCoinSound(coinProgress)
     state.remainingCoins.delete(deleteIndex)
 
 let gameOverPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
@@ -81,7 +84,6 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("coin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
-  playCoinSound()
   discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
   false # don't process the collision further
 
