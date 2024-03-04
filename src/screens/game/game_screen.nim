@@ -160,7 +160,6 @@ proc onThrottle*() =
   let rearWheel = state.rearWheel
   let dd = state.driveDirection
   if rearWheel.angularVelocity * dd > maxWheelAngularVelocity:
-    print("ignore throttle. back wheel already at max angular velocity")
     return
 
   rearWheel.torque = throttleTorque * dd
@@ -174,8 +173,6 @@ proc onBrake*() =
 proc onAttitudeAdjust(state: GameState, direction: float) =
   if state.attitudeAdjustForce == 0f:
     state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
-  else:
-    print("ignore attitude adjust. Already in progress with remaining force: " & $state.attitudeAdjustForce)
 
 proc onFlipDirection(state: GameState) =
   state.driveDirection *= -1.0
@@ -231,10 +228,8 @@ proc handleInput(state: GameState) =
     onBrake()
   
   if actionLeanLeft in buttonsState.current:
-    print("Lean left pressed")
     state.onAttitudeAdjust(-1f)
   elif actionLeanRight in buttonsState.current:
-    print("Lean Right pressed")
     state.onAttitudeAdjust(1f)
 
   if actionFlipDirection in buttonsState.pushed:

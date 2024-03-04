@@ -42,7 +42,6 @@ proc updateBikeEngine*(state: GameState) =
             idleRpm
 
     curRpm = lerp(curRpm, targetRpm, 0.1f)
-    # print("RPM: " & $curRpm)
     targetPlayer = if throttle: throttlePlayer else: idlePlayer
     if currentPlayer != targetPlayer:
         # print("switch from currentPlayer: " & $currentPlayer.repr & " targetPlayer: " & targetPlayer.repr)

@@ -92,7 +92,6 @@ proc loadPolygon(level: Level, obj: LevelObjectEntity): bool =
   # Offset the polygon by the object's position (localToWorld)
   for i in 0..lastIndex:
     polygon[i] = polygon[i] + objOffset
-    print("segment: " & $polygon[i])
 
   level.terrainPolygons.add(polygon)
 
@@ -103,7 +102,6 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   let gid = obj.gid.get
   let hFlip: bool = (gid and GID_HFLIP_MASK).bool
   let classId: ClassIds = (gid and GID_CLASS_MASK).ClassIds
-  print("classId: " & $classId)
 
   let position: Vertex = [obj.x, obj.y]
 
