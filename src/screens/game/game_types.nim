@@ -81,10 +81,14 @@ type GameState* = ref object of RootObj
   ## Navigation state
   resetGameOnResume*: bool
 
+  ## timers
+  finishFlipDirectionAt*: Option[Seconds]
+  finishTrophyBlinkerAt*: Option[Seconds]
+
+
   ## Physics
   space*: Space
   time*: Seconds
-  finishFlipDirectionAt*: Option[Seconds]
   attitudeAdjustForce*: Float
   camera*: Camera
   driveDirection*: DriveDirection

@@ -17,6 +17,11 @@ const
   frontForkChassisAttachmentOffset = v(15.0, -3.0)
   forkOutlineWidth: int32 = 4'i32
   patternSize: int32 = 8'i32
+  blinkerPeriod = 0.5
+  halfBlinkerPeriod = blinkerPeriod / 2.0
+
+  trophyBlinkerPos: Vertex = [360, 8]
+
 
 let
   bgPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
@@ -194,6 +199,11 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
+proc drawBlinkers(state: GameState) =
+  if state.finishTrophyBlinkerAt.isSome:
+    let blinkerOn: bool = state.time mod blinkerPeriod < halfBlinkerPeriod
+    trophyImageTable.getBitmap(blinkerOn.int32).draw(trophyBlinkerPos[0], trophyBlinkerPos[1], kBitmapUnflipped)
+
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
@@ -207,6 +217,8 @@ proc drawGame*(statePtr: ptr GameState) =
     bgImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
   else:
     gfx.clear(kColorWhite)
+
+  drawBlinkers(state)
 
   if debugDrawLevel:
     drawTerrain(camVertex, level.terrainPolygons)

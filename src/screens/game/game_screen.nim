@@ -66,10 +66,15 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
     print("coin not found in remaining coins: " & repr(coinToDelete))
   else:
     print("deleting coin at index: " & repr(deleteIndex))
+    state.remainingCoins.delete(deleteIndex)
     let coinProgress = 1f - (state.remainingCoins.len.float32 / state.level.coins.len.float32)
     print ("coin progress: " & $coinProgress)
     playCoinSound(coinProgress)
-    state.remainingCoins.delete(deleteIndex)
+
+    if state.remainingCoins.len == 0:
+      print("all coins collected")
+      state.finishTrophyBlinkerAt = some(state.time + 2.5.Seconds)
+
 
 let gameOverPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
   print("game over post step callback")
@@ -206,7 +211,11 @@ proc updateTimers(state: GameState) =
     if currentTime > state.finishFlipDirectionAt.get:
       state.finishFlipDirectionAt = none[Seconds]()
       state.resetRiderConstraintForces()
-    
+
+  if state.finishTrophyBlinkerAt.isSome:
+    if currentTime > state.finishTrophyBlinkerAt.get:
+      print("blinker timeout")
+      state.finishTrophyBlinkerAt = none[Seconds]()
 
 proc handleInput(state: GameState) =
   state.isThrottlePressed = false

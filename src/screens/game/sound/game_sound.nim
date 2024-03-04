@@ -6,6 +6,7 @@ import playdate/api
 var
   finishPlayer: SamplePlayer
   coinPlayer: SamplePlayer
+  finishUnlockPlayer: SamplePlayer
   collisionPlayers: seq[SamplePlayer]
 
 proc initGameSound*() =
@@ -15,6 +16,7 @@ proc initGameSound*() =
   try:
     finishPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish")
     coinPlayer = playdate.sound.newSamplePlayer("/audio/pickup/coin")
+    finishUnlockPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish_unlock")
     for i in 1..9:
       collisionPlayers.add(playdate.sound.newSamplePlayer("/audio/collision/collision-0" & $i))
 
@@ -26,7 +28,11 @@ proc playFinishSound*() =
 
 proc playCoinSound*(coinProgress: float32) =
   ## coinProgress the fraction of coins collected
-  coinPlayer.play(1, lerp(0.9, 1.1, coinProgress))
+  if coinProgress < 1.0f:
+    coinPlayer.play(1, lerp(0.9, 1.1, coinProgress))
+  else:
+    finishUnlockPlayer.playVariation()
+
 
 proc playCollisionSound*() =
   collisionPlayers[rand(collisionPlayers.high)].playVariation()
