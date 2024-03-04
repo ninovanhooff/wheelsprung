@@ -43,12 +43,13 @@ if defined simulator:
 # forward declarations
 proc onResetGame() {.raises: [].}
 
-proc setGameResult(state: GameState, resultType: GameResultType) =
-  state.gameResult = some(GameResult(
+proc setGameResult(state: GameState, resultType: GameResultType): GameResult {.discardable.} =
+  result = GameResult(
     resultType: resultType,
     time: state.time
-  ))
+  )
   state.resetGameOnResume = true
+  state.gameResult = some(result)
 
 proc navigateToGameResult(result: GameResult) =
   newDialogScreen(result).pushScreen()
@@ -279,6 +280,10 @@ method update*(gameScreen: GameScreen): int {.locks:0.} =
   state.updateTimers()
 
   updateGameBike(state)
+  if not state.isBikeInLevelBounds():
+    if not state.gameResult.isSome:
+      state.setGameResult(GameResultType.GameOver)
+    navigateToGameResult(state.gameResult.get)
 
   state.camera = state.level.cameraBounds.clampVect(
     state.chassis.position - halfDisplaySize

@@ -42,6 +42,8 @@ const
 
   ## offset of Chassis position (center Vect) from Player object top-left position
   vPlayerChassisOffset: Vect = v(30.0, 39.0)
+  ## The amount of pixels the chassis center can be outside the level bounds before the game over
+  chassisLevelBoundsSlop: Float = 50.Float
 
 let kFileReadAny: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
@@ -166,6 +168,12 @@ proc loadLevel*(path: string): Level =
     t = (levelEntity.height * levelEntity.tileheight).Float - displaySize.y
   )
   print("cameraBounds: " & $level.cameraBounds)
+  level.chassisBounds = newBB(
+    l = -chassisLevelBoundsSlop,
+    b = -chassisLevelBoundsSlop,
+    r = levelEntity.width.Float * levelEntity.tilewidth.Float + chassisLevelBoundsSlop,
+    t = levelEntity.height.Float * levelEntity.tileheight.Float + chassisLevelBoundsSlop
+  )
 
   for layer in levelEntity.layers:
     level.loadLayer(layer)

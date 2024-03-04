@@ -65,6 +65,7 @@ type Level* = ref object of RootObj
   killers*: seq[Killer]
   finishPosition*: Vertex
   cameraBounds*: BB
+  chassisBounds*: BB
   initialChassisPosition*: Vect
   initialDriveDirection*: DriveDirection
 

@@ -221,6 +221,11 @@ proc initGameBike*(state: GameState) =
   state.setBikeConstraints()
   initBikeSound()
 
+proc isBikeInLevelBounds*(state: GameState): bool =
+  state.level.chassisBounds.containsVect(
+    state.chassis.position
+  )
+
 proc updateGameBike*(state: GameState) =
   updateBikeSound(state)
 
