@@ -218,10 +218,10 @@ proc drawGame*(statePtr: ptr GameState) =
   else:
     gfx.clear(kColorWhite)
 
-  drawBlinkers(state)
-
   if debugDrawLevel:
     drawTerrain(camVertex, level.terrainPolygons)
+
+  drawBlinkers(state)
 
   if debugDrawTextures:
     # coins
