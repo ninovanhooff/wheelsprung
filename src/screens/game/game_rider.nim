@@ -16,13 +16,13 @@ const
     headRotationOffset = degToRad(-35.0)
     
     # offset from torso, align top of arm with top of torso
-    upperArmSize = v(4.0, 14.0)
+    upperArmSize = v(4.0, 13.0)
     upperArmMass = 0.25
     upperArmRotationOffset = degToRad(-70.0)
-    upperArmOffset = v(7.0, -3.0)
+    upperArmOffset = v(5.0, -3.0)
 
     # offset from upper arm
-    lowerArmSize = v(3.0, 10.0)
+    lowerArmSize = v(3.0, 11.0)
     lowerArmOffset = v(2.0, 9.0)
     lowerArmMass = 0.2f
     lowerArmRotationOffset = degToRad(-60f)
