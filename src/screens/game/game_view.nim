@@ -270,10 +270,10 @@ proc drawGame*(statePtr: ptr GameState) =
     
     
     riderTorsoImageTable.drawRotated(state.riderTorso, state)
-    riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
-    riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
     riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
     riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
+    riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
+    riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
 
   if debugDrawShapes:
     eachShape(statePtr.space, shapeIter, statePtr)
