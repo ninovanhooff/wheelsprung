@@ -140,6 +140,12 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
+  # elbow rotation spring
+  state.elbowRotarySpring = state.riderLowerArm.newDampedRotarySpring(state.riderUpperArm, lowerArmRotationOffset * dd, 1_000.0, 100.0)
+  riderConstraints.add(space.addConstraint(
+    state.elbowRotarySpring  
+  ))
+
   # Pivot Elbow to chassis
   state.elbowPivot = state.chassis.newPivotJoint(
       state.riderLowerArm,
@@ -155,6 +161,7 @@ proc setRiderConstraints(state: GameState) =
       state.riderLowerArm,
       riderHandWorldPosition
     )
+  state.handPivot.maxForce = 90.0
   riderConstraints.add(space.addConstraint(state.handPivot))
 
   # Pivot upper leg
@@ -208,6 +215,34 @@ proc initGameRider*(state: GameState, riderPosition: Vect) =
 proc flip(joint: PivotJoint) =
   joint.anchorA = joint.anchorA.flip()
 
+proc offset(joint: PivotJoint, offset: Vect) =
+  joint.anchorA = joint.anchorA + offset
+
+proc setAttitudeAdjustForward(state: GameState, dirV: Vect) =
+  state.assPivot.offset(v(1.0 , -1.0).transform(dirV))
+  state.hipPivot.offset(v(1.0, -1.0).transform(dirV))
+  state.shoulderPivot.offset(v(3.0, 2.0).transform(dirV))
+  # state.handPivot.offset(v(-13.0, 10.0).transform(dirV))
+
+proc setAttitudeAdjustBackward(state: GameState, dirV: Vect) =
+  state.assPivot.offset(v(-2.0 , 3.0).transform(dirV))
+  state.hipPivot.offset(v(-2.0, 3.0).transform(dirV))
+  state.shoulderPivot.offset(v(-5.0, -2.0).transform(dirV))
+#  state.handPivot.offset(v(-19.0, -22.0).transform(dirV))
+  state.handPivot.offset(v(-23.0, 5.0).transform(dirV))
+
+proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float, revert: bool) =
+  let revertDirection = if revert: -1.0 else: 1.0
+  let dirV = v(
+    state.driveDirection * revertDirection,
+    revertDirection
+  )
+  if direction > 0.0:
+    setAttitudeAdjustForward(state, dirV)
+  else:
+    setAttitudeAdjustBackward(state, dirV)
+
+
 proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.assPivot.flip()
   state.shoulderPivot.flip()
@@ -223,6 +258,7 @@ proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.headPivot.flip()
 
   state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
+  state.elbowRotarySpring.restAngle = -state.elbowRotarySpring.restAngle
   # state.riderHead.angle=0.0
 
   # state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle

@@ -1,4 +1,4 @@
-import options
+import options, math
 import chipmunk7
 import playdate/api
 import utils, chipmunk_utils, graphics_utils
@@ -179,6 +179,10 @@ proc onBrake*() =
 proc onAttitudeAdjust(state: GameState, direction: float) =
   if state.attitudeAdjustForce == 0f:
     state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+    state.setRiderAttitudeAdjustPosition(
+      direction * state.driveDirection,
+      false
+    )
 
 proc onFlipDirection(state: GameState) =
   state.driveDirection *= -1.0
@@ -193,6 +197,11 @@ proc updateAttitudeAdjust(state: GameState) =
     chassis.torque = state.attitudeAdjustForce
     state.attitudeAdjustForce *= attitudeAdjustAttentuation
     if state.attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
+      setRiderAttitudeAdjustPosition(
+        state,
+        state.attitudeAdjustForce.sgn.DriveDirection * state.driveDirection,
+        true
+      )
       state.attitudeAdjustForce = 0f
 
 proc updateTimers(state: GameState) =
