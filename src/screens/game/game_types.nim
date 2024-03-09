@@ -8,6 +8,7 @@ import shared_types
 type 
   Camera* = Vect
   DriveDirection* = Float
+  RotationDirection* = DriveDirection
 
   Coin* = Vertex
   Killer* = Vertex
@@ -21,6 +22,9 @@ type
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
+
+const ROT_CCW*: RotationDirection = -1.0 # Counter Clockwise
+const ROT_CW*: RotationDirection = 1.0 # Clockwise
 
 const GameCollisionTypes* = (
   None: cast[GameCollisionType](0), 

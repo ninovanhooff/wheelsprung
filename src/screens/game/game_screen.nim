@@ -1,6 +1,7 @@
 import options, math
 import chipmunk7
 import playdate/api
+import globals
 import utils, chipmunk_utils, graphics_utils
 import levels
 import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
@@ -14,7 +15,9 @@ type GameScreen* = ref object of Screen
 
 const
   riderOffset = v(-4.0, -18.0) # offset from chassis center
-  initialAttitudeAdjustTorque = 90_000.0
+  initialForwardAttitudeAdjustTorque = 90_000.0
+  # player is back-heavy, so less torque is needed to rotate backwards
+  initialBackwardAttitudeAdjustTorque = 54_000.0
   attitudeAdjustAttentuation = 0.75
   attitudeAdjustForceThreshold = 100.0
   maxWheelAngularVelocity = 30.0
@@ -24,6 +27,7 @@ const
   brakeTorque = 2_000.0
   timeStep = 1.0/50.0
   attitudeAdjustTimeout = 0.5.Seconds
+  flipDuration = 0.5.Seconds
 
 var 
   state: GameState
@@ -177,9 +181,11 @@ proc onBrake*() =
   rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
-proc onAttitudeAdjust(state: GameState, direction: float) =
+proc onAttitudeAdjust(state: GameState, direction: RotationDirection) =
   if state.attitudeAdjustForce != 0.0 or state.enableAttitudeAdjustAt.isSome: return # currently disabled
-  state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+  state.attitudeAdjustForce = direction * initialForwardAttitudeAdjustTorque
+  if state.attitudeAdjustForce.sgn.DriveDirection != state.driveDirection:
+    state.attitudeAdjustForce = direction * initialBackwardAttitudeAdjustTorque
   if state.finishFlipDirectionAt.isSome: return # currently flipping, prevent clashing animations
   state.setRiderAttitudeAdjustPosition(
     direction * state.driveDirection,
@@ -199,7 +205,7 @@ proc onFlipDirection(state: GameState) =
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
   state.flipRiderDirection(riderPosition)
-  state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
+  state.finishFlipDirectionAt = some(state.time + flipDuration)
 
 proc updateAttitudeAdjust(state: GameState) =
   let chassis = state.chassis
@@ -227,7 +233,8 @@ proc updateTimers(state: GameState) =
 
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
-    state.chassis.torque = state.driveDirection * -15_500.0
+    state.chassis.torque = state.driveDirection * 5_500.0
+
     if state.finishFlipDirectionAt.expire(currentTime):
       state.resetRiderConstraintForces()
 
@@ -257,9 +264,9 @@ proc handleInput(state: GameState) =
     onBrake()
   
   if actionLeanLeft in buttonsState.current:
-    state.onAttitudeAdjust(-1f)
+    state.onAttitudeAdjust(ROT_CCW)
   elif actionLeanRight in buttonsState.current:
-    state.onAttitudeAdjust(1f)
+    state.onAttitudeAdjust(ROT_CW)
 
   if actionFlipDirection in buttonsState.pushed:
     print("Flip direction pressed")
