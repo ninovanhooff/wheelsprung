@@ -1,11 +1,20 @@
-import std/math
+import std/[math, options]
 import std/strutils
 import playdate/api
+import shared_types
 
 const
   TwoPi*: float = 2 * PI
 
 proc now*(): uint = playdate.system.getCurrentTimeMilliseconds
+
+proc expire*(expireAt: var Option[Seconds], currentTime: Seconds): bool =
+  ## Sets expireAt to none and returns true if expireAt is after currentTime
+  if expireAt.isSome:
+    if currentTime > expireAt.get:
+      expireAt = none[Seconds]()
+      return true
+  return false
 
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string

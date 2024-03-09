@@ -14,6 +14,10 @@ type
   Finish* = Vertex
   GameCollisionType* = CollisionType
 
+  RiderAttitudePosition* {.pure.} = enum
+    Neutral, Forward, Backward
+
+
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
@@ -85,6 +89,7 @@ type GameState* = ref object of RootObj
   ## timers
   finishFlipDirectionAt*: Option[Seconds]
   finishTrophyBlinkerAt*: Option[Seconds]
+  enableAttitudeAdjustAt*: Option[Seconds]
 
 
   ## Physics
@@ -108,6 +113,13 @@ type GameState* = ref object of RootObj
   swingArmShape*: Shape
   forkArmShape*: Shape
 
+  # Bike Constraints
+  forkArmSpring*: DampedSpring
+  bikeConstraints*: seq[Constraint]
+
+  ## Rider
+  riderAttitudePosition*: RiderAttitudePosition
+
   # rider bodies
   riderHead*: Body
   riderTorso*: Body
@@ -116,10 +128,6 @@ type GameState* = ref object of RootObj
   riderUpperLeg*: Body
   riderLowerLeg*: Body
   # keep in sync with getRiderBodies()
-
-  # Bike Constraints
-  forkArmSpring*: DampedSpring
-  bikeConstraints*: seq[Constraint]
 
   # Rider Constraints
   riderConstraints*: seq[Constraint] # todo remove if unused

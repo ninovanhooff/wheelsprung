@@ -22,7 +22,8 @@ const
   throttleTorque = 3_500.0
   # applied to both wheels
   brakeTorque = 2_000.0
-  timeStep = 1.0f/50.0f
+  timeStep = 1.0/50.0
+  attitudeAdjustTimeout = 0.5.Seconds
 
 var 
   state: GameState
@@ -177,12 +178,12 @@ proc onBrake*() =
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
 proc onAttitudeAdjust(state: GameState, direction: float) =
-  if state.attitudeAdjustForce == 0f:
-    state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
-    state.setRiderAttitudeAdjustPosition(
-      direction * state.driveDirection,
-      false
-    )
+  if state.attitudeAdjustForce != 0.0 or state.enableAttitudeAdjustAt.isSome: return # currently disabled
+  state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+  state.setRiderAttitudeAdjustPosition(
+    direction * state.driveDirection,
+    false
+  )
 
 proc onFlipDirection(state: GameState) =
   state.driveDirection *= -1.0
@@ -203,6 +204,7 @@ proc updateAttitudeAdjust(state: GameState) =
         true
       )
       state.attitudeAdjustForce = 0f
+      state.enableAttitudeAdjustAt = some(state.time + attitudeAdjustTimeout)
 
 proc updateTimers(state: GameState) =
   state.time += timeStep
@@ -217,15 +219,14 @@ proc updateTimers(state: GameState) =
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
     state.chassis.torque = state.driveDirection * -15_500.0
-
-    if currentTime > state.finishFlipDirectionAt.get:
-      state.finishFlipDirectionAt = none[Seconds]()
+    if state.finishFlipDirectionAt.expire(currentTime):
       state.resetRiderConstraintForces()
 
-  if state.finishTrophyBlinkerAt.isSome:
-    if currentTime > state.finishTrophyBlinkerAt.get:
-      print("blinker timeout")
-      state.finishTrophyBlinkerAt = none[Seconds]()
+  if state.finishTrophyBlinkerAt.expire(currentTime):
+    print("blinker timeout")
+
+  if state.enableAttitudeAdjustAt.expire(currentTime):
+    print("attitude adjust enabled")
 
 proc handleInput(state: GameState) =
   state.isThrottlePressed = false

@@ -233,17 +233,21 @@ proc setAttitudeAdjustBackward(state: GameState, dirV: Vect) =
 #  state.handPivot.offset(v(-19.0, -22.0).transform(dirV))
   state.handPivot.offset(v(-23.0, 5.0).transform(dirV))
 
-proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float, revert: bool) =
-  let revertDirection = if revert: -1.0 else: 1.0
+proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float, toNeutral: bool) =
+  let revertDirection = if toNeutral: -1.0 else: 1.0
   let dirV = v(
     state.driveDirection * revertDirection,
     revertDirection
   )
+  var attitudePosition: RiderAttitudePosition
   if direction > 0.0:
     setAttitudeAdjustForward(state, dirV)
+    attitudePosition = RiderAttitudePosition.Forward
   else:
     setAttitudeAdjustBackward(state, dirV)
+    attitudePosition = RiderAttitudePosition.Backward
 
+  state.riderAttitudePosition = if toNeutral: RiderAttitudePosition.Neutral else: attitudePosition
 
 proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.assPivot.flip()
