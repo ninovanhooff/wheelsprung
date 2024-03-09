@@ -4,6 +4,8 @@ import chipmunk_utils
 import std/math
 import game_types
 
+import playdate/api #todo remove
+
 const 
     torsoMass = 1f
     torsoSize = v(7.0, 16.0)
@@ -234,6 +236,14 @@ proc setAttitudeAdjustBackward(state: GameState, dirV: Vect) =
   state.handPivot.offset(v(-23.0, 5.0).transform(dirV))
 
 proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float, toNeutral: bool) =
+  if toNeutral and state.riderAttitudePosition == RiderAttitudePosition.Neutral:
+    print("SKIP setRiderAttitudeAdjustPosition: already neutral")
+    # playdate.system.error("setRiderAttitudeAdjustPosition: already neutral")
+    return
+  if not toNeutral and state.riderAttitudePosition != RiderAttitudePosition.Neutral:
+    playdate.system.error("setRiderAttitudeAdjustPosition: already adjusted")
+    return
+
   let revertDirection = if toNeutral: -1.0 else: 1.0
   let dirV = v(
     state.driveDirection * revertDirection,
@@ -260,22 +270,16 @@ proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.elbowPivot.flip()
   state.chassisKneePivot.maxForce=2_000.0
   state.elbowPivot.maxForce=1_000.0
+  state.elbowRotarySpring.maxForce=0.0
   state.handPivot.flip()
   state.headPivot.flip()
-
   state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
   state.elbowRotarySpring.restAngle = -state.elbowRotarySpring.restAngle
-  # state.riderHead.angle=0.0
-
-  # state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
 
 proc resetRiderConstraintForces*(state: GameState) =
   print("resetRiderConstraintForces")
-  state.shoulderPivot.maxForce=900.0
+  state.shoulderPivot.maxForce=900.0 #todo DRY
   state.chassisKneePivot.maxForce=0.0
   state.elbowPivot.maxForce=0.0
-  # state.headRotarySpring = state.riderHead.newDampedRotarySpring(state.riderTorso, headRotationOffset * state.driveDirection, 10000.0, 900.0)
-  # discard state.space.addConstraint(
-  #   state.headRotarySpring  
-  # )
+  # state.elbowRotarySpring.maxForce=1_000.0 # todo make constant
 

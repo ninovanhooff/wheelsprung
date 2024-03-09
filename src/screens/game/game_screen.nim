@@ -180,12 +180,21 @@ proc onBrake*() =
 proc onAttitudeAdjust(state: GameState, direction: float) =
   if state.attitudeAdjustForce != 0.0 or state.enableAttitudeAdjustAt.isSome: return # currently disabled
   state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+  if state.finishFlipDirectionAt.isSome: return # currently flipping, prevent clashing animations
   state.setRiderAttitudeAdjustPosition(
     direction * state.driveDirection,
     false
   )
 
 proc onFlipDirection(state: GameState) =
+  if state.attitudeAdjustForce != 0.0:
+    print("attitude adjust in progress, reset attitude adjust force before flipping")
+    # reset animation to neutral
+    state.setRiderAttitudeAdjustPosition(
+      state.attitudeAdjustForce.sgn.DriveDirection * state.driveDirection,
+      true
+    )
+    state.attitudeAdjustForce = 0.0
   state.driveDirection *= -1.0
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
@@ -203,7 +212,7 @@ proc updateAttitudeAdjust(state: GameState) =
         state.attitudeAdjustForce.sgn.DriveDirection * state.driveDirection,
         true
       )
-      state.attitudeAdjustForce = 0f
+      state.attitudeAdjustForce = 0.0
       state.enableAttitudeAdjustAt = some(state.time + attitudeAdjustTimeout)
 
 proc updateTimers(state: GameState) =
@@ -287,6 +296,12 @@ method update*(gameScreen: GameScreen): int {.locks:0.} =
   state.updateAttitudeAdjust()
 
   state.space.step(timeStep)
+  # print("elbowRotarySpring impulse", state.elbowRotarySpring.impulse.int32, "elbowPivot impulse", state.elbowPivot.impulse.int32, "handPivot impulse", state.handPivot.impulse.int32)
+  # print("elbowRotarySpring.maxForce", state.elbowRotarySpring.maxForce.int32, "elbowPivot.maxForce", state.elbowPivot.maxForce.int32, "handPivot.maxForce", state.handPivot.maxForce.int32)
+  # print("shoulderPvot impulse", state.shoulderPivot.impulse.int32, "shoulderPivot maxForce", state.shoulderPivot.maxForce.int32)
+  # print("chassisKneePivot impulse", state.chassisKneePivot.impulse.int32, "chassisKneePivot maxForce", state.chassisKneePivot.maxForce.int32)
+  # print("assPivot impulse", state.assPivot.impulse.int32, "assPivot maxForce", state.assPivot.maxForce.int32)
+  # print("hipPivot impulse", state.hipPivot.impulse.int32, "hipPivot maxForce", state.hipPivot.maxForce.int32)
   state.updateTimers()
 
   updateGameBike(state)
