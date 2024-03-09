@@ -161,7 +161,9 @@ proc setRiderConstraints(state: GameState) =
       state.riderLowerArm,
       riderHandWorldPosition
     )
-  state.handPivot.maxForce = 90.0
+  # Should be slightly stronger than elbow pivot to be able to put hands behind head
+  # during attitude adjustment. Not too much, because we don't want it to overextend the elbow
+  state.handPivot.maxForce = 200.0
   riderConstraints.add(space.addConstraint(state.handPivot))
 
   # Pivot upper leg
@@ -222,7 +224,7 @@ proc setAttitudeAdjustForward(state: GameState, dirV: Vect) =
   state.assPivot.offset(v(1.0 , -1.0).transform(dirV))
   state.hipPivot.offset(v(1.0, -1.0).transform(dirV))
   state.shoulderPivot.offset(v(3.0, 2.0).transform(dirV))
-  # state.handPivot.offset(v(-13.0, 10.0).transform(dirV))
+  state.handPivot.offset(v(-13.0, -20.0).transform(dirV))
 
 proc setAttitudeAdjustBackward(state: GameState, dirV: Vect) =
   state.assPivot.offset(v(-2.0 , 3.0).transform(dirV))
