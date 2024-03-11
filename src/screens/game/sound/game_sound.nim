@@ -8,6 +8,7 @@ var
   coinPlayer: SamplePlayer
   finishUnlockPlayer: SamplePlayer
   collisionPlayers: seq[SamplePlayer]
+  screamPlayers: seq[SamplePlayer]
 
 proc initGameSound*() =
   if finishPlayer != nil: return # already initialized
@@ -19,6 +20,8 @@ proc initGameSound*() =
     finishUnlockPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish_unlock")
     for i in 1..9:
       collisionPlayers.add(playdate.sound.newSamplePlayer("/audio/collision/collision-0" & $i))
+    for i in 1..3:
+      screamPlayers.add(playdate.sound.newSamplePlayer("/audio/scream/wilhelm_scream-0" & $i))
 
   except:
     quit(getCurrentExceptionMsg(), 1)
