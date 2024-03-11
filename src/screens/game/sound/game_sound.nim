@@ -39,3 +39,6 @@ proc playCoinSound*(coinProgress: float32) =
 
 proc playCollisionSound*() =
   collisionPlayers[rand(collisionPlayers.high)].playVariation()
+
+proc playScreamSound*() =
+  screamPlayers[rand(screamPlayers.high)].playVariation()

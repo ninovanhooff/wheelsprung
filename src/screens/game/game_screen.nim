@@ -283,6 +283,7 @@ method update*(gameScreen: GameScreen): int {.locks:0.} =
   if not state.isBikeInLevelBounds():
     if not state.gameResult.isSome:
       state.setGameResult(GameResultType.GameOver)
+      playScreamSound()
     navigateToGameResult(state.gameResult.get)
 
   state.camera = state.level.cameraBounds.clampVect(
