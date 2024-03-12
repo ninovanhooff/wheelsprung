@@ -5,7 +5,9 @@ import utils, chipmunk_utils, graphics_utils
 import levels
 import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
 import sound/game_sound
-import game_types, shared_types
+import shared_types
+import game_types, game_constants
+import game_input
 import game_view
 import navigation/[screen, navigator]
 import screens/dialog/dialog_screen
@@ -13,32 +15,12 @@ import screens/dialog/dialog_screen
 type GameScreen* = ref object of Screen
 
 const
-  riderOffset = v(-4.0, -18.0) # offset from chassis center
-  initialAttitudeAdjustTorque = 90_000.0
   attitudeAdjustAttentuation = 0.75
   attitudeAdjustForceThreshold = 100.0
-  maxWheelAngularVelocity = 30.0
-  # applied to wheel1 when throttle is pressed
-  throttleTorque = 3_500.0
-  # applied to both wheels
-  brakeTorque = 2_000.0
   timeStep = 1.0f/50.0f
 
 var 
   state: GameState
-
-  # device controls
-  actionThrottle = kButtonA
-  actionBrake = kButtonB
-  actionFlipDirection = kButtonDown
-  actionLeanLeft = kButtonLeft
-  actionLeanRight = kButtonRight
-
-# simulator overrides
-if defined simulator:
-  actionThrottle = kButtonUp
-  actionBrake = kButtonDown
-  actionFlipDirection = kButtonB
 
 # forward declarations
 proc onResetGame() {.raises: [].}
@@ -50,9 +32,6 @@ proc setGameResult(state: GameState, resultType: GameResultType): GameResult {.d
   )
   state.resetGameOnResume = true
   state.gameResult = some(result)
-
-proc navigateToGameResult(result: GameResult) =
-  newDialogScreen(result).pushScreen()
 
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl.} =
   print("coin post step callback")
@@ -162,31 +141,6 @@ proc onResetGame() {.raises: [].} =
   state.destroy()
   state = newGameState(state.level)
 
-proc onThrottle*() =
-  let rearWheel = state.rearWheel
-  let dd = state.driveDirection
-  if rearWheel.angularVelocity * dd > maxWheelAngularVelocity:
-    return
-
-  rearWheel.torque = throttleTorque * dd
-
-proc onBrake*() =
-  let rearWheel = state.rearWheel
-  let frontWheel = state.frontWheel
-  rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
-  frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
-
-proc onAttitudeAdjust(state: GameState, direction: float) =
-  if state.attitudeAdjustForce == 0f:
-    state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
-
-proc onFlipDirection(state: GameState) =
-  state.driveDirection *= -1.0
-  state.flipBikeDirection()
-  let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
-  state.flipRiderDirection(riderPosition)
-  state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
-
 proc updateAttitudeAdjust(state: GameState) =
   let chassis = state.chassis
   if state.attitudeAdjustForce != 0.0:
@@ -217,34 +171,6 @@ proc updateTimers(state: GameState) =
     if currentTime > state.finishTrophyBlinkerAt.get:
       print("blinker timeout")
       state.finishTrophyBlinkerAt = none[Seconds]()
-
-proc handleInput(state: GameState) =
-  state.isThrottlePressed = false
-
-  let buttonsState = playdate.system.getButtonsState()
-
-  if state.gameResult.isSome:
-    # when the game is over, the bike cannot be controlled anymore,
-    # but any button can be pressed to navigate to the result screen
-    if buttonsState.pushed.len > 0:
-      navigateToGameResult(state.gameResult.get)
-    return
-
-
-  if actionThrottle in buttonsState.current:
-    state.isThrottlePressed = true
-    onThrottle()
-  if actionBrake in buttonsState.current:
-    onBrake()
-  
-  if actionLeanLeft in buttonsState.current:
-    state.onAttitudeAdjust(-1f)
-  elif actionLeanRight in buttonsState.current:
-    state.onAttitudeAdjust(1f)
-
-  if actionFlipDirection in buttonsState.pushed:
-    print("Flip direction pressed")
-    state.onFlipDirection()
 
 proc initGame*(levelPath: string) {.raises: [].} =
   state = newGameState(loadLevel(levelPath))

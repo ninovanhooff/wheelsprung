@@ -12,6 +12,10 @@ type DialogScreen = ref object of Screen
 proc newDialogScreen*(gameResult: GameResult): DialogScreen {.raises:[].} =
   return DialogScreen(gameResult: gameResult)
 
+
+proc navigateToGameResult*(result: GameResult) =
+  newDialogScreen(result).pushScreen()
+
 proc formatTime(time: Seconds): string {.raises: [], tags: [].} =
   try: 
     fmt"{time:.2f}" 
