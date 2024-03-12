@@ -1,4 +1,4 @@
-import options
+import std/[options, math]
 import playdate/api
 import chipmunk7, chipmunk_utils
 import utils
@@ -54,6 +54,14 @@ proc onFlipDirection(state: GameState) =
   state.flipRiderDirection(riderPosition)
   state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
 
+const PITAU = 360f + 180f
+proc attitudeAdjustForCrankAngle*(crankAngle, calibrationAngle: float32): float32 =
+  ## Convert the crank angle to a value between 
+  ## -1 and 1 for [-90 .. +90] degrees from calibrationAngle
+  # https://gamedev.stackexchange.com/a/169509
+  let adjustDegrees = (( crankAngle - calibrationAngle + PITAU ) mod 360f) - 180f
+  return (adjustDegrees / 90f).clamp(-1f, 1f)
+
 proc handleInput*(state: GameState) =
   state.isThrottlePressed = false
 
@@ -65,7 +73,6 @@ proc handleInput*(state: GameState) =
     if buttonsState.pushed.len > 0:
       navigateToGameResult(state.gameResult.get)
     return
-
 
   if actionThrottle in buttonsState.current:
     state.isThrottlePressed = true
