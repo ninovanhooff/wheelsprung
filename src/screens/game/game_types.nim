@@ -78,6 +78,7 @@ type GameState* = ref object of RootObj
 
   ## Input
   isThrottlePressed*: bool
+  crankNeutralAngle*: float32
 
   ## Navigation state
   resetGameOnResume*: bool

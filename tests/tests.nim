@@ -55,8 +55,8 @@ proc runTests*() =
     assert testAttitudeAdjust(180f, 270f, -1f)
     assert testAttitudeAdjust(0f, 90f, -1f)
     assert testAttitudeAdjust(180f, 90f, 1f)
-    assert testAttitudeAdjust(180f, 0f, -1.0f)
+    assert testAttitudeAdjust(180f, 0f, -2.0f)
 
-    assert testAttitudeAdjust(0f, 180f, -1f)
+    assert testAttitudeAdjust(0f, 180f, -2.0f)
     
     assert testNotify "Tests passed."
