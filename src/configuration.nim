@@ -3,17 +3,11 @@ import std/json
 import sugar
 import options
 import utils
-
-type DPadInputType* {.pure.} = enum
-  Jolt ="jolt", Constant ="constant", Gradual = "gradual"
-
-type Config* = ref object of RootObj
-  lastOpenedLevel*: Option[string]
-  dPadInputType*: Option[DPadInputType]
+import configuration_types
 
 var config: Config
 
-proc saveConfig(config: Config) =
+proc save*(config: Config) =
   print "Saving config", repr(config)
   let jsonString: seq[byte] = cast[seq[byte]]($(%config))
   try:
@@ -25,9 +19,9 @@ proc saveConfig(config: Config) =
   except:
     print "Failed to save config file", getCurrentExceptionMsg()
 
-proc createAndSaveConfig(): Config =
+proc createAndsave(): Config =
   let config = Config(lastOpenedLevel: none(string))
-  saveConfig(config)
+  save(config)
   return config
 
 proc makeDir(dir: string) =
@@ -48,7 +42,7 @@ proc loadConfig(): Config =
     # we usually end up here when the data folder doesn't exist yet.
     # this is a good time to create the levels folder too.
     makeDir("levels")
-    return createAndSaveConfig()
+    return createAndsave()
 
 proc getConfig*(): Config =
   if config == nil:
@@ -58,7 +52,7 @@ proc getConfig*(): Config =
 proc updateConfig*(update: Config -> void) =
   discard getConfig() # Ensure config is loaded
   update(config)
-  saveConfig(config)
+  save(config)
 
 proc setLastOpenedLevel*(levelPath: string) =
   updateConfig(proc (config: Config) = 

@@ -69,7 +69,6 @@ proc draw(screen: LevelSelectScreen) =
   drawLevelPaths(screen)
   drawButtons(screen)
 
-
 method resume*(screen: LevelSelectScreen) =
   try:
     screen.levelPaths = getLevelPaths()
