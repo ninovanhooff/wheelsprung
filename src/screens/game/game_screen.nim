@@ -184,6 +184,7 @@ proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
+  {.warning[LockLevel]:off.}
   discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
       popScreen()
   )
@@ -202,7 +203,7 @@ method resume*(gameScreen: GameScreen) =
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
 
-method update*(gameScreen: GameScreen): int {.locks:0.} =
+method update*(gameScreen: GameScreen): int =
   handleInput(state)
   
   if state.isGameStarted:

@@ -1,4 +1,4 @@
-{.push base, locks:0, raises: [].}
+{.push base, raises: [].}
 import utils
 
 type Screen* = ref object of RootObj

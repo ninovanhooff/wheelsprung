@@ -9,7 +9,7 @@ type DialogScreen = ref object of Screen
   gameResult: GameResult
 
 
-proc newDialogScreen*(gameResult: GameResult): DialogScreen {.raises:[].} =
+proc newDialogScreen*(gameResult: GameResult): DialogScreen {.raises: [].} =
   return DialogScreen(gameResult: gameResult)
 
 
@@ -17,8 +17,8 @@ proc navigateToGameResult*(result: GameResult) =
   newDialogScreen(result).pushScreen()
 
 proc formatTime(time: Seconds): string {.raises: [], tags: [].} =
-  try: 
-    fmt"{time:.2f}" 
+  try:
+    fmt"{time:.2f}"
   except: "unknown time"
 
 proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].} =
@@ -32,19 +32,19 @@ method resume*(self: DialogScreen) =
   print("DialogScreen resume")
   playdate.graphics.clear(kColorWhite)
   let gameResult = self.gameResult
-  gfx.drawTextAligned(gameResult.resultType.displayText, 200,100)
-  gfx.drawTextAligned("Your time: " & formatTime(gameResult.time) , 200, 140)
+  gfx.drawTextAligned(gameResult.resultType.displayText, 200, 100)
+  gfx.drawTextAligned("Your time: " & formatTime(gameResult.time), 200, 140)
 
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
 
-method update*(self: DialogScreen): int {.locks:0.} =
+method update*(self: DialogScreen): int =
   let buttonState = playdate.system.getButtonsState()
 
   if kButtonA in buttonState.pushed:
     popScreen()
   elif kButtonB in buttonState.pushed:
     clearNavigationStack()
-    # navigator will push new level select screen. We cannoto do it here 
+    # navigator will push new level select screen. We cannoto do it here
     # bevause that would create a circular dependency
 
   return 0

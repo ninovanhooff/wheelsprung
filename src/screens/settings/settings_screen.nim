@@ -4,7 +4,6 @@
 import playdate/api
 import navigation/screen
 import configuration
-import sugar
 import graphics_utils
 
 const borderInset = 8
@@ -60,12 +59,14 @@ proc draw*(screen: SettingsScreen) =
 ## Screen methods
 
 method resume*(screen: SettingsScreen) =
+  {.warning[LockLevel]:off.}
   screen.configuration = getConfig()
   screen.editors = @[inputTypeEditor]
   screen.selectedIdx = 0
   
 
 method update*(screen: SettingsScreen): int =
+  {.warning[LockLevel]:off.}
   updateInput(screen)
   draw(screen)
   return 1

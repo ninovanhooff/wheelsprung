@@ -13,13 +13,13 @@ type LevelSelectScreen = ref object of Screen
   levelPaths: seq[string]
   selectedIndex: int
 
-proc getLevelPaths(): seq[string] {.locks:0.} =
+proc getLevelPaths(): seq[string] =
   playdate.file.listFiles(levelsBasePath)
 
 proc newLevelSelectScreen*(): LevelSelectScreen =
   return LevelSelectScreen()
 
-proc updateInput(screen: LevelSelectScreen) {.locks:0.} =
+proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonsState()
 
   if kButtonA in buttonState.pushed:
@@ -44,7 +44,8 @@ proc updateInput(screen: LevelSelectScreen) {.locks:0.} =
       screen.selectedIndex = 0
 
 proc drawBackground() =
-  gfx.drawRect(borderInset, borderInset, 400 - 2 * borderInset, 240 - 2 * borderInset, kColorBlack)
+  gfx.drawRect(borderInset, borderInset, 400 - 2 * borderInset, 240 - 2 *
+      borderInset, kColorBlack)
 
 proc drawTitle(title: string) =
   gfx.drawTextAligned(title, 200, 2)
@@ -54,7 +55,7 @@ proc drawLevelPaths(screen: LevelSelectScreen) =
   for level in screen.levelPaths:
     gfx.drawText(level, borderInset * 2, y)
     y += 20
-  
+
   gfx.drawText(">", borderInset + 8, 40 + screen.selectedIndex * 20)
 
 proc drawButtons(screen: LevelSelectScreen) =
@@ -69,16 +70,16 @@ proc draw(screen: LevelSelectScreen) =
   drawButtons(screen)
 
 
-method resume*(screen: LevelSelectScreen) {.locks:0.} =
+method resume*(screen: LevelSelectScreen) =
   try:
     screen.levelPaths = getLevelPaths()
   except IOError:
     print("Error reading level paths")
-    
+
   print("paths: ")
   print(screen.levelPaths)
 
-method update*(screen: LevelSelectScreen): int {.locks:0.} =
+method update*(screen: LevelSelectScreen): int =
   updateInput(screen)
   draw(screen)
   return 1

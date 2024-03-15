@@ -1,5 +1,3 @@
-{.push locks:0.}
-
 import playdate/api
 import math
 import std/sequtils
