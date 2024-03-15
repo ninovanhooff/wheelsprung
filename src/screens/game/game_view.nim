@@ -258,12 +258,12 @@ proc drawGame*(statePtr: ptr GameState) =
 
     # rider
     
-    let riderHead = state.riderHead    
+    let riderHead = state.riderHead
+    let riderHeadScreenPos = riderHead.position - camera
     if state.finishFlipDirectionAt.isSome:
       # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
       let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
       let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
-      let riderHeadScreenPos = riderHead.position - camera
       riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
     else:
       riderHeadImageTable.drawRotated(riderHead, state)
@@ -282,3 +282,11 @@ proc drawGame*(statePtr: ptr GameState) =
     eachConstraint(statePtr.space, constraintIter, statePtr)
     let forkImpulse: int32 = state.forkArmSpring.impulse.int32
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
+
+  if state.time < 0.5:
+    let messageY = (state.riderHead.position.y - camera.y - 40.0).int32
+    if not state.isGameStarted:
+      gfx.drawTextAligned("Ready?", 200, messageY)
+    else:
+      gfx.drawTextAligned("Go!", 200, messageY)
+  

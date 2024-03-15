@@ -72,6 +72,8 @@ type Level* = ref object of RootObj
 type GameState* = ref object of RootObj
   level*: Level
 
+  ## Game state
+  isGameStarted*: bool
   remainingCoins*: seq[Coin]
   killers*: seq[Body]
   gameResult*: Option[GameResult]

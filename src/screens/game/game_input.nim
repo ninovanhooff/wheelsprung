@@ -24,7 +24,7 @@ var
   actionLeanLeft = kButtonLeft
   actionLeanRight = kButtonRight
 
-  crankMaxAttitudeAdjustForce = 10_000.0
+  crankMaxAttitudeAdjustForce = 30_000.0
 
 # simulator overrides
 if defined simulator:
@@ -73,6 +73,11 @@ proc handleInput*(state: GameState) =
   state.isThrottlePressed = false
 
   let buttonsState = playdate.system.getButtonsState()
+
+  if not state.isGameStarted and buttonsState.pushed.len > 0:
+    state.isGameStarted = true
+    if not playdate.system.isCrankDocked:
+      state.crankNeutralAngle = playdate.system.getCrankAngle()
 
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,

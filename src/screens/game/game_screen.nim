@@ -195,22 +195,28 @@ method resume*(gameScreen: GameScreen) =
     onResetGame()
     state.resetGameOnResume = false
 
+  if not state.isGameStarted:
+    # the update loop won't draw the game
+    drawGame(addr state)
+
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
 
 method update*(gameScreen: GameScreen): int {.locks:0.} =
   handleInput(state)
-  state.updateAttitudeAdjust()
+  
+  if state.isGameStarted:
+    state.updateAttitudeAdjust()
 
-  state.space.step(timeStep)
-  state.updateTimers()
+    state.space.step(timeStep)
+    state.updateTimers()
 
-  updateGameBike(state)
-  if not state.isBikeInLevelBounds():
-    if not state.gameResult.isSome:
-      state.setGameResult(GameResultType.GameOver)
-      playScreamSound()
-    navigateToGameResult(state.gameResult.get)
+    updateGameBike(state)
+    if not state.isBikeInLevelBounds():
+      if not state.gameResult.isSome:
+        state.setGameResult(GameResultType.GameOver)
+        playScreamSound()
+      navigateToGameResult(state.gameResult.get)
 
   state.camera = state.level.cameraBounds.clampVect(
     state.chassis.position - halfDisplaySize
