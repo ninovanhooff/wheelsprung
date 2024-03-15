@@ -12,6 +12,7 @@ import navigation/[navigator, screen]
 import playdate/api
 import screens/game/game_screen
 import screens/level_select/level_select_screen
+import screens/settings/settings_screen
 
 const FONT_PATH = "fonts/Roobert-11-Medium.pft"
 
@@ -59,10 +60,11 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
     let lastOpenedLevelPath = getConfig().lastOpenedLevel
-    if lastOpenedLevelPath.isSome:
-      pushScreen(newGameScreen(lastOpenedLevelPath.get()))
-    else:
-      pushScreen(newLevelSelectScreen())
+    # if lastOpenedLevelPath.isSome:
+    #   pushScreen(newGameScreen(lastOpenedLevelPath.get()))
+    # else:
+    #   pushScreen(newLevelSelectScreen())
+    pushScreen(newSettingsScreen())
     
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)

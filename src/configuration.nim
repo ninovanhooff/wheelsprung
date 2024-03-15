@@ -4,8 +4,12 @@ import sugar
 import options
 import utils
 
+type DPadInputType* {.pure.} = enum
+  Jolt ="jolt", Constant ="constant", Gradual = "gradual"
+
 type Config* = ref object of RootObj
   lastOpenedLevel*: Option[string]
+  dPadInputType*: Option[DPadInputType]
 
 var config: Config
 
@@ -59,4 +63,29 @@ proc updateConfig*(update: Config -> void) =
 proc setLastOpenedLevel*(levelPath: string) =
   updateConfig(proc (config: Config) = 
     config.lastOpenedLevel = some(levelPath)
+  )
+
+proc getDPadInputType*(self: Config): DPadInputType =
+  return config.dPadInputType.get(DPadInputType.Jolt)
+
+proc nextWrapped[T: enum](v: T): T =
+  if v == high(T):
+    return low(T)
+  else:
+    return succ(v)
+
+proc prevWrapped[T: enum](v: T): T =
+  if v == low(T):
+    return high(T)
+  else:
+    return pred(v)
+
+proc incDpadInputType*(config: Config) =
+  config.dPadInputType = some(
+    config.getDPadInputType().nextWrapped()
+  )
+
+proc decDpadInputType*(config: Config) =
+  config.dPadInputType = some(
+    config.getDPadInputType().prevWrapped()
   )
