@@ -5,12 +5,28 @@ import playdate/api
 const
   TwoPi*: float = 2 * PI
 
+### Time
 proc now*(): uint = playdate.system.getCurrentTimeMilliseconds
 
+### Logging
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($now() & ": " &  things.join("\t"))
 
+### Enums
+proc nextWrapped*[T: enum](v: T): T =
+  if v == high(T):
+    return low(T)
+  else:
+    return succ(v)
+
+proc prevWrapped*[T: enum](v: T): T =
+  if v == low(T):
+    return high(T)
+  else:
+    return pred(v)
+
+### Math
 proc normalizeAngle*(angle: float): float =
     ## normalize angle to be between 0 and 2 * PI
     result = angle mod TwoPi

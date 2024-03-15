@@ -62,18 +62,6 @@ proc setLastOpenedLevel*(levelPath: string) =
 proc getDPadInputType*(self: Config): DPadInputType =
   return config.dPadInputType.get(DPadInputType.Jolt)
 
-proc nextWrapped[T: enum](v: T): T =
-  if v == high(T):
-    return low(T)
-  else:
-    return succ(v)
-
-proc prevWrapped[T: enum](v: T): T =
-  if v == low(T):
-    return high(T)
-  else:
-    return pred(v)
-
 proc incDpadInputType*(config: Config) =
   config.dPadInputType = some(
     config.getDPadInputType().nextWrapped()
