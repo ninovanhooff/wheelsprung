@@ -1,5 +1,6 @@
 {.push raises: [].}
 
+import sugar
 import playdate/api
 import graphics_utils
 import configuration_types
@@ -9,10 +10,10 @@ const cellPadding = 8
 type
   Editor* = ref object of RootObj
     label*: string
-    incrementor*: proc (config: Config)
-    decrementor*: proc (config: Config)
-    draw*: proc (self: Editor, x: int, y: int, selected: bool)
-    value*: proc (config: Config): string
+    incrementor*: (config: Config) -> void
+    decrementor*: (config: Config) -> void
+    draw*: (self: Editor, x: int, y: int, selected: bool) -> void
+    value*: (config: Config) -> string
 
 proc drawLabel(editor: Editor, x: int, y: int) =
   gfx.drawText(editor.label, x, y)

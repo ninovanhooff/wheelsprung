@@ -1,6 +1,7 @@
 {.experimental: "codeReordering".}
 {.push raises: [].}
 
+import sugar
 import playdate/api
 import navigation/[navigator, screen]
 import configuration_types, configuration
@@ -21,9 +22,9 @@ type
 
 let inputTypeEditor: Editor = Editor(
   label: "Input Type", 
-  incrementor: proc (config: Config) = config.incDpadInputType(),
-  decrementor: proc (config: Config) = config.decDpadInputType(),
-  value: proc (config: Config): string = $(config.getDPadInputType())
+  incrementor: (config: Config) => config.incDpadInputType(),
+  decrementor: (config: Config) => config.decDpadInputType(),
+  value: (config: Config) => $config.getDPadInputType
 )
 
 proc increaseValue*(self: SettingsScreen) =
