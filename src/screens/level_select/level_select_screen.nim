@@ -5,6 +5,7 @@ import utils
 import configuration
 
 import screens/game/game_screen
+import screens/settings/settings_screen
 
 const borderInset = 24
 const levelsBasePath = "levels/"
@@ -77,6 +78,10 @@ method resume*(screen: LevelSelectScreen) =
 
   print("paths: ")
   print(screen.levelPaths)
+
+  discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
+    pushScreen(newSettingsScreen())
+  )
 
 method update*(screen: LevelSelectScreen): int =
   updateInput(screen)
