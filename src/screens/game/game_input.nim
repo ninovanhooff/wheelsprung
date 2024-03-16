@@ -1,4 +1,5 @@
 import std/[options, math]
+import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
 import utils
@@ -74,12 +75,16 @@ proc resumeGameInput*(state: GameState) =
   state.isThrottlePressed = false
   initialAttitudeAdjustTorque = 90_000.0 * getDPadInputMultiplier(getConfig())
 
+const allButtons: PDButtons = PDButton.fullSet
+proc anyButton(buttons: PDButtons): bool =
+  (buttons * allButtons).len > 0
+
 proc handleInput*(state: GameState) =
   state.isThrottlePressed = false
 
   let buttonsState = playdate.system.getButtonsState()
 
-  if not state.isGameStarted and buttonsState.pushed.len > 0:
+  if not state.isGameStarted and buttonsState.pushed.anyButton:
     state.isGameStarted = true
     if not playdate.system.isCrankDocked:
       state.crankNeutralAngle = playdate.system.getCrankAngle()
