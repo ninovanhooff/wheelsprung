@@ -5,11 +5,11 @@ import utils
 import game_types, game_constants
 import game_bike, game_rider
 import shared_types
+import configuration
 import screens/dialog/dialog_screen
 
 const
   crankDeadZone = 5.0f
-  initialAttitudeAdjustTorque = 90_000.0
   maxWheelAngularVelocity = 30.0
   # applied to wheel1 when throttle is pressed
   throttleTorque = 3_500.0
@@ -24,6 +24,7 @@ var
   actionLeanLeft = kButtonLeft
   actionLeanRight = kButtonRight
 
+  initialAttitudeAdjustTorque = 90_000.0
   crankMaxAttitudeAdjustForce = 30_000.0
 
 # simulator overrides
@@ -68,6 +69,10 @@ proc onFlipDirection(state: GameState) =
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
   state.flipRiderDirection(riderPosition)
   state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
+
+proc resumeGameInput*(state: GameState) =
+  state.isThrottlePressed = false
+  initialAttitudeAdjustTorque = 90_000.0 * getDPadInputMultiplier(getConfig())
 
 proc handleInput*(state: GameState) =
   state.isThrottlePressed = false

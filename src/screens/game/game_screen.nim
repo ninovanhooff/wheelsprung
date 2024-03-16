@@ -11,6 +11,7 @@ import game_input
 import game_view
 import navigation/[screen, navigator]
 import screens/dialog/dialog_screen
+import screens/settings/settings_screen
 
 type GameScreen* = ref object of Screen
 
@@ -185,12 +186,18 @@ proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
 
 method resume*(gameScreen: GameScreen) =
   {.warning[LockLevel]:off.}
+
+  discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
+    pushScreen(newSettingsScreen())
+  )
   discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
       popScreen()
   )
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     onResetGame()
   )
+
+  resumeGameInput(state)
 
   if state.resetGameOnResume:
     onResetGame()
