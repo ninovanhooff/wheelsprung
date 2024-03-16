@@ -6,7 +6,7 @@ import options
 import chipmunk7
 import game_types, graphics_types, shared_types
 import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, swingArmRightCenter
-import graphics_utils
+import utils, graphics_utils
 import chipmunk_utils
 import globals
 
@@ -202,6 +202,28 @@ proc drawBlinkers(state: GameState) =
     let blinkerOn: bool = state.time mod blinkerPeriod < halfBlinkerPeriod
     trophyImageTable.getBitmap(blinkerOn.int32).draw(trophyBlinkerPos[0], trophyBlinkerPos[1], kBitmapUnflipped)
 
+proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
+  let rotationIndicatorRadius = 16'i32
+  let rotationIndicatorDiameter = rotationIndicatorRadius * 2'i32
+  # total rotation range indicator
+  gfx.drawEllipse(
+    center[0] - rotationIndicatorRadius, center[1] - rotationIndicatorDiameter, 
+    rotationIndicatorDiameter, rotationIndicatorDiameter, 
+    3, 
+    315, 45, 
+    kColorBlack
+  )
+  print("forceDegrees: ", forceDegrees)
+  # current rotation indicator
+  gfx.drawEllipse(
+    center[0] - rotationIndicatorRadius, center[1] - rotationIndicatorDiameter, 
+    rotationIndicatorDiameter, rotationIndicatorDiameter, 
+    9, 
+    forceDegrees - 6f, forceDegrees + 6f, 
+    kColorXOR
+  )
+    
+
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
@@ -265,8 +287,12 @@ proc drawGame*(statePtr: ptr GameState) =
       riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
     else:
       riderHeadImageTable.drawRotated(riderHead, state)
-    
-    
+
+    drawRotationForceIndicator(
+      riderHeadScreenPos.toVertex, 
+      state.attitudeAdjustForce / 1500f
+    )
+
     riderTorsoImageTable.drawRotated(state.riderTorso, state)
     riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
     riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
