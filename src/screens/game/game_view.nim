@@ -312,7 +312,7 @@ proc drawGame*(statePtr: ptr GameState) =
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
   if state.time < 0.5:
-    let messageY = (state.riderHead.position.y - camera.y - 40.0).int32
+    let messageY = (state.riderHead.position.y - camera.y - 26.0).int32
     if not state.isGameStarted:
       gfx.drawTextAligned("Ready?", 200, messageY)
     else:
