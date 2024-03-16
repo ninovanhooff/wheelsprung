@@ -7,11 +7,13 @@ import game_types, game_constants
 import game_bike, game_rider
 import shared_types
 import configuration
+import configuration_types
 import screens/dialog/dialog_screen
 
 const
   crankDeadZone = 5.0f
   maxWheelAngularVelocity = 30.0
+  attitudeAdjustForceThreshold = 100.0
   # applied to wheel1 when throttle is pressed
   throttleTorque = 3_500.0
   # applied to both wheels
@@ -25,8 +27,10 @@ var
   actionLeanLeft = kButtonLeft
   actionLeanRight = kButtonRight
 
-  initialAttitudeAdjustTorque = 90_000.0
+  initialAttitudeAdjustTorque = 0.0 # set on resume
+  attitudeAdjustAmplification = 1.0 # set on resume
   crankMaxAttitudeAdjustForce = 30_000.0
+  dPadInputType: DPadInputType
 
 # simulator overrides
 if defined simulator:
@@ -57,8 +61,29 @@ proc onBrake*(state: GameState) =
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
 proc onButtonAttitudeAdjust(state: GameState, direction: float) =
-  if state.attitudeAdjustForce == 0f:
+  case dPadInputType 
+  of Constant:
     state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+  of Gradual:
+    state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+  of Jolt:
+    if state.attitudeAdjustForce == 0.0: # this type can only be applied once the previous jolt has been reset
+      state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+
+proc updateAttitudeAdjust*(state: GameState) =
+  let chassis = state.chassis
+
+  if state.attitudeAdjustForce != 0.0:
+    chassis.torque = state.attitudeAdjustForce
+
+    case dPadInputType
+    of Constant:
+      state.attitudeAdjustForce = 0.0 # reset, will be applied again on next frame if button pressed
+    of Gradual, Jolt:
+      state.attitudeAdjustForce *= attitudeAdjustAmplification
+
+    if state.attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
+      state.attitudeAdjustForce = 0.0
 
 proc onCrankAttitudeAdjust(state: GameState, crankAngle: float32) =
   let adjust = attitudeAdjustForCrankAngle(crankAngle, state.crankNeutralAngle)
@@ -73,7 +98,20 @@ proc onFlipDirection(state: GameState) =
 
 proc resumeGameInput*(state: GameState) =
   state.isThrottlePressed = false
-  initialAttitudeAdjustTorque = 90_000.0 * getDPadInputMultiplier(getConfig())
+
+  let config = getConfig()
+  dPadInputType = config.getDPadInputType()
+  case dPadInputType
+  of Constant:
+    initialAttitudeAdjustTorque = 30_000.0 * config.getDPadInputMultiplier()
+    attitudeAdjustAmplification = 1.0
+  of Gradual:
+    initialAttitudeAdjustTorque = 20_000.0 * config.getDPadInputMultiplier()
+    attitudeAdjustAmplification = 1.25
+  of Jolt:
+    initialAttitudeAdjustTorque = 90_000.0 * config.getDPadInputMultiplier()
+    attitudeAdjustAmplification = 0.75
+  
 
 const allButtons: PDButtons = PDButton.fullSet
 proc anyButton(buttons: PDButtons): bool =

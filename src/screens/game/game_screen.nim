@@ -16,8 +16,6 @@ import screens/settings/settings_screen
 type GameScreen* = ref object of Screen
 
 const
-  attitudeAdjustAttentuation = 0.75
-  attitudeAdjustForceThreshold = 100.0
   timeStep = 1.0f/50.0f
 
 var 
@@ -142,14 +140,6 @@ proc onResetGame() {.raises: [].} =
   state.destroy()
   state = newGameState(state.level)
 
-proc updateAttitudeAdjust(state: GameState) =
-  let chassis = state.chassis
-  if state.attitudeAdjustForce != 0.0:
-    chassis.torque = state.attitudeAdjustForce
-    state.attitudeAdjustForce *= attitudeAdjustAttentuation
-    if state.attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
-      state.attitudeAdjustForce = 0f
-
 proc updateTimers(state: GameState) =
   state.time += timeStep
   let currentTime = state.time
@@ -211,11 +201,10 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
 
 method update*(gameScreen: GameScreen): int =
+  updateAttitudeAdjust(state)
   handleInput(state)
   
   if state.isGameStarted:
-    state.updateAttitudeAdjust()
-
     state.space.step(timeStep)
     state.updateTimers()
 
