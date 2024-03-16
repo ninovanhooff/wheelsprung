@@ -1,3 +1,5 @@
+## A simple navigation system for Playdate
+## Ported from https://github.com/ninovanhooff/playdate-navigator/blob/a33c2b724dfe7f83d7c406eed3d3aabbb8b550c2/Navigator.lua
 {.push raises: [].}
 
 import std/sugar

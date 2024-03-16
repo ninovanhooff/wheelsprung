@@ -1,6 +1,7 @@
 {.push raises: [].}
 
 import sugar
+import strformat
 import playdate/api
 import graphics_utils
 import configuration_types
@@ -14,6 +15,11 @@ type
     decrementor*: (config: Config) -> void
     draw*: (self: Editor, x: int, y: int, selected: bool) -> void
     value*: (config: Config) -> string
+
+proc formatEditorFloat*(value: SomeFloat): string {.raises: [], tags: [].} =
+  try:
+    fmt"{value:.1f}"
+  except: "cannot format value as float: " & value.repr
 
 proc drawLabel(editor: Editor, x: int, y: int) =
   gfx.drawText(editor.label, x, y)

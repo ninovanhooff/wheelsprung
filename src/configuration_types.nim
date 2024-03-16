@@ -7,6 +7,7 @@ type DPadInputType* {.pure.} = enum
 type Config* = ref object of RootObj
   lastOpenedLevel*: Option[string]
   dPadInputType*: Option[DPadInputType]
+  dPadInputMultiplier*: Option[float]
 
 
 proc `$`*(inputType: DPadInputType): string =

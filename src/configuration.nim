@@ -71,3 +71,16 @@ proc decDpadInputType*(config: Config) =
   config.dPadInputType = some(
     config.getDPadInputType().prevWrapped()
   )
+
+proc getDPadInputMultiplier*(self: Config): float =
+  return config.dPadInputMultiplier.get(1.0)
+
+proc incDpadInputMultiplier*(config: Config) =
+  config.dPadInputMultiplier = some(
+    min(config.getDPadInputMultiplier() + 0.1, 2.0)
+  )
+
+proc decDpadInputMultiplier*(config: Config) =
+  config.dPadInputMultiplier = some(
+    max(config.getDPadInputMultiplier() - 0.1, 0.1)
+  )
