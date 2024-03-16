@@ -80,6 +80,10 @@ proc init(screen: SettingsScreen) =
 
 ## Screen methods
 
+method pause*(screen: SettingsScreen) =
+  {.warning[LockLevel]:off.}
+  screen.config.save()
+
 method resume*(screen: SettingsScreen) =
   {.warning[LockLevel]:off.}
   if not screen.isInitialized:
