@@ -1,4 +1,4 @@
-import std/[options, math]
+import std/[options]
 import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
@@ -11,7 +11,6 @@ import configuration_types
 import screens/dialog/dialog_screen
 
 const
-  crankDeadZone = 5.0f
   maxWheelAngularVelocity = 30.0
   attitudeAdjustForceThreshold = 100.0
   # applied to wheel1 when throttle is pressed
@@ -29,7 +28,6 @@ var
 
   initialAttitudeAdjustTorque = 0.0 # set on resume
   attitudeAdjustAmplification = 1.0 # set on resume
-  crankMaxAttitudeAdjustForce = 30_000.0
   dPadInputType: DPadInputType
 
 # simulator overrides
@@ -37,14 +35,6 @@ if defined simulator:
   actionThrottle = kButtonUp
   actionBrake = kButtonDown
   actionFlipDirection = kButtonB
-
-const PITAU = 360f + 180f
-proc attitudeAdjustForCrankAngle*(crankAngle, calibrationAngle: float32): float32 =
-  ## Convert the crank angle to a value between 
-  ## -2 and 2 for [-180 .. +180] degrees from calibrationAngle
-  # https://gamedev.stackexchange.com/a/169509
-  let adjustDegrees = (( crankAngle - calibrationAngle + PITAU ) mod 360f) - 180f
-  return (adjustDegrees / 90f)
 
 proc onThrottle*(state: GameState) =
   let rearWheel = state.rearWheel
@@ -85,10 +75,6 @@ proc updateAttitudeAdjust*(state: GameState) =
     if state.attitudeAdjustForce.abs < attitudeAdjustForceThreshold:
       state.attitudeAdjustForce = 0.0
 
-proc onCrankAttitudeAdjust(state: GameState, crankAngle: float32) =
-  let adjust = attitudeAdjustForCrankAngle(crankAngle, state.crankNeutralAngle)
-  state.attitudeAdjustForce = adjust * crankMaxAttitudeAdjustForce
-
 proc onFlipDirection(state: GameState) =
   state.driveDirection *= -1.0
   state.flipBikeDirection()
@@ -124,8 +110,6 @@ proc handleInput*(state: GameState) =
 
   if not state.isGameStarted and buttonsState.pushed.anyButton:
     state.isGameStarted = true
-    if not playdate.system.isCrankDocked:
-      state.crankNeutralAngle = playdate.system.getCrankAngle()
 
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,
@@ -144,10 +128,6 @@ proc handleInput*(state: GameState) =
     state.onButtonAttitudeAdjust(-1f)
   elif actionLeanRight in buttonsState.current:
     state.onButtonAttitudeAdjust(1f)
-  elif not playdate.system.isCrankDocked:
-    let angle = playdate.system.getCrankAngle()
-    if angle.abs > crankDeadZone:
-      state.onCrankAttitudeAdjust(angle)
 
   if actionFlipDirection in buttonsState.pushed:
     print("Flip direction pressed")
