@@ -1,4 +1,4 @@
-import std/[options]
+import std/[math, options]
 import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
@@ -63,7 +63,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: float) =
   of Gradual:
     if direction == 0.0: # reset immediately
       state.attitudeAdjustForce = 0.0
-    elif state.attitudeAdjustForce == 0.0: # initial application
+    elif state.attitudeAdjustForce == 0.0 or state.attitudeAdjustForce.signbit != direction.signbit: # initial application
       state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
   of Jolt:
     if state.attitudeAdjustForce == 0.0: # this type can only be applied once the previous jolt has been reset
@@ -102,6 +102,9 @@ proc resumeGameInput*(state: GameState) =
 
   let config = getConfig()
   dPadInputType = config.getDPadInputType()
+
+  # Parameters tuned on Desmos: https://www.desmos.com/calculator/rsyi3zaobh
+
   case dPadInputType
   of Constant:
     initialAttitudeAdjustTorque = 30_000.0 * config.getDPadInputMultiplier()
