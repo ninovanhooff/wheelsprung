@@ -213,7 +213,6 @@ proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
     315, 45, 
     kColorBlack
   )
-  print("forceDegrees: ", forceDegrees)
   # current rotation indicator
   gfx.drawEllipse(
     center[0] - rotationIndicatorRadius, center[1] - rotationIndicatorDiameter, 
@@ -288,9 +287,10 @@ proc drawGame*(statePtr: ptr GameState) =
     else:
       riderHeadImageTable.drawRotated(riderHead, state)
 
+    print("attitudeadjustforce: ", state.attitudeAdjustForce, "degrees:", state.attitudeAdjustForce / 1_500f)
     drawRotationForceIndicator(
       riderHeadScreenPos.toVertex, 
-      state.attitudeAdjustForce / 1500f
+      state.attitudeAdjustForce / 1_500f
     )
 
     riderTorsoImageTable.drawRotated(state.riderTorso, state)

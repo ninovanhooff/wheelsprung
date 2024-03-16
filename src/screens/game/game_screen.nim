@@ -201,10 +201,10 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
 
 method update*(gameScreen: GameScreen): int =
-  updateAttitudeAdjust(state)
   handleInput(state)
   
   if state.isGameStarted:
+    updateAttitudeAdjust(state)
     state.space.step(timeStep)
     state.updateTimers()
 
