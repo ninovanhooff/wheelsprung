@@ -202,23 +202,27 @@ proc drawBlinkers(state: GameState) =
     let blinkerOn: bool = state.time mod blinkerPeriod < halfBlinkerPeriod
     trophyImageTable.getBitmap(blinkerOn.int32).draw(trophyBlinkerPos[0], trophyBlinkerPos[1], kBitmapUnflipped)
 
+const
+  rotationIndicatorRadius = 16'i32
+  rotationIndicatorSize = rotationIndicatorRadius * 2'i32
+  rotationIndicatorWidthDegrees = 6f
+
 proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
-  let rotationIndicatorRadius = 16'i32
-  let rotationIndicatorDiameter = rotationIndicatorRadius * 2'i32
+  let
+    x = center[0] - rotationIndicatorRadius
+    y = center[1] - rotationIndicatorSize
   # total rotation range indicator
   gfx.drawEllipse(
-    center[0] - rotationIndicatorRadius, center[1] - rotationIndicatorDiameter, 
-    rotationIndicatorDiameter, rotationIndicatorDiameter, 
+    x, y, rotationIndicatorSize, rotationIndicatorSize, 
     3, 
     315, 45, 
     kColorBlack
   )
   # current rotation indicator
   gfx.drawEllipse(
-    center[0] - rotationIndicatorRadius, center[1] - rotationIndicatorDiameter, 
-    rotationIndicatorDiameter, rotationIndicatorDiameter, 
+    x,y - 3'i32,rotationIndicatorSize,rotationIndicatorSize,
     9, 
-    forceDegrees - 6f, forceDegrees + 6f, 
+    forceDegrees - rotationIndicatorWidthDegrees, forceDegrees + rotationIndicatorWidthDegrees, 
     kColorXOR
   )
     

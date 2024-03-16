@@ -76,7 +76,7 @@ proc updateAttitudeAdjust*(state: GameState) =
     if state.gameResult.isSome:
       state.attitudeAdjustForce = 0.0
       return
-    
+
     chassis.torque = state.attitudeAdjustForce
 
     case dPadInputType
@@ -152,4 +152,3 @@ proc handleInput*(state: GameState) =
   if actionFlipDirection in buttonsState.pushed:
     print("Flip direction pressed")
     state.onFlipDirection()
-
