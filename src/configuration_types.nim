@@ -1,8 +1,7 @@
 import options
 
 type DPadInputType* {.pure.} = enum
-  # value is json-serialised value and must not be changed
-  Jolt = "jolt", Constant = "constant", Gradual = "gradual"
+  Jolt, Constant, Gradual
 
 type Config* = ref object of RootObj
   lastOpenedLevel*: Option[string]
