@@ -68,7 +68,7 @@ proc updateAttitudeAdjust*(state: GameState) =
 
     case dPadInputType
     of Constant:
-      state.attitudeAdjustForce = 0.0 # reset, will be applied again on next frame if button pressed
+      discard # no need to change the force
     of Gradual, Jolt:
       state.attitudeAdjustForce *= attitudeAdjustAmplification
 
@@ -125,9 +125,11 @@ proc handleInput*(state: GameState) =
     state.onBrake()
   
   if actionLeanLeft in buttonsState.current:
-    state.onButtonAttitudeAdjust(-1f)
+    state.onButtonAttitudeAdjust(-1.0)
   elif actionLeanRight in buttonsState.current:
-    state.onButtonAttitudeAdjust(1f)
+    state.onButtonAttitudeAdjust(1.0)
+  else:
+    state.onButtonAttitudeAdjust(0.0)
 
   if actionFlipDirection in buttonsState.pushed:
     print("Flip direction pressed")
