@@ -73,19 +73,28 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
     if state.attitudeAdjust.isNone: # this type can only be applied once the previous jolt has been reset
       state.setAttitudeAdjust(direction)
 
+proc applyAttitudeAdjust*(state: GameState) {.raises: [].} =
+  let optAdjust = state.attitudeAdjust
+  if optAdjust.isNone:
+    return
+  let adjust = optAdjust.get
+
+  let direction = adjust.direction
+  let torque = direction * attitudeInputResponse(state.time - adjust.startedAt)
+  if abs(torque) < minAttitudeAdjustForce:
+    return
+  adjust.lastTorque = torque
+  state.chassis.torque = torque
+
 proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
-  let chassis = state.chassis
 
   if state.attitudeAdjust.isSome:
     if state.gameResult.isSome:
       state.attitudeAdjust = none(AttitudeAdjust)
       return
-
+    
     # apply force
-    let adjust = state.attitudeAdjust.get
-    chassis.torque = adjust.direction * attitudeInputResponse(
-      state.time - adjust.startedAt
-    )
+    state.applyAttitudeAdjust()
 
 
 proc onFlipDirection(state: GameState) =

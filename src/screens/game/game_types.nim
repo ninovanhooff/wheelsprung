@@ -73,7 +73,7 @@ type AttitudeAdjust* = ref object
   # adjustType*: AttitudeAdjustType #todo move DpadInputType type def to proper place
   direction*: Float # 1.0 or -1.0, not necessarily the same as drive direction
   startedAt*: Seconds
-  force*: Float # todo unused
+  lastTorque*: Float # only used to display attitude indicator
 
 type GameState* = ref object of RootObj
   level*: Level
