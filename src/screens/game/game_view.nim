@@ -294,7 +294,7 @@ proc drawGame*(statePtr: ptr GameState) =
     print("attitudeadjustforce: ", state.attitudeAdjustForce, "degrees:", state.attitudeAdjustForce / 1_500f)
     drawRotationForceIndicator(
       riderHeadScreenPos.toVertex, 
-      state.attitudeAdjustForce / 1_500f
+      state.attitudeAdjustForce / 1_000f
     )
 
     riderTorsoImageTable.drawRotated(state.riderTorso, state)
