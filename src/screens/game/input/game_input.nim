@@ -125,13 +125,12 @@ proc toInputResponse(config: Config): (t: Seconds) -> Float =
   of Gradual:
     # todo
     return (t: Seconds) => (30_000.0 * multiplier).Float
-  of Jolt: return proc (t: Seconds) : Float =
-    let modTime = t mod 0.46
-    let exp: int32 = (50.0 * modTime).int32
-    print(exp)
-    result = (multiplier * 90_000.0 * (0.75 ^ exp)).Float
-    print("result", result)
-    
+  of Jolt: return (t: Seconds) => (
+    ## Logariithmic decay starting at multiplier * 90_000.0
+    ## Periodic with period 0.46 seconds
+    let exp: int32 = (physicsTickRate * (t mod 0.46)).int32
+    (multiplier * 90_000.0 * (0.75 ^ exp)).Float
+  )
 
 proc resumeGameInput*(state: GameState) =
   state.isThrottlePressed = false

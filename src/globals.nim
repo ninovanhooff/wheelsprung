@@ -1,5 +1,8 @@
-var debugDrawGrid* = false
-var debugDrawLevel* = true;
-var debugDrawShapes* = false;
-var debugDrawTextures* = true;
-var debugDrawConstraints* = false;
+var
+  refreshRate* = 50.0f
+
+  debugDrawGrid* = false
+  debugDrawLevel* = true
+  debugDrawShapes* = false
+  debugDrawTextures* = true
+  debugDrawConstraints* = false

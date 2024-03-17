@@ -21,7 +21,6 @@ let initialScreenProvider: InitialScreenProvider =
 
 var 
   font: LCDFont
-  refreshRate = 50.0f
 
 proc update() {.raises: [].} =
   discard updateNavigator()

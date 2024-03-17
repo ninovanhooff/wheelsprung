@@ -15,9 +15,6 @@ import screens/settings/settings_screen
 
 type GameScreen* = ref object of Screen
 
-const
-  timeStep = 1.0f/50.0f
-
 var 
   state: GameState
 
