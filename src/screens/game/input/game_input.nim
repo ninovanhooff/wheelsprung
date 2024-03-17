@@ -123,9 +123,13 @@ proc toInputResponse(config: Config): (t: Seconds) -> Float =
   of Constant:
     return (t: Seconds) => (30_000.0 * multiplier).Float
   of Parabolic: return proc (t: Seconds) : Float =
-    result = (multiplier * 30_000.0).Float
-    if (t >= 0.7): 
+    result = (multiplier * 20_000.0).Float
+    if (t >= 0.7):
+      ## constant sustain
       result *= 1.5
+    else:
+      ## parabolic increase and decrease
+      result *= 2 - (2.44 * t - 1) ^ 2
   of Jolt: return (t: Seconds) => (
     ## Logariithmic decay starting at multiplier * 90_000.0
     ## Periodic with period 0.46 seconds
