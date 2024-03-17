@@ -127,6 +127,7 @@ proc newGameState(level: Level): GameState =
     level: level, 
     space: space,
     driveDirection: level.initialDriveDirection,
+    attitudeAdjust: none[AttitudeAdjust](),
   )
   initGameBike(state)
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)

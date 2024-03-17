@@ -1,5 +1,5 @@
 {.push raises: [].}
-import std/[options, sugar]
+import std/[options, sugar, math]
 import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
@@ -51,6 +51,7 @@ proc onBrake*(state: GameState) =
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
 proc setAttitudeAdjust(state: GameState, direction: Float) =
+  print("setAttitudeAdjust", direction)
   state.attitudeAdjust = some(AttitudeAdjust(
     direction: direction,
     startedAt: state.time
@@ -59,7 +60,12 @@ proc setAttitudeAdjust(state: GameState, direction: Float) =
 proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   ## Called on every frame, direction may be 0.0 if the button is not pressed
   
-  let adjust = state.attitudeAdjust
+  if direction == 0.0:
+    if state.attitudeAdjust.isSome:
+      state.attitudeAdjust = none(AttitudeAdjust)
+    return
+
+  let optAdjust = state.attitudeAdjust
   
   case dPadInputType 
   of Constant:
@@ -67,7 +73,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   of Gradual:
     if direction == 0.0: # reset immediately
       state.attitudeAdjust = none(AttitudeAdjust)
-    elif adjust.isNone or adjust.get.direction != direction: # initial application
+    elif optAdjust.isNone or optAdjust.get.direction != direction: # initial application
       state.setAttitudeAdjust(direction)
   of Jolt:
     if state.attitudeAdjust.isNone: # this type can only be applied once the previous jolt has been reset
@@ -80,9 +86,12 @@ proc applyAttitudeAdjust*(state: GameState) {.raises: [].} =
   let adjust = optAdjust.get
 
   let direction = adjust.direction
-  let torque = direction * attitudeInputResponse(state.time - adjust.startedAt)
+  let response = attitudeInputResponse(state.time - adjust.startedAt)
+  let torque = direction * response
   if abs(torque) < minAttitudeAdjustForce:
-    return
+    print("attitude adjust force too low", torque, direction, response)
+    return # todo remove adjust? note this would cancel jolt
+  print("attitude adjust", torque)
   adjust.lastTorque = torque
   state.chassis.torque = torque
 
@@ -110,14 +119,19 @@ proc toInputResponse(config: Config): (t: Seconds) -> Float =
 
   # parameters tuned on Desmos: https://www.desmos.com/calculator/w4zbw0thzd
 
-  return (t: Seconds) => (30_000.0 * multiplier).Float
-  # case inputType
-  # of Constant:
-  #   return proc(t: Seconds): Float = 30_000.0 * multiplier
-  # of Gradual:
-  #   return proc(t: Seconds): Float = 20_000.0 * attitudeAdjustAmplification * (1.03 ** t)
-  # of Jolt:
-  #   return proc(t: Seconds): Float = 1.0
+  case inputType
+  of Constant:
+    return (t: Seconds) => (30_000.0 * multiplier).Float
+  of Gradual:
+    # todo
+    return (t: Seconds) => (30_000.0 * multiplier).Float
+  of Jolt: return proc (t: Seconds) : Float =
+    let modTime = t mod 0.46
+    let exp: int32 = (50.0 * modTime).int32
+    print(exp)
+    result = (multiplier * 90_000.0 * (0.75 ^ exp)).Float
+    print("result", result)
+    
 
 proc resumeGameInput*(state: GameState) =
   state.isThrottlePressed = false
