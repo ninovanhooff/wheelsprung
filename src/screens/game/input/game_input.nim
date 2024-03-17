@@ -1,4 +1,5 @@
-import std/[math, options, sugar]
+{.push raises: [].}
+import std/[options, sugar]
 import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
@@ -27,7 +28,7 @@ var
   actionLeanRight = kButtonRight
 
   dPadInputType: DPadInputType
-  attitudeInputResponse: proc (t: Seconds): Float {.raises: [].}
+  attitudeInputResponse: (t: Seconds) -> Float
 
 # simulator overrides
 if defined simulator:
@@ -94,13 +95,13 @@ proc onFlipDirection(state: GameState) =
   state.flipRiderDirection(riderPosition)
   state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
 
-proc toInputResponse(config: Config): proc (t: Seconds): Float {.raises: [].} =
+proc toInputResponse(config: Config): (t: Seconds) -> Float =
   let inputType = config.getDPadInputType()
   let multiplier = config.getDPadInputMultiplier()
 
   # parameters tuned on Desmos: https://www.desmos.com/calculator/w4zbw0thzd
 
-  return proc(t: Seconds): Float {.raises:[].} = 30_000.0 * multiplier
+  return (t: Seconds) => (30_000.0 * multiplier).Float
   # case inputType
   # of Constant:
   #   return proc(t: Seconds): Float = 30_000.0 * multiplier
