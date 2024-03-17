@@ -1,4 +1,4 @@
-import std/[math, options]
+import std/[math, options, sugar]
 import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
@@ -7,8 +7,7 @@ import screens/game/[
   game_types, game_constants, game_bike, game_rider
 ]
 import shared_types
-import configuration
-import configuration_types
+import configuration, configuration_types
 import screens/dialog/dialog_screen
 
 const
@@ -27,12 +26,8 @@ var
   actionLeanLeft = kButtonLeft
   actionLeanRight = kButtonRight
 
-  # adjust force parameters, set on resume
-  initialAttitudeAdjustTorque = 0.0
-  attitudeAdjustAmplification = 1.0
-  maxAttitudeAdjustForce = 0.0
-
   dPadInputType: DPadInputType
+  attitudeInputResponse: proc (t: Seconds): Float {.raises: [].}
 
 # simulator overrides
 if defined simulator:
@@ -54,42 +49,43 @@ proc onBrake*(state: GameState) =
   rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
-proc onButtonAttitudeAdjust(state: GameState, direction: float) =
+proc setAttitudeAdjust(state: GameState, direction: Float) =
+  state.attitudeAdjust = some(AttitudeAdjust(
+    direction: direction,
+    startedAt: state.time
+  ))
+
+proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   ## Called on every frame, direction may be 0.0 if the button is not pressed
+  
+  let adjust = state.attitudeAdjust
   
   case dPadInputType 
   of Constant:
-    # apply if not zero, reset immediately if zero
-    state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+    state.setAttitudeAdjust(direction)
   of Gradual:
     if direction == 0.0: # reset immediately
-      state.attitudeAdjustForce = 0.0
-    elif state.attitudeAdjustForce == 0.0 or state.attitudeAdjustForce.signbit != direction.signbit: # initial application
-      state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+      state.attitudeAdjust = none(AttitudeAdjust)
+    elif adjust.isNone or adjust.get.direction != direction: # initial application
+      state.setAttitudeAdjust(direction)
   of Jolt:
-    if state.attitudeAdjustForce == 0.0: # this type can only be applied once the previous jolt has been reset
-      state.attitudeAdjustForce = direction * initialAttitudeAdjustTorque
+    if state.attitudeAdjust.isNone: # this type can only be applied once the previous jolt has been reset
+      state.setAttitudeAdjust(direction)
 
-proc updateAttitudeAdjust*(state: GameState) =
+proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
   let chassis = state.chassis
 
-  if state.attitudeAdjustForce != 0.0:
+  if state.attitudeAdjust.isSome:
     if state.gameResult.isSome:
-      state.attitudeAdjustForce = 0.0
+      state.attitudeAdjust = none(AttitudeAdjust)
       return
 
-    chassis.torque = state.attitudeAdjustForce
+    # apply force
+    let adjust = state.attitudeAdjust.get
+    chassis.torque = adjust.direction * attitudeInputResponse(
+      state.time - adjust.startedAt
+    )
 
-    case dPadInputType
-    of Constant:
-      discard # no need to change the force
-    of Gradual, Jolt:
-      state.attitudeAdjustForce *= attitudeAdjustAmplification
-
-    if state.attitudeAdjustForce.abs < minAttitudeAdjustForce:
-      state.attitudeAdjustForce = 0.0
-
-    state.attitudeAdjustForce = clamp(state.attitudeAdjustForce, -maxAttitudeAdjustForce, maxAttitudeAdjustForce)
 
 proc onFlipDirection(state: GameState) =
   state.driveDirection *= -1.0
@@ -98,28 +94,27 @@ proc onFlipDirection(state: GameState) =
   state.flipRiderDirection(riderPosition)
   state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
 
+proc toInputResponse(config: Config): proc (t: Seconds): Float {.raises: [].} =
+  let inputType = config.getDPadInputType()
+  let multiplier = config.getDPadInputMultiplier()
+
+  # parameters tuned on Desmos: https://www.desmos.com/calculator/w4zbw0thzd
+
+  return proc(t: Seconds): Float {.raises:[].} = 30_000.0 * multiplier
+  # case inputType
+  # of Constant:
+  #   return proc(t: Seconds): Float = 30_000.0 * multiplier
+  # of Gradual:
+  #   return proc(t: Seconds): Float = 20_000.0 * attitudeAdjustAmplification * (1.03 ** t)
+  # of Jolt:
+  #   return proc(t: Seconds): Float = 1.0
+
 proc resumeGameInput*(state: GameState) =
   state.isThrottlePressed = false
 
   let config = getConfig()
   dPadInputType = config.getDPadInputType()
-
-  # Parameters tuned on Desmos: https://www.desmos.com/calculator/rsyi3zaobh
-
-  case dPadInputType
-  of Constant:
-    initialAttitudeAdjustTorque = 30_000.0 * config.getDPadInputMultiplier()
-    attitudeAdjustAmplification = 1.0
-    maxAttitudeAdjustForce = initialAttitudeAdjustTorque
-  of Gradual:
-    initialAttitudeAdjustTorque = 20_000.0 * config.getDPadInputMultiplier()
-    attitudeAdjustAmplification = 1.03
-    maxAttitudeAdjustForce = 2.0 * initialAttitudeAdjustTorque
-  of Jolt:
-    initialAttitudeAdjustTorque = 90_000.0 * config.getDPadInputMultiplier()
-    attitudeAdjustAmplification = 0.75
-    maxAttitudeAdjustForce = initialAttitudeAdjustTorque
-  
+  attitudeInputResponse = config.toInputResponse()
 
 const allButtons: PDButtons = PDButton.fullSet
 proc anyButton(buttons: PDButtons): bool =

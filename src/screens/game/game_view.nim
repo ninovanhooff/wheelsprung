@@ -291,10 +291,12 @@ proc drawGame*(statePtr: ptr GameState) =
     else:
       riderHeadImageTable.drawRotated(riderHead, state)
 
-    print("attitudeadjustforce: ", state.attitudeAdjustForce, "degrees:", state.attitudeAdjustForce / 1_500f)
+    let chassisTorque = state.chassis.torque
+    let chassisTorqueDegrees = chassisTorque / 1_000f
+    print("attitudeadjustforce: ", chassisTorque, "degrees:", chassisTorqueDegrees)
     drawRotationForceIndicator(
       riderHeadScreenPos.toVertex, 
-      state.attitudeAdjustForce / 1_000f
+      chassisTorqueDegrees
     )
 
     riderTorsoImageTable.drawRotated(state.riderTorso, state)

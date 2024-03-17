@@ -3,7 +3,7 @@ import std/json
 import sugar
 import options
 import utils
-import configuration_types
+import configuration_types, shared_types
 
 var config: Config
 

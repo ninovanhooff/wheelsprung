@@ -69,6 +69,12 @@ type Level* = ref object of RootObj
   initialChassisPosition*: Vect
   initialDriveDirection*: DriveDirection
 
+type AttitudeAdjust* = ref object
+  # adjustType*: AttitudeAdjustType #todo move DpadInputType type def to proper place
+  direction*: Float # 1.0 or -1.0, not necessarily the same as drive direction
+  startedAt*: Seconds
+  force*: Float # todo unused
+
 type GameState* = ref object of RootObj
   level*: Level
 
@@ -92,7 +98,7 @@ type GameState* = ref object of RootObj
   ## Physics
   space*: Space
   time*: Seconds
-  attitudeAdjustForce*: Float
+  attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   driveDirection*: DriveDirection
 

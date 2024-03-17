@@ -1,7 +1,5 @@
 import options
-
-type DPadInputType* {.pure.} = enum
-  Jolt, Constant, Gradual
+import shared_types
 
 type Config* = ref object of RootObj
   lastOpenedLevel*: Option[string]
