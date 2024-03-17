@@ -12,4 +12,4 @@ proc `$`*(inputType: DPadInputType): string =
   case inputType
   of DPadInputType.Jolt: return "Jolt"
   of DPadInputType.Constant: return "Constant"
-  of DPadInputType.Gradual: return "Gradual"
+  of DPadInputType.Parabolic: return "Parabolic"

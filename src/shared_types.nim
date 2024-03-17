@@ -4,7 +4,7 @@ type
   Seconds* = Float
 
   DPadInputType* {.pure.} = enum
-    Jolt, Constant, Gradual
+    Jolt, Constant, Parabolic
 
   GameResultType* {.pure.} = enum
     GameOver, LevelComplete

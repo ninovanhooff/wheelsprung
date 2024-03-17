@@ -70,7 +70,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   case dPadInputType 
   of Constant:
     state.setAttitudeAdjust(direction)
-  of Gradual:
+  of Parabolic:
     if direction == 0.0: # reset immediately
       state.attitudeAdjust = none(AttitudeAdjust)
     elif optAdjust.isNone or optAdjust.get.direction != direction: # initial application
@@ -122,9 +122,10 @@ proc toInputResponse(config: Config): (t: Seconds) -> Float =
   case inputType
   of Constant:
     return (t: Seconds) => (30_000.0 * multiplier).Float
-  of Gradual:
-    # todo
-    return (t: Seconds) => (30_000.0 * multiplier).Float
+  of Parabolic: return proc (t: Seconds) : Float =
+    result = (multiplier * 30_000.0).Float
+    if (t >= 0.7): 
+      result *= 1.5
   of Jolt: return (t: Seconds) => (
     ## Logariithmic decay starting at multiplier * 90_000.0
     ## Periodic with period 0.46 seconds
