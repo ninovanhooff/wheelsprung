@@ -7,7 +7,7 @@ import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
 import sound/game_sound
 import shared_types
 import game_types, game_constants
-import game_input
+import input/game_input
 import game_view
 import navigation/[screen, navigator]
 import screens/dialog/dialog_screen

@@ -3,8 +3,9 @@ import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
 import utils
-import game_types, game_constants
-import game_bike, game_rider
+import screens/game/[
+  game_types, game_constants, game_bike, game_rider
+]
 import shared_types
 import configuration
 import configuration_types
