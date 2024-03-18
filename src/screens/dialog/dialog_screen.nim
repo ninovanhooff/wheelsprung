@@ -29,7 +29,7 @@ proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].
   of GameResultType.LevelComplete:
     return "Level Complete"
 
-proc drawDialog*(self: DialogScreen) =
+proc drawDialog(self: DialogScreen) =
   playdate.graphics.clear(kColorWhite)
   let gameResult = self.gameResult
   gfx.drawTextAligned(gameResult.resultType.displayText, 200, 100)
@@ -38,6 +38,8 @@ proc drawDialog*(self: DialogScreen) =
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
 
 method resume*(self: DialogScreen) =
+
+  drawDialog(self) # once in resume is enough, static screen
   
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
@@ -50,6 +52,7 @@ method resume*(self: DialogScreen) =
   )
 
 method update*(self: DialogScreen): int =
+  # no drawing needed here, we do it in resume
   let buttonState = playdate.system.getButtonsState()
 
   if kButtonA in buttonState.pushed:
