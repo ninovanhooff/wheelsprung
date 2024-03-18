@@ -25,7 +25,7 @@ let inputTypeEditor: Editor = Editor(
   label: "d-pad leaning", 
   incrementor: (config: Config) => config.incDpadInputType(),
   decrementor: (config: Config) => config.decDpadInputType(),
-  value: (config: Config) => $config.getDPadInputType,
+  value: (config: Config) => config.getDPadInputType.displayName,
   preview: some[PreviewCallback](drawDPadInputResponsePreview),
 )
 

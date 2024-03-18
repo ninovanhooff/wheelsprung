@@ -31,6 +31,5 @@ proc drawDPadInputResponsePreview*(config: Config, rect: Rect) =
     y = clamp(plotBottomY - (response / 500.0f).int32, plotRect.y, plotRect.bottom)
     if tick > 0:
       gfx.drawLine(x - xStep, lastY, x, y, 2, kColorBlack)
-    print("x,y: ", x, y)
     x += xStep
     lastY = y

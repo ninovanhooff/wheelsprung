@@ -7,7 +7,7 @@ type Config* = ref object of RootObj
   dPadInputMultiplier*: Option[float]
 
 
-proc `$`*(inputType: DPadInputType): string =
+proc displayName*(inputType: DPadInputType): string =
   ## Display value for Settings screen
   case inputType
   of DPadInputType.Jolt: return "Jolt"
