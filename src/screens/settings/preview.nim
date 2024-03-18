@@ -1,6 +1,35 @@
 import playdate/api
+import utils
 import graphics_utils, graphics_types
+import shared_types
+import input_response
 import configuration_types
 
 proc drawDPadInputResponsePreview*(config: Config, rect: Rect) =
-  rect.fill(kColorBlack)
+  rect.fill(kColorWhite)
+  rect.inset(4).draw(kColorBlack)
+  let graphRect = rect.inset(40,2, 40, 4)
+  gfx.drawTextAligned("Force".vertical, graphRect.x, graphRect.y + 6, lineHeightAdjustment = -6)
+  let axisRect = graphRect.inset(15,4)
+  gfx.drawLine(axisRect.x, axisRect.y, axisRect.x, axisRect.y + axisRect.height, 1, kColorBlack)
+  gfx.drawLine(
+    axisRect.x, axisRect.y + axisRect.height, 
+    axisRect.x + axisRect.width, axisRect.y + axisRect.height, 
+    1, kColorBlack
+  )
+
+  let plotRect = axisRect.inset(2)
+  let plotBottomY = plotRect.y + plotRect.height
+  let inputResponse = config.toInputResponse()
+
+  let xStep: int32 = (plotRect.width / 50).int32
+  var x = plotRect.x
+  var y, lastY = 0
+  for tick in 0..50:
+    let response = inputResponse(tick.Seconds * 0.02.Seconds)
+    y = plotBottomY + 20 - (response / 500.0f).int32
+    if tick > 0:
+      gfx.drawLine(x - xStep, lastY, x, y, 2, kColorBlack)
+    print("x,y: ", x, y)
+    x += xStep
+    lastY = y

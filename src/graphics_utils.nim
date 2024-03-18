@@ -66,3 +66,27 @@ proc fill*(rect: Rect, color: LCDColor) {.inline.} =
 
 proc setScreenClipRect*(rect: Rect) {.inline.} =
   gfx.setClipRect(rect.x, rect.y, rect.width, rect.height)
+
+proc inset*(rect: Rect, left, top, right, bottom: int32): Rect =
+  return Rect(
+    x: rect.x + left, 
+    y: rect.y + top, 
+    width: rect.width - left - right, 
+    height: rect.height - top - bottom
+  )
+
+proc inset*(rect: Rect, x: int32, y: int32): Rect =
+  return Rect(
+    x: rect.x + x, 
+    y: rect.y + y, 
+    width: rect.width - x * 2, 
+    height: rect.height - y * 2
+  )
+
+proc inset*(rect: Rect, size: int32): Rect =
+  return Rect(
+    x: rect.x + size, 
+    y: rect.y + size, 
+    width: rect.width - size * 2, 
+    height: rect.height - size * 2
+  )

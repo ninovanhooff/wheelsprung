@@ -13,6 +13,14 @@ proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($now() & ": " &  things.join("\t"))
 
+## Text
+proc vertical*(text: string): string =
+  ## Convert text to vertical text
+  result = ""
+  for i in 0..<text.len:
+    result.add(text[i])
+    result.add("\n")
+
 ### Enums
 proc nextWrapped*[T: enum](v: T): T =
   if v == high(T):

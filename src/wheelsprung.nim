@@ -12,6 +12,7 @@ import navigation/[navigator, screen]
 import playdate/api
 import screens/game/game_screen
 import screens/level_select/level_select_screen
+import screens/settings/settings_screen
 
 const FONT_PATH = "fonts/Roobert-11-Medium.pft"
 
@@ -58,7 +59,9 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
     let lastOpenedLevelPath = getConfig().lastOpenedLevel
-    if lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
+    if true:
+      pushScreen(newSettingsScreen())
+    elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
       pushScreen(newGameScreen(lastOpenedLevelPath.get()))
     else:
       pushScreen(newLevelSelectScreen())
