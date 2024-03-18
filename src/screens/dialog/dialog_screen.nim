@@ -1,9 +1,10 @@
+{. push warning[LockLevel]:off.}
 import std/strformat
 import playdate/api
 import navigation/[screen, navigator]
 import graphics_utils
-import utils
 import shared_types
+import screens/settings/settings_screen
 
 type DialogScreen = ref object of Screen
   gameResult: GameResult
@@ -28,14 +29,25 @@ proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].
   of GameResultType.LevelComplete:
     return "Level Complete"
 
-method resume*(self: DialogScreen) =
-  print("DialogScreen resume")
+proc drawDialog*(self: DialogScreen) =
   playdate.graphics.clear(kColorWhite)
   let gameResult = self.gameResult
   gfx.drawTextAligned(gameResult.resultType.displayText, 200, 100)
   gfx.drawTextAligned("Your time: " & formatTime(gameResult.time), 200, 140)
 
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
+
+method resume*(self: DialogScreen) =
+  
+  discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
+    pushScreen(newSettingsScreen())
+  )
+  discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
+    clearNavigationStack()
+  )
+  discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
+    popScreen()
+  )
 
 method update*(self: DialogScreen): int =
   let buttonState = playdate.system.getButtonsState()
