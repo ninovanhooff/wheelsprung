@@ -16,6 +16,13 @@ proc toInputResponse*(config: Config): InputResponse =
   case inputType
   of Constant:
     return (t: Seconds) => (30_000.0 * multiplier).Float
+  of Linear: return proc (t: Seconds) : Float =
+    result = (multiplier * 20_000.0).Float
+    if (t >= 0.7):
+      ## constant sustain
+      result *= 1.5
+    else:
+      result *= 0.7*t + 1.0
   of EaseOutBack: return proc (t: Seconds) : Float =
     result = (multiplier * 20_000.0).Float
     if (t >= 0.7):

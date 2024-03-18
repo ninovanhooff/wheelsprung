@@ -10,8 +10,9 @@ type Config* = ref object of RootObj
 proc displayName*(inputType: DPadInputType): string =
   ## Display value for Settings screen
   case inputType
-  of DPadInputType.Jolt: return "Jolt"
   of DPadInputType.Constant: return "Constant"
+  of DPadInputType.Linear: return "Linear"
   of DPadInputType.Parabolic: return "Parabolic"
   of DPadInputType.Sinical: return "Sine"
   of DPadInputType.EaseOutBack: return "Ease Out Back"
+  of DPadInputType.Jolt: return "Jolt"

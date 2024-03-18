@@ -8,7 +8,7 @@ import screens/game/[
   game_types, game_constants, game_bike, game_rider
 ]
 import shared_types
-import configuration, configuration_types
+import configuration
 import input_response
 import screens/dialog/dialog_screen
 
@@ -71,7 +71,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   case dPadInputType 
   of Constant:
     state.setAttitudeAdjust(direction)
-  of Parabolic, Sinical, EaseOutBack:
+  of Linear, Parabolic, Sinical, EaseOutBack:
     if direction == 0.0: # reset immediately
       state.attitudeAdjust = none(AttitudeAdjust)
     elif optAdjust.isNone or optAdjust.get.direction != direction: # initial application
