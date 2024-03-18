@@ -48,7 +48,8 @@ proc newSettingsScreen*(): SettingsScreen =
 
 
 
-proc updateInput*(screen: SettingsScreen) =
+proc updateInput*(screen: SettingsScreen): bool =
+  ## Check for button presses, return true if handled
   let buttonState = playdate.system.getButtonsState()
 
   if kButtonRight in buttonState.pushed or kButtonA in buttonState.pushed:
@@ -62,6 +63,10 @@ proc updateInput*(screen: SettingsScreen) =
   elif kButtonB in buttonState.pushed:
     screen.config.save()
     popScreen()
+  else:
+    return false
+
+  return true
 
 proc draw*(screen: SettingsScreen) =
   gfx.clear(kColorWhite)
@@ -98,11 +103,13 @@ method resume*(screen: SettingsScreen) =
   if not screen.isInitialized:
     screen.init()
   screen.config = getConfig()
+  draw(screen)
 
 method update*(screen: SettingsScreen): int =
-  updateInput(screen)
-  draw(screen)
-  return 1
+  if updateInput(screen):
+    draw(screen)
+    return 1
+  return 0
 
 method `$`*(screen: SettingsScreen): string =
   return "SettingsScreen"
