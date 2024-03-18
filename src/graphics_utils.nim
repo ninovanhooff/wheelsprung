@@ -57,3 +57,12 @@ proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidCol
       (width/2).int32, 
       innerColor
   )
+
+proc draw*(rect: Rect, color: LCDColor) {.inline.} =
+  gfx.drawRect(rect.x, rect.y, rect.width, rect.height, color)
+
+proc fill*(rect: Rect, color: LCDColor) {.inline.} =
+  gfx.fillRect(rect.x, rect.y, rect.width, rect.height, color)
+
+proc setScreenClipRect*(rect: Rect) {.inline.} =
+  gfx.setClipRect(rect.x, rect.y, rect.width, rect.height)

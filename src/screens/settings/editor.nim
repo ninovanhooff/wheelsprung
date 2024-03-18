@@ -1,20 +1,22 @@
 {.push raises: [].}
 
-import sugar
+import sugar, options
 import strformat
 import playdate/api
-import graphics_utils
+import graphics_utils, graphics_types
 import configuration_types
 
 const cellPadding = 8
 
 type
+  PreviewCallback* = (config: Config, rect: Rect) -> void
   Editor* = ref object of RootObj
     label*: string
     incrementor*: (config: Config) -> void
     decrementor*: (config: Config) -> void
     draw*: (self: Editor, x: int, y: int, selected: bool) -> void
     value*: (config: Config) -> string
+    preview*: Option[PreviewCallback]
 
 proc formatEditorFloat*(value: SomeFloat): string {.raises: [], tags: [].} =
   try:

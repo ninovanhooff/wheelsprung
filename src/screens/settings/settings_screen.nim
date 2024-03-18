@@ -1,12 +1,12 @@
 {.experimental: "codeReordering".}
 {.push raises: [], warning[LockLevel]:off.}
 
-import sugar
+import sugar, options
 import playdate/api
 import navigation/[navigator, screen]
 import configuration_types, configuration
-import graphics_utils
-import editor
+import graphics_types, graphics_utils
+import editor, preview
 
 const 
   borderInset = 8
@@ -25,14 +25,15 @@ let inputTypeEditor: Editor = Editor(
   label: "d-pad leaning", 
   incrementor: (config: Config) => config.incDpadInputType(),
   decrementor: (config: Config) => config.decDpadInputType(),
-  value: (config: Config) => $config.getDPadInputType
+  value: (config: Config) => $config.getDPadInputType,
+  preview: some[PreviewCallback](drawDPadInputResponsePreview),
 )
 
 let inputMultiplierEditor: Editor = Editor(
   label: "d-pad leaning multiplier", 
   incrementor: (config: Config) => config.incDpadInputMultiplier,
   decrementor: (config: Config) => config.decDpadInputMultiplier,
-  value: (config: Config) => formatEditorFloat(config.getDPadInputMultiplier)
+  value: (config: Config) => formatEditorFloat(config.getDPadInputMultiplier),
 )
 
 proc increaseValue*(self: SettingsScreen) =
@@ -71,6 +72,12 @@ proc draw*(screen: SettingsScreen) =
     config.drawEditor(editor, borderInset, y, cellWidth, cellHeight, i == screen.selectedIdx)
     gfx.popContext()
     y += cellHeight
+
+  let optPreview = screen.editors[screen.selectedIdx].preview
+  if optPreview.isSome:
+    optPreview.get()(
+      screen.config, Rect(x: 0,y: 140, width: 400, height:100)
+    )
 
 proc init(screen: SettingsScreen) =
   screen.editors = @[inputTypeEditor, inputMultiplierEditor]
