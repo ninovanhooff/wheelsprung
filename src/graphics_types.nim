@@ -4,3 +4,9 @@ type
     Polygon* = seq[Vertex]
     Rect* {.requiresInit.} = object of RootObj
         x*, y*, width*, height*: int32
+
+proc bottom*(rect: Rect): int32 =
+    result = rect.y + rect.height
+
+proc right*(rect: Rect): int32 =
+    result = rect.x + rect.width

@@ -10,16 +10,17 @@ proc drawDPadInputResponsePreview*(config: Config, rect: Rect) =
   rect.inset(4).draw(kColorBlack)
   let graphRect = rect.inset(40,2, 40, 4)
   gfx.drawTextAligned("Force".vertical, graphRect.x, graphRect.y + 6, lineHeightAdjustment = -6)
-  let axisRect = graphRect.inset(15,4)
-  gfx.drawLine(axisRect.x, axisRect.y, axisRect.x, axisRect.y + axisRect.height, 1, kColorBlack)
+  let axisRect = graphRect.inset(20,4)
+  let axisRectBottom = axisRect.bottom
+  gfx.drawLine(axisRect.x, axisRect.y, axisRect.x, axisRectBottom, 1, kColorBlack)
   gfx.drawLine(
-    axisRect.x, axisRect.y + axisRect.height, 
-    axisRect.x + axisRect.width, axisRect.y + axisRect.height, 
+    axisRect.x, axisRectBottom, 
+    axisRect.right, axisRectBottom, 
     1, kColorBlack
   )
 
   let plotRect = axisRect.inset(2)
-  let plotBottomY = plotRect.y + plotRect.height
+  let plotBottomY = plotRect.bottom
   let inputResponse = config.toInputResponse()
 
   let xStep: int32 = (plotRect.width / 50).int32
@@ -27,7 +28,7 @@ proc drawDPadInputResponsePreview*(config: Config, rect: Rect) =
   var y, lastY = 0
   for tick in 0..50:
     let response = inputResponse(tick.Seconds * 0.02.Seconds)
-    y = plotBottomY + 20 - (response / 500.0f).int32
+    y = clamp(plotBottomY - (response / 500.0f).int32, plotRect.y, plotRect.bottom)
     if tick > 0:
       gfx.drawLine(x - xStep, lastY, x, y, 2, kColorBlack)
     print("x,y: ", x, y)
