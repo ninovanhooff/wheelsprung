@@ -1,5 +1,5 @@
 {.experimental: "codeReordering".}
-{.push raises: [].}
+{.push raises: [], warning[LockLevel]:off.}
 
 import sugar
 import playdate/api
@@ -73,7 +73,6 @@ proc draw*(screen: SettingsScreen) =
     y += cellHeight
 
 proc init(screen: SettingsScreen) =
-  {.warning[LockLevel]:off.}
   screen.editors = @[inputTypeEditor, inputMultiplierEditor]
   screen.selectedIdx = 0
   screen.isInitialized = true
@@ -81,17 +80,14 @@ proc init(screen: SettingsScreen) =
 ## Screen methods
 
 method pause*(screen: SettingsScreen) =
-  {.warning[LockLevel]:off.}
   screen.config.save()
 
 method resume*(screen: SettingsScreen) =
-  {.warning[LockLevel]:off.}
   if not screen.isInitialized:
     screen.init()
   screen.config = getConfig()
 
 method update*(screen: SettingsScreen): int =
-  {.warning[LockLevel]:off.}
   updateInput(screen)
   draw(screen)
   return 1

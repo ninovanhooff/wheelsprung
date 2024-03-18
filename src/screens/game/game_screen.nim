@@ -1,3 +1,4 @@
+{. push warning[LockLevel]:off.}
 import options
 import chipmunk7
 import playdate/api
@@ -173,8 +174,6 @@ proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
-  {.warning[LockLevel]:off.}
-
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
   )
