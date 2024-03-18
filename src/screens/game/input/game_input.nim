@@ -128,7 +128,7 @@ proc toInputResponse(config: Config): (t: Seconds) -> Float =
       ## constant sustain
       result *= 1.5
     else:
-      result *= 1.5 + (5.0 + 3.6) * (t - 0.7) ^ 3 + 5.0 * (t - 0.7) ^ 2
+      result *= 1.5 + 8.6 * (t - 0.7) ^ 3 + 5.0 * (t - 0.7) ^ 2
   of Sinical: return proc (t: Seconds) : Float =
     result = (multiplier * 20_000.0).Float
     if (t >= 0.7):
