@@ -75,9 +75,13 @@ proc draw*(screen: SettingsScreen) =
 
   let optPreview = screen.editors[screen.selectedIdx].preview
   if optPreview.isSome:
+    let previewRect = Rect(x: 0,y: 140, width: 400, height:100)
+
+    setScreenClipRect(previewRect)
     optPreview.get()(
-      screen.config, Rect(x: 0,y: 140, width: 400, height:100)
+      screen.config, previewRect
     )
+    gfx.clearClipRect()
 
 proc init(screen: SettingsScreen) =
   screen.editors = @[inputTypeEditor, inputMultiplierEditor]

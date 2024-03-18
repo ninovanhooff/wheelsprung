@@ -296,7 +296,6 @@ proc drawGame*(statePtr: ptr GameState) =
       chassisTorque = state.attitudeAdjust.get.lastTorque
     
     let chassisTorqueDegrees = chassisTorque / 1_000f
-    print("attitudeadjustforce: ", chassisTorque, "degrees:", chassisTorqueDegrees)
     drawRotationForceIndicator(
       riderHeadScreenPos.toVertex, 
       chassisTorqueDegrees
