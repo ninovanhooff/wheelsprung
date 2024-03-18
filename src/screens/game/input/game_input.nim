@@ -70,7 +70,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   case dPadInputType 
   of Constant:
     state.setAttitudeAdjust(direction)
-  of Parabolic:
+  of Parabolic, Sinical, EaseOutBack:
     if direction == 0.0: # reset immediately
       state.attitudeAdjust = none(AttitudeAdjust)
     elif optAdjust.isNone or optAdjust.get.direction != direction: # initial application
@@ -122,6 +122,21 @@ proc toInputResponse(config: Config): (t: Seconds) -> Float =
   case inputType
   of Constant:
     return (t: Seconds) => (30_000.0 * multiplier).Float
+  of EaseOutBack: return proc (t: Seconds) : Float =
+    result = (multiplier * 20_000.0).Float
+    let x = t
+    let c1 = 5.0
+    let bin = 3.6
+    let c3 = c1 + bin
+    let ccutoff = 0.7
+    result *= 1.5 + c3 * (x - ccutoff) ^ 3 + c1 * (x - ccutoff) ^ 2
+  of Sinical: return proc (t: Seconds) : Float =
+    result = (multiplier * 20_000.0).Float
+    if (t >= 0.7):
+      ## constant sustain
+      result *= 1.5
+    else:
+      result *= 1.5 + 0.5 * sin(6.732 * t - HALF_PI)
   of Parabolic: return proc (t: Seconds) : Float =
     result = (multiplier * 20_000.0).Float
     if (t >= 0.7):

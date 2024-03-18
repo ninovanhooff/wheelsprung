@@ -13,3 +13,5 @@ proc `$`*(inputType: DPadInputType): string =
   of DPadInputType.Jolt: return "Jolt"
   of DPadInputType.Constant: return "Constant"
   of DPadInputType.Parabolic: return "Parabolic"
+  of DPadInputType.Sinical: return "Sine"
+  of DPadInputType.EaseOutBack: return "Ease Out Back"
