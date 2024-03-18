@@ -34,6 +34,7 @@ let inputMultiplierEditor: Editor = Editor(
   incrementor: (config: Config) => config.incDpadInputMultiplier,
   decrementor: (config: Config) => config.decDpadInputMultiplier,
   value: (config: Config) => formatEditorFloat(config.getDPadInputMultiplier),
+  preview: some[PreviewCallback](drawDPadInputResponsePreview),
 )
 
 proc increaseValue*(self: SettingsScreen) =
