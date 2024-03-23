@@ -140,8 +140,15 @@ proc handleInput*(state: GameState) =
 
   let buttonsState = playdate.system.getButtonsState()
 
-  if not state.isGameStarted and buttonsState.pushed.anyButton:
-    state.isGameStarted = true
+  updateInputs()
+
+  if not state.isGameStarted:
+    if state.isAccelerometerEnabled:
+      calibrateAccelerometer()
+    if buttonsState.pushed.anyButton:
+      state.isGameStarted = true
+    else:
+      return
 
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,
@@ -166,6 +173,11 @@ proc handleInput*(state: GameState) =
     else:
       state.onButtonAttitudeAdjust(0.0)
 
-  if actionFlipDirection in buttonsState.pushed:
+  if state.isAccelerometerEnabled:
+    if (getAccelerometerY() > 0.2 and state.driveDirection > 0.0) or
+      (getAccelerometerY() < -0.2 and state.driveDirection < 0.0):
+      print("Flip direction accelerometer")
+      state.onFlipDirection()
+  elif actionFlipDirection in buttonsState.pushed:
     print("Flip direction pressed")
     state.onFlipDirection()
