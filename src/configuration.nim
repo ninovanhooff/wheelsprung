@@ -84,3 +84,11 @@ proc decDpadInputMultiplier*(config: Config) =
   config.dPadInputMultiplier = some(
     max(config.getDPadInputMultiplier() - 0.1, 0.1)
   )
+
+proc getTiltAttitudeAdjustEnabled*(self: Config): bool =
+  return config.tiltAttitudeAdjustEnabled.get(false)
+
+proc toggleTiltAttitudeAdjustEnabled*(config: Config) =
+  config.tiltAttitudeAdjustEnabled = some(
+    not config.getTiltAttitudeAdjustEnabled()
+  )

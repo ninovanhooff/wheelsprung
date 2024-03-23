@@ -7,7 +7,7 @@ import utils
 import screens/game/[
   game_types, game_constants, game_bike, game_rider
 ]
-import accelerometer_input
+import input/input_manager
 import shared_types
 import configuration
 import input_response
@@ -81,7 +81,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
     if state.attitudeAdjust.isNone: # this type can only be applied once the previous jolt has been reset
       state.setAttitudeAdjust(direction)
 
-proc applyAttitudeAdjust(state: GameState) {.raises: [].} =
+proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let optAdjust = state.attitudeAdjust
   if optAdjust.isNone:
     return
@@ -97,15 +97,20 @@ proc applyAttitudeAdjust(state: GameState) {.raises: [].} =
   state.lastTorque = torque
   state.chassis.torque = torque
 
-proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
+proc applyAccelerometerAttitudeAdjust(state: GameState) {.raises: [].} =
+  let torque = 30_000.0 * getAccelerometerX()
+  print("attitude adjust", torque)
+  state.lastTorque = torque
+  state.chassis.torque = torque
 
-  if state.attitudeAdjust.isSome:
+proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
     if state.gameResult.isSome:
-      state.attitudeAdjust = none(AttitudeAdjust)
       return
-    
-    # apply force
-    state.applyAttitudeAdjust()
+
+    if state.isAccelerometerEnabled:
+      state.applyAccelerometerAttitudeAdjust()
+    else:
+      state.applyButtonAttitudeAdjust()
 
 
 proc onFlipDirection(state: GameState) =
@@ -115,12 +120,16 @@ proc onFlipDirection(state: GameState) =
   state.flipRiderDirection(riderPosition)
   state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
 
-proc resumeGameInput*(state: GameState) =
-  state.isThrottlePressed = false
-
+proc applyConfig*(state: GameState) =
   let config = getConfig()
   dPadInputType = config.getDPadInputType()
   attitudeInputResponse = config.toInputResponse()
+  state.isAccelerometerEnabled = config.getTiltAttitudeAdjustEnabled()
+
+proc resetGameInput*(state: GameState) =
+  print("resetGameInput")
+  state.isThrottlePressed = false
+  state.applyConfig()
 
 const allButtons: PDButtons = PDButton.fullSet
 proc anyButton(buttons: PDButtons): bool =
@@ -148,7 +157,7 @@ proc handleInput*(state: GameState) =
     state.onBrake()
   
   if state.isAccelerometerEnabled:
-    handleAccelerometerInput(state)
+    state.setAttitudeAdjust(getAccelerometerX())
   else:
     if actionLeanLeft in buttonsState.current:
       state.onButtonAttitudeAdjust(-1.0)

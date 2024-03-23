@@ -21,6 +21,13 @@ type
     selectedIdx: int
     isInitialized: bool
 
+let tiltAttitudeAdjustEnabledEditor: Editor = Editor(
+  label: "Tilt Controls", 
+  incrementor: (config: Config) => config.toggleTiltAttitudeAdjustEnabled,
+  decrementor: (config: Config) => config.toggleTiltAttitudeAdjustEnabled,
+  value: (config: Config) => config.getTiltAttitudeAdjustEnabled.displayName,
+)
+
 let inputTypeEditor: Editor = Editor(
   label: "d-pad leaning", 
   incrementor: (config: Config) => config.incDpadInputType(),
@@ -90,7 +97,11 @@ proc draw*(screen: SettingsScreen) =
     gfx.clearClipRect()
 
 proc init(screen: SettingsScreen) =
-  screen.editors = @[inputTypeEditor, inputMultiplierEditor]
+  screen.editors = @[
+    tiltAttitudeAdjustEnabledEditor,
+    inputTypeEditor, 
+    inputMultiplierEditor
+  ]
   screen.selectedIdx = 0
   screen.isInitialized = true
 

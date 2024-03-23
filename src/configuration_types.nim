@@ -3,9 +3,15 @@ import shared_types
 
 type Config* = ref object of RootObj
   lastOpenedLevel*: Option[string]
+  tiltAttitudeAdjustEnabled*: Option[bool]
   dPadInputType*: Option[DPadInputType]
   dPadInputMultiplier*: Option[float]
 
+proc displayName*(enabled: bool): string =
+  if enabled: 
+    return "Enabled"
+  else: 
+    return "Disabled"
 
 proc displayName*(inputType: DPadInputType): string =
   ## Display value for Settings screen

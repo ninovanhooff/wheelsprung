@@ -138,6 +138,7 @@ proc newGameState(level: Level): GameState =
 proc onResetGame() {.raises: [].} =
   state.destroy()
   state = newGameState(state.level)
+  resetGameInput(state)
 
 proc updateTimers(state: GameState) =
   state.time += timeStep
@@ -184,7 +185,7 @@ method resume*(gameScreen: GameScreen) =
     onResetGame()
   )
 
-  resumeGameInput(state)
+  resetGameInput(state)
 
   if state.resetGameOnResume:
     onResetGame()
