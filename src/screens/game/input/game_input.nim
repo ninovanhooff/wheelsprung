@@ -7,6 +7,7 @@ import utils
 import screens/game/[
   game_types, game_constants, game_bike, game_rider
 ]
+import accelerometer_input
 import shared_types
 import configuration
 import input_response
@@ -93,7 +94,7 @@ proc applyAttitudeAdjust(state: GameState) {.raises: [].} =
     print("attitude adjust force too low", torque, direction, response)
     return # todo remove adjust? note this would cancel jolt
   print("attitude adjust", torque)
-  adjust.lastTorque = torque
+  state.lastTorque = torque
   state.chassis.torque = torque
 
 proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
@@ -146,12 +147,15 @@ proc handleInput*(state: GameState) =
   if actionBrake in buttonsState.current:
     state.onBrake()
   
-  if actionLeanLeft in buttonsState.current:
-    state.onButtonAttitudeAdjust(-1.0)
-  elif actionLeanRight in buttonsState.current:
-    state.onButtonAttitudeAdjust(1.0)
+  if state.isAccelerometerEnabled:
+    handleAccelerometerInput(state)
   else:
-    state.onButtonAttitudeAdjust(0.0)
+    if actionLeanLeft in buttonsState.current:
+      state.onButtonAttitudeAdjust(-1.0)
+    elif actionLeanRight in buttonsState.current:
+      state.onButtonAttitudeAdjust(1.0)
+    else:
+      state.onButtonAttitudeAdjust(0.0)
 
   if actionFlipDirection in buttonsState.pushed:
     print("Flip direction pressed")

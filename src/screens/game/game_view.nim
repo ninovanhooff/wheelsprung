@@ -293,7 +293,7 @@ proc drawGame*(statePtr: ptr GameState) =
 
     var chassisTorque = 0.0
     if state.attitudeAdjust.isSome:
-      chassisTorque = state.attitudeAdjust.get.lastTorque
+      chassisTorque = state.lastTorque
     
     let chassisTorqueDegrees = chassisTorque / 1_000f
     drawRotationForceIndicator(
