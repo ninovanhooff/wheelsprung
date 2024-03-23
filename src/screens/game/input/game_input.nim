@@ -1,5 +1,5 @@
 {.push raises: [].}
-import std/[options, sugar, math]
+import std/[options, sugar]
 import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
@@ -37,7 +37,7 @@ if defined simulator:
   actionBrake = kButtonDown
   actionFlipDirection = kButtonB
 
-proc onThrottle*(state: GameState) =
+proc onThrottle(state: GameState) =
   let rearWheel = state.rearWheel
   let dd = state.driveDirection
   if rearWheel.angularVelocity * dd > maxWheelAngularVelocity:
@@ -45,7 +45,7 @@ proc onThrottle*(state: GameState) =
 
   rearWheel.torque = throttleTorque * dd
 
-proc onBrake*(state: GameState) =
+proc onBrake(state: GameState) =
   let rearWheel = state.rearWheel
   let frontWheel = state.frontWheel
   rearWheel.torque = -rearWheel.angularVelocity * brakeTorque
@@ -80,7 +80,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
     if state.attitudeAdjust.isNone: # this type can only be applied once the previous jolt has been reset
       state.setAttitudeAdjust(direction)
 
-proc applyAttitudeAdjust*(state: GameState) {.raises: [].} =
+proc applyAttitudeAdjust(state: GameState) {.raises: [].} =
   let optAdjust = state.attitudeAdjust
   if optAdjust.isNone:
     return

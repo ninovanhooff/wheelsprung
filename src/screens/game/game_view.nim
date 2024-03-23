@@ -6,7 +6,7 @@ import options
 import chipmunk7
 import game_types, graphics_types, shared_types
 import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, swingArmRightCenter
-import utils, graphics_utils
+import graphics_utils
 import chipmunk_utils
 import globals
 
