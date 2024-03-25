@@ -46,7 +46,7 @@ proc destroyAccelerometerInput*(accelerometerInput: AccelerometerInput) =
   system.setPeripheralsEnabled(kNone)
 
 proc getAxisValue(axis: AccelereometerAxisState): float32 {.inline.} =
-  return clamp(axis.smoothAccel, -1.0f, 1.0f)
+  return clamp(axis.smoothAccel - axis.calibration, -1.0f, 1.0f)
 
 proc getX*(state: AccelerometerInput): float32 =
   return getAxisValue(state.axes.x)

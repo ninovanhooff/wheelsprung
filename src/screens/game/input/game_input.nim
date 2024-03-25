@@ -174,8 +174,8 @@ proc handleInput*(state: GameState) =
       state.onButtonAttitudeAdjust(0.0)
 
   if state.isAccelerometerEnabled:
-    if (getAccelerometerY() > 0.2 and state.driveDirection > 0.0) or
-      (getAccelerometerY() < -0.2 and state.driveDirection < 0.0):
+    if (getAccelerometerY() > 0.1 and state.driveDirection > 0.0) or
+      (getAccelerometerY() < -0.1 and state.driveDirection < 0.0):
       print("Flip direction accelerometer")
       state.onFlipDirection()
   elif actionFlipDirection in buttonsState.pushed:
