@@ -37,6 +37,7 @@ var
   killerImageTable: LCDBitmapTable
   trophyImageTable: LCDBitmapTable
   coinImage: LCDBitmap
+  starImage: LCDBitmap
   bgImage: LCDBitmap
 
   # pre-allocated vars for drawing
@@ -60,6 +61,7 @@ proc initGameView*() =
     trophyImageTable = gfx.newBitmapTable("images/trophy")
 
     coinImage = gfx.newBitmap("images/coin")
+    starImage = gfx.newBitmap("images/star")
 
     bgImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, bgPattern)
   except:
@@ -251,6 +253,11 @@ proc drawGame*(statePtr: ptr GameState) =
     for coin in state.remainingCoins:
       let coinScreenPos = coin - camVertex
       coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+
+    if level.starPosition.isSome:
+      let starScreenPos = level.starPosition.get - camVertex
+      starImage.draw(starScreenPos[0], starScreenPos[1], kBitmapUnflipped)
+      
 
     # killer
     for killer in state.killers:

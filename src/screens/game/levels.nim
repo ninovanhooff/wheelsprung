@@ -30,7 +30,7 @@ type
     layers: seq[LayerEntity]
 
   ClassIds {.pure.} = enum
-    Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32
+    Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -122,6 +122,8 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.killers.add(position)
     of ClassIds.Finish:
       level.finishPosition = position
+    of ClassIds.Star:
+      level.starPosition = some(position)
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
