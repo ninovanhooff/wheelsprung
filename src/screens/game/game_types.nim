@@ -10,6 +10,7 @@ type
   DriveDirection* = Float
 
   Coin* = Vertex
+  Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
   GameCollisionType* = CollisionType
@@ -27,10 +28,11 @@ const GameCollisionTypes* = (
   Killer: cast[GameCollisionType](5),
   Finish: cast[GameCollisionType](6),
   Chassis: cast[GameCollisionType](7),
+  Star: cast[GameCollisionType](8),
 )
 
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
-const COIN_MASK_BIT = cuint(1 shl 29)
+const COLLECTIBLE_MASK_BIT = cuint(1 shl 29)
 const KILLER_MASK_BIT = cuint(1 shl 28)
 const FINISH_MASK_BIT = cuint(1 shl 27)
 const PLAYER_MASK_BIT = cuint(1 shl 26)
@@ -38,14 +40,14 @@ const PLAYER_MASK_BIT = cuint(1 shl 26)
 const GameShapeFilters* = (
   Player: ShapeFilter(
     categories: PLAYER_MASK_BIT,
-    mask: TERRAIN_MASK_BIT or COIN_MASK_BIT or KILLER_MASK_BIT or FINISH_MASK_BIT
+    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or FINISH_MASK_BIT
   ),
   Terrain: ShapeFilter(
     categories: TERRAIN_MASK_BIT,
     mask: PLAYER_MASK_BIT
   ),
-  Coin: ShapeFilter(
-    categories: COIN_MASK_BIT,
+  Collectible: ShapeFilter(
+    categories: COLLECTIBLE_MASK_BIT,
     mask: PLAYER_MASK_BIT
   ),
   Killer: ShapeFilter(
@@ -81,6 +83,7 @@ type GameState* = ref object of RootObj
   ## Game state
   isGameStarted*: bool
   remainingCoins*: seq[Coin]
+  remainingStar*: Option[Star]
   killers*: seq[Body]
   gameResult*: Option[GameResult]
 

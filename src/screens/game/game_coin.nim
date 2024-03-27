@@ -15,6 +15,6 @@ proc addCoins*(space: Space, coins: seq[Coin]) =
     let shape: Shape = newCircleShape(space.staticBody, coinRadius, toVect(coin) + vCoinOffset)
     shape.sensor = true # only detect collisions, don't apply forces to colliders
     shape.collisionType = GameCollisionTypes.Coin
-    shape.filter = GameShapeFilters.Coin
+    shape.filter = GameShapeFilters.Collectible
     shape.userData = cast[DataPointer](index)
     discard space.addShape(shape)

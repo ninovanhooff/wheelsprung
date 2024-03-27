@@ -6,6 +6,7 @@ import playdate/api
 var
   finishPlayer: SamplePlayer
   coinPlayer: SamplePlayer
+  starPlayer: SamplePlayer
   finishUnlockPlayer: SamplePlayer
   collisionPlayers: seq[SamplePlayer]
   screamPlayers: seq[SamplePlayer]
@@ -17,6 +18,7 @@ proc initGameSound*() =
   try:
     finishPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish")
     coinPlayer = playdate.sound.newSamplePlayer("/audio/pickup/coin")
+    starPlayer = playdate.sound.newSamplePlayer("/audio/pickup/star")
     finishUnlockPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish_unlock")
     for i in 1..9:
       collisionPlayers.add(playdate.sound.newSamplePlayer("/audio/collision/collision-0" & $i))
@@ -35,6 +37,9 @@ proc playCoinSound*(coinProgress: float32) =
     coinPlayer.play(1, lerp(0.9, 1.1, coinProgress))
   else:
     finishUnlockPlayer.playVariation()
+
+proc playStarSound*() =
+  starPlayer.playVariation()
 
 
 proc playCollisionSound*() =

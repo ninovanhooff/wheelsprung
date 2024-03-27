@@ -254,8 +254,9 @@ proc drawGame*(statePtr: ptr GameState) =
       let coinScreenPos = coin - camVertex
       coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
 
-    if level.starPosition.isSome:
-      let starScreenPos = level.starPosition.get - camVertex
+    # star
+    if state.remainingStar.isSome:
+      let starScreenPos = state.remainingStar.get - camVertex
       starImage.draw(starScreenPos[0], starScreenPos[1], kBitmapUnflipped)
       
 

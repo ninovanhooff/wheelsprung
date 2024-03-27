@@ -59,7 +59,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
     let lastOpenedLevelPath = getConfig().lastOpenedLevel
-    if true:
+    if false:
       pushScreen(newSettingsScreen())
     elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
       pushScreen(newGameScreen(lastOpenedLevelPath.get()))

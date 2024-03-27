@@ -4,7 +4,7 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils, graphics_utils
 import levels
-import game_bike, game_rider, game_coin, game_killer, game_finish, game_terrain
+import game_bike, game_rider, game_coin, game_star, game_killer, game_finish, game_terrain
 import sound/game_sound
 import shared_types
 import game_types, game_constants
@@ -30,7 +30,7 @@ proc setGameResult(state: GameState, resultType: GameResultType): GameResult {.d
   state.resetGameOnResume = true
   state.gameResult = some(result)
 
-let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl.} =
+let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
   print("coin post step callback")
   let shape = cast[Shape](coinShape)
   let coinIndex = cast[int](shape.userData)
@@ -52,6 +52,14 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
       print("all coins collected")
       state.finishTrophyBlinkerAt = some(state.time + 2.5.Seconds)
 
+let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
+  print("star post step callback")
+  let shape = cast[Shape](starShape)
+  print("shape data:" & repr(shape))
+  space.removeShape(shape)
+  state.remainingStar = none[Star]()
+  playStarSound()
+
 
 let gameOverPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
   print("game over post step callback")
@@ -68,6 +76,14 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
   print("coin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
   discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
   false # don't process the collision further
+
+let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  var 
+    shapeA: Shape
+    shapeB: Shape
+  arb.shapes(addr(shapeA), addr(shapeB))
+  discard space.addPostStepCallback(starPostStepCallback, shapeA, nil)
+  return false # don't process the collision further
 
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   playCollisionSound()
@@ -94,7 +110,7 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
 
   return false # don't process the collision further
 
-proc createSpace(level: Level): Space =
+proc createSpace(level: Level): Space {.raises: [].} =
   let space = newSpace()
   space.gravity = v(0.0, 100.0)
 
@@ -102,6 +118,10 @@ proc createSpace(level: Level): Space =
   handler.beginFunc = coinBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Head)
   handler.beginFunc = coinBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Star, GameCollisionTypes.Wheel)
+  handler.beginFunc = starBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.Star, GameCollisionTypes.Head)
+  handler.beginFunc = starBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.Killer, GameCollisionTypes.Wheel)
   handler.beginFunc = gameOverBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.Killer, GameCollisionTypes.Head)
@@ -115,11 +135,13 @@ proc createSpace(level: Level): Space =
 
   space.addTerrain(level.terrainPolygons)
   space.addCoins(level.coins)
+  if(level.starPosition.isSome):
+    space.addStar(level.starPosition.get)
   space.addFinish(level.finishPosition)
       
   return space
 
-proc newGameState(level: Level): GameState =
+proc newGameState(level: Level): GameState {.raises: [].} =
   let space = level.createSpace()
   state = GameState(
     level: level, 
@@ -132,6 +154,7 @@ proc newGameState(level: Level): GameState =
   initGameRider(state, riderPosition)
   
   initGameCoins(state)
+  initGameStar(state)
   state.killers = space.addKillers(level)
   return state
 
