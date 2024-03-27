@@ -32,8 +32,10 @@ proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].
 proc drawDialog(self: DialogScreen) =
   playdate.graphics.clear(kColorWhite)
   let gameResult = self.gameResult
-  gfx.drawTextAligned(gameResult.resultType.displayText, 200, 100)
-  gfx.drawTextAligned("Your time: " & formatTime(gameResult.time), 200, 140)
+  gfx.drawTextAligned(gameResult.resultType.displayText, 200, 80)
+  gfx.drawTextAligned("Your time: " & formatTime(gameResult.time), 200, 120)
+  if gameResult.resultType == GameResultType.LevelComplete and gameResult.starCollected:
+    gfx.drawTextAligned("You collected a star!", 200, 140)
 
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
 

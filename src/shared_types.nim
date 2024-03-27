@@ -12,3 +12,4 @@ type
   GameResult* = ref object of RootObj
     resultType*: GameResultType
     time*: Seconds
+    starCollected*: bool
