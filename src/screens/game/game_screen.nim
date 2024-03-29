@@ -2,9 +2,10 @@
 import options
 import chipmunk7
 import playdate/api
-import utils, chipmunk_utils, graphics_utils
+import utils, chipmunk_utils
 import levels
 import game_bike, game_rider, game_coin, game_star, game_killer, game_finish, game_terrain
+import game_camera
 import sound/game_sound
 import shared_types
 import game_types, game_constants
@@ -243,9 +244,7 @@ method update*(gameScreen: GameScreen): int =
         playScreamSound()
       navigateToGameResult(state.gameResult.get)
 
-  state.camera = state.level.cameraBounds.clampVect(
-    state.chassis.position - halfDisplaySize
-  ).round()
+  state.updateCamera()
   drawGame(addr state) # todo pass as object?
   return 1
 
