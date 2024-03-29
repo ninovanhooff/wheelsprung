@@ -11,7 +11,8 @@ bin           = @["wheelsprung"]
 # Dependencies
 
 requires "nim >= 1.6.10"
-requires "https://github.com/ninovanhooff/playdate-nim#develop"
+requires "playdate"
+# requires "https://github.com/ninovanhooff/playdate-nim#develop"
 # change to chipmunk7 for local development
 requires "https://github.com/ninovanhooff/nim-chipmunk-playdate"
 include playdate/build/nimble
