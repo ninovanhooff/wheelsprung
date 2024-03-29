@@ -1,5 +1,4 @@
 import game_types
-import utils
 import chipmunk7, chipmunk_utils
 import graphics_utils
 
@@ -18,7 +17,6 @@ proc updateCamera*(state: GameState) =
     state.driveDirection * cameraDirectionOffsetX + chassisVelocity.x * cameraVelocityOffsetFactorX,
     chassisVelocity.y * cameraVelocityOffsetFactorY
   )
-  print "targetCameraOffset: ", targetCameraOffset, chassisVelocity.x, state.driveDirection
   if state.cameraOffset.vdistsq(targetCameraOffset) > 4.0: # NOTE: this is a squared distance (faster)
     state.cameraOffset = state.cameraOffset.vlerp(targetCameraOffset, cameraLerpSpeed)
   
