@@ -231,13 +231,12 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 
 method update*(gameScreen: GameScreen): int =
   handleInput(state)
+  updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
   
   if state.isGameStarted:
     updateAttitudeAdjust(state)
     state.space.step(timeStep)
     state.updateTimers()
-
-    updateGameBike(state)
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)

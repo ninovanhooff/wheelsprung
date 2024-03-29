@@ -25,6 +25,8 @@ proc initBikeKickStart*() =
     print(getCurrentExceptionMsg())
 
 proc updateBikeKickStart*(state: GameState) =
+  if playdate.system.isCrankDocked():
+    return
   if not isInitialized:
     initBikeKickStart()
 
@@ -33,7 +35,6 @@ proc updateBikeKickStart*(state: GameState) =
     kickstartPlayer.setPlayRange(0, kickStartFootDownEndSample)
     kickstartPlayer.playVariation()
   
-  print("Crank change: ", playdate.system.getCrankChange())
   if kickstartPlayer.isPlaying and abs(playdate.system.getCrankChange()) > 10.0:
     kickstartPlayer.setFinishCallback(nil)
     kickstartPlayer.setPlayRange(0, kickstartSuccessEndSample)

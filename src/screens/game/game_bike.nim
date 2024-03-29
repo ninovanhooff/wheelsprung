@@ -226,7 +226,7 @@ proc isBikeInLevelBounds*(state: GameState): bool =
     state.chassis.position
   )
 
-proc updateGameBike*(state: GameState) =
+proc updateGameBikeSound*(state: GameState) =
   updateBikeSound(state)
 
 proc pauseGameBike*() =
