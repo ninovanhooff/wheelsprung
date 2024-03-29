@@ -44,7 +44,7 @@ proc updateBikeEngine*(state: GameState) =
     curRpm = lerp(curRpm, targetRpm, 0.1f)
     targetPlayer = if throttle: throttlePlayer else: idlePlayer
     if currentPlayer != targetPlayer:
-        # print("switch from currentPlayer: " & $currentPlayer.repr & " targetPlayer: " & targetPlayer.repr)
+        print("switch from currentPlayer: " & $currentPlayer.repr & " targetPlayer: " & targetPlayer.repr)
         fadeoutPlayer = currentPlayer
         currentPlayer = targetPlayer
         currentPlayer.play(0, 1.0f) 
@@ -69,6 +69,11 @@ proc updateBikeEngine*(state: GameState) =
             fadeoutPlayer = nil
 
     # print("playerBaseRpm: " & $playerBaseRpm & "throttlePlayerIndex" & " rate: " & $currentPlayer.rate)
+
+proc startBikeEngine*()=
+    if currentPlayer.isPlaying: return
+    
+    currentPlayer.play(0, 1.0f)
 
 proc pauseBikeEngine*()=
     if not isInitialized: return
