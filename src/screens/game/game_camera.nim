@@ -7,16 +7,18 @@ const
   cameraLerpSpeed = 0.05
   cameraDirectionOffsetX = 50.0
   cameraVelocityOffsetFactorX = 0.25
+  cameraVelocityOffsetFactorY = 0.25
 
 var 
+  chassisVelocity: Vect
   targetCameraOffset: Vect
 proc updateCamera*(state: GameState) =
-  # instead of `let targetCameraOffset = v( ...` use the var
+  chassisVelocity = state.chassis.velocity
   targetCameraOffset = v(
-    state.driveDirection * cameraDirectionOffsetX + state.chassis.velocity.x * cameraVelocityOffsetFactorX,
-    0.0
+    state.driveDirection * cameraDirectionOffsetX + chassisVelocity.x * cameraVelocityOffsetFactorX,
+    chassisVelocity.y * cameraVelocityOffsetFactorY
   )
-  print "targetCameraOffset: ", targetCameraOffset, state.chassis.velocity.x, state.driveDirection
+  print "targetCameraOffset: ", targetCameraOffset, chassisVelocity.x, state.driveDirection
   if state.cameraOffset.vdistsq(targetCameraOffset) > 4.0: # NOTE: this is a squared distance (faster)
     state.cameraOffset = state.cameraOffset.vlerp(targetCameraOffset, cameraLerpSpeed)
   
