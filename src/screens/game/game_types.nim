@@ -105,6 +105,7 @@ type GameState* = ref object of RootObj
   time*: Seconds
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
+  cameraOffset*: Vect
   driveDirection*: DriveDirection
 
   ## Player
