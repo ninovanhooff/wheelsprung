@@ -57,7 +57,7 @@ proc newSettingsScreen*(): SettingsScreen =
 
 proc updateInput*(screen: SettingsScreen): bool =
   ## Check for button presses, return true if handled
-  let buttonState = playdate.system.getButtonsState()
+  let buttonState = playdate.system.getButtonState()
 
   if kButtonRight in buttonState.pushed or kButtonA in buttonState.pushed:
     screen.increaseValue()

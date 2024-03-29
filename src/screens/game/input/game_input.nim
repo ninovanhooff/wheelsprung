@@ -138,34 +138,34 @@ proc anyButton(buttons: PDButtons): bool =
 proc handleInput*(state: GameState) =
   state.isThrottlePressed = false
 
-  let buttonsState = playdate.system.getButtonsState()
+  let buttonState = playdate.system.getButtonState()
 
-  if not state.isGameStarted and buttonsState.pushed.anyButton:
+  if not state.isGameStarted and buttonState.pushed.anyButton:
     state.isGameStarted = true
 
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,
     # but any button can be pressed to navigate to the result screen
-    if buttonsState.pushed.anyButton:
+    if buttonState.pushed.anyButton:
       navigateToGameResult(state.gameResult.get)
     return
 
-  if actionThrottle in buttonsState.current:
+  if actionThrottle in buttonState.current:
     state.isThrottlePressed = true
     state.onThrottle()
-  if actionBrake in buttonsState.current:
+  if actionBrake in buttonState.current:
     state.onBrake()
   
   if state.isAccelerometerEnabled:
     state.setAttitudeAdjust(getAccelerometerX())
   else:
-    if actionLeanLeft in buttonsState.current:
+    if actionLeanLeft in buttonState.current:
       state.onButtonAttitudeAdjust(-1.0)
-    elif actionLeanRight in buttonsState.current:
+    elif actionLeanRight in buttonState.current:
       state.onButtonAttitudeAdjust(1.0)
     else:
       state.onButtonAttitudeAdjust(0.0)
 
-  if actionFlipDirection in buttonsState.pushed:
+  if actionFlipDirection in buttonState.pushed:
     print("Flip direction pressed")
     state.onFlipDirection()

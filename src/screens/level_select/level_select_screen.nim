@@ -21,7 +21,7 @@ proc newLevelSelectScreen*(): LevelSelectScreen =
   return LevelSelectScreen()
 
 proc updateInput(screen: LevelSelectScreen) =
-  let buttonState = playdate.system.getButtonsState()
+  let buttonState = playdate.system.getButtonState()
 
   if kButtonA in buttonState.pushed:
     popScreen()

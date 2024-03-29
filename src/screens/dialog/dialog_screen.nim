@@ -55,7 +55,7 @@ method resume*(self: DialogScreen) =
 
 method update*(self: DialogScreen): int =
   # no drawing needed here, we do it in resume
-  let buttonState = playdate.system.getButtonsState()
+  let buttonState = playdate.system.getButtonState()
 
   if kButtonA in buttonState.pushed:
     popScreen()
