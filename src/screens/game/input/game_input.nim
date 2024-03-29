@@ -91,15 +91,12 @@ proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let response = attitudeInputResponse(state.time - adjust.startedAt)
   let torque = direction * response
   if abs(torque) < minAttitudeAdjustForce:
-    print("attitude adjust force too low", torque, direction, response)
     return # todo remove adjust? note this would cancel jolt
-  print("attitude adjust", torque)
   state.lastTorque = torque
   state.chassis.torque = torque
 
 proc applyAccelerometerAttitudeAdjust(state: GameState) {.raises: [].} =
   let torque = 30_000.0 * getAccelerometerX()
-  print("attitude adjust", torque)
   state.lastTorque = torque
   state.chassis.torque = torque
 
