@@ -2,9 +2,16 @@
 {.push base, raises: [].}
 import utils
 
-type Screen* = ref object of RootObj
+type 
+  ScreenType* {.pure.}= enum
+    LevelSelect
+    Game
+    Dialog
+    Settings
+  Screen* {.requiresInit.} = ref object of RootObj
+    screenType*: ScreenType
 
-method `$`*(self: Screen): string = "'$' not implemented for this screen"
+method `$`*(self: Screen): string = $self.screenType
 
 method pause*(screen: Screen) =
   discard

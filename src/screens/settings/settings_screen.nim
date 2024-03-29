@@ -51,7 +51,7 @@ proc decreaseValue*(self: SettingsScreen) =
   self.editors[self.selectedIdx].decrementor(self.config)
 
 proc newSettingsScreen*(): SettingsScreen =
-  return SettingsScreen()
+  return SettingsScreen(screenType: ScreenType.Settings)
 
 
 

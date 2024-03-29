@@ -11,7 +11,10 @@ type DialogScreen = ref object of Screen
 
 
 proc newDialogScreen*(gameResult: GameResult): DialogScreen {.raises: [].} =
-  return DialogScreen(gameResult: gameResult)
+  return DialogScreen(
+    gameResult: gameResult,
+    screenType: ScreenType.Dialog
+  )
 
 
 proc navigateToGameResult*(result: GameResult) =
@@ -47,7 +50,7 @@ method resume*(self: DialogScreen) =
     pushScreen(newSettingsScreen())
   )
   discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
-    clearNavigationStack()
+    popToScreenType(ScreenType.LevelSelect)
   )
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     popScreen()
@@ -60,9 +63,7 @@ method update*(self: DialogScreen): int =
   if kButtonA in buttonState.pushed:
     popScreen()
   elif kButtonB in buttonState.pushed:
-    clearNavigationStack()
-    # navigator will push new level select screen. We cannoto do it here
-    # bevause that would create a circular dependency
+    popToScreenType(ScreenType.LevelSelect)
 
   return 0
 

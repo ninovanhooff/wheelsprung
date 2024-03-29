@@ -18,14 +18,12 @@ proc getLevelPaths(): seq[string] =
   playdate.file.listFiles(levelsBasePath)
 
 proc newLevelSelectScreen*(): LevelSelectScreen =
-  return LevelSelectScreen()
+  return LevelSelectScreen(screenType: ScreenType.LevelSelect)
 
 proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonState()
 
   if kButtonA in buttonState.pushed:
-    popScreen()
-    popScreen()
     let levelPath = levelsBasePath & screen.levelPaths[screen.selectedIndex]
     let gameScreen = newGameScreen(levelPath)
     # the ganme screen loaded successfully, save as last opened level

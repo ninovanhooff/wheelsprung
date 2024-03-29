@@ -1,6 +1,14 @@
 ## A simple navigation system for Playdate
 ## Ported from https://github.com/ninovanhooff/playdate-navigator/blob/a33c2b724dfe7f83d7c406eed3d3aabbb8b550c2/Navigator.lua
-{.push raises: [].}
+
+# These warning are triggered by Screen having a requiresInit pragma
+# It doesn't play nice with Sequence initialisation and setLen
+{.
+  push raises: [],
+  warning[UnsafeSetLen]: off, 
+  warning[UnsafeDefault]: off,
+  warning[ProveInit]: off,
+.}
 
 import std/sugar
 import screen
@@ -57,6 +65,14 @@ proc pushScreen*(toScreen: Screen) =
 
 proc popScreen*() =
   pendingNavigators.add(popScreenImmediately)
+
+proc popToScreenType*(screenType: ScreenType) =
+  pendingNavigators.add(proc() =
+    var activeScreen = getActiveScreen()
+    while activeScreen != nil and activeScreen.screenType != screenType:
+      popScreenImmediately()
+      activeScreen = getActiveScreen()
+  )
 
 proc clearNavigationStack*() =
   pendingNavigators.add(proc() =

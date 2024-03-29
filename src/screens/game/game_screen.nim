@@ -201,7 +201,7 @@ proc initGame*(levelPath: string) {.raises: [].} =
 
 proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
   initGame(levelPath)
-  return GameScreen()
+  return GameScreen(screenType: ScreenType.Game)
 
 ### Screen methods
 
