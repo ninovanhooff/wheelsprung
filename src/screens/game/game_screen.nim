@@ -31,6 +31,10 @@ proc setGameResult(state: GameState, resultType: GameResultType): GameResult {.d
   state.resetGameOnResume = true
   state.gameResult = some(result)
 
+proc updateGameResult(state: GameState) {.raises: [].} =
+  if state.gameResult.isSome:
+    state.setGameResult(state.gameResult.get.resultType)
+
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
   print("coin post step callback")
   let shape = cast[Shape](coinShape)
@@ -59,7 +63,9 @@ let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, 
   print("shape data:" & repr(shape))
   space.removeShape(shape)
   state.remainingStar = none[Star]()
+  state.updateGameResult()
   playStarSound()
+  
 
 
 let gameOverPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
