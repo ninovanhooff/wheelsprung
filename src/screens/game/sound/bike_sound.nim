@@ -8,10 +8,12 @@ proc initBikeSound*() =
   initBikeKickStart()
 
 proc updateBikeSound*(state: GameState)=
+  updateBikeKickStart(state)
+  if not state.isGameStarted:
+    return
   updateBikeEngine(state)
   updateBikeSqueak(state)
   updateBikeThud(state)
-  updateBikeKickStart(state)
 
 proc pauseBikeSound*() =
   pauseBikeEngine()
