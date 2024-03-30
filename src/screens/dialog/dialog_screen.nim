@@ -2,7 +2,7 @@
 import std/strformat
 import playdate/api
 import navigation/[screen, navigator]
-import graphics_utils
+import graphics_types
 import shared_types
 import screens/settings/settings_screen
 

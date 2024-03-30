@@ -249,6 +249,11 @@ proc drawGame*(statePtr: ptr GameState) =
   drawBlinkers(state)
 
   if debugDrawTextures:
+    # textures
+    for texture in level.textures:
+      let textureScreenPos = texture.position - camVertex
+      texture.image.draw(textureScreenPos[0], textureScreenPos[1], kBitmapUnflipped)
+
     # coins
     for coin in state.remainingCoins:
       let coinScreenPos = coin - camVertex

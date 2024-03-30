@@ -6,7 +6,7 @@
          "format":"json"
         }
     },
- "height":30,
+ "height":12,
  "infinite":false,
  "layers":[
         {
@@ -285,14 +285,14 @@
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",
- "tileheight":8,
+ "tileheight":20,
  "tilesets":[
         {
          "firstgid":1,
          "source":"game_objects.tsx"
         }],
- "tilewidth":8,
+ "tilewidth":20,
  "type":"map",
  "version":"1.10",
- "width":50
+ "width":20
 }

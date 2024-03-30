@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="Game Objects" tilewidth="66" tileheight="60" tilecount="5" columns="0" objectalignment="topleft">
+<tileset version="1.10" tiledversion="1.10.2" name="Game Objects" tilewidth="66" tileheight="60" tilecount="6" columns="0" objectalignment="topleft">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="Player">
   <image width="66" height="60" source="player_object.png"/>
@@ -10,10 +10,13 @@
  <tile id="2" type="Killer">
   <image width="20" height="20" source="killer_object.png"/>
  </tile>
- <tile id="3">
+ <tile id="3" type="Finish">
   <image width="38" height="38" source="trophy.png"/>
  </tile>
- <tile id="4">
+ <tile id="4" type="Star">
   <image width="20" height="20" source="star.png"/>
+ </tile>
+ <tile id="5" type="Signpost">
+  <image width="48" height="48" source="signpost_left_object.png"/>
  </tile>
 </tileset>

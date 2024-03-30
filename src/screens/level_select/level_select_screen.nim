@@ -1,6 +1,6 @@
 import playdate/api
 import navigation/[screen, navigator]
-import graphics_utils
+import graphics_types
 import utils
 import configuration
 

@@ -4,8 +4,6 @@ import std/math
 import utils
 import graphics_types
 
-template gfx*: untyped = playdate.graphics
-
 const
   displaySize* = v(400.0, 240.0)
   halfDisplaySize*: Vect = displaySize.vmult(0.5)

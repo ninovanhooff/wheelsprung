@@ -1,3 +1,5 @@
+template gfx*: untyped = playdate.graphics
+
 type
     Int32x2 = array[2, int32]
     Vertex* = Int32x2

@@ -34,14 +34,16 @@ proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
     let exception = getCurrentException()
     var message: string = ""
     try: 
-      message = &"{messagePrefix}\n{getCurrentExceptionMsg()}\n{exception.getStackTrace()}\nFATAL EXCEPTION. STOP."
+      message = &"{messagePrefix}\n{getCurrentExceptionMsg()}\n{exception.getStackTrace()}"
       # replace line number notation from (90) to :90, which is more common and can be picked up as source link
       message = message.replace('(', ':')
       message = message.replace(")", "")
     except:
       message = getCurrentExceptionMsg() & exception.getStackTrace()
 
-    playdate.system.error(message) # this will stop the program
+    for line in message.splitLines():
+      # Log the error to the console, total stack trace might be too long for single call
+      playdate.system.logToConsole(line)
 
 proc catchingUpdate(): int {.raises: [].} = 
   runCatching(update)
@@ -59,8 +61,8 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
     let lastOpenedLevelPath = getConfig().lastOpenedLevel
-    if false:
-      pushScreen(newSettingsScreen())
+    if true:
+      pushScreen(newLevelSelectScreen())
     elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
       pushScreen(newGameScreen(lastOpenedLevelPath.get()))
     else:
