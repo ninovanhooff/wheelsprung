@@ -9,6 +9,7 @@ import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, sw
 import graphics_utils
 import chipmunk_utils
 import globals
+import lcd_patterns
 
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
@@ -19,10 +20,6 @@ const
   halfBlinkerPeriod = blinkerPeriod / 2.0
 
   trophyBlinkerPos: Vertex = [360, 8]
-
-
-let
-  bgPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
 
 var
   bikeChassisImageTable: LCDBitmapTable
@@ -121,8 +118,8 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
 
-proc offset(polygon: Polygon, off: Vertex): Polygon =
-  polygon.map(vertex => [
+proc offset(vertices: seq[Vertex], off: Vertex): seq[Vertex] =
+  vertices.map(vertex => [
     (vertex[0] - off[0]), 
     (vertex[1] - off[1])
     ])
@@ -130,7 +127,7 @@ proc offset(polygon: Polygon, off: Vertex): Polygon =
 proc drawTerrain(camVertex: Vertex, terrainPolygons: seq[Polygon]) =
   for polygon in terrainPolygons:
     # todo optimize: only draw if polygon is visible and not drawn to offscreen buffer yet
-    gfx.fillPolygon(polygon.offset(camVertex), kColorBlack, kPolygonFillNonZero)
+    gfx.fillPolygon(polygon.vertices.offset(camVertex), polygon.fill, kPolygonFillNonZero)
 
 proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(

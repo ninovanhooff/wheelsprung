@@ -8,8 +8,11 @@ import game_types
 import graphics_types
 import graphics_utils
 import cache/bitmap_cache
+import lcd_patterns
 
-type 
+type
+  LevelPropertiesEntity = ref object of RootObj
+
   LevelVertexEntity {.bycopy.} = object
     x*: int32
     y*: int32
@@ -19,6 +22,7 @@ type
     x, y: int32
     width*, height*: int32
     polygon: Option[seq[LevelVertexEntity]]
+    properties: Option[seq[LevelPropertiesEntity]]
     polyline: Option[seq[LevelVertexEntity]]
     ellipse: Option[bool]
   
@@ -73,28 +77,32 @@ proc toVertex(obj: LevelVertexEntity): Vertex =
 
 proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
   if obj.polyline.isSome:
-    return obj.polyline.get.map(toVertex)
+    return newPolygon(obj.polyline.get.map(toVertex))
   elif obj.polygon.isSome:
     var segments: seq[LevelVertexEntity] = obj.polygon.get
     # close the polygon by adding the first vertex to the end
     segments.add(segments[0])
-    return segments.map(toVertex)
+    if obj.properties.isSome:
+      return newPolygon(segments.map(toVertex), dLine6)
+    else:
+      return newPolygon(segments.map(toVertex))
   else:
-    return @[]
+    return emptyPolygon
 
 proc `+`*(v1, v2: Vertex): Vertex = [v1[0] + v2[0], v1[1] + v2[1]]
 
 proc loadPolygon(level: Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = [obj.x, obj.y]
   var polygon: Polygon = obj.getPolygon()
-  if polygon.len < 2:
-    return false
-
-  let lastIndex = polygon.high
+  var vertices: ptr seq[Vertex] = addr polygon.vertices
+  let lastIndex = vertices[].high
+  
+  if lastIndex < 2:
+    return false # polygons require at least 3 vertices
 
   # Offset the polygon by the object's position (localToWorld)
   for i in 0..lastIndex:
-    polygon[i] = polygon[i] + objOffset
+    vertices[i] = vertices[i] + objOffset
 
   level.terrainPolygons.add(polygon)
 
@@ -151,7 +159,7 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
     objOffset + [0'i32, height],
     objOffset
   ]
-  level.terrainPolygons.add(rect)
+  level.terrainPolygons.add(newPolygon(rect))
   return true
 
 proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
