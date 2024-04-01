@@ -223,6 +223,7 @@ method resume*(gameScreen: GameScreen) =
     state.resetGameOnResume = false
 
   if not state.isGameStarted:
+    state.updateCamera(snapToTarget = true)
     # the update loop won't draw the game
     drawGame(addr state)
 

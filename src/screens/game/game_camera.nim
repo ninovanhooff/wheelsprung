@@ -11,13 +11,15 @@ const
 var 
   chassisVelocity: Vect
   targetCameraOffset: Vect
-proc updateCamera*(state: GameState) =
+proc updateCamera*(state: GameState, snapToTarget: bool = false) =
   chassisVelocity = state.chassis.velocity
   targetCameraOffset = v(
     state.driveDirection * cameraDirectionOffsetX + chassisVelocity.x * cameraVelocityOffsetFactorX,
     chassisVelocity.y * cameraVelocityOffsetFactorY
   )
-  if state.cameraOffset.vdistsq(targetCameraOffset) > 4.0: # NOTE: this is a squared distance (faster)
+  if snapToTarget:
+    state.cameraOffset = targetCameraOffset
+  elif state.cameraOffset.vdistsq(targetCameraOffset) > 4.0: # NOTE: this is a squared distance (faster)
     state.cameraOffset = state.cameraOffset.vlerp(targetCameraOffset, cameraLerpSpeed)
   
   state.camera = state.level.cameraBounds.clampVect(
