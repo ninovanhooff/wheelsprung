@@ -252,7 +252,7 @@ proc drawGame*(statePtr: ptr GameState) =
     # textures
     for texture in level.textures:
       let textureScreenPos = texture.position - camVertex
-      texture.image.draw(textureScreenPos[0], textureScreenPos[1], kBitmapUnflipped)
+      texture.image.draw(textureScreenPos[0], textureScreenPos[1], texture.flip)
 
     # coins
     for coin in state.remainingCoins:
