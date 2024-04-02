@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="Game Objects" tilewidth="66" tileheight="60" tilecount="6" columns="0" objectalignment="topleft">
+<tileset version="1.10" tiledversion="1.10.2" name="Game Objects" tilewidth="66" tileheight="72" tilecount="7" columns="0" objectalignment="topleft">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="Player">
   <image width="66" height="60" source="player_object.png"/>
@@ -18,5 +18,8 @@
  </tile>
  <tile id="5" type="Signpost">
   <image width="48" height="48" source="signpost_left_object.png"/>
+ </tile>
+ <tile id="6" type="Flag">
+  <image width="48" height="72" source="flag.png"/>
  </tile>
 </tileset>
