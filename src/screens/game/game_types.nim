@@ -3,8 +3,6 @@ import options
 import graphics_types
 import utils
 import shared_types
-import playdate/api
-
 
 type 
   Camera* = Vect
@@ -14,12 +12,7 @@ type
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
-  Texture* = object of RootObj
-    image*: LCDBitmap
-    position*: Vertex
-    flip*: LCDBitmapFlip
   GameCollisionType* = CollisionType
-
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
@@ -72,7 +65,7 @@ type Level* = ref object of RootObj
   killers*: seq[Killer]
   finishPosition*: Vertex
   starPosition*: Option[Vertex]
-  textures*: seq[Texture]
+  assets*: seq[Asset]
   cameraBounds*: BB
   chassisBounds*: BB
   initialChassisPosition*: Vect
@@ -101,14 +94,15 @@ type GameState* = ref object of RootObj
   ## Navigation state
   resetGameOnResume*: bool
 
-  ## timers
+  ## time
+  time*: Seconds
+  frameCounter*: int32
   finishFlipDirectionAt*: Option[Seconds]
   finishTrophyBlinkerAt*: Option[Seconds]
 
 
   ## Physics
   space*: Space
-  time*: Seconds
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect
@@ -169,6 +163,3 @@ proc getRiderBodies*(state: GameState): seq[Body] =
 proc destroy*(state: GameState) =
   print("Destroying game state")
   state.space.destroy()
-
-proc newTexture*(image: LCDBitmap, position: Vertex, flip: LCDBitmapFlip): Texture =
-  result = Texture(image: image, position: position, flip: flip)

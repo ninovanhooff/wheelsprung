@@ -3,6 +3,8 @@ import chipmunk7
 import std/math
 import utils
 import graphics_types
+import cache/bitmaptable_cache
+import random
 
 const
   displaySize* = v(400.0, 240.0)
@@ -35,6 +37,20 @@ proc drawRotated*(table: LCDBitmapTable, center: Vect, angle: float32, flip: LCD
   let x: int32 = (center.x - bitmap.width.float * 0.5).round.int32
   let y: int32 = (center.y - bitmap.height.float * 0.5).round.int32
   bitmap.draw(x, y, flip)
+
+proc fallbackBitmap*(): LCDBitmap = 
+  let errorPattern = makeLCDOpaquePattern(0x0, 0x3C, 0x5A, 0x66, 0x66, 0x5A, 0x3C, 0x0)
+  gfx.newBitmap(8,8, errorPattern)
+
+proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitmapFlip, randomStartOffset: bool): Animation =
+  let annotatedTable = getOrLoadBitmapTable(bitmapTableId)
+  return Animation(
+    bitmapTable: annotatedTable.bitmapTable, 
+    frameCount: annotatedTable.frameCount,
+    position: position,
+    flip: flip,
+    startOffset: if randomStartOffset: rand(annotatedTable.frameCount).int32 else: 0'i32,
+  )
 
 proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidColor) =
   # draw outer line

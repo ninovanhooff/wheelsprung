@@ -8,6 +8,7 @@ import game_types
 import graphics_types
 import graphics_utils
 import cache/bitmap_cache
+import cache/bitmaptable_cache
 
 type 
   LevelVertexEntity {.bycopy.} = object
@@ -31,7 +32,7 @@ type
     layers: seq[LayerEntity]
 
   ClassIds {.pure.} = enum
-    Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32
+    Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32, Flag = 7'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -126,11 +127,27 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
     of ClassIds.Star:
       level.starPosition = some(position)
     of ClassIds.SignPost:
-      level.textures.add(Texture(
+      level.assets.add(Texture(
         image: getOrLoadBitmap("images/signpost_dpad_down"),
         position: position,
         flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped
       ))
+    of ClassIds.Flag:
+      let annotatedTable = getOrLoadBitmapTable(BitmapTableId.Flag)
+      let animation = Animation(
+        bitmapTable: annotatedTable.bitmapTable, 
+        frameCount: annotatedTable.frameCount,
+        position: position,
+        flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
+        startOffset: 0'i32,
+      )
+      # let animation: Animation = newAnimation(
+      #   bitmapTableId: BitmapTableId.Flag,
+      #   position: position,
+      #   flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
+      #   randomStartOffset: true
+      # )
+      level.assets.add(animation)
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =

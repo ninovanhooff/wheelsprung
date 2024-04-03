@@ -1,3 +1,5 @@
+{.push raises: [].}
+
 import playdate/api
 import math
 import std/sequtils
@@ -8,6 +10,7 @@ import game_types, graphics_types, shared_types
 import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, swingArmRightCenter
 import graphics_utils
 import chipmunk_utils
+import utils
 import globals
 
 const
@@ -227,7 +230,16 @@ proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
     forceDegrees - rotationIndicatorWidthDegrees, forceDegrees + rotationIndicatorWidthDegrees, 
     kColorXOR
   )
-    
+
+method getBitmap(asset: Asset, frameCounter: int32): LCDBitmap {.base.} =
+  print("getImage not implemented for: ", repr(asset))
+  return fallbackBitmap()
+
+method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
+  return asset.image
+
+method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
+  return asset.bitmapTable.getBitmap((frameCounter div 2'i32) mod asset.frameCount)
 
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
@@ -249,10 +261,11 @@ proc drawGame*(statePtr: ptr GameState) =
   drawBlinkers(state)
 
   if debugDrawTextures:
-    # textures
-    for texture in level.textures:
-      let textureScreenPos = texture.position - camVertex
-      texture.image.draw(textureScreenPos[0], textureScreenPos[1], texture.flip)
+    # assets
+    let frameCounter: int32 = state.frameCounter
+    for asset in level.assets:
+      let assetScreenPos = asset.position - camVertex
+      asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
 
     # coins
     for coin in state.remainingCoins:

@@ -172,6 +172,7 @@ proc onResetGame() {.raises: [].} =
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =
+  state.frameCounter += 1
   state.time += timeStep
   let currentTime = state.time
 

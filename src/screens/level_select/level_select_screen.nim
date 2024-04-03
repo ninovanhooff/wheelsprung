@@ -1,5 +1,4 @@
 import playdate/api
-import sequtils
 import navigation/[screen, navigator]
 import graphics_types
 import utils
