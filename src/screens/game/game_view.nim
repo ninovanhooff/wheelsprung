@@ -21,7 +21,7 @@ const
   blinkerPeriod = 0.5
   halfBlinkerPeriod = blinkerPeriod / 2.0
 
-  trophyBlinkerPos: Vertex = [360, 8]
+  trophyBlinkerPos: Vertex = (360, 8)
 
 
 let
@@ -125,10 +125,10 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
 
 
 proc offset(polygon: Polygon, off: Vertex): Polygon =
-  polygon.map(vertex => [
+  polygon.map(vertex => (
     (vertex[0] - off[0]), 
     (vertex[1] - off[1])
-    ])
+    ))
 
 proc drawTerrain(camVertex: Vertex, terrainPolygons: seq[Polygon]) =
   for polygon in terrainPolygons:

@@ -13,16 +13,16 @@ const
   imageRotations = 64
 
 proc toVertex*(v: Vect): Vertex = 
-  [v.x.round.int32, v.y.round.int32]
+  (v.x.round.int32, v.y.round.int32)
 
 proc toVect*(vertex: Vertex): Vect =
   return v(vertex[0].Float, vertex[1].Float)
 
 proc `-`*(a: Vertex, b: Vertex): Vertex = 
-  return [a[0] - b[0], a[1] - b[1]]
+  return (a[0] - b[0], a[1] - b[1])
 
 proc `+`*(a: Vertex, b: Vertex): Vertex =
-  return [a[0] + b[0], a[1] + b[1]]
+  return (a[0] + b[0], a[1] + b[1])
 
 proc drawRotated*(table: LCDBitmapTable, center: Vect, angle: float32, flip: LCDBitmapFlip = kBitmapUnflipped) =
   ## angle is in radians

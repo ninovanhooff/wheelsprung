@@ -70,7 +70,7 @@ proc parseLevel(path: string): LevelEntity {.raises: [].} =
     return nil
 
 proc toVertex(obj: LevelVertexEntity): Vertex =
-  return [obj.x, obj.y]
+  return (obj.x, obj.y)
 
 proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
   if obj.polyline.isSome:
@@ -83,10 +83,10 @@ proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
   else:
     return @[]
 
-proc `+`*(v1, v2: Vertex): Vertex = [v1[0] + v2[0], v1[1] + v2[1]]
+proc `+`*(v1, v2: Vertex): Vertex = (v1[0] + v2[0], v1[1] + v2[1])
 
 proc loadPolygon(level: Level, obj: LevelObjectEntity): bool =
-  let objOffset: Vertex = [obj.x, obj.y]
+  let objOffset: Vertex = (obj.x, obj.y)
   var polygon: Polygon = obj.getPolygon()
   if polygon.len < 2:
     return false
@@ -107,7 +107,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   let hFlip: bool = (gid and GID_HFLIP_MASK).bool
   let classId: ClassIds = (gid and GID_CLASS_MASK).ClassIds
 
-  let position: Vertex = [obj.x, obj.y]
+  let position: Vertex = (obj.x, obj.y)
 
   case classId:
     of ClassIds.Player:
@@ -158,14 +158,14 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
-  let objOffset: Vertex = [obj.x, obj.y]
+  let objOffset: Vertex = (obj.x, obj.y)
   let width = obj.width
   let height = obj.height
   let rect: seq[Vertex] = @[
     objOffset,
-    objOffset + [width, 0'i32],
-    objOffset + [width, height],
-    objOffset + [0'i32, height],
+    objOffset + (width, 0'i32),
+    objOffset + (width, height),
+    objOffset + (0'i32, height),
     objOffset
   ]
   level.terrainPolygons.add(rect)

@@ -3,8 +3,7 @@ import playdate/api
 template gfx*: untyped = playdate.graphics
 
 type
-  Int32x2 = array[2, int32]
-  Vertex* = Int32x2
+  Vertex* = tuple [x, y: int32]
   Polygon* = seq[Vertex]
   Rect* {.requiresInit.} = object of RootObj
     x*, y*, width*, height*: int32
