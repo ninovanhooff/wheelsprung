@@ -85,17 +85,16 @@ proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
 
 proc `+`*(v1, v2: Vertex): Vertex = (v1[0] + v2[0], v1[1] + v2[1])
 
-proc loadPolygon(level: Level, obj: LevelObjectEntity): bool =
+proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = (obj.x, obj.y)
   var polygon: Polygon = obj.getPolygon()
-  if polygon.len < 2:
-    return false
 
-  let lastIndex = polygon.high
+  if polygon.high < 2:
+    return false # polygons require at least 3 vertices
 
   # Offset the polygon by the object's position (localToWorld)
-  for i in 0..lastIndex:
-    polygon[i] = polygon[i] + objOffset
+  for vertex in polygon.mItems():
+    vertex = vertex + objOffset
 
   level.terrainPolygons.add(polygon)
 
@@ -163,14 +162,14 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   level.terrainPolygons.add(rect)
   return true
 
-proc loadLayer(level: Level, layer: LayerEntity) {.raises: [].} =
+proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
     discard level.loadPolygon(obj) or level.loadGid(obj) or level.loadRectangle(obj)
 
 proc loadLevel*(path: string): Level =
-  let level = Level(
+  var level = Level(
     terrainPolygons: @[],
     initialChassisPosition: v(80.0, 80.0),
     initialDriveDirection: DD_RIGHT,
