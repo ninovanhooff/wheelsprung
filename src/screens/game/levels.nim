@@ -133,20 +133,12 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped
       ))
     of ClassIds.Flag:
-      let annotatedTable = getOrLoadBitmapTable(BitmapTableId.Flag)
-      let animation = Animation(
-        bitmapTable: annotatedTable.bitmapTable, 
-        frameCount: annotatedTable.frameCount,
-        position: position,
-        flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
-        startOffset: 0'i32,
+      let animation: Animation = newAnimation(
+        bitmapTableId = BitmapTableId.Flag,
+        position = position,
+        flip = if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
+        randomStartOffset = true
       )
-      # let animation: Animation = newAnimation(
-      #   bitmapTableId: BitmapTableId.Flag,
-      #   position: position,
-      #   flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
-      #   randomStartOffset: true
-      # )
       level.assets.add(animation)
   return true
 

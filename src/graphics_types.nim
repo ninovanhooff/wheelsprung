@@ -30,10 +30,3 @@ proc right*(rect: Rect): int32 =
 
 proc newTexture*(image: LCDBitmap, position: Vertex, flip: LCDBitmapFlip): Texture =
   result = Texture(image: image, position: position, flip: flip)
-
-# proc newAnimationFromAnnotatedTable*(bitmapTable: AnnotatedBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32): Animation {.inline.} =
-#   result = Animation(
-#     bitmapTable: bitmapTable.bitmapTable, frameCount: bitmapTable.frameCount, 
-#     startOffset: startOffset,
-#     position: position, flip: flip
-#   )
