@@ -21,7 +21,6 @@ proc initBikeSqueak*()=
 proc updateBikeSqueak*(state: GameState) =
   let forkImpulse: Float = state.forkArmSpring.impulse
   if not contractPlayer.isPlaying and forkImpulse > contractImpulseThreshold:
-    print("playing contract squeak for impulse: " & $forkImpulse)
     contractPlayer.play(1, 1.0)
     contractPlayer.volume=lerp(0.0, 1.0, forkImpulse/50.0)
   elif contractPlayer.isPlaying and forkImpulse <= 0.0:
