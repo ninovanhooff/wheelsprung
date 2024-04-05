@@ -60,7 +60,7 @@ proc setLastOpenedLevel*(levelPath: string) =
   )
 
 proc getDPadInputType*(self: Config): DPadInputType =
-  return config.dPadInputType.get(DPadInputType.Jolt)
+  return config.dPadInputType.get(DPadInputType.Constant)
 
 proc incDpadInputType*(config: Config) =
   config.dPadInputType = some(
@@ -73,7 +73,7 @@ proc decDpadInputType*(config: Config) =
   )
 
 proc getDPadInputMultiplier*(self: Config): float =
-  return config.dPadInputMultiplier.get(1.0)
+  return config.dPadInputMultiplier.get(0.9)
 
 proc incDpadInputMultiplier*(config: Config) =
   config.dPadInputMultiplier = some(

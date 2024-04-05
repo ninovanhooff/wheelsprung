@@ -53,7 +53,6 @@ proc onBrake(state: GameState) =
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
 proc setAttitudeAdjust(state: GameState, direction: Float) =
-  print("setAttitudeAdjust", direction)
   state.attitudeAdjust = some(AttitudeAdjust(
     direction: direction,
     startedAt: state.time
