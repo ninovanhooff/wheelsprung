@@ -82,6 +82,10 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("O")
       debugDrawShapes = not debugDrawShapes
       print("debugDrawShapes:" & $debugDrawShapes)
+    elif keycode == 112:
+      print("P")
+      debugDrawPlayer = not debugDrawPlayer
+      print("debugDrawPlayers:" & $debugDrawPlayer)
     elif keycode == 105:
       print("I")
       debugDrawTextures = not debugDrawTextures

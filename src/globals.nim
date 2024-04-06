@@ -5,4 +5,5 @@ var
   debugDrawLevel* = true
   debugDrawShapes* = false
   debugDrawTextures* = true
+  debugDrawPlayer* = true
   debugDrawConstraints* = false

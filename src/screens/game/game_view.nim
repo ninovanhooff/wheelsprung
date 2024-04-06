@@ -241,13 +241,61 @@ method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
 method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
   return asset.bitmapTable.getBitmap((frameCounter div 2'i32) mod asset.frameCount)
 
+proc drawPlayer(state: GameState) =
+  let chassis = state.chassis
+  let camera = state.camera
+  let driveDirection = state.driveDirection
+
+  # wheels
+  let frontWheel = state.frontWheel
+  let frontWheelScreenPos = frontWheel.position - camera
+  bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
+  let rearWheel = state.rearWheel
+  let rearWheelScreenPos = rearWheel.position - camera
+  bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
+  
+  gfx.setLineCapStyle(kLineCapStyleRound)
+
+  drawBikeForks(state)
+
+  # chassis
+  let chassisScreenPos = chassis.position - camera
+  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
+
+  # rider
+  
+  let riderHead = state.riderHead
+  let riderHeadScreenPos = riderHead.position - camera
+  if state.finishFlipDirectionAt.isSome:
+    # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
+    let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
+    let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
+    riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
+  else:
+    riderHeadImageTable.drawRotated(riderHead, state)
+
+  var chassisTorque = 0.0
+  if state.attitudeAdjust.isSome:
+    chassisTorque = state.lastTorque
+  
+  let chassisTorqueDegrees = chassisTorque / 1_000f
+  drawRotationForceIndicator(
+    riderHeadScreenPos.toVertex, 
+    chassisTorqueDegrees
+  )
+
+  riderTorsoImageTable.drawRotated(state.riderTorso, state)
+  riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
+  riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
+  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
+  riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+
+
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
-  let chassis = state.chassis
   let camera = state.camera
   let camVertex = camera.toVertex()
-  let driveDirection = state.driveDirection
 
   # draw background
   if debugDrawGrid:
@@ -288,50 +336,8 @@ proc drawGame*(statePtr: ptr GameState) =
     let finishTableIndex = if state.remainingCoins.len == 0: 1 else: 0
     trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
   
-
-    # wheels
-    let frontWheel = state.frontWheel
-    let frontWheelScreenPos = frontWheel.position - camera
-    bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
-    let rearWheel = state.rearWheel
-    let rearWheelScreenPos = rearWheel.position - camera
-    bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
-    
-    gfx.setLineCapStyle(kLineCapStyleRound)
-
-    drawBikeForks(state)
-
-    # chassis
-    let chassisScreenPos = chassis.position - camera
-    bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
-
-    # rider
-    
-    let riderHead = state.riderHead
-    let riderHeadScreenPos = riderHead.position - camera
-    if state.finishFlipDirectionAt.isSome:
-      # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
-      let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
-      let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
-      riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
-    else:
-      riderHeadImageTable.drawRotated(riderHead, state)
-
-    var chassisTorque = 0.0
-    if state.attitudeAdjust.isSome:
-      chassisTorque = state.lastTorque
-    
-    let chassisTorqueDegrees = chassisTorque / 1_000f
-    drawRotationForceIndicator(
-      riderHeadScreenPos.toVertex, 
-      chassisTorqueDegrees
-    )
-
-    riderTorsoImageTable.drawRotated(state.riderTorso, state)
-    riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
-    riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
-    riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
-    riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+  if debugDrawPlayer:
+    drawPlayer(state)
 
   if debugDrawShapes:
     eachShape(statePtr.space, shapeIter, statePtr)
