@@ -31,9 +31,10 @@ proc addBox*(
     body.position = pos
     body.angle = angle
 
-    let shape = space.addShape(newBoxShape(body, size.x, size.y, 0f))
-    shape.filter = shapeFilter
-    shape.collisionType = collisionType
+    if shapeFilter != SHAPE_FILTER_NONE:
+      let shape = space.addShape(newBoxShape(body, size.x, size.y, 0f))
+      shape.filter = shapeFilter
+      shape.collisionType = collisionType
 
     return body
 
@@ -46,8 +47,9 @@ proc addCircle*(
     body.position = pos
     body.angle = angle
 
-    let shape = space.addShape(newCircleShape(body, radius, vzero))
-    shape.filter = shapeFilter
-    shape.collisionType = collisionType
+    if shapeFilter != SHAPE_FILTER_NONE:
+      let shape = space.addShape(newCircleShape(body, radius, vzero))
+      shape.filter = shapeFilter
+      shape.collisionType = collisionType
 
     return body
