@@ -32,9 +32,19 @@
             }
         },
         {
+            "label": "Reboot Device to Data disk",
+            "type": "shell",
+            "command": "./scripts/reboot_datadisk.sh",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+            }
+        },
+        {
             "label": "Build & Run Device PDX",
             "type": "shell",
             "dependsOn": [
+                "Reboot Device to Data disk",
                 "Build Device PDX"
             ],
             "command": "./scripts/quickinstall.sh",
