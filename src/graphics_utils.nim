@@ -9,8 +9,6 @@ import random
 const
   displaySize* = v(400.0, 240.0)
   halfDisplaySize*: Vect = displaySize.vmult(0.5)
-  ## Amount of rotation images (angle steps) in the table
-  imageRotations = 64
 
 proc toVertex*(v: Vect): Vertex = 
   (v.x.round.int32, v.y.round.int32)
@@ -24,18 +22,18 @@ proc `-`*(a: Vertex, b: Vertex): Vertex =
 proc `+`*(a: Vertex, b: Vertex): Vertex =
   return (a[0] + b[0], a[1] + b[1])
 
-proc drawRotated*(table: LCDBitmapTable, center: Vect, angle: float32, flip: LCDBitmapFlip = kBitmapUnflipped) =
+proc drawRotated*(annotatedT: AnnotatedBitmapTable, center: Vect, angle: float32, flip: LCDBitmapFlip = kBitmapUnflipped) {.inline.} =
   ## angle is in radians
-  let index = ((normalizeAngle(angle) / TwoPi) * imageRotations).int32 mod imageRotations
-  let bitmap = table.getBitmap(index)
+  let index: int32 = (((normalizeAngle(angle) / TwoPi) * annotatedT.frameCount.float32).int32)
+  # let index = unboundedIndex mod frameCount
+  let bitmap = annotatedT.bitmapTable.getBitmap(index)
 
   if bitmap == nil:
-    print "Bitmap is nil for index: " & $index
+    print "Bitmap is nil for index: " & $index, "angle: " & $angle, "normalizeAngle: " & $normalizeAngle(angle), "equalsToTwoPi: " & $(normalizeAngle(angle) == TwoPi)
     return
 
-  # todo optimize: cache for table
-  let x: int32 = (center.x - bitmap.width.float * 0.5).round.int32
-  let y: int32 = (center.y - bitmap.height.float * 0.5).round.int32
+  let x: int32 = (center.x.float32 - annotatedT.halfFrameWidth).round.int32
+  let y: int32 = (center.y.float32 - annotatedT.halfFrameHeight).round.int32
   bitmap.draw(x, y, flip)
 
 proc fallbackBitmap*(): LCDBitmap = 

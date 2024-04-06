@@ -12,6 +12,7 @@ import graphics_utils
 import chipmunk_utils
 import utils
 import globals
+import cache/bitmaptable_cache
 
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
@@ -28,17 +29,17 @@ let
   bgPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
 
 var
-  bikeChassisImageTable: LCDBitmapTable
-  bikeWheelImageTable: LCDBitmapTable
+  bikeChassisImageTable: AnnotatedBitmapTable
+  bikeWheelImageTable: AnnotatedBitmapTable
 
-  riderTorsoImageTable: LCDBitmapTable
-  riderHeadImageTable: LCDBitmapTable
-  riderUpperArmImageTable: LCDBitmapTable
-  riderLowerArmImageTable: LCDBitmapTable
-  riderUpperLegImageTable: LCDBitmapTable
-  riderLowerLegImageTable: LCDBitmapTable
-  killerImageTable: LCDBitmapTable
-  trophyImageTable: LCDBitmapTable
+  riderTorsoImageTable: AnnotatedBitmapTable
+  riderHeadImageTable: AnnotatedBitmapTable
+  riderUpperArmImageTable: AnnotatedBitmapTable
+  riderLowerArmImageTable: AnnotatedBitmapTable
+  riderUpperLegImageTable: AnnotatedBitmapTable
+  riderLowerLegImageTable: AnnotatedBitmapTable
+  killerImageTable: AnnotatedBitmapTable
+  trophyImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
   starImage: LCDBitmap
   bgImage: LCDBitmap
@@ -51,21 +52,20 @@ var
 proc initGameView*() =
   if bikeChassisImageTable != nil: return # already initialized
 
-  try:
-    bikeChassisImageTable = gfx.newBitmapTable("images/bike-chassis")
-    bikeWheelImageTable = gfx.newBitmapTable("images/bike-wheel")
-    riderTorsoImageTable = gfx.newBitmapTable("images/rider/torso")
-    riderHeadImageTable = gfx.newBitmapTable("images/rider/head")
-    riderUpperArmImageTable = gfx.newBitmapTable("images/rider/upper-arm")
-    riderLowerArmImageTable = gfx.newBitmapTable("images/rider/lower-arm")
-    riderUpperLegImageTable = gfx.newBitmapTable("images/rider/upper-leg")
-    riderLowerLegImageTable = gfx.newBitmapTable("images/rider/lower-leg")
-    killerImageTable = gfx.newBitmapTable("images/killer/killer")
-    trophyImageTable = gfx.newBitmapTable("images/trophy")
+  bikeChassisImageTable = getOrLoadBitmapTable(BitmapTableId.BikeChassis)
+  bikeWheelImageTable = getOrLoadBitmapTable(BitmapTableId.BikeWheel)
+  riderTorsoImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTorso)
+  riderHeadImageTable = getOrLoadBitmapTable(BitmapTableId.RiderHead)
+  riderUpperArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperArm)
+  riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
+  riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
+  riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
+  killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
+  trophyImageTable = getOrLoadBitmapTable(BitmapTableId.Trophy)
 
+  try:
     coinImage = gfx.newBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
-
     bgImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, bgPattern)
   except:
     echo getCurrentExceptionMsg()
@@ -135,14 +135,14 @@ proc drawTerrain(camVertex: Vertex, terrainPolygons: seq[Polygon]) =
     # todo optimize: only draw if polygon is visible and not drawn to offscreen buffer yet
     gfx.fillPolygon(polygon.offset(camVertex), kColorBlack, kPolygonFillNonZero)
 
-proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
+proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
     center, 
     (if driveDirection == DD_LEFT: -angle else: angle),
     (if driveDirection == DD_LEFT: kBitmapFlippedX else: kBitmapUnflipped)
   )
 
-proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState, inverse: bool = false) {.inline.} =
+proc drawRotated(table: AnnotatedBitmapTable, body: Body, state: GameState, inverse: bool = false) {.inline.} =
   let driveDirection = state.driveDirection
   table.drawRotated(
     body.position - state.camera, 
@@ -332,8 +332,8 @@ proc drawGame*(statePtr: ptr GameState) =
       killerImageTable.drawRotated(killerScreenPos, killer.angle)
 
     # trophy
-    let finishScreenPos = level.finishPosition - camVertex
-    let finishTableIndex = if state.remainingCoins.len == 0: 1 else: 0
+    let finishScreenPos: Vertex = level.finishPosition - camVertex
+    let finishTableIndex: int32 = if state.remainingCoins.len == 0: 1'i32 else: 0'i32
     trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
   
   if debugDrawPlayer:
