@@ -55,7 +55,11 @@
         },
         {
             "label": "Build & Run all",
-            "dependsOn": ["Build & Run Device PDX", "Build & Run Simulator PDX"]
+            "dependsOn": [
+                "Build & Run Device PDX",
+                "Build & Run Simulator PDX"
+            ],
+            "problemMatcher": []
         }
     ]
 }
