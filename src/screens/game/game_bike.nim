@@ -81,12 +81,12 @@ proc addSwingArm(state: GameState, chassisOffset: Vect): Body =
   swingArm.position = localToWorld(state.chassis, chassisOffset)
   swingArm.angle = state.chassis.angle
 
-  let swingArmShape = space.addShape(newBoxShape(swingArm, swingArmWidth, swingArmHeight, 0f))
-  swingArmShape.filter = SHAPE_FILTER_NONE # no collisions
-  swingArmShape.elasticity = 0.0f
-  swingArmShape.friction = 0.7f
-  state.bikeShapes.add(swingArmShape)
-  state.swingArmShape = swingArmShape
+  # let swingArmShape = space.addShape(newBoxShape(swingArm, swingArmWidth, swingArmHeight, 0f))
+  # swingArmShape.filter = SHAPE_FILTER_NONE # no collisions
+  # swingArmShape.elasticity = 0.0f
+  # swingArmShape.friction = 0.7f
+  # state.bikeShapes.add(swingArmShape)
+  # state.swingArmShape = swingArmShape
 
   return swingArm
 
@@ -101,12 +101,12 @@ proc addForkArm(state: GameState, chassisOffset: Vect): Body =
   forkArm.position = localToWorld(state.chassis, chassisOffset)
   forkArm.angle = state.chassis.angle
 
-  let forkArmShape = space.addShape(newBoxShape(forkArm, forkArmWidth, forkArmHeight, 0f))
-  forkArmShape.filter = SHAPE_FILTER_NONE # no collisions
-  forkArmShape.elasticity = 0.0f
-  forkArmShape.friction = 0.7f
-  state.bikeShapes.add(forkArmShape)
-  state.forkArmShape = forkArmShape
+  # let forkArmShape = space.addShape(newBoxShape(forkArm, forkArmWidth, forkArmHeight, 0f))
+  # forkArmShape.filter = SHAPE_FILTER_NONE # no collisions
+  # forkArmShape.elasticity = 0.0f
+  # forkArmShape.friction = 0.7f
+  # state.bikeShapes.add(forkArmShape)
+  # state.forkArmShape = forkArmShape
 
   return forkArm
 
@@ -116,13 +116,6 @@ proc removeBikeConstraints*(state: GameState) =
   for constraint in state.bikeConstraints:
     space.removeConstraint(constraint)
   state.bikeConstraints.setLen(0)
-
-# proc removeBikeShapes(state: GameState) =
-#   let space = state.space
-
-#   for shape in state.bikeShapes:
-#     space.removeShape(shape)
-#   state.bikeShapes.setLen(0)
 
 proc setBikeConstraints(state: GameState) =
   # NOTE inverted y axis!
