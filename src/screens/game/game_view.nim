@@ -2,8 +2,6 @@
 
 import playdate/api
 import math
-import std/sequtils
-import std/sugar
 import options
 import chipmunk7
 import game_types, graphics_types, shared_types

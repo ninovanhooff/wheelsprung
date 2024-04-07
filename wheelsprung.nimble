@@ -12,7 +12,7 @@ bin           = @["wheelsprung"]
 
 requires "nim >= 1.6.10"
 # requires "playdate"
-requires "https://github.com/ninovanhooff/playdate-nim#finishcallback_like_menu_callback"
+requires "https://github.com/samdze/playdate-nim#finish-callback-fix"
 # change to chipmunk7 for local development
 requires "https://github.com/ninovanhooff/nim-chipmunk-playdate"
 include playdate/build/nimble
