@@ -3,6 +3,7 @@ import std/strutils
 import playdate/api
 
 const
+  Pi32*: float32 = PI
   TwoPi*: float32 = 2 * PI
 
 ### Time

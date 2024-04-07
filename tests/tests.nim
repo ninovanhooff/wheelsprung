@@ -11,12 +11,12 @@ proc runTests*() =
     assert testNotify "Running tests..."
     
     assert normalizeAngle(0) == 0
-    assert normalizeAngle(PI) == PI
-    assert normalizeAngle(2 * PI) == 0
-    assert normalizeAngle(3 * PI) == PI
-    assert normalizeAngle(-PI) == PI
-    assert normalizeAngle(-2 * PI) == 0
-    assert normalizeAngle(-3 * PI) == PI
+    assert normalizeAngle(Pi32) == Pi32
+    assert normalizeAngle(TwoPi) == 0f
+    assert normalizeAngle(3 * Pi32).almostEqual(Pi32)
+    assert normalizeAngle(-Pi32) == Pi32
+    assert normalizeAngle(-2 * Pi32) == 0f
+    assert normalizeAngle(-3 * Pi32).almostEqual(Pi32)
 
     assert roundToNearest(1305, 100) == 1300
     assert roundToNearest(1351, 100) == 1400
