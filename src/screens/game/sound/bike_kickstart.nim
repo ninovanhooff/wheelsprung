@@ -31,7 +31,7 @@ proc updateBikeKickStart*(state: GameState) =
     initBikeKickStart()
 
   if not kickstartPlayer.isPlaying and abs(playdate.system.getCrankChange()) > 2.0:
-    kickstartPlayer.setFinishCallback((_: pointer) => comeOnPlayer.playVariation())
+    kickstartPlayer.finishCallback = (_: SamplePlayer) => comeOnPlayer.playVariation()
     kickstartPlayer.setPlayRange(0, kickStartFootDownEndSample)
     kickstartPlayer.playVariation()
   
