@@ -307,7 +307,9 @@ proc drawGame*(statePtr: ptr GameState) =
 
   # draw grid
   if debugDrawGrid:
+    gfx.setDrawMode(kDrawmodeWhiteTransparent)
     gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
+    gfx.setDrawMode(kDrawmodeCopy)
 
   drawBlinkers(state)
 
