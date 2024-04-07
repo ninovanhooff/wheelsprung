@@ -176,7 +176,8 @@ proc loadLevel*(path: string): Level =
   )
   
   let levelEntity = parseLevel(path)
-
+  let size: Size = (levelEntity.width * levelEntity.tilewidth, levelEntity.height * levelEntity.tileheight)
+  level.size = size
   # BB uses a y-axis that points up
   level.cameraBounds = newBB(
     l = 0.0,

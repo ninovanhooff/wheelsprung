@@ -1,3 +1,4 @@
+import playdate/api
 import chipmunk7
 import options
 import graphics_types
@@ -66,6 +67,8 @@ type Level* = ref object of RootObj
   finishPosition*: Vertex
   starPosition*: Option[Vertex]
   assets*: seq[Asset]
+  ## Level size in Pixels
+  size*: Size
   cameraBounds*: BB
   chassisBounds*: BB
   initialChassisPosition*: Vect
@@ -78,6 +81,8 @@ type AttitudeAdjust* = ref object
 
 type GameState* = ref object of RootObj
   level*: Level
+
+  background*: LCDBitmap
 
   ## Game state
   isGameStarted*: bool

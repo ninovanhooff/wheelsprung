@@ -26,7 +26,7 @@ const
 
 
 let
-  bgPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
+  gridPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
 
 var
   bikeChassisImageTable: AnnotatedBitmapTable
@@ -42,7 +42,7 @@ var
   trophyImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
   starImage: LCDBitmap
-  bgImage: LCDBitmap
+  gridImage: LCDBitmap
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -66,7 +66,7 @@ proc initGameView*() =
   try:
     coinImage = gfx.newBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
-    bgImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, bgPattern)
+    gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
     echo getCurrentExceptionMsg()
 
@@ -123,17 +123,22 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     let b = localToWorld(spring.bodyB, vzero) - camera
     gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
+proc initGameBackground*(state: GameState) =
+  let level = state.level
+  state.background = gfx.newBitmap(
+    level.size.x, level.size.y, kColorWhite
+  )
 
-proc offset(polygon: Polygon, off: Vertex): Polygon =
-  polygon.map(vertex => (
-    (vertex[0] - off[0]), 
-    (vertex[1] - off[1])
-    ))
+  gfx.pushContext(state.background)
 
-proc drawTerrain(camVertex: Vertex, terrainPolygons: seq[Polygon]) =
-  for polygon in terrainPolygons:
-    # todo optimize: only draw if polygon is visible and not drawn to offscreen buffer yet
-    gfx.fillPolygon(polygon.offset(camVertex), kColorBlack, kPolygonFillNonZero)
+  let terrainPolygons = level.terrainPolygons
+  for polygon in level.terrainPolygons:
+    gfx.fillPolygon(polygon, kColorBlack, kPolygonFillNonZero)
+  # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
+  # as a workaround, we re-copy the data back to the level
+  level.terrainPolygons = terrainPolygons
+
+  gfx.popContext()
 
 proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
@@ -297,14 +302,12 @@ proc drawGame*(statePtr: ptr GameState) =
   let camera = state.camera
   let camVertex = camera.toVertex()
 
-  # draw background
-  if debugDrawGrid:
-    bgImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
-  else:
-    gfx.clear(kColorWhite)
-
   if debugDrawLevel:
-    drawTerrain(camVertex, level.terrainPolygons)
+    state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
+
+  # draw grid
+  if debugDrawGrid:
+    gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
 
   drawBlinkers(state)
 

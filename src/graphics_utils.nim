@@ -14,7 +14,7 @@ proc toVertex*(v: Vect): Vertex =
   (v.x.round.int32, v.y.round.int32)
 
 proc toVect*(vertex: Vertex): Vect =
-  return v(vertex[0].Float, vertex[1].Float)
+  return v(x = vertex.x.Float, y = vertex.y.Float)
 
 proc `-`*(a: Vertex, b: Vertex): Vertex = 
   return (a[0] - b[0], a[1] - b[1])

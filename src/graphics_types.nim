@@ -4,6 +4,7 @@ template gfx*: untyped = playdate.graphics
 
 type
   Vertex* = tuple [x, y: int32]
+  Size* = Vertex
   Polygon* = seq[Vertex]
   Rect* {.requiresInit.} = object of RootObj
     x*, y*, width*, height*: int32

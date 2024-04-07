@@ -149,10 +149,11 @@ proc createSpace(level: Level): Space {.raises: [].} =
       
   return space
 
-proc newGameState(level: Level): GameState {.raises: [].} =
+proc newGameState(level: Level, background: LCDBitmap = nil): GameState {.raises: [].} =
   let space = level.createSpace()
   state = GameState(
     level: level, 
+    background: background,
     space: space,
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
@@ -163,12 +164,15 @@ proc newGameState(level: Level): GameState {.raises: [].} =
   
   initGameCoins(state)
   initGameStar(state)
+  if background.isNil:
+    initGameBackground(state)
+
   state.killers = space.addKillers(level)
   return state
 
 proc onResetGame() {.raises: [].} =
   state.destroy()
-  state = newGameState(state.level)
+  state = newGameState(state.level, state.background)
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =
