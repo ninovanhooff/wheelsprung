@@ -6,16 +6,24 @@
         {
             "label": "Build Universal PDX",
             "type": "shell",
+            "hide": true,
             "command": "nimble all"
         },
         {
             "label": "Build Simulator PDX",
             "type": "shell",
+            "hide": true,
             "command": "nimble simulator",
         },
         {
             "label": "Build Device PDX",
             "type": "shell",
+            "hide": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "never",
+                "showReuseMessage": false,
+            },
             "command": "nimble device"
         },
         {
@@ -36,6 +44,20 @@
             "type": "shell",
             "command": "./scripts/reboot_datadisk.sh",
             "problemMatcher": [],
+            "group": {
+                "kind": "none",
+            }
+        },
+        {
+            "label": "Level Sync Watcher",
+            "type": "shell",
+            "command": "./scripts/sync_levels.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "never",
+                "showReuseMessage": false,
+            },
             "group": {
                 "kind": "none",
             }
