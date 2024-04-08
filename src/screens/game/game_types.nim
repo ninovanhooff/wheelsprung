@@ -13,7 +13,7 @@ type
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
-  GravityZone* = object
+  GravityZone* = ref object
     position*: Vertex
     gravity*: Vect
   GameCollisionType* = CollisionType

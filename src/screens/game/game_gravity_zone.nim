@@ -12,4 +12,4 @@ proc addGravityZones*(space: Space, gravityZones: seq[GravityZone]) =
     shape.sensor = true # only detect collisions, don't apply forces to colliders
     shape.collisionType = GameCollisionTypes.GravityZone
     shape.filter = GameShapeFilters.GravityZone
-    shape.userData = cast[DataPointer](index)
+    shape.userData = cast[DataPointer](gravityZone)
