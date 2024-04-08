@@ -133,14 +133,20 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped
       ))
     of ClassIds.Flag:
-      let animation: Animation = newAnimation(
+      level.assets.add(newAnimation(
         bitmapTableId = BitmapTableId.Flag,
         position = position,
         flip = if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
         randomStartOffset = true
-      )
-      level.assets.add(animation)
+      ))
     of ClassIds.Gravity:
+      level.assets.add(newAnimation(
+        bitmapTableId = BitmapTableId.Gravity,
+        position = position,
+        flip = if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
+        randomStartOffset = true
+      ))
+
       level.gravityZones.add(newGravityZone(
         position = position,
         gravity = v(0.0, -100.0)
