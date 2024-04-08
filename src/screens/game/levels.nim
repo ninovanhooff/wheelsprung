@@ -32,7 +32,8 @@ type
     layers: seq[LayerEntity]
 
   ClassIds {.pure.} = enum
-    Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32, Flag = 7'u32
+    Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
+    Flag = 7'u32, Gravity = 8'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -139,6 +140,11 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         randomStartOffset = true
       )
       level.assets.add(animation)
+    of ClassIds.Gravity:
+      level.gravityZones.add(newGravityZone(
+        position = position,
+        gravity = v(0.0, -100.0)
+      ))
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =

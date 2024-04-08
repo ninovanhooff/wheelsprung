@@ -4,7 +4,8 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
 import levels
-import game_bike, game_rider, game_coin, game_star, game_killer, game_finish, game_terrain
+import game_bike, game_rider, game_coin, game_star, game_killer, game_finish
+import game_terrain, game_gravity_zone
 import game_camera
 import sound/game_sound
 import shared_types
@@ -58,6 +59,13 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
       print("all coins collected")
       state.finishTrophyBlinkerAt = some(state.time + 2.5.Seconds)
 
+let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityZoneShape: pointer, unused: pointer) {.cdecl.} =
+  print("gravity zone post step callback")
+  let shape = cast[Shape](gravityZoneShape)
+  let gravityZoneIdx = cast[int32](shape.userData)
+  let gravityVect = state.level.gravityZones[gravityZoneIdx].gravity
+  space.gravity = gravityVect
+
 let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
   print("star post step callback")
   let shape = cast[Shape](starShape)
@@ -81,7 +89,7 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
-  print("coin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  print("coin collision for arbiter" & " shapeA: " & repr(shapeA) & " shapeB: " & repr(shapeB))
   discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
   false # don't process the collision further
 
@@ -118,6 +126,15 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
 
   return false # don't process the collision further
 
+let gravityZoneBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  var 
+    shapeA: Shape
+    shapeB: Shape
+  arb.shapes(addr(shapeA), addr(shapeB))
+  print("gravity zone collision for arbiter" & " shapeA: " & repr(shapeA) & " shapeB: " & repr(shapeB))
+  discard space.addPostStepCallback(gravityZonePostStepCallback, shapeA, nil)
+  return false # don't process the collision further
+
 proc createSpace(level: Level): Space {.raises: [].} =
   let space = newSpace()
   space.gravity = v(0.0, 100.0)
@@ -140,9 +157,14 @@ proc createSpace(level: Level): Space {.raises: [].} =
   handler.beginFunc = finishBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.Finish, GameCollisionTypes.Head)
   handler.beginFunc = finishBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.GravityZone, GameCollisionTypes.Wheel)
+  handler.beginFunc = gravityZoneBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.GravityZone, GameCollisionTypes.Head)
+  handler.beginFunc = gravityZoneBeginFunc
 
   space.addTerrain(level.terrainPolygons)
   space.addCoins(level.coins)
+  space.addGravityZones(level.gravityZones)
   if(level.starPosition.isSome):
     space.addStar(level.starPosition.get)
   space.addFinish(level.finishPosition)

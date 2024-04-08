@@ -37,6 +37,7 @@ var
   riderUpperLegImageTable: AnnotatedBitmapTable
   riderLowerLegImageTable: AnnotatedBitmapTable
   killerImageTable: AnnotatedBitmapTable
+  gravityImageTable: AnnotatedBitmapTable
   trophyImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
   starImage: LCDBitmap
@@ -59,6 +60,7 @@ proc initGameView*() =
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
   killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
+  gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
   trophyImageTable = getOrLoadBitmapTable(BitmapTableId.Trophy)
 
   try:

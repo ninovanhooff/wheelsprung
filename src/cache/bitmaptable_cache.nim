@@ -22,6 +22,7 @@ type
     Killer = "images/killer/killer"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
+    Gravity = "images/gravity"
   BitmapTableCache = TableRef[BitmapTableId, AnnotatedBitmapTable]
 
 # global singleton
@@ -31,6 +32,7 @@ proc frameCount(id: BitmapTableId): int32 =
   case id
   of BitmapTableId.Trophy: return 2'i32
   of BitmapTableId.Flag: return 46'i32
+  of BitmapTableId.Gravity: return 33'i32
   
   of BitmapTableId.BikeChassis,
     BitmapTableId.BikeWheel,

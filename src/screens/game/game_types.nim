@@ -13,6 +13,9 @@ type
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
+  GravityZone* = object
+    position*: Vertex
+    gravity*: Vect
   GameCollisionType* = CollisionType
 
 const DD_LEFT*: DriveDirection = -1.0
@@ -28,6 +31,7 @@ const GameCollisionTypes* = (
   Finish: cast[GameCollisionType](6),
   Chassis: cast[GameCollisionType](7),
   Star: cast[GameCollisionType](8),
+  GravityZone: cast[GameCollisionType](9),
 )
 
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
@@ -35,11 +39,13 @@ const COLLECTIBLE_MASK_BIT = cuint(1 shl 29)
 const KILLER_MASK_BIT = cuint(1 shl 28)
 const FINISH_MASK_BIT = cuint(1 shl 27)
 const PLAYER_MASK_BIT = cuint(1 shl 26)
+const GRAVITY_ZONE_MASK_BIT = cuint(1 shl 25)
 
 const GameShapeFilters* = (
   Player: ShapeFilter(
     categories: PLAYER_MASK_BIT,
-    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or FINISH_MASK_BIT
+    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or 
+      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT
   ),
   Terrain: ShapeFilter(
     categories: TERRAIN_MASK_BIT,
@@ -57,13 +63,18 @@ const GameShapeFilters* = (
     categories: FINISH_MASK_BIT,
     mask: PLAYER_MASK_BIT
   ),
-  # remember that collisions only happen when mask of both shapes match the category of the other
+  GravityZone: ShapeFilter(
+    categories: GRAVITY_ZONE_MASK_BIT,
+    mask: PLAYER_MASK_BIT
+  ),
+  # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
 
 type Level* = ref object of RootObj
   terrainPolygons*: seq[Polygon]
   coins*: seq[Coin]
   killers*: seq[Killer]
+  gravityZones*: seq[GravityZone]
   finishPosition*: Vertex
   starPosition*: Option[Vertex]
   assets*: seq[Asset]
@@ -154,6 +165,9 @@ type GameState* = ref object of RootObj
   footPivot*: PivotJoint
   handPivot*: PivotJoint
   headPivot*: PivotJoint
+
+proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
+  result = GravityZone(position: position, gravity: gravity)
 
 proc getRiderBodies*(state: GameState): seq[Body] =
   result = @[
