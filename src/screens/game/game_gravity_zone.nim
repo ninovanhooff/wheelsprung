@@ -15,12 +15,6 @@ proc addGravityZones*(space: Space, gravityZones: seq[GravityZone]) =
     shape.filter = GameShapeFilters.GravityZone
     shape.userData = cast[DataPointer](gravityZone)
 
-let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityZoneRef: pointer, unused: pointer) {.cdecl.} =
-  print("gravity zone post step callback")
-  let gravityZone: GravityZone = cast[GravityZone](gravityZoneRef)
-  print("gravity zone data:" & repr(gravityZone))
-  space.gravity = gravityZone.gravity
-
 
 let gravityZoneBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var 
@@ -28,5 +22,5 @@ let gravityZoneBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space;
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   print("gravity zone collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB))
-  discard space.addPostStepCallback(gravityZonePostStepCallback, shapeA.userData, nil)
+  space.gravity=cast[GravityZone](shapeA.userData).gravity
   return false # don't process the collision further
