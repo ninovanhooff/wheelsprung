@@ -59,12 +59,6 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
       print("all coins collected")
       state.finishTrophyBlinkerAt = some(state.time + 2.5.Seconds)
 
-let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityZoneRef: pointer, unused: pointer) {.cdecl.} =
-  print("gravity zone post step callback")
-  let gravityZone: GravityZone = cast[GravityZone](gravityZoneRef)
-  print("gravity zone data:" & repr(gravityZone))
-  space.gravity = gravityZone.gravity
-
 let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
   print("star post step callback")
   let shape = cast[Shape](starShape)
@@ -123,15 +117,6 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
   state.setGameResult(GameResultType.LevelComplete)
   playFinishSound()
 
-  return false # don't process the collision further
-
-let gravityZoneBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var 
-    shapeA: Shape
-    shapeB: Shape
-  arb.shapes(addr(shapeA), addr(shapeB))
-  print("gravity zone collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB))
-  discard space.addPostStepCallback(gravityZonePostStepCallback, shapeA.userData, nil)
   return false # don't process the collision further
 
 proc createSpace(level: Level): Space {.raises: [].} =
