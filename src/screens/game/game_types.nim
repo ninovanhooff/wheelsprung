@@ -8,6 +8,7 @@ import shared_types
 type 
   Camera* = Vect
   DriveDirection* = Float
+  RotationDirection* = DriveDirection
 
   Coin* = Vertex
   Star* = Vertex
@@ -18,8 +19,16 @@ type
     gravity*: Vect
   GameCollisionType* = CollisionType
 
+  RiderAttitudePosition* {.pure.} = enum
+    Neutral, Forward, Backward
+
+
+
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
+
+const ROT_CCW*: RotationDirection = -1.0 # Counter Clockwise
+const ROT_CW*: RotationDirection = 1.0 # Clockwise
 
 const GameCollisionTypes* = (
   None: cast[GameCollisionType](0), 
@@ -44,7 +53,7 @@ const GRAVITY_ZONE_MASK_BIT = cuint(1 shl 25)
 const GameShapeFilters* = (
   Player: ShapeFilter(
     categories: PLAYER_MASK_BIT,
-    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or 
+    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or
       FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT
   ),
   Terrain: ShapeFilter(
@@ -115,6 +124,7 @@ type GameState* = ref object of RootObj
   frameCounter*: int32
   finishFlipDirectionAt*: Option[Seconds]
   finishTrophyBlinkerAt*: Option[Seconds]
+  enableAttitudeAdjustAt*: Option[Seconds]
 
 
   ## Physics
@@ -138,6 +148,13 @@ type GameState* = ref object of RootObj
   swingArmShape*: Shape
   forkArmShape*: Shape
 
+  # Bike Constraints
+  forkArmSpring*: DampedSpring
+  bikeConstraints*: seq[Constraint]
+
+  ## Rider
+  riderAttitudePosition*: RiderAttitudePosition
+
   # rider bodies
   riderHead*: Body
   riderTorso*: Body
@@ -146,10 +163,6 @@ type GameState* = ref object of RootObj
   riderUpperLeg*: Body
   riderLowerLeg*: Body
   # keep in sync with getRiderBodies()
-
-  # Bike Constraints
-  forkArmSpring*: DampedSpring
-  bikeConstraints*: seq[Constraint]
 
   # Rider Constraints
   riderConstraints*: seq[Constraint] # todo remove if unused
@@ -160,6 +173,7 @@ type GameState* = ref object of RootObj
   # upper arm to torso
   upperArmPivot*: PivotJoint
   elbowPivot*: PivotJoint
+  elbowRotarySpring*: DampedRotarySpring
   hipPivot*: PivotJoint
   chassisKneePivot*: PivotJoint
   footPivot*: PivotJoint

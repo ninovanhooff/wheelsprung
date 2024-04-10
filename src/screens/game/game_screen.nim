@@ -1,7 +1,8 @@
 {. push warning[LockLevel]:off.}
-import options
+import options, math
 import chipmunk7
 import playdate/api
+import globals
 import utils, chipmunk_utils
 import levels
 import game_bike, game_rider, game_coin, game_star, game_killer, game_finish
@@ -67,7 +68,7 @@ let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, 
   state.remainingStar = none[Star]()
   state.updateGameResult()
   playStarSound()
-  
+
 
 
 let gameOverPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
@@ -87,7 +88,7 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
   false # don't process the collision further
 
 let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var 
+  var
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
@@ -194,16 +195,44 @@ proc updateTimers(state: GameState) =
 
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
-    state.chassis.torque = state.driveDirection * -15_500.0
+    state.chassis.torque = state.driveDirection * 5_500.0
 
-    if currentTime > state.finishFlipDirectionAt.get:
-      state.finishFlipDirectionAt = none[Seconds]()
+    if state.finishFlipDirectionAt.expire(currentTime):
       state.resetRiderConstraintForces()
 
-  if state.finishTrophyBlinkerAt.isSome:
-    if currentTime > state.finishTrophyBlinkerAt.get:
-      print("blinker timeout")
-      state.finishTrophyBlinkerAt = none[Seconds]()
+  if state.finishTrophyBlinkerAt.expire(currentTime):
+    print("blinker timeout")
+
+  if state.enableAttitudeAdjustAt.expire(currentTime):
+    print("attitude adjust enabled")
+
+proc handleInput(state: GameState) =
+  state.isThrottlePressed = false
+
+  let buttonsState = playdate.system.getButtonsState()
+
+  if state.gameResult.isSome:
+    # when the game is over, the bike cannot be controlled anymore,
+    # but any button can be pressed to navigate to the result screen
+    if buttonsState.pushed.len > 0:
+      navigateToGameResult(state.gameResult.get)
+    return
+
+
+  if actionThrottle in buttonsState.current:
+    state.isThrottlePressed = true
+    onThrottle()
+  if actionBrake in buttonsState.current:
+    onBrake()
+  
+  if actionLeanLeft in buttonsState.current:
+    state.onAttitudeAdjust(-1f)
+  elif actionLeanRight in buttonsState.current:
+    state.onAttitudeAdjust(1f)
+
+  if actionFlipDirection in buttonsState.pushed:
+    print("Flip direction pressed")
+    state.onFlipDirection()
 
 proc initGame*(levelPath: string) {.raises: [].} =
   state = newGameState(loadLevel(levelPath))
@@ -244,11 +273,16 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 method update*(gameScreen: GameScreen): int =
   handleInput(state)
   updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
-  
+
   if state.isGameStarted:
     updateAttitudeAdjust(state)
     state.space.step(timeStep)
-    state.updateTimers()
+    # print("elbowRotarySpring impulse", state.elbowRotarySpring.impulse.int32, "elbowPivot impulse", state.elbowPivot.impulse.int32, "handPivot impulse", state.handPivot.impulse.int32)
+  # print("elbowRotarySpring.maxForce", state.elbowRotarySpring.maxForce.int32, "elbowPivot.maxForce", state.elbowPivot.maxForce.int32, "handPivot.maxForce", state.handPivot.maxForce.int32)
+  # print("shoulderPvot impulse", state.shoulderPivot.impulse.int32, "shoulderPivot maxForce", state.shoulderPivot.maxForce.int32)
+  # print("chassisKneePivot impulse", state.chassisKneePivot.impulse.int32, "chassisKneePivot maxForce", state.chassisKneePivot.maxForce.int32)
+  # print("assPivot impulse", state.assPivot.impulse.int32, "assPivot maxForce", state.assPivot.maxForce.int32)
+  # print("hipPivot impulse", state.hipPivot.impulse.int32, "hipPivot maxForce", state.hipPivot.maxForce.int32)state.updateTimers()
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
