@@ -11,6 +11,9 @@
         },
         {
             "label": "Build Simulator PDX",
+            "presentation": {
+                "clear": true,
+            },
             "type": "shell",
             "hide": true,
             "command": "nimble simulator",
@@ -20,9 +23,7 @@
             "type": "shell",
             "hide": true,
             "presentation": {
-                "echo": true,
-                "reveal": "never",
-                "showReuseMessage": false,
+                "clear": true,
             },
             "command": "nimble device"
         },
@@ -54,6 +55,7 @@
             "command": "./scripts/sync_levels.sh",
             "problemMatcher": [],
             "presentation": {
+                "clear": true,
                 "echo": true,
                 "reveal": "never",
                 "showReuseMessage": false,
