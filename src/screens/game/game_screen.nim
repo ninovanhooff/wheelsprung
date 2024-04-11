@@ -97,7 +97,7 @@ let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   playCollisionSound()
   if state.gameResult.isSome:
-    # Can'r be game over if the game was already won
+    # Can't be game over if the game was already won
     return true # process collision normally
 
   state.setGameResult(GameResultType.GameOver)
@@ -247,12 +247,7 @@ method update*(gameScreen: GameScreen): int =
     updateAttitudeAdjust(state)
     state.space.step(timeStep)
     state.updateTimers()
-    # print("elbowRotarySpring impulse", state.elbowRotarySpring.impulse.int32, "elbowPivot impulse", state.elbowPivot.impulse.int32, "handPivot impulse", state.handPivot.impulse.int32)
-  # print("elbowRotarySpring.maxForce", state.elbowRotarySpring.maxForce.int32, "elbowPivot.maxForce", state.elbowPivot.maxForce.int32, "handPivot.maxForce", state.handPivot.maxForce.int32)
-  # print("shoulderPvot impulse", state.shoulderPivot.impulse.int32, "shoulderPivot maxForce", state.shoulderPivot.maxForce.int32)
-  # print("chassisKneePivot impulse", state.chassisKneePivot.impulse.int32, "chassisKneePivot maxForce", state.chassisKneePivot.maxForce.int32)
-  # print("assPivot impulse", state.assPivot.impulse.int32, "assPivot maxForce", state.assPivot.maxForce.int32)
-  # print("hipPivot impulse", state.hipPivot.impulse.int32, "hipPivot maxForce", state.hipPivot.maxForce.int32)state.updateTimers()
+    
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
