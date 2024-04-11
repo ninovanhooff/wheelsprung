@@ -218,14 +218,14 @@ proc setAttitudeAdjustForward(state: GameState, dirV: Vect) =
   state.assPivot.offset(v(1.0 , -1.0).transform(dirV))
   state.hipPivot.offset(v(1.0, -1.0).transform(dirV))
   state.shoulderPivot.offset(v(3.0, 2.0).transform(dirV))
-  state.handPivot.offset(v(-13.0, -20.0).transform(dirV))
+  # state.handPivot.offset(v(-13.0, -20.0).transform(dirV))
 
 proc setAttitudeAdjustBackward(state: GameState, dirV: Vect) =
-  state.assPivot.offset(v(-2.0 , 3.0).transform(dirV))
-  state.hipPivot.offset(v(-2.0, 3.0).transform(dirV))
-  state.shoulderPivot.offset(v(-5.0, -2.0).transform(dirV))
+  state.assPivot.offset(v(-1.0 , 2.0).transform(dirV))
+  state.hipPivot.offset(v(-1.0, 2.0).transform(dirV))
+  state.shoulderPivot.offset(v(-2.0, -2.0).transform(dirV))
 #  state.handPivot.offset(v(-19.0, -22.0).transform(dirV))
-  state.handPivot.offset(v(-23.0, 5.0).transform(dirV))
+  # state.handPivot.offset(v(-23.0, 5.0).transform(dirV))
 
 proc resetRiderAttitudePosition*(state: GameState) =
   if state.riderAttitudePosition == RiderAttitudePosition.Neutral:
@@ -250,9 +250,14 @@ proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float) =
   if direction > 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Forward:
     print("SKIP setRiderAttitudeAdjustPosition: already forward")
     return
-  if direction < 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Backward:
+  elif direction < 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Backward:
     print("SKIP setRiderAttitudeAdjustPosition: already backward")
     return
+  elif direction != 0.0 and state.riderAttitudePosition != RiderAttitudePosition.Neutral:
+    print("setRiderAttitudeAdjustPosition: cannot transition from non-neutral position to non-neutral position. Resetting to neutral.")
+    resetRiderAttitudePosition(state)
+    return
+
 
   let dirV = v(
     state.driveDirection,
