@@ -84,7 +84,6 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   # if not currently flipping, set rider animation
   # this check is done to prevent clashing animations
   if state.finishFlipDirectionAt.isNone:
-    print "blaat"
     state.setRiderAttitudeAdjustPosition(
       direction * state.driveDirection,
     )
@@ -171,9 +170,9 @@ proc handleInput*(state: GameState) =
     state.setAttitudeAdjust(getAccelerometerX())
   else:
     if actionLeanLeft in buttonState.current:
-      state.onButtonAttitudeAdjust(-1.0)
+      state.onButtonAttitudeAdjust(ROT_CCW)
     elif actionLeanRight in buttonState.current:
-      state.onButtonAttitudeAdjust(1.0)
+      state.onButtonAttitudeAdjust(ROT_CW)
     else:
       state.onButtonAttitudeAdjust(0.0)
 

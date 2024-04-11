@@ -124,7 +124,6 @@ type GameState* = ref object of RootObj
   frameCounter*: int32
   finishFlipDirectionAt*: Option[Seconds]
   finishTrophyBlinkerAt*: Option[Seconds]
-  enableAttitudeAdjustAt*: Option[Seconds]
 
 
   ## Physics

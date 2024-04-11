@@ -203,9 +203,6 @@ proc updateTimers(state: GameState) =
   if state.finishTrophyBlinkerAt.expire(currentTime):
     print("blinker timeout")
 
-  if state.enableAttitudeAdjustAt.expire(currentTime):
-    print("attitude adjust enabled")
-
 proc initGame*(levelPath: string) {.raises: [].} =
   state = newGameState(loadLevel(levelPath))
   initGameSound()
