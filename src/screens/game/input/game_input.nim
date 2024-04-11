@@ -64,6 +64,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   if direction == 0.0:
     if state.attitudeAdjust.isSome:
       state.attitudeAdjust = none(AttitudeAdjust)
+      state.resetRiderAttitudePosition()
     return
 
   let optAdjust = state.attitudeAdjust
@@ -79,6 +80,14 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   of Jolt:
     if state.attitudeAdjust.isNone: # this type can only be applied once the previous jolt has been reset
       state.setAttitudeAdjust(direction)
+
+  # if not currently flipping, set rider animation
+  # this check is done to prevent clashing animations
+  if state.finishFlipDirectionAt.isNone:
+    print "blaat"
+    state.setRiderAttitudeAdjustPosition(
+      direction * state.driveDirection,
+    )
 
 proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let optAdjust = state.attitudeAdjust
@@ -110,6 +119,12 @@ proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
 
 
 proc onFlipDirection(state: GameState) =
+  if state.attitudeAdjust.isSome:
+    print("attitude adjust in progress, reset attitude adjust force before flipping")
+    # reset animation to neutral
+    state.resetRiderAttitudePosition()
+    state.attitudeAdjust = none(AttitudeAdjust)
+  
   state.driveDirection *= -1.0
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))

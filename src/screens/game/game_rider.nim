@@ -4,9 +4,7 @@ import chipmunk_utils
 import std/math
 import game_types
 
-import playdate/api #todo remove
-
-const 
+const
     torsoMass = 1f
     torsoSize = v(7.0, 16.0)
     torsoRotation = degToRad(35f)
@@ -235,29 +233,45 @@ proc setAttitudeAdjustBackward(state: GameState, dirV: Vect) =
 #  state.handPivot.offset(v(-19.0, -22.0).transform(dirV))
   state.handPivot.offset(v(-23.0, 5.0).transform(dirV))
 
-proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float, toNeutral: bool) =
-  if toNeutral and state.riderAttitudePosition == RiderAttitudePosition.Neutral:
-    print("SKIP setRiderAttitudeAdjustPosition: already neutral")
-    # playdate.system.error("setRiderAttitudeAdjustPosition: already neutral")
-    return
-  if not toNeutral and state.riderAttitudePosition != RiderAttitudePosition.Neutral:
-    playdate.system.error("setRiderAttitudeAdjustPosition: already adjusted")
+proc resetRiderAttitudePosition*(state: GameState) =
+  if state.riderAttitudePosition == RiderAttitudePosition.Neutral:
+    print("SKIP resetRiderAttitudePosition: already neutral")
     return
 
-  let revertDirection = if toNeutral: -1.0 else: 1.0
   let dirV = v(
-    state.driveDirection * revertDirection,
-    revertDirection
+    state.driveDirection * -1.0,
+    -1.0
   )
-  var attitudePosition: RiderAttitudePosition
-  if direction > 0.0:
+  print("resetRiderAttitudePosition: ", state.riderAttitudePosition, dirV)
+
+  if state.riderAttitudePosition == RiderAttitudePosition.Forward:
     setAttitudeAdjustForward(state, dirV)
-    attitudePosition = RiderAttitudePosition.Forward
   else:
     setAttitudeAdjustBackward(state, dirV)
-    attitudePosition = RiderAttitudePosition.Backward
 
-  state.riderAttitudePosition = if toNeutral: RiderAttitudePosition.Neutral else: attitudePosition
+  state.riderAttitudePosition = RiderAttitudePosition.Neutral
+
+proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float) =
+  print("setRiderAttitudeAdjustPosition: ", direction)
+  if direction > 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Forward:
+    print("SKIP setRiderAttitudeAdjustPosition: already forward")
+    return
+  if direction < 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Backward:
+    print("SKIP setRiderAttitudeAdjustPosition: already backward")
+    return
+
+  let dirV = v(
+    state.driveDirection,
+    1.0
+  )
+  if direction > 0.0:
+    setAttitudeAdjustForward(state, dirV)
+    state.riderAttitudePosition = RiderAttitudePosition.Forward
+  else:
+    setAttitudeAdjustBackward(state, dirV)
+    state.riderAttitudePosition = RiderAttitudePosition.Backward
+
+  print("setRiderAttitudeAdjustPosition: ", state.riderAttitudePosition)
 
 proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.assPivot.flip()
