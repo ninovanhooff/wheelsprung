@@ -197,7 +197,7 @@ proc updateTimers(state: GameState) =
     state.chassis.torque = state.driveDirection * -15_500.0
 
     if state.finishFlipDirectionAt.expire(currentTime):
-      print("flip direction timeout", state.finishFlipDirectionAt)
+      print("flip direction timeout")
       state.resetRiderConstraintForces()
 
   if state.finishTrophyBlinkerAt.expire(currentTime):
@@ -247,7 +247,7 @@ method update*(gameScreen: GameScreen): int =
     updateAttitudeAdjust(state)
     state.space.step(timeStep)
     state.updateTimers()
-    
+
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)

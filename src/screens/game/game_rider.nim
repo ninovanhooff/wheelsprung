@@ -253,14 +253,12 @@ proc setAttitudeAdjustBackward(state: GameState, dirV: Vect) =
 
 proc resetRiderAttitudePosition*(state: GameState) =
   if state.riderAttitudePosition == RiderAttitudePosition.Neutral:
-    print("SKIP resetRiderAttitudePosition: already neutral")
     return
 
   let dirV = v(
     state.driveDirection * -1.0,
     -1.0
   )
-  print("resetRiderAttitudePosition: ", state.riderAttitudePosition, dirV)
 
   if state.riderAttitudePosition == RiderAttitudePosition.Forward:
     setAttitudeAdjustForward(state, dirV)
@@ -268,17 +266,14 @@ proc resetRiderAttitudePosition*(state: GameState) =
     setAttitudeAdjustBackward(state, dirV)
 
   state.riderAttitudePosition = RiderAttitudePosition.Neutral
+  print("resetRiderAttitudePosition: ", state.riderAttitudePosition)
 
 proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float) =
-  print("setRiderAttitudeAdjustPosition: ", direction)
   if direction > 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Forward:
-    print("SKIP setRiderAttitudeAdjustPosition: already forward")
     return
   elif direction < 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Backward:
-    print("SKIP setRiderAttitudeAdjustPosition: already backward")
     return
   elif direction != 0.0 and state.riderAttitudePosition != RiderAttitudePosition.Neutral:
-    print("setRiderAttitudeAdjustPosition: cannot transition from non-neutral position to non-neutral position. Resetting to neutral.")
     resetRiderAttitudePosition(state)
     return
 
