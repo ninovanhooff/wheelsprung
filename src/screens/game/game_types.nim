@@ -172,7 +172,6 @@ type GameState* = ref object of RootObj
   # upper arm to torso
   upperArmPivot*: PivotJoint
   elbowPivot*: PivotJoint
-  elbowRotarySpring*: DampedRotarySpring
   hipPivot*: PivotJoint
   chassisKneePivot*: PivotJoint
   footPivot*: PivotJoint

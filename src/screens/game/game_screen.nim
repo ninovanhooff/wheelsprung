@@ -194,7 +194,7 @@ proc updateTimers(state: GameState) =
 
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
-    state.chassis.torque = state.driveDirection * 5_500.0
+    state.chassis.torque = state.driveDirection * -15_500.0
 
     if state.finishFlipDirectionAt.expire(currentTime):
       print("flip direction timeout", state.finishFlipDirectionAt)

@@ -140,12 +140,6 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
-  # elbow rotation spring
-  state.elbowRotarySpring = state.riderLowerArm.newDampedRotarySpring(state.riderUpperArm, lowerArmRotationOffset * dd, 1_000.0, 100.0)
-  riderConstraints.add(space.addConstraint(
-    state.elbowRotarySpring  
-  ))
-
   # Pivot Elbow to chassis
   state.elbowPivot = state.chassis.newPivotJoint(
       state.riderLowerArm,
@@ -163,7 +157,7 @@ proc setRiderConstraints(state: GameState) =
     )
   # Should be slightly stronger than elbow pivot to be able to put hands behind head
   # during attitude adjustment. Not too much, because we don't want it to overextend the elbow
-  state.handPivot.maxForce = 200.0
+  # state.handPivot.maxForce = 200.0
   riderConstraints.add(space.addConstraint(state.handPivot))
 
   # Pivot upper leg
@@ -284,16 +278,13 @@ proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.elbowPivot.flip()
   state.chassisKneePivot.maxForce=2_000.0
   state.elbowPivot.maxForce=1_000.0
-  state.elbowRotarySpring.maxForce=0.0
   state.handPivot.flip()
   state.headPivot.flip()
   state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
-  state.elbowRotarySpring.restAngle = -state.elbowRotarySpring.restAngle
 
 proc resetRiderConstraintForces*(state: GameState) =
   print("resetRiderConstraintForces")
   state.shoulderPivot.maxForce=900.0 #todo DRY
   state.chassisKneePivot.maxForce=0.0
   state.elbowPivot.maxForce=0.0
-  # state.elbowRotarySpring.maxForce=1_000.0 # todo make constant
 
