@@ -25,9 +25,9 @@ const
 
     # offset from upper arm
     lowerArmSize = v(3.0, 11.0)
-    lowerArmOffset = v(2.0, 9.0)
+    lowerArmOffset = v(3.0, 8.0)
     lowerArmMass = 0.2f
-    lowerArmRotationOffset = degToRad(-60f)
+    lowerArmRotationOffset = degToRad(-55f)
 
     # offset from torso, align top of leg with bottom of torso
     upperLegSize = v(5.0, 15.0)
