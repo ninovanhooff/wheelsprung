@@ -44,7 +44,7 @@ const
   GID_CLASS_MASK: uint32 = not GID_FLIP_MASK
 
   ## offset of Chassis position (center Vect) from Player object top-left position
-  vPlayerChassisOffset: Vect = v(30.0, 39.0)
+  vPlayerChassisOffset: Vect = v(30.0, 36.0)
   ## The amount of pixels the chassis center can be outside the level bounds before the game over
   chassisLevelBoundsSlop: Float = 50.Float
 
