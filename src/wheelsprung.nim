@@ -58,7 +58,8 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     font = try: playdate.graphics.newFont(FONT_PATH) except: nil
     playdate.graphics.setFont(font)
 
-    runCatching(runTests, "UNIT TESTS FAILED")
+    if defined(debug):
+      runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
     let lastOpenedLevelPath = getConfig().lastOpenedLevel
     if false:

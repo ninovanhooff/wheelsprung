@@ -1,14 +1,8 @@
 import std/math
 import utils
 
-proc testNotify(message: string): bool =
-    print("Test: " & message)
-    return true
-
 proc runTests*() =
-    # All calls should be passed to assert, so that this proc gets optimized out in release builds
-
-    assert testNotify "Running tests..."
+    print "Test: Running tests..."
     
     assert normalizeAngle(0) == 0
     assert normalizeAngle(Pi32) == Pi32
@@ -28,4 +22,4 @@ proc runTests*() =
     assert lerp(0, 10, -1) == 0
     assert lerp(0, 10, 2) == 10
     
-    assert testNotify "Tests passed."
+    print "Test: Tests passed."
