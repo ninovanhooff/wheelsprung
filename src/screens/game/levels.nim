@@ -69,6 +69,13 @@ proc getFill(obj: LevelObjectEntity): LCDPattern =
       return fillProp.get.value.getStr.toLCDPattern()
   return nil # black
 
+proc getCount(obj: LevelObjectEntity): int32 =
+  if obj.properties.isSome:
+    let countProp = obj.properties.get.findFirst(it => it.name == "count")
+    if countProp.isSome:
+      return countProp.get.value.getInt.int32
+  return 1'i32
+
 proc getRequiredRotations(obj: LevelObjectEntity): int32 =
   if obj.properties.isSome:
     let fillProp = obj.properties.get.findFirst(it => it.name == "requiredRotations")
@@ -145,7 +152,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         level.initialDriveDirection = DD_RIGHT
         
     of ClassIds.Coin:
-      level.coins.add(newCoin(position = position, count = 1))
+      level.coins.add(newCoin(position = position, count = obj.getCount()))
     of ClassIds.Killer:
       level.killers.add(position)
     of ClassIds.Finish:

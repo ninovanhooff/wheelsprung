@@ -42,12 +42,17 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
   let shape = cast[Shape](coinShape)
   let coinIndex = cast[int](shape.userData)
   print("shape data:" & repr(shape))
+  var coin = cast[Coin](shape.userData)
+  if coin.count > 1:
+    coin.count -= 1
+    print("new count for coin: " & repr(coin))
+    return
+
+  print("deleting coin: " & repr(coin))
   space.removeShape(shape)
-  let coinToDelete = state.level.coins[coinIndex]
-  print("deleting coin: " & repr(coinToDelete))
-  let deleteIndex = state.remainingCoins.find(coinToDelete)
+  let deleteIndex = state.remainingCoins.find(coin)
   if deleteIndex == -1:
-    print("coin not found in remaining coins: " & repr(coinToDelete))
+    print("coin not found in remaining coins: " & repr(coin))
   else:
     print("deleting coin at index: " & repr(deleteIndex))
     state.remainingCoins.delete(deleteIndex)
@@ -147,7 +152,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
   handler.beginFunc = gravityZoneBeginFunc
 
   space.addTerrain(level.terrainPolygons)
-  space.addCoins(level.coins)
+  # cannot add coins here because they are mutable and thus are part of the state, not the level
   space.addGravityZones(level.gravityZones)
   if(level.starPosition.isSome):
     space.addStar(level.starPosition.get)
