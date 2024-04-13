@@ -131,7 +131,7 @@ proc initGameBackground*(state: GameState) =
 
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
-    gfx.fillPolygon(polygon.vertices, kColorBlack, kPolygonFillNonZero)
+    gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
   # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
   # as a workaround, we re-copy the data back to the level
   level.terrainPolygons = terrainPolygons
