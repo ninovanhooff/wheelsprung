@@ -3,6 +3,7 @@
 import playdate/api
 import math
 import options
+import sugar
 import chipmunk7
 import game_types, graphics_types, shared_types
 import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, swingArmRightCenter
@@ -130,18 +131,18 @@ proc initGameBackground*(state: GameState) =
 
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
-    gfx.fillPolygon(polygon, kColorBlack, kPolygonFillNonZero)
+    gfx.fillPolygon(polygon.vertices, kColorBlack, kPolygonFillNonZero)
   # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
   # as a workaround, we re-copy the data back to the level
   level.terrainPolygons = terrainPolygons
 
   gfx.popContext()
 
-proc offset(vertices: seq[Vertex], off: Vertex): seq[Vertex] =
-  vertices.map(vertex => [
-    (vertex[0] - off[0]), 
-    (vertex[1] - off[1])
-    ])
+# proc offset(vertices: seq[Vertex], off: Vertex): seq[Vertex] =
+#   vertices.map(vertex => (
+#     (vertex[0] - off[0]),
+#     (vertex[1] - off[1])
+#   ))
 
 proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
@@ -307,6 +308,8 @@ proc drawGame*(statePtr: ptr GameState) =
 
   if debugDrawLevel:
     state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
+  else:
+    gfx.clear(kColorWhite)
 
   # draw grid
   if debugDrawGrid:
