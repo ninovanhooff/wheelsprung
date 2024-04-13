@@ -3,7 +3,6 @@
 import playdate/api
 import math
 import options
-import sugar
 import chipmunk7
 import game_types, graphics_types, shared_types
 import game_bike, game_finish
@@ -316,7 +315,7 @@ proc drawGame*(statePtr: ptr GameState) =
 
     # coins
     for coin in state.remainingCoins:
-      let coinScreenPos = coin - camVertex
+      let coinScreenPos = coin.position - camVertex
       coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
 
     # star

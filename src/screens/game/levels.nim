@@ -145,7 +145,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         level.initialDriveDirection = DD_RIGHT
         
     of ClassIds.Coin:
-      level.coins.add(position)
+      level.coins.add(newCoin(position = position, count = 1))
     of ClassIds.Killer:
       level.killers.add(position)
     of ClassIds.Finish:

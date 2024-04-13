@@ -10,7 +10,9 @@ type
   DriveDirection* = Float
   RotationDirection* = DriveDirection
 
-  Coin* = Vertex
+  Coin* = ref object
+    position*: Vertex
+    count*: int32
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
@@ -179,6 +181,9 @@ type GameState* = ref object of RootObj
   footPivot*: PivotJoint
   handPivot*: PivotJoint
   headPivot*: PivotJoint
+
+proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
+  result = Coin(position: position, count: count)
 
 proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
   result = GravityZone(position: position, gravity: gravity)
