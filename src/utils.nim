@@ -74,3 +74,14 @@ proc lerp*(initial, target, factor: float32): float32 =
   ## the result is clamped between initial and target
   result = (initial * (1.0f - factor)) + (target * factor)
   result = min(max(result, initial), target)
+
+
+### Sequences
+
+proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
+  ## find the first item in the sequence that satisfies the predicate
+  result = none(T)  # return none if no item satisfies the predicate
+  for i, x in s:
+    if pred(x):
+      result = some[T](x)
+      break
