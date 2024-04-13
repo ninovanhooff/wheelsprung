@@ -16,7 +16,8 @@
             "storageType": "string",
             "type": "enum",
             "values": [
-                "grid4"
+                "grid4",
+                "black"
             ],
             "valuesAsFlags": false
         }
