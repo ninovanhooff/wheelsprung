@@ -85,6 +85,7 @@ type Level* = ref object of RootObj
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]
   finishPosition*: Vertex
+  finishRequiredRotations*: int32
   starPosition*: Option[Vertex]
   assets*: seq[Asset]
   ## Level size in Pixels

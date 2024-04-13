@@ -15,7 +15,7 @@ import lcd_patterns
 type
   LevelPropertiesEntity = ref object of RootObj
     name: string
-    value: string
+    value: JsonNode
 
   LevelVertexEntity {.bycopy.} = object
     x*: int32
@@ -66,8 +66,15 @@ proc getFill(obj: LevelObjectEntity): LCDPattern =
   if obj.properties.isSome:
     let fillProp = obj.properties.get.findFirst(it => it.name == "fill")
     if fillProp.isSome:
-      return fillProp.get.value.toLCDPattern()
-  return nil
+      return fillProp.get.value.getStr.toLCDPattern()
+  return nil # black
+
+proc getRequiredRotations(obj: LevelObjectEntity): int32 =
+  if obj.properties.isSome:
+    let fillProp = obj.properties.get.findFirst(it => it.name == "requiredRotations")
+    if fillProp.isSome:
+      return fillProp.get.value.getInt.int32
+  return 0'i32
 
 
 proc readDataFileContents(path: string): string {.raises: [].} =
@@ -143,6 +150,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.killers.add(position)
     of ClassIds.Finish:
       level.finishPosition = position
+      level.finishRequiredRotations = obj.getRequiredRotations()
     of ClassIds.Star:
       level.starPosition = some(position)
     of ClassIds.SignPost:

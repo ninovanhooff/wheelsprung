@@ -109,8 +109,8 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     # Can't finish the game if it was already finished
     return false
 
-  if state.remainingCoins.len > 0:
-    print("finish collision but not all coins collected")
+  if not state.isFinishActivated:
+    print("finish collision but not activated")
     return false
   
   print("gameWin collision")

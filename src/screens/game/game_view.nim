@@ -6,7 +6,7 @@ import options
 import sugar
 import chipmunk7
 import game_types, graphics_types, shared_types
-import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, swingArmRightCenter
+import game_bike, game_finish
 import graphics_utils
 import chipmunk_utils
 import utils
@@ -19,10 +19,6 @@ const
   frontForkChassisAttachmentOffset = v(15.0, -3.0)
   forkOutlineWidth: int32 = 4'i32
   patternSize: int32 = 8'i32
-  blinkerPeriod = 0.5
-  halfBlinkerPeriod = blinkerPeriod / 2.0
-
-  trophyBlinkerPos: Vertex = (360, 8)
 
 var
   bikeChassisImageTable: AnnotatedBitmapTable
@@ -36,7 +32,6 @@ var
   riderLowerLegImageTable: AnnotatedBitmapTable
   killerImageTable: AnnotatedBitmapTable
   gravityImageTable: AnnotatedBitmapTable
-  trophyImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
   starImage: LCDBitmap
   gridImage: LCDBitmap
@@ -59,7 +54,7 @@ proc initGameView*() =
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
   killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
   gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
-  trophyImageTable = getOrLoadBitmapTable(BitmapTableId.Trophy)
+  initGameFinish()
 
   try:
     coinImage = gfx.newBitmap("images/coin")
@@ -212,11 +207,6 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
-proc drawBlinkers(state: GameState) =
-  if state.finishTrophyBlinkerAt.isSome:
-    let blinkerOn: bool = state.time mod blinkerPeriod < halfBlinkerPeriod
-    trophyImageTable.getBitmap(blinkerOn.int32).draw(trophyBlinkerPos[0], trophyBlinkerPos[1], kBitmapUnflipped)
-
 const
   rotationIndicatorRadius = 16'i32
   rotationIndicatorSize = rotationIndicatorRadius * 2'i32
@@ -300,7 +290,6 @@ proc drawPlayer(state: GameState) =
   riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
 
-
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
@@ -317,8 +306,6 @@ proc drawGame*(statePtr: ptr GameState) =
     gfx.setDrawMode(kDrawmodeWhiteTransparent)
     gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
     gfx.setDrawMode(kDrawmodeCopy)
-
-  drawBlinkers(state)
 
   if debugDrawTextures:
     # assets
@@ -343,10 +330,7 @@ proc drawGame*(statePtr: ptr GameState) =
       let killerScreenPos = killer.position - camera
       killerImageTable.drawRotated(killerScreenPos, killer.angle)
 
-    # trophy
-    let finishScreenPos: Vertex = level.finishPosition - camVertex
-    let finishTableIndex: int32 = if state.remainingCoins.len == 0: 1'i32 else: 0'i32
-    trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
+    drawFinish(state)
 
   if debugDrawPlayer:
     drawPlayer(state)
