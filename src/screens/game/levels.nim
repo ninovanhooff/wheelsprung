@@ -191,14 +191,14 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = (obj.x, obj.y)
   let width = obj.width
   let height = obj.height
-  let rect: seq[Vertex] = @[
+  let vertices: seq[Vertex] = @[
     objOffset,
     objOffset + (width, 0'i32),
     objOffset + (width, height),
     objOffset + (0'i32, height),
     objOffset
   ]
-  level.terrainPolygons.add(newPolygon(rect))
+  level.terrainPolygons.add(newPolygon(vertices, obj.getFill()))
   return true
 
 proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
