@@ -10,5 +10,15 @@
     "properties": [
     ],
     "propertyTypes": [
+        {
+            "id": 1,
+            "name": "Fill",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "grid4"
+            ],
+            "valuesAsFlags": false
+        }
     ]
 }
