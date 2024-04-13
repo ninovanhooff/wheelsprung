@@ -1,6 +1,7 @@
 import chipmunk7
 import options
 import utils
+import sugar
 import std/json
 import std/sequtils
 import playdate/api
@@ -13,6 +14,8 @@ import lcd_patterns
 
 type
   LevelPropertiesEntity = ref object of RootObj
+    name: string
+    value: string
 
   LevelVertexEntity {.bycopy.} = object
     x*: int32
@@ -54,6 +57,18 @@ const
 
 let kFileReadAny: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
+proc toLCDPattern(str: string): LCDPattern =
+  case str
+    of "grid4": return patGrid4
+    else: return nil
+
+proc getFill(obj: LevelObjectEntity): LCDPattern =
+  if obj.properties.isSome:
+    let fillProp = obj.properties.get.findFirst(it => it.name == "fill")
+    if fillProp.isSome:
+      return fillProp.get.value.toLCDPattern()
+  return nil
+
 
 proc readDataFileContents(path: string): string {.raises: [].} =
   try:
@@ -84,10 +99,7 @@ proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
     var segments: seq[LevelVertexEntity] = obj.polygon.get
     # close the polygon by adding the first vertex to the end
     segments.add(segments[0])
-    if obj.properties.isSome:
-      return newPolygon(segments.map(toVertex), dLine6)
-    else:
-      return newPolygon(segments.map(toVertex))
+    return newPolygon(segments.map(toVertex), obj.getFill())
   else:
     return emptyPolygon
 
