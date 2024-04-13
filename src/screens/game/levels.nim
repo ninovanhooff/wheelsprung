@@ -96,13 +96,12 @@ proc `+`*(v1, v2: Vertex): Vertex = (v1[0] + v2[0], v1[1] + v2[1])
 proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = (obj.x, obj.y)
   var polygon: Polygon = obj.getPolygon()
-  var vertices: seq[Vertex] = polygon.vertices
 
-  if vertices.high < 2:
+  if polygon.vertices.high < 2:
     return false # polygons require at least 3 vertices
 
   # Offset the polygon by the object's position (localToWorld)
-  for vertex in vertices.mItems():
+  for vertex in polygon.vertices.mItems():
     vertex = vertex + objOffset
 
   level.terrainPolygons.add(polygon)
