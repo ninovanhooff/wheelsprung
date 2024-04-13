@@ -44,7 +44,6 @@ proc updateBikeEngine*(state: GameState) =
     curRpm = lerp(curRpm, targetRpm, 0.1f)
     targetPlayer = if throttle: throttlePlayer else: idlePlayer
     if currentPlayer != targetPlayer:
-        print("switch from currentPlayer: " & $currentPlayer.repr & " targetPlayer: " & targetPlayer.repr)
         fadeoutPlayer = currentPlayer
         currentPlayer = targetPlayer
         currentPlayer.play(0, 1.0f) 

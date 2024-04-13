@@ -58,7 +58,8 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     font = try: playdate.graphics.newFont(FONT_PATH) except: nil
     playdate.graphics.setFont(font)
 
-    runCatching(runTests, "UNIT TESTS FAILED")
+    if defined(debug):
+      runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
     let lastOpenedLevelPath = getConfig().lastOpenedLevel
     if false:
@@ -82,6 +83,10 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("O")
       debugDrawShapes = not debugDrawShapes
       print("debugDrawShapes:" & $debugDrawShapes)
+    elif keycode == 112:
+      print("P")
+      debugDrawPlayer = not debugDrawPlayer
+      print("debugDrawPlayers:" & $debugDrawPlayer)
     elif keycode == 105:
       print("I")
       debugDrawTextures = not debugDrawTextures

@@ -4,7 +4,7 @@ import chipmunk_utils
 import std/math
 import game_types
 
-const 
+const
     torsoMass = 1f
     torsoSize = v(7.0, 16.0)
     torsoRotation = degToRad(35f)
@@ -16,16 +16,18 @@ const
     headRotationOffset = degToRad(-35.0)
     
     # offset from torso, align top of arm with top of torso
-    upperArmSize = v(4.0, 14.0)
+    upperArmSize = v(4.0, 13.0)
     upperArmMass = 0.25
     upperArmRotationOffset = degToRad(-70.0)
-    upperArmOffset = v(7.0, -3.0)
+    upperArmOffset = v(5.0, -3.0)
+
+    elbowRotaryLimitAngle = 7/8 * PI # full bend minus 22.5 degrees
 
     # offset from upper arm
-    lowerArmSize = v(3.0, 10.0)
-    lowerArmOffset = v(2.0, 9.0)
+    lowerArmSize = v(3.0, 11.0)
+    lowerArmOffset = v(3.0, 8.0)
     lowerArmMass = 0.2f
-    lowerArmRotationOffset = degToRad(-60f)
+    lowerArmRotationOffset = degToRad(-55f)
 
     # offset from torso, align top of leg with bottom of torso
     upperLegSize = v(5.0, 15.0)
@@ -37,6 +39,24 @@ const
     lowerLegOffset = v(-2.5, 10.0)
     lowerLegMass = 0.2f
     lowerLegRotationOffset = degToRad(35f)
+
+proc resetRiderConstraintForces*(state: GameState) =
+  print("resetRiderConstraintForces")
+  state.shoulderPivot.maxForce=900.0
+  state.chassisKneePivot.maxForce=0.0
+  state.elbowRotaryLimit.maxForce=2_000.0
+  state.elbowPivot.maxForce=0.0
+
+proc flip(joint: PivotJoint) =
+  joint.anchorA = joint.anchorA.flip()
+
+proc flip(joint: RotaryLimitJoint) =
+  let temp = joint.min
+  joint.min = -joint.max
+  joint.max = -temp
+
+proc offset(joint: PivotJoint, offset: Vect) =
+  joint.anchorA = joint.anchorA + offset
 
 proc addRider*(state: GameState, torsoPosition: Vect) =
     let space = state.space
@@ -99,8 +119,6 @@ proc setRiderConstraints(state: GameState) =
   riderConstraints.add(space.addConstraint(
     state.shoulderPivot
   ))
-  state.shoulderPivot.maxForce = 900.0 # allow shoulders to sag towards bike on impact
-
 
   # pivot shoulder to torso
   let riderUpperArmShoulderLocalPosition = v(0f, -upperArmSize.y/2f + upperArmSize.x/2f) # + half upper arm width
@@ -140,6 +158,18 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
+  # Elbow rotary limit
+  state.elbowRotaryLimit = state.riderLowerArm.newRotaryLimitJoint(
+    state.riderUpperArm,
+    0.1,
+    elbowRotaryLimitAngle,
+  )
+  if dd == DD_LEFT:
+    state.elbowRotaryLimit.flip()
+  riderConstraints.add(space.addConstraint(
+    state.elbowRotaryLimit
+  ))
+
   # Pivot Elbow to chassis
   state.elbowPivot = state.chassis.newPivotJoint(
       state.riderLowerArm,
@@ -155,6 +185,9 @@ proc setRiderConstraints(state: GameState) =
       state.riderLowerArm,
       riderHandWorldPosition
     )
+  # Should be slightly stronger than elbow pivot to be able to put hands behind head
+  # during attitude adjustment. Not too much, because we don't want it to overextend the elbow
+  # state.handPivot.maxForce = 200.0
   riderConstraints.add(space.addConstraint(state.handPivot))
 
   # Pivot upper leg
@@ -186,7 +219,6 @@ proc setRiderConstraints(state: GameState) =
   riderConstraints.add(space.addConstraint(
     state.chassisKneePivot
   ))
-  state.chassisKneePivot.maxForce = 0.0 # only for direction change
 
   # Pivot foot to pedal
   let riderLowerLegFootLocalPosition = v(0.0, lowerLegSize.y/2)
@@ -200,40 +232,78 @@ proc setRiderConstraints(state: GameState) =
   ))
 
   state.riderConstraints = riderConstraints
+  state.resetRiderConstraintForces()
 
 proc initGameRider*(state: GameState, riderPosition: Vect) =
   state.addRider(riderPosition)
   state.setRiderConstraints()
 
-proc flip(joint: PivotJoint) =
-  joint.anchorA = joint.anchorA.flip()
+proc setAttitudeAdjustForward(state: GameState, dirV: Vect) =
+  state.assPivot.offset(v(1.0 , -1.0).transform(dirV))
+  state.hipPivot.offset(v(1.0, -1.0).transform(dirV))
+  state.shoulderPivot.offset(v(3.0, 2.0).transform(dirV))
+  # state.handPivot.offset(v(-13.0, -20.0).transform(dirV))
+
+proc setAttitudeAdjustBackward(state: GameState, dirV: Vect) =
+  state.assPivot.offset(v(-1.0 , 2.0).transform(dirV))
+  state.hipPivot.offset(v(-1.0, 2.0).transform(dirV))
+  state.shoulderPivot.offset(v(-2.0, -2.0).transform(dirV))
+#  state.handPivot.offset(v(-19.0, -22.0).transform(dirV))
+  # state.handPivot.offset(v(-23.0, 5.0).transform(dirV))
+
+proc resetRiderAttitudePosition*(state: GameState) =
+  if state.riderAttitudePosition == RiderAttitudePosition.Neutral:
+    return
+
+  let dirV = v(
+    state.driveDirection * -1.0,
+    -1.0
+  )
+
+  if state.riderAttitudePosition == RiderAttitudePosition.Forward:
+    setAttitudeAdjustForward(state, dirV)
+  else:
+    setAttitudeAdjustBackward(state, dirV)
+
+  state.riderAttitudePosition = RiderAttitudePosition.Neutral
+  print("resetRiderAttitudePosition: ", state.riderAttitudePosition)
+
+proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float) =
+  if direction > 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Forward:
+    return
+  elif direction < 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Backward:
+    return
+  elif direction != 0.0 and state.riderAttitudePosition != RiderAttitudePosition.Neutral:
+    resetRiderAttitudePosition(state)
+    return
+
+
+  let dirV = v(
+    state.driveDirection,
+    1.0
+  )
+  if direction > 0.0:
+    setAttitudeAdjustForward(state, dirV)
+    state.riderAttitudePosition = RiderAttitudePosition.Forward
+  else:
+    setAttitudeAdjustBackward(state, dirV)
+    state.riderAttitudePosition = RiderAttitudePosition.Backward
+
+  print("setRiderAttitudeAdjustPosition: ", state.riderAttitudePosition)
 
 proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.assPivot.flip()
   state.shoulderPivot.flip()
-  state.shoulderPivot.maxForce=100.0
+  state.shoulderPivot.maxForce=100.0 # allow shoulder to move
   state.upperArmPivot.flip()
   state.hipPivot.flip()
   state.footPivot.flip()
   state.chassisKneePivot.flip()
   state.elbowPivot.flip()
+  state.elbowRotaryLimit.flip()
   state.chassisKneePivot.maxForce=2_000.0
   state.elbowPivot.maxForce=1_000.0
+  state.elbowRotaryLimit.maxForce=0.0 # Allow elbow to over-extend
   state.handPivot.flip()
   state.headPivot.flip()
-
   state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
-  # state.riderHead.angle=0.0
-
-  # state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
-
-proc resetRiderConstraintForces*(state: GameState) =
-  print("resetRiderConstraintForces")
-  state.shoulderPivot.maxForce=900.0
-  state.chassisKneePivot.maxForce=0.0
-  state.elbowPivot.maxForce=0.0
-  # state.headRotarySpring = state.riderHead.newDampedRotarySpring(state.riderTorso, headRotationOffset * state.driveDirection, 10000.0, 900.0)
-  # discard state.space.addConstraint(
-  #   state.headRotarySpring  
-  # )
-

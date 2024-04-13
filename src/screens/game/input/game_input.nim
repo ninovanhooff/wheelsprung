@@ -53,7 +53,6 @@ proc onBrake(state: GameState) =
   frontWheel.torque = -frontWheel.angularVelocity * brakeTorque
 
 proc setAttitudeAdjust(state: GameState, direction: Float) =
-  print("setAttitudeAdjust", direction)
   state.attitudeAdjust = some(AttitudeAdjust(
     direction: direction,
     startedAt: state.time
@@ -65,6 +64,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   if direction == 0.0:
     if state.attitudeAdjust.isSome:
       state.attitudeAdjust = none(AttitudeAdjust)
+      state.resetRiderAttitudePosition()
     return
 
   let optAdjust = state.attitudeAdjust
@@ -80,6 +80,13 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   of Jolt:
     if state.attitudeAdjust.isNone: # this type can only be applied once the previous jolt has been reset
       state.setAttitudeAdjust(direction)
+
+  # if not currently flipping, set rider animation
+  # this check is done to prevent clashing animations
+  if state.finishFlipDirectionAt.isNone:
+    state.setRiderAttitudeAdjustPosition(
+      direction * state.driveDirection,
+    )
 
 proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let optAdjust = state.attitudeAdjust
@@ -111,6 +118,12 @@ proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
 
 
 proc onFlipDirection(state: GameState) =
+  if state.attitudeAdjust.isSome:
+    print("attitude adjust in progress, reset attitude adjust force before flipping")
+    # reset animation to neutral
+    state.resetRiderAttitudePosition()
+    state.attitudeAdjust = none(AttitudeAdjust)
+  
   state.driveDirection *= -1.0
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
@@ -157,9 +170,9 @@ proc handleInput*(state: GameState) =
     state.setAttitudeAdjust(getAccelerometerX())
   else:
     if actionLeanLeft in buttonState.current:
-      state.onButtonAttitudeAdjust(-1.0)
+      state.onButtonAttitudeAdjust(ROT_CCW)
     elif actionLeanRight in buttonState.current:
-      state.onButtonAttitudeAdjust(1.0)
+      state.onButtonAttitudeAdjust(ROT_CW)
     else:
       state.onButtonAttitudeAdjust(0.0)
 

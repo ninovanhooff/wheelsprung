@@ -1,12 +1,22 @@
-import std/math
+import std/[math, options]
 import std/strutils
 import playdate/api
+import shared_types
 
 const
-  TwoPi*: float = 2 * PI
+  Pi32*: float32 = PI
+  TwoPi*: float32 = 2 * PI
 
 ### Time
 proc now*(): uint = playdate.system.getCurrentTimeMilliseconds
+
+proc expire*(expireAt: var Option[Seconds], currentTime: Seconds): bool =
+  ## Sets expireAt to none and returns true if expireAt is after currentTime
+  if expireAt.isSome:
+    if currentTime > expireAt.get:
+      expireAt = none[Seconds]()
+      return true
+  return false
 
 ### Logging
 proc print*(things: varargs[string, `$`]) =
@@ -35,12 +45,15 @@ proc prevWrapped*[T: enum](v: T): T =
     return pred(v)
 
 ### Math
-proc normalizeAngle*(angle: float): float =
-    ## normalize angle to be between 0 and 2 * PI
+proc normalizeAngle*(angle: float32): float32 {.inline.} =
+    ## normalize angle to be between 0 (inclusive) and 2 * PI (exclusive)
     result = angle mod TwoPi
-    if result < 0:
+    if result < 0.0f:
         result += TwoPi
-
+    # In case angle was very close to TwoPi or 0.0, the result may be equal to TwoPi.
+    # Therefore, we use if instead of elif
+    if result >= TwoPi:
+        result -= TwoPi
 
 proc roundToNearest*(num: float, increment: int = 1): int =
     ## round to the nearest multiple of increment

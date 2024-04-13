@@ -6,16 +6,25 @@
         {
             "label": "Build Universal PDX",
             "type": "shell",
+            "hide": true,
             "command": "nimble all"
         },
         {
             "label": "Build Simulator PDX",
+            "presentation": {
+                "clear": true,
+            },
             "type": "shell",
+            "hide": true,
             "command": "nimble simulator",
         },
         {
             "label": "Build Device PDX",
             "type": "shell",
+            "hide": true,
+            "presentation": {
+                "clear": true,
+            },
             "command": "nimble device"
         },
         {
@@ -32,9 +41,34 @@
             }
         },
         {
+            "label": "Reboot Device to Data disk",
+            "type": "shell",
+            "command": "./scripts/reboot_datadisk.sh",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+            }
+        },
+        {
+            "label": "Level Sync Watcher",
+            "type": "shell",
+            "command": "./scripts/sync_levels.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "clear": true,
+                "echo": true,
+                "reveal": "never",
+                "showReuseMessage": false,
+            },
+            "group": {
+                "kind": "none",
+            }
+        },
+        {
             "label": "Build & Run Device PDX",
             "type": "shell",
             "dependsOn": [
+                "Reboot Device to Data disk",
                 "Build Device PDX"
             ],
             "command": "./scripts/quickinstall.sh",
@@ -45,7 +79,11 @@
         },
         {
             "label": "Build & Run all",
-            "dependsOn": ["Build & Run Device PDX", "Build & Run Simulator PDX"]
+            "dependsOn": [
+                "Build & Run Device PDX",
+                "Build & Run Simulator PDX"
+            ],
+            "problemMatcher": []
         }
     ]
 }

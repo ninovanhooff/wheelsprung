@@ -1,14 +1,16 @@
+{.push raises: [].}
+
 import playdate/api
 import math
-import std/sequtils
-import std/sugar
 import options
 import chipmunk7
 import game_types, graphics_types, shared_types
 import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, swingArmRightCenter
 import graphics_utils
 import chipmunk_utils
+import utils
 import globals
+import cache/bitmaptable_cache
 import lcd_patterns
 
 const
@@ -19,23 +21,24 @@ const
   blinkerPeriod = 0.5
   halfBlinkerPeriod = blinkerPeriod / 2.0
 
-  trophyBlinkerPos: Vertex = [360, 8]
+  trophyBlinkerPos: Vertex = (360, 8)
 
 var
-  bikeChassisImageTable: LCDBitmapTable
-  bikeWheelImageTable: LCDBitmapTable
+  bikeChassisImageTable: AnnotatedBitmapTable
+  bikeWheelImageTable: AnnotatedBitmapTable
 
-  riderTorsoImageTable: LCDBitmapTable
-  riderHeadImageTable: LCDBitmapTable
-  riderUpperArmImageTable: LCDBitmapTable
-  riderLowerArmImageTable: LCDBitmapTable
-  riderUpperLegImageTable: LCDBitmapTable
-  riderLowerLegImageTable: LCDBitmapTable
-  killerImageTable: LCDBitmapTable
-  trophyImageTable: LCDBitmapTable
+  riderTorsoImageTable: AnnotatedBitmapTable
+  riderHeadImageTable: AnnotatedBitmapTable
+  riderUpperArmImageTable: AnnotatedBitmapTable
+  riderLowerArmImageTable: AnnotatedBitmapTable
+  riderUpperLegImageTable: AnnotatedBitmapTable
+  riderLowerLegImageTable: AnnotatedBitmapTable
+  killerImageTable: AnnotatedBitmapTable
+  gravityImageTable: AnnotatedBitmapTable
+  trophyImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
   starImage: LCDBitmap
-  bgImage: LCDBitmap
+  gridImage: LCDBitmap
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -45,22 +48,22 @@ var
 proc initGameView*() =
   if bikeChassisImageTable != nil: return # already initialized
 
-  try:
-    bikeChassisImageTable = gfx.newBitmapTable("images/bike-chassis")
-    bikeWheelImageTable = gfx.newBitmapTable("images/bike-wheel")
-    riderTorsoImageTable = gfx.newBitmapTable("images/rider/torso")
-    riderHeadImageTable = gfx.newBitmapTable("images/rider/head")
-    riderUpperArmImageTable = gfx.newBitmapTable("images/rider/upper-arm")
-    riderLowerArmImageTable = gfx.newBitmapTable("images/rider/lower-arm")
-    riderUpperLegImageTable = gfx.newBitmapTable("images/rider/upper-leg")
-    riderLowerLegImageTable = gfx.newBitmapTable("images/rider/lower-leg")
-    killerImageTable = gfx.newBitmapTable("images/killer/killer")
-    trophyImageTable = gfx.newBitmapTable("images/trophy")
+  bikeChassisImageTable = getOrLoadBitmapTable(BitmapTableId.BikeChassis)
+  bikeWheelImageTable = getOrLoadBitmapTable(BitmapTableId.BikeWheel)
+  riderTorsoImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTorso)
+  riderHeadImageTable = getOrLoadBitmapTable(BitmapTableId.RiderHead)
+  riderUpperArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperArm)
+  riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
+  riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
+  riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
+  killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
+  gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
+  trophyImageTable = getOrLoadBitmapTable(BitmapTableId.Trophy)
 
+  try:
     coinImage = gfx.newBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
-
-    bgImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, bgPattern)
+    gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
     echo getCurrentExceptionMsg()
 
@@ -117,6 +120,22 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
     let b = localToWorld(spring.bodyB, vzero) - camera
     gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
+proc initGameBackground*(state: GameState) =
+  let level = state.level
+  state.background = gfx.newBitmap(
+    level.size.x, level.size.y, kColorWhite
+  )
+
+  gfx.pushContext(state.background)
+
+  let terrainPolygons = level.terrainPolygons
+  for polygon in level.terrainPolygons:
+    gfx.fillPolygon(polygon, kColorBlack, kPolygonFillNonZero)
+  # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
+  # as a workaround, we re-copy the data back to the level
+  level.terrainPolygons = terrainPolygons
+
+  gfx.popContext()
 
 proc offset(vertices: seq[Vertex], off: Vertex): seq[Vertex] =
   vertices.map(vertex => [
@@ -124,19 +143,14 @@ proc offset(vertices: seq[Vertex], off: Vertex): seq[Vertex] =
     (vertex[1] - off[1])
     ])
 
-proc drawTerrain(camVertex: Vertex, terrainPolygons: seq[Polygon]) =
-  for polygon in terrainPolygons:
-    # todo optimize: only draw if polygon is visible and not drawn to offscreen buffer yet
-    gfx.fillPolygon(polygon.vertices.offset(camVertex), polygon.fill, kPolygonFillNonZero)
-
-proc drawRotated(table: LCDBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
+proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
     center, 
     (if driveDirection == DD_LEFT: -angle else: angle),
     (if driveDirection == DD_LEFT: kBitmapFlippedX else: kBitmapUnflipped)
   )
 
-proc drawRotated(table: LCDBitmapTable, body: Body, state: GameState, inverse: bool = false) {.inline.} =
+proc drawRotated(table: AnnotatedBitmapTable, body: Body, state: GameState, inverse: bool = false) {.inline.} =
   let driveDirection = state.driveDirection
   table.drawRotated(
     body.position - state.camera, 
@@ -224,32 +238,90 @@ proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
     forceDegrees - rotationIndicatorWidthDegrees, forceDegrees + rotationIndicatorWidthDegrees, 
     kColorXOR
   )
-    
+
+method getBitmap(asset: Asset, frameCounter: int32): LCDBitmap {.base.} =
+  print("getImage not implemented for: ", repr(asset))
+  return fallbackBitmap()
+
+method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
+  return asset.image
+
+method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
+  return asset.bitmapTable.getBitmap((frameCounter div 2'i32) mod asset.frameCount)
+
+proc drawPlayer(state: GameState) =
+  let chassis = state.chassis
+  let camera = state.camera
+  let driveDirection = state.driveDirection
+
+  # wheels
+  let frontWheel = state.frontWheel
+  let frontWheelScreenPos = frontWheel.position - camera
+  bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
+  let rearWheel = state.rearWheel
+  let rearWheelScreenPos = rearWheel.position - camera
+  bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
+
+  gfx.setLineCapStyle(kLineCapStyleRound)
+
+  drawBikeForks(state)
+
+  # chassis
+  let chassisScreenPos = chassis.position - camera
+  bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
+
+  # rider
+
+  let riderHead = state.riderHead
+  let riderHeadScreenPos = riderHead.position - camera
+  if state.finishFlipDirectionAt.isSome:
+    # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
+    let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
+    let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
+    riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
+  else:
+    riderHeadImageTable.drawRotated(riderHead, state)
+
+  var chassisTorque = 0.0
+  if state.attitudeAdjust.isSome:
+    chassisTorque = state.lastTorque
+
+  let chassisTorqueDegrees = chassisTorque / 1_000f
+  drawRotationForceIndicator(
+    riderHeadScreenPos.toVertex,
+    chassisTorqueDegrees
+  )
+
+  riderTorsoImageTable.drawRotated(state.riderTorso, state)
+  riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
+  riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
+  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
+  riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+
 
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
-  let chassis = state.chassis
   let camera = state.camera
   let camVertex = camera.toVertex()
-  let driveDirection = state.driveDirection
-
-  # draw background
-  if debugDrawGrid:
-    bgImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
-  else:
-    gfx.clear(kColorWhite)
 
   if debugDrawLevel:
-    drawTerrain(camVertex, level.terrainPolygons)
+    state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
+
+  # draw grid
+  if debugDrawGrid:
+    gfx.setDrawMode(kDrawmodeWhiteTransparent)
+    gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
+    gfx.setDrawMode(kDrawmodeCopy)
 
   drawBlinkers(state)
 
   if debugDrawTextures:
-    # textures
-    for texture in level.textures:
-      let textureScreenPos = texture.position - camVertex
-      texture.image.draw(textureScreenPos[0], textureScreenPos[1], texture.flip)
+    # assets
+    let frameCounter: int32 = state.frameCounter
+    for asset in level.assets:
+      let assetScreenPos = asset.position - camVertex
+      asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
 
     # coins
     for coin in state.remainingCoins:
@@ -260,7 +332,7 @@ proc drawGame*(statePtr: ptr GameState) =
     if state.remainingStar.isSome:
       let starScreenPos = state.remainingStar.get - camVertex
       starImage.draw(starScreenPos[0], starScreenPos[1], kBitmapUnflipped)
-      
+
 
     # killer
     for killer in state.killers:
@@ -268,54 +340,12 @@ proc drawGame*(statePtr: ptr GameState) =
       killerImageTable.drawRotated(killerScreenPos, killer.angle)
 
     # trophy
-    let finishScreenPos = level.finishPosition - camVertex
-    let finishTableIndex = if state.remainingCoins.len == 0: 1 else: 0
+    let finishScreenPos: Vertex = level.finishPosition - camVertex
+    let finishTableIndex: int32 = if state.remainingCoins.len == 0: 1'i32 else: 0'i32
     trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
-  
 
-    # wheels
-    let frontWheel = state.frontWheel
-    let frontWheelScreenPos = frontWheel.position - camera
-    bikeWheelImageTable.drawRotated(frontWheelScreenPos, frontWheel.angle, driveDirection)
-    let rearWheel = state.rearWheel
-    let rearWheelScreenPos = rearWheel.position - camera
-    bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
-    
-    gfx.setLineCapStyle(kLineCapStyleRound)
-
-    drawBikeForks(state)
-
-    # chassis
-    let chassisScreenPos = chassis.position - camera
-    bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
-
-    # rider
-    
-    let riderHead = state.riderHead
-    let riderHeadScreenPos = riderHead.position - camera
-    if state.finishFlipDirectionAt.isSome:
-      # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
-      let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
-      let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
-      riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
-    else:
-      riderHeadImageTable.drawRotated(riderHead, state)
-
-    var chassisTorque = 0.0
-    if state.attitudeAdjust.isSome:
-      chassisTorque = state.lastTorque
-    
-    let chassisTorqueDegrees = chassisTorque / 1_000f
-    drawRotationForceIndicator(
-      riderHeadScreenPos.toVertex, 
-      chassisTorqueDegrees
-    )
-
-    riderTorsoImageTable.drawRotated(state.riderTorso, state)
-    riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
-    riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
-    riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
-    riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+  if debugDrawPlayer:
+    drawPlayer(state)
 
   if debugDrawShapes:
     eachShape(statePtr.space, shapeIter, statePtr)

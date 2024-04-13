@@ -1,28 +1,34 @@
+import playdate/api
 import chipmunk7
 import options
 import graphics_types
 import utils
 import shared_types
-import playdate/api
-
 
 type 
   Camera* = Vect
   DriveDirection* = Float
+  RotationDirection* = DriveDirection
 
   Coin* = Vertex
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
-  Texture* = object of RootObj
-    image*: LCDBitmap
+  GravityZone* = ref object
     position*: Vertex
-    flip*: LCDBitmapFlip
+    gravity*: Vect
   GameCollisionType* = CollisionType
+
+  RiderAttitudePosition* {.pure.} = enum
+    Neutral, Forward, Backward
+
 
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
+
+const ROT_CCW*: RotationDirection = -1.0 # Counter Clockwise
+const ROT_CW*: RotationDirection = 1.0 # Clockwise
 
 const GameCollisionTypes* = (
   None: cast[GameCollisionType](0), 
@@ -34,6 +40,7 @@ const GameCollisionTypes* = (
   Finish: cast[GameCollisionType](6),
   Chassis: cast[GameCollisionType](7),
   Star: cast[GameCollisionType](8),
+  GravityZone: cast[GameCollisionType](9),
 )
 
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
@@ -41,11 +48,13 @@ const COLLECTIBLE_MASK_BIT = cuint(1 shl 29)
 const KILLER_MASK_BIT = cuint(1 shl 28)
 const FINISH_MASK_BIT = cuint(1 shl 27)
 const PLAYER_MASK_BIT = cuint(1 shl 26)
+const GRAVITY_ZONE_MASK_BIT = cuint(1 shl 25)
 
 const GameShapeFilters* = (
   Player: ShapeFilter(
     categories: PLAYER_MASK_BIT,
-    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or FINISH_MASK_BIT
+    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or
+      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT
   ),
   Terrain: ShapeFilter(
     categories: TERRAIN_MASK_BIT,
@@ -63,16 +72,23 @@ const GameShapeFilters* = (
     categories: FINISH_MASK_BIT,
     mask: PLAYER_MASK_BIT
   ),
-  # remember that collisions only happen when mask of both shapes match the category of the other
+  GravityZone: ShapeFilter(
+    categories: GRAVITY_ZONE_MASK_BIT,
+    mask: PLAYER_MASK_BIT
+  ),
+  # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
 
 type Level* = ref object of RootObj
   terrainPolygons*: seq[Polygon]
   coins*: seq[Coin]
   killers*: seq[Killer]
+  gravityZones*: seq[GravityZone]
   finishPosition*: Vertex
   starPosition*: Option[Vertex]
-  textures*: seq[Texture]
+  assets*: seq[Asset]
+  ## Level size in Pixels
+  size*: Size
   cameraBounds*: BB
   chassisBounds*: BB
   initialChassisPosition*: Vect
@@ -85,6 +101,8 @@ type AttitudeAdjust* = ref object
 
 type GameState* = ref object of RootObj
   level*: Level
+
+  background*: LCDBitmap
 
   ## Game state
   isGameStarted*: bool
@@ -101,14 +119,15 @@ type GameState* = ref object of RootObj
   ## Navigation state
   resetGameOnResume*: bool
 
-  ## timers
+  ## time
+  time*: Seconds
+  frameCounter*: int32
   finishFlipDirectionAt*: Option[Seconds]
   finishTrophyBlinkerAt*: Option[Seconds]
 
 
   ## Physics
   space*: Space
-  time*: Seconds
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect
@@ -128,6 +147,13 @@ type GameState* = ref object of RootObj
   swingArmShape*: Shape
   forkArmShape*: Shape
 
+  # Bike Constraints
+  forkArmSpring*: DampedSpring
+  bikeConstraints*: seq[Constraint]
+
+  ## Rider
+  riderAttitudePosition*: RiderAttitudePosition
+
   # rider bodies
   riderHead*: Body
   riderTorso*: Body
@@ -136,10 +162,6 @@ type GameState* = ref object of RootObj
   riderUpperLeg*: Body
   riderLowerLeg*: Body
   # keep in sync with getRiderBodies()
-
-  # Bike Constraints
-  forkArmSpring*: DampedSpring
-  bikeConstraints*: seq[Constraint]
 
   # Rider Constraints
   riderConstraints*: seq[Constraint] # todo remove if unused
@@ -150,11 +172,15 @@ type GameState* = ref object of RootObj
   # upper arm to torso
   upperArmPivot*: PivotJoint
   elbowPivot*: PivotJoint
+  elbowRotaryLimit*: RotaryLimitJoint
   hipPivot*: PivotJoint
   chassisKneePivot*: PivotJoint
   footPivot*: PivotJoint
   handPivot*: PivotJoint
   headPivot*: PivotJoint
+
+proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
+  result = GravityZone(position: position, gravity: gravity)
 
 proc getRiderBodies*(state: GameState): seq[Body] =
   result = @[
@@ -169,6 +195,3 @@ proc getRiderBodies*(state: GameState): seq[Body] =
 proc destroy*(state: GameState) =
   print("Destroying game state")
   state.space.destroy()
-
-proc newTexture*(image: LCDBitmap, position: Vertex, flip: LCDBitmapFlip): Texture =
-  result = Texture(image: image, position: position, flip: flip)

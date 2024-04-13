@@ -4,7 +4,8 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
 import levels
-import game_bike, game_rider, game_coin, game_star, game_killer, game_finish, game_terrain
+import game_bike, game_rider, game_coin, game_star, game_killer, game_finish
+import game_terrain, game_gravity_zone
 import game_camera
 import sound/game_sound
 import shared_types
@@ -66,7 +67,7 @@ let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, 
   state.remainingStar = none[Star]()
   state.updateGameResult()
   playStarSound()
-  
+
 
 
 let gameOverPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
@@ -81,12 +82,12 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
-  print("coin collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB.userData))
+  print("coin collision for arbiter" & " shapeA: " & repr(shapeA) & " shapeB: " & repr(shapeB))
   discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
   false # don't process the collision further
 
 let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var 
+  var
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
@@ -96,7 +97,7 @@ let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   playCollisionSound()
   if state.gameResult.isSome:
-    # Can'r be game over if the game was already won
+    # Can't be game over if the game was already won
     return true # process collision normally
 
   state.setGameResult(GameResultType.GameOver)
@@ -140,19 +141,25 @@ proc createSpace(level: Level): Space {.raises: [].} =
   handler.beginFunc = finishBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.Finish, GameCollisionTypes.Head)
   handler.beginFunc = finishBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.GravityZone, GameCollisionTypes.Wheel)
+  handler.beginFunc = gravityZoneBeginFunc
+  handler = space.addCollisionHandler(GameCollisionTypes.GravityZone, GameCollisionTypes.Head)
+  handler.beginFunc = gravityZoneBeginFunc
 
   space.addTerrain(level.terrainPolygons)
   space.addCoins(level.coins)
+  space.addGravityZones(level.gravityZones)
   if(level.starPosition.isSome):
     space.addStar(level.starPosition.get)
   space.addFinish(level.finishPosition)
       
   return space
 
-proc newGameState(level: Level): GameState {.raises: [].} =
+proc newGameState(level: Level, background: LCDBitmap = nil): GameState {.raises: [].} =
   let space = level.createSpace()
   state = GameState(
     level: level, 
+    background: background,
     space: space,
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
@@ -163,15 +170,19 @@ proc newGameState(level: Level): GameState {.raises: [].} =
   
   initGameCoins(state)
   initGameStar(state)
+  if background.isNil:
+    initGameBackground(state)
+
   state.killers = space.addKillers(level)
   return state
 
 proc onResetGame() {.raises: [].} =
   state.destroy()
-  state = newGameState(state.level)
+  state = newGameState(state.level, state.background)
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =
+  state.frameCounter += 1
   state.time += timeStep
   let currentTime = state.time
 
@@ -185,14 +196,12 @@ proc updateTimers(state: GameState) =
     # apply a torque to the chassis to compensate for the rider's inertia
     state.chassis.torque = state.driveDirection * -15_500.0
 
-    if currentTime > state.finishFlipDirectionAt.get:
-      state.finishFlipDirectionAt = none[Seconds]()
+    if state.finishFlipDirectionAt.expire(currentTime):
+      print("flip direction timeout")
       state.resetRiderConstraintForces()
 
-  if state.finishTrophyBlinkerAt.isSome:
-    if currentTime > state.finishTrophyBlinkerAt.get:
-      print("blinker timeout")
-      state.finishTrophyBlinkerAt = none[Seconds]()
+  if state.finishTrophyBlinkerAt.expire(currentTime):
+    print("blinker timeout")
 
 proc initGame*(levelPath: string) {.raises: [].} =
   state = newGameState(loadLevel(levelPath))
@@ -233,11 +242,12 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 method update*(gameScreen: GameScreen): int =
   handleInput(state)
   updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
-  
+
   if state.isGameStarted:
     updateAttitudeAdjust(state)
     state.space.step(timeStep)
     state.updateTimers()
+
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)

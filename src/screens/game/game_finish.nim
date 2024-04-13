@@ -3,7 +3,7 @@ import graphics_utils
 import game_types
 
 const
-  vFinishSize = v(38.0, 38.0) # half of the finish image size
+  vFinishSize = v(38.0, 38.0)
 
 proc addFinish*(space: Space, finish: Finish) =
   let vFinish = finish.toVect

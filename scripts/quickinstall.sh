@@ -17,20 +17,10 @@ DEVICE_PDX="${PRODUCT}_device.pdx"
 # Create a PDX file for the device
 "$SCRIPT_DIR"/bundle_device.sh "$PRODUCT.pdx" "$DEVICE_PDX"
 
-# Put device in data disk mode
-until ls /dev/cu.usbmodemPD*
-do
-  echo "Playdate not found. Is it connected to USB and unlocked?"
-  sleep 1
-done
-PDUTIL_DEVICE="$(ls /dev/cu.usbmodemPD* | head -n 1)"
-echo "device $PDUTIL_DEVICE"
-pdutil "${PDUTIL_DEVICE}" datadisk
-
 echo "Waiting for Data Disk to be mounted ... "
 until [ -d /Volumes/PLAYDATE/GAMES ]
 do
-     sleep 1
+  sleep 1
 done
 echo "Game Dir mounted"
 # #echo "Input anything to continue"
@@ -48,7 +38,9 @@ diskutil eject PLAYDATE
 echo "Waiting for USB Device to be mounted ... "
 until ls "${PDUTIL_DEVICE}"
 do
-     sleep 1
+  sleep 1
+  PDUTIL_DEVICE="$(ls /dev/cu.usbmodemPD* | head -n 1)"
+  echo "device $PDUTIL_DEVICE"
 done
 echo "Usb Device Connected"
 
