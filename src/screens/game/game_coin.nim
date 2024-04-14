@@ -16,10 +16,18 @@ proc addCoins(space: Space, coins: seq[Coin]) =
     shape.userData = cast[DataPointer](coin)
     discard space.addShape(shape)
 
+# better deepCopy implementation: https://github.com/nim-lang/Nim/issues/23460
+proc myDeepCopy[T](src: ref T): ref T =
+  new(result)
+  result[] = src[]
+
+# proc myDeepCopy[T](dst, src: ref T) =
+#   dst[] = src[]
+
 proc initGameCoins*(state: GameState) =
   # asssigment by copy
   print "initGameCoins"
   state.remainingCoins = @[]
   for coin in state.level.coins:
-    state.remainingCoins.add(newCoin(coin.position, coin.count))
+    state.remainingCoins.add(myDeepCopy(coin))
   state.space.addCoins(state.remainingCoins)
