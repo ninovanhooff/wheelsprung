@@ -316,11 +316,10 @@ proc drawGame*(statePtr: ptr GameState) =
     # coins
     for coin in state.remainingCoins:
       let coinScreenPos = coin.position - camVertex
-      coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
-      if coin.count > 1:
-        gfx.setDrawMode(kDrawmodeNXOR)
+      if coin.count < 2:
+        coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+      else:
         gfx.drawTextAligned($coin.count, coinScreenPos[0] + 10, coinScreenPos[1])
-        gfx.setDrawMode(kDrawmodeCopy)
 
     # star
     if state.remainingStar.isSome:
