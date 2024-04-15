@@ -11,6 +11,24 @@
     ],
     "propertyTypes": [
         {
+            "id": 3,
+            "name": "Direction8",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "up",
+                "down",
+                "left",
+                "right",
+                "up",
+                "up_left",
+                "up_right",
+                "down_left",
+                "down_right"
+            ],
+            "valuesAsFlags": false
+        },
+        {
             "id": 1,
             "name": "Fill",
             "storageType": "string",
