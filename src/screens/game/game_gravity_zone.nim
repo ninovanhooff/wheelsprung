@@ -21,6 +21,6 @@ let gravityZoneBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space;
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
-  print("gravity zone collision for arbiter" & " shapeA: " & repr(shapeA.userData) & " shapeB: " & repr(shapeB))
   space.gravity=cast[GravityZone](shapeA.userData).gravity
+  print "new gravity", space.gravity
   return false # don't process the collision further

@@ -62,6 +62,31 @@ proc toLCDPattern(str: string): LCDPattern =
     of "grid4": return patGrid4
     else: return nil
 
+proc toDirection8(str: string): Direction8 =
+  case str
+    of "up": return D8_UP
+    of "down": return D8_DOWN
+    of "left": return D8_LEFT
+    of "right": return D8_RIGHT
+    of "up_left": return D8_UP_LEFT
+    of "up_right": return D8_UP_RIGHT
+    of "down_left": return D8_DOWN_LEFT
+    of "down_right": return D8_DOWN_RIGHT
+    else:
+      print("Unknown direction: " & $str)
+      return D8_FALLBACK
+
+proc toGravity(d8: Direction8): Vect =
+  return case d8
+    of D8_UP: v(0.0, -100.0f)
+    of D8_DOWN: v(0.0, 100.0f)
+    of D8_LEFT: v(-100.0f, 0.0)
+    of D8_RIGHT: v(100.0f, 0.0)
+    of D8_UP_LEFT: v(-70.71f, -70.71f)
+    of D8_UP_RIGHT: v(70.71f, -70.71f)
+    of D8_DOWN_LEFT: v(-70.71f, 70.71f)
+    of D8_DOWN_RIGHT: v(70.71f, 70.71f)
+
 proc getFill(obj: LevelObjectEntity): LCDPattern =
   if obj.properties.isSome:
     let fillProp = obj.properties.get.findFirst(it => it.name == "fill")
@@ -75,6 +100,13 @@ proc getCount(obj: LevelObjectEntity): int32 =
     if countProp.isSome:
       return countProp.get.value.getInt.int32
   return 1'i32
+
+proc getDirection8(obj: LevelObjectEntity): Direction8 =
+  if obj.properties.isSome:
+    let directionProp = obj.properties.get.findFirst(it => it.name == "direction")
+    if directionProp.isSome:
+      return directionProp.get.value.getStr.toDirection8()
+  return D8_UP
 
 proc getRequiredRotations(obj: LevelObjectEntity): int32 =
   if obj.properties.isSome:
@@ -180,11 +212,11 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         flip = if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
         randomStartOffset = true
       ))
-
-      level.gravityZones.add(newGravityZone(
+      let gravityZone = newGravityZone(
         position = position,
-        gravity = v(0.0, -100.0)
-      ))
+        gravity = obj.getDirection8().toGravity(),
+      )
+      level.gravityZones.add(gravityZone)
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =

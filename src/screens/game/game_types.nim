@@ -82,6 +82,13 @@ const GameShapeFilters* = (
   # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
 
+
+type Direction8* = enum
+  ## 4 horizontal and 4 diagonal directions
+  D8_UP, D8_UP_RIGHT, D8_RIGHT, D8_DOWN_RIGHT, D8_DOWN, D8_DOWN_LEFT, D8_LEFT, D8_UP_LEFT
+
+const D8_FALLBACK* = D8_UP
+
 type Level* = ref object of RootObj
   terrainPolygons*: seq[Polygon]
   coins*: seq[Coin]
