@@ -13,6 +13,7 @@ type
   Coin* = ref object
     position*: Vertex
     count*: int32
+    activeFrom*: Seconds
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex

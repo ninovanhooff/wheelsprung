@@ -43,9 +43,14 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
   let coinIndex = cast[int](shape.userData)
   print("shape data:" & repr(shape))
   var coin = cast[Coin](shape.userData)
+  if state.time < coin.activeFrom:
+    print("coin activates at: " & repr(coin.activeFrom) & " current time: " & repr(state.time))
+    return
   if coin.count > 1:
     coin.count -= 1
+    coin.activeFrom = state.time + 2.0.Seconds
     print("new count for coin: " & repr(coin))
+    playCoinSound(1f - coin.count.float32 * 0.1f)
     return
 
   print("deleting coin: " & repr(coin))
