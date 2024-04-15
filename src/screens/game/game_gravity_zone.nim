@@ -4,12 +4,13 @@ import game_types
 import utils
 
 const 
-  vGravityZoneRadius = 20.0.Float
+  gravityZoneRadius = 20.0.Float
+  vGravityZoneCenterOffset = v(gravityZoneRadius, gravityZoneRadius)
 
 proc addGravityZones*(space: Space, gravityZones: seq[GravityZone]) =
   for index, gravityZone in gravityZones:
-    let pos = gravityZone.position.toVect
-    let shape = space.addShape(space.staticBody.newCircleShape(vGravityZoneRadius, pos))
+    let vCenter = gravityZone.position.toVect + vGravityZoneCenterOffset
+    let shape = space.addShape(space.staticBody.newCircleShape(gravityZoneRadius, vCenter))
     shape.sensor = true # only detect collisions, don't apply forces to colliders
     shape.collisionType = GameCollisionTypes.GravityZone
     shape.filter = GameShapeFilters.GravityZone
