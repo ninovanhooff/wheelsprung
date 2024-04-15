@@ -8,6 +8,9 @@ type
   Polygon* = object of RootObj
         vertices*: seq[Vertex]
         fill*: LCDPattern
+  Polyline* = object of RootObj
+        vertices*: seq[Vertex]
+        stroke*: LCDPattern
   Rect* {.requiresInit.} = object of RootObj
     x*, y*, width*, height*: int32
 
@@ -29,6 +32,7 @@ type
 
 let
     emptyPolygon*: Polygon = Polygon(vertices: @[], fill: nil)
+    emptyPolyline*: Polyline = Polyline(vertices: @[], stroke: nil)
 
 proc bottom*(rect: Rect): int32 =
   result = rect.y + rect.height
@@ -50,6 +54,9 @@ proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): A
     halfFrameWidth: firstBitmap.width.float32 * 0.5f,
     halfFrameHeight: firstBitmap.height.float32 * 0.5f
   )
+
+proc newPolyline*(vertices: seq[Vertex], stroke: LCDPattern = nil): Polyline =
+    result = Polyline(vertices: vertices, stroke: stroke)
 
 proc newPolygon*(vertices: seq[Vertex], fill: LCDPattern = nil): Polygon =
     result = Polygon(vertices: vertices, fill: fill)

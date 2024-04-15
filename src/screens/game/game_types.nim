@@ -91,6 +91,7 @@ const D8_FALLBACK* = D8_UP
 
 type Level* = ref object of RootObj
   terrainPolygons*: seq[Polygon]
+  terrainPolylines*: seq[Polyline]
   coins*: seq[Coin]
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]

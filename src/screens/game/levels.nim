@@ -139,15 +139,19 @@ proc toVertex(obj: LevelVertexEntity): Vertex =
   return (obj.x, obj.y)
 
 proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
-  if obj.polyline.isSome:
-    return newPolygon(obj.polyline.get.map(toVertex))
-  elif obj.polygon.isSome:
+  if obj.polygon.isSome:
     var segments: seq[LevelVertexEntity] = obj.polygon.get
     # close the polygon by adding the first vertex to the end
     segments.add(segments[0])
-    return newPolygon(segments.map(toVertex), obj.getFill())
+    return newPolygon(vertices = segments.map(toVertex), fill = obj.getFill())
   else:
     return emptyPolygon
+
+proc getPolyline(obj: LevelObjectEntity): Polyline {.raises: [].} =
+  if obj.polyline.isSome:
+    return newPolyline(vertices = obj.polyline.get.map(toVertex))
+  else:
+    return emptyPolyline
 
 proc `+`*(v1, v2: Vertex): Vertex = (v1[0] + v2[0], v1[1] + v2[1])
 
@@ -155,7 +159,7 @@ proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = (obj.x, obj.y)
   var polygon: Polygon = obj.getPolygon()
 
-  if polygon.vertices.high < 2:
+  if polygon.vertices.len < 3:
     return false # polygons require at least 3 vertices
 
   # Offset the polygon by the object's position (localToWorld)
@@ -163,6 +167,19 @@ proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
     vertex = vertex + objOffset
 
   level.terrainPolygons.add(polygon)
+
+proc loadPolyline(level: var Level, obj: LevelObjectEntity): bool =
+  let objOffset: Vertex = (obj.x, obj.y)
+  var polyline: Polyline = obj.getPolyline()
+
+  if polyline.vertices.len < 2:
+    return false # polylines require at least 2 vertices
+
+  # Offset the polyline by the object's position (localToWorld)
+  for vertex in polyline.vertices.mItems():
+    vertex = vertex + objOffset
+
+  level.terrainPolylines.add(polyline)
 
 proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   if obj.gid.isNone:
@@ -244,7 +261,10 @@ proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
-    discard level.loadPolygon(obj) or level.loadGid(obj) or level.loadRectangle(obj)
+    discard level.loadPolygon(obj) or
+    level.loadPolyline(obj) or
+    level.loadGid(obj) or
+    level.loadRectangle(obj)
 
 proc loadLevel*(path: string): Level =
   var level = Level(

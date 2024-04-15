@@ -70,7 +70,7 @@ proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidCol
       innerColor
   )
 
-proc drawPolygon*(vertices: seq[Vertex], width: int = 1, color: LCDColor = kColorBlack) =
+proc drawPolyline*(vertices: seq[Vertex], width: int = 1, color: LCDColor = kColorBlack) =
   for i in 0..vertices.high-1:
     let v0 = vertices[i]
     let v1 = vertices[i+1]
