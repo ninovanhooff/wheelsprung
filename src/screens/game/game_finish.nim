@@ -1,4 +1,4 @@
-import chipmunk7, chipmunk_utils
+import chipmunk7
 import math
 import options
 import playdate/api
