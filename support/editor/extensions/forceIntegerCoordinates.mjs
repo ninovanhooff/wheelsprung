@@ -1,3 +1,6 @@
+import { newPolygon } from "./newPolygon.mjs";
+import { polylineToPolygon } from "./outlinePolyline.mjs";
+
 function forceIntegerCoordinates(mapOrLayer) {
 	tiled.log("Running forceIntegerCoordinates:" + mapOrLayer);
 	if(!mapOrLayer){
@@ -5,7 +8,16 @@ function forceIntegerCoordinates(mapOrLayer) {
 	};
 	if(mapOrLayer.isObjectLayer) {
 		let objects = mapOrLayer.objects;
+		var object;
 		for(object of objects) {
+			if (object.shape == MapObject.Polyline) {
+				var polygon = polylineToPolygon(object.polygon, 4.0);
+				var newObject = newPolygon(object);
+				tiled.log("New object:" + newObject);
+				newObject.polygon = polygon;
+				mapOrLayer.addObject(newObject);
+			};
+
 			object.x = Math.round(object.x);
 			object.y = Math.round(object.y);
 			object.width = Math.round(object.width);
