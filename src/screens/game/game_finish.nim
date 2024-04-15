@@ -1,5 +1,4 @@
 import chipmunk7, chipmunk_utils
-import utils
 import math
 import options
 import playdate/api
@@ -10,8 +9,6 @@ import cache/bitmaptable_cache
 
 const
   vFinishSize = v(38.0, 38.0)
-  vertFinishSize = vFinishSize.toVertex
-  halfVertFinishSize = (vFinishSize / 2f).toVertex
 
   blinkerPeriod = 0.5
   halfBlinkerPeriod = blinkerPeriod / 2.0
@@ -33,16 +30,8 @@ proc addFinish*(space: Space, finish: Finish) =
   shape.filter = GameShapeFilters.Finish
   shape.collisionType = GameCollisionTypes.Finish
 
-proc remainingRotations(state: GameState): int32 =
-  let finishRequiredRotations = state.level.finishRequiredRotations
-  if finishRequiredRotations > 0'i32:
-    let currentRotations = abs(state.chassis.angle / TwoPi).int32
-    return finishRequiredRotations - currentRotations
-  else:
-    return 0'i32
-
-proc isFinishActivated*(state: GameState): bool =
-  state.remainingCoins.len == 0 and state.remainingRotations == 0'i32
+proc isFinishActivated*(state: GameState): bool {.inline.} =
+  state.remainingCoins.len == 0
 
 proc drawFinish*(state: GameState) =
   let level = state.level
@@ -57,14 +46,3 @@ proc drawFinish*(state: GameState) =
   if state.finishTrophyBlinkerAt.isSome:
     let blinkerOn: bool = state.time mod blinkerPeriod < halfBlinkerPeriod
     trophyImageTable.getBitmap(blinkerOn.int32).draw(trophyBlinkerPos[0], trophyBlinkerPos[1], kBitmapUnflipped)
-
-
-  # Rotation count indicator
-  let rotationsToDraw = state.remainingRotations
-  if rotationsToDraw > 0:
-    gfx.drawTextAligned(
-      $rotationsToDraw & "X",
-      finishScreenPos.x + halfVertFinishSize.x,
-      finishScreenPos.y - 20'i32,
-    )
-
