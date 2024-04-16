@@ -87,36 +87,48 @@ proc toGravity(d8: Direction8): Vect =
     of D8_DOWN_LEFT: v(-70.71f, 70.71f)
     of D8_DOWN_RIGHT: v(70.71f, 70.71f)
 
-proc getFill(obj: LevelObjectEntity): LCDPattern =
+proc getProp[T](obj: LevelObjectEntity, name: string, mapper: JsonNode -> T, fallback: T): T =
   if obj.properties.isSome:
-    let fillProp = obj.properties.get.findFirst(it => it.name == "fill")
-    if fillProp.isSome:
-      return fillProp.get.value.getStr.toLCDPattern()
-  return nil # black
+      let fillProp = obj.properties.get.findFirst(it => it.name == name)
+      if fillProp.isSome:
+        return mapper(fillProp.get.value)
+  return fallback
 
-proc getCount(obj: LevelObjectEntity): int32 =
-  if obj.properties.isSome:
-    let countProp = obj.properties.get.findFirst(it => it.name == "count")
-    if countProp.isSome:
-      return countProp.get.value.getInt.int32
-  return 1'i32
 
-proc getDirection8(obj: LevelObjectEntity): Direction8 =
-  if obj.properties.isSome:
-    let directionProp = obj.properties.get.findFirst(it => it.name == "direction")
-    if directionProp.isSome:
-      return directionProp.get.value.getStr.toDirection8()
-  return D8_UP
+proc fill(obj: LevelObjectEntity): LCDPattern =
+  return obj.getProp(
+    name = "fill",
+    mapper = (node => node.getStr.toLCDPattern),
+    fallback = nil
+  )
 
-proc getRequiredRotations(obj: LevelObjectEntity): int32 =
-  if obj.properties.isSome:
-    let fillProp = obj.properties.get.findFirst(it => it.name == "requiredRotations")
-    if fillProp.isSome:
-      return fillProp.get.value.getInt.int32
-  return 0'i32
+proc count(obj: LevelObjectEntity): int32 =
+  return obj.getProp(
+    name = "count",
+    mapper = (node => node.getInt.int32),
+    fallback = 1'i32
+  )
 
-proc getThickness(obj: LevelObjectEntity): float32 =
-  8f # todo
+proc direction8(obj: LevelObjectEntity): Direction8 =
+  return obj.getProp(
+    name = "direction",
+    mapper = (node => node.getStr.toDirection8),
+    fallback = D8_UP
+  )
+
+proc requiredRotations(obj: LevelObjectEntity): int32 =
+  return obj.getProp(
+    name = "requiredRotations",
+    mapper = (node => node.getInt.int32),
+    fallback = 0'i32
+  )
+
+proc thickness(obj: LevelObjectEntity): float32 =
+  return obj.getProp(
+    name = "thickness",
+    mapper = (node => node.getFloat.float32),
+    fallback = 1.0f
+  )
 
 
 proc readDataFileContents(path: string): string {.raises: [].} =
@@ -146,13 +158,13 @@ proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
     var segments: seq[LevelVertexEntity] = obj.polygon.get
     # close the polygon by adding the first vertex to the end
     segments.add(segments[0])
-    return newPolygon(vertices = segments.map(toVertex), fill = obj.getFill())
+    return newPolygon(vertices = segments.map(toVertex), fill = obj.fill)
   else:
     return emptyPolygon
 
 proc getPolyline(obj: LevelObjectEntity): Polyline {.raises: [].} =
   if obj.polyline.isSome:
-    return newPolyline(vertices = obj.polyline.get.map(toVertex), thickness = obj.getThickness())
+    return newPolyline(vertices = obj.polyline.get.map(toVertex), thickness = obj.thickness)
   else:
     return emptyPolyline
 
@@ -204,12 +216,12 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         level.initialDriveDirection = DD_RIGHT
         
     of ClassIds.Coin:
-      level.coins.add(newCoin(position = position, count = obj.getCount()))
+      level.coins.add(newCoin(position = position, count = obj.count))
     of ClassIds.Killer:
       level.killers.add(position)
     of ClassIds.Finish:
       level.finishPosition = position
-      level.finishRequiredRotations = obj.getRequiredRotations()
+      level.finishRequiredRotations = obj.requiredRotations
     of ClassIds.Star:
       level.starPosition = some(position)
     of ClassIds.SignPost:
@@ -234,7 +246,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       ))
       let gravityZone = newGravityZone(
         position = position,
-        gravity = obj.getDirection8().toGravity(),
+        gravity = obj.direction8().toGravity(),
       )
       level.gravityZones.add(gravityZone)
   return true
@@ -257,7 +269,7 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
     objOffset + (0'i32, height),
     objOffset
   ]
-  level.terrainPolygons.add(newPolygon(vertices, obj.getFill()))
+  level.terrainPolygons.add(newPolygon(vertices, obj.fill()))
   return true
 
 proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
