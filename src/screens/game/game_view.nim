@@ -134,7 +134,8 @@ proc initGameBackground*(state: GameState) =
   for polyline in level.terrainPolylines:
     drawPolyline(polyline.vertices, polyline.thickness.int32)
     for vertex in polyline.vertices:
-      fillCircle(vertex.x, vertex.y, (polyline.thickness / 2f).int32)
+      # fill the gaps between sharp-angled line segments
+      fillCircle(vertex.x, vertex.y, ((polyline.thickness - 2.0f) / 2f).int32)
 
   gfx.popContext()
 
