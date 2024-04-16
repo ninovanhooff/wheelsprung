@@ -132,7 +132,9 @@ proc initGameBackground*(state: GameState) =
   level.terrainPolygons = terrainPolygons
 
   for polyline in level.terrainPolylines:
-    drawPolyline(polyline.vertices)
+    drawPolyline(polyline.vertices, polyline.thickness.int32)
+    for vertex in polyline.vertices:
+      fillCircle(vertex.x, vertex.y, (polyline.thickness / 2f).int32)
 
   gfx.popContext()
 

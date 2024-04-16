@@ -70,11 +70,14 @@ proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidCol
       innerColor
   )
 
-proc drawPolyline*(vertices: seq[Vertex], width: int = 1, color: LCDColor = kColorBlack) =
+proc drawPolyline*(vertices: seq[Vertex], width: int32 = 1, color: LCDColor = kColorBlack) =
   for i in 0..vertices.high-1:
     let v0 = vertices[i]
     let v1 = vertices[i+1]
     gfx.drawLine(v0.x, v0.y, v1.x, v1.y, width, color)
+
+proc fillCircle*(x, y: int32, radius: int32, color: LCDColor = kColorBlack ) {.inline.} =
+  gfx.fillEllipse(x - radius,y - radius,radius * 2'i32, radius * 2'i32, 0f, 0f, color);
 
 proc draw*(rect: Rect, color: LCDColor) {.inline.} =
   gfx.drawRect(rect.x, rect.y, rect.width, rect.height, color)

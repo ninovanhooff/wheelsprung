@@ -115,6 +115,9 @@ proc getRequiredRotations(obj: LevelObjectEntity): int32 =
       return fillProp.get.value.getInt.int32
   return 0'i32
 
+proc getThickness(obj: LevelObjectEntity): float32 =
+  8f # todo
+
 
 proc readDataFileContents(path: string): string {.raises: [].} =
   try:
@@ -149,7 +152,7 @@ proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
 
 proc getPolyline(obj: LevelObjectEntity): Polyline {.raises: [].} =
   if obj.polyline.isSome:
-    return newPolyline(vertices = obj.polyline.get.map(toVertex))
+    return newPolyline(vertices = obj.polyline.get.map(toVertex), thickness = obj.getThickness())
   else:
     return emptyPolyline
 

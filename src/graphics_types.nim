@@ -11,6 +11,7 @@ type
   Polyline* = object of RootObj
         vertices*: seq[Vertex]
         stroke*: LCDPattern
+        thickness*: float32
   Rect* {.requiresInit.} = object of RootObj
     x*, y*, width*, height*: int32
 
@@ -55,8 +56,8 @@ proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): A
     halfFrameHeight: firstBitmap.height.float32 * 0.5f
   )
 
-proc newPolyline*(vertices: seq[Vertex], stroke: LCDPattern = nil): Polyline =
-    result = Polyline(vertices: vertices, stroke: stroke)
+proc newPolyline*(vertices: seq[Vertex], thickness: float32, stroke: LCDPattern = nil): Polyline =
+    result = Polyline(vertices: vertices, thickness: thickness, stroke: stroke)
 
 proc newPolygon*(vertices: seq[Vertex], fill: LCDPattern = nil): Polygon =
     result = Polygon(vertices: vertices, fill: fill)
