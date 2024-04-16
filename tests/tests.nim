@@ -14,8 +14,8 @@ proc runTests*() =
     assert normalizeAngle(-2 * Pi32) == 0f
     assert normalizeAngle(-3 * Pi32).almostEqual(Pi32)
 
-    assert roundToNearest(1305, 100) == 1300
-    assert roundToNearest(1351, 100) == 1400
+    assert roundToNearestInt(1305, 100) == 1300
+    assert roundToNearestInt(1351, 100) == 1400
 
     assert lerp(0, 10, 0) == 0
     assert lerp(0, 10, 1) == 10
