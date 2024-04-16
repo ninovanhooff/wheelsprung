@@ -38,9 +38,10 @@ proc drawFinish*(state: GameState) =
   let camVertex = state.camera.toVertex
 
   # trophy itself
-  let finishScreenPos: Vertex = level.finishPosition - camVertex
-  let finishTableIndex: int32 = if state.isFinishActivated: 1'i32 else: 0'i32
-  trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
+  if state.gameResult.isNone:
+    let finishScreenPos: Vertex = level.finishPosition - camVertex
+    let finishTableIndex: int32 = if state.isFinishActivated: 1'i32 else: 0'i32
+    trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
 
   # Last coin collect blinker (HUD)
   if state.finishTrophyBlinkerAt.isSome:
