@@ -40,7 +40,6 @@ proc updateGameResult(state: GameState) {.raises: [].} =
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
   print("coin post step callback")
   let shape = cast[Shape](coinShape)
-  let coinIndex = cast[int](shape.userData)
   print("shape data:" & repr(shape))
   var coin = cast[Coin](shape.userData)
   if state.time < coin.activeFrom:
