@@ -38,6 +38,25 @@
                 "black"
             ],
             "valuesAsFlags": false
+        },
+        {
+            "color": "#ffff9300",
+            "drawFill": true,
+            "id": 4,
+            "members": [
+                {
+                    "name": "thickness",
+                    "type": "float",
+                    "value": 8
+                }
+            ],
+            "name": "Polyline",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object",
+                "project"
+            ]
         }
     ]
 }

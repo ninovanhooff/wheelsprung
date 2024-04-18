@@ -46,20 +46,20 @@ proc prevWrapped*[T: enum](v: T): T =
 
 ### Math
 proc normalizeAngle*(angle: float32): float32 {.inline.} =
-    ## normalize angle to be between 0 (inclusive) and 2 * PI (exclusive)
-    result = angle mod TwoPi
-    if result < 0.0f:
-        result += TwoPi
-    # In case angle was very close to TwoPi or 0.0, the result may be equal to TwoPi.
-    # Therefore, we use if instead of elif
-    if result >= TwoPi:
-        result -= TwoPi
+  ## normalize angle to be between 0 (inclusive) and 2 * PI (exclusive)
+  result = angle mod TwoPi
+  if result < 0.0f:
+    result += TwoPi
+  # In case angle was very close to TwoPi or 0.0, the result may be equal to TwoPi.
+  # Therefore, we use if instead of elif
+  if result >= TwoPi:
+    result -= TwoPi
 
-proc roundToNearest*(num: float, increment: int = 1): int =
-    ## round to the nearest multiple of increment
-    ## ie to nearest 2: 1 -> 0, 2.1 -> 2, 2.6 -> 2, 3.1 -> 4, -1.1 -> -2
+proc roundToNearestInt*(num: float32, increment: int32 = 1): int32 =
+  ## round to the nearest multiple of increment
+  ## ie to nearest 2: 1 -> 0, 2.1 -> 2, 2.6 -> 2, 3.1 -> 4, -1.1 -> -2
 
-    math.floor(num / increment.float + 0.5).int * increment
+  math.floor(num / increment.float32 + 0.5f).int32 * increment
 
 proc lerp*(initial, target, factor: not float32): float64 =
   ## linear interpolation between initial and target

@@ -126,18 +126,20 @@ proc initGameBackground*(state: GameState) =
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
     gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
-    drawPolygon(polygon.vertices)
+    drawPolyline(polygon.vertices)
   # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
   # as a workaround, we re-copy the data back to the level
   level.terrainPolygons = terrainPolygons
 
-  gfx.popContext()
+  for polyline in level.terrainPolylines:
+    drawPolyline(polyline.vertices, polyline.thickness.int32)
+    for vertex in polyline.vertices:
+      # fill the gaps between sharp-angled line segments
+      let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
+      if radius > 0:
+        fillCircle(vertex.x, vertex.y, radius)
 
-# proc offset(vertices: seq[Vertex], off: Vertex): seq[Vertex] =
-#   vertices.map(vertex => (
-#     (vertex[0] - off[0]),
-#     (vertex[1] - off[1])
-#   ))
+  gfx.popContext()
 
 proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(

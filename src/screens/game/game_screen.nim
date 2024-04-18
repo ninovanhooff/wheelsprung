@@ -157,6 +157,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
   handler.beginFunc = gravityZoneBeginFunc
 
   space.addTerrain(level.terrainPolygons)
+  space.addTerrain(level.terrainPolylines)
   # cannot add coins here because they are mutable and thus are part of the state, not the level
   space.addGravityZones(level.gravityZones)
   if(level.starPosition.isSome):
