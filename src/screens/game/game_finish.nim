@@ -4,6 +4,7 @@ import options
 import playdate/api
 import graphics_types, graphics_utils
 import game_types
+import shared_types
 import cache/bitmaptable_cache
 
 
@@ -37,8 +38,8 @@ proc drawFinish*(state: GameState) =
   let level = state.level
   let camVertex = state.camera.toVertex
 
-  # trophy itself
-  if state.gameResult.isNone:
+  # trophy itself. Hide when level is successfully completed.
+  if state.gameResult.isNone or state.gameResult.get.resultType != GameResultType.LevelComplete:
     let finishScreenPos: Vertex = level.finishPosition - camVertex
     let finishTableIndex: int32 = if state.isFinishActivated: 1'i32 else: 0'i32
     trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
