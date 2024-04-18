@@ -22,10 +22,10 @@ type
     isInitialized: bool
 
 let tiltAttitudeAdjustEnabledEditor: Editor = Editor(
-  label: "Tilt Controls", 
+  label: "Leaning Controls",
   incrementor: (config: Config) => config.toggleTiltAttitudeAdjustEnabled,
   decrementor: (config: Config) => config.toggleTiltAttitudeAdjustEnabled,
-  value: (config: Config) => config.getTiltAttitudeAdjustEnabled.displayName,
+  value: (config: Config) => (if config.getTiltAttitudeAdjustEnabled: "Device tilt" else: "d-pad")
 )
 
 let inputTypeEditor: Editor = Editor(
