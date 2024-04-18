@@ -1,5 +1,7 @@
 #!/bin/bash
 
+spriterot -v -r 64 -o ./wheel-table-22-22.png ./wheel.png
+
 spriterot -v -r 64 -o ../../source/images/rider/upper-arm-table-14-14.png ./rider/upper-arm.png
 spriterot -v -r 64 -o ../../source/images/rider/lower-arm-table-12-12.png ./rider/lower-arm.png
 spriterot -v -r 64 -o ../../source/images/rider/upper-leg-table-18-18.png ./rider/upper-leg.png
