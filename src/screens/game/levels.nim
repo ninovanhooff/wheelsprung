@@ -127,7 +127,7 @@ proc thickness(obj: LevelObjectEntity): float32 =
   return obj.getProp(
     name = "thickness",
     mapper = (node => node.getFloat.float32),
-    fallback = 1.0f
+    fallback = 8.0f
   )
 
 

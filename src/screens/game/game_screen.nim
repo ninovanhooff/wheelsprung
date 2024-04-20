@@ -15,6 +15,7 @@ import game_view
 import navigation/[screen, navigator]
 import screens/dialog/dialog_screen
 import screens/settings/settings_screen
+import screens/hit_stop/hit_stop_screen
 
 type GameScreen* = ref object of Screen
 
@@ -110,6 +111,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     return true # process collision normally
 
   state.setGameResult(GameResultType.GameOver)
+  pushScreen(createHitStopScreen())
   discard space.addPostStepCallback(gameOverPostStepCallback, nil, nil)
   return true # we still want to collide
 
@@ -229,7 +231,7 @@ method resume*(gameScreen: GameScreen) =
     pushScreen(newSettingsScreen())
   )
   discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
-      popScreen()
+    popScreen()
   )
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     onResetGame()

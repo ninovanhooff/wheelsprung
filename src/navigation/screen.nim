@@ -6,6 +6,7 @@ type
   ScreenType* {.pure.}= enum
     LevelSelect
     Game
+    HitStop
     Dialog
     Settings
   Screen* {.requiresInit.} = ref object of RootObj

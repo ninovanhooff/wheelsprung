@@ -8,7 +8,8 @@ const
   TwoPi*: float32 = 2 * PI
 
 ### Time
-proc now*(): uint = playdate.system.getCurrentTimeMilliseconds
+proc currentTimeMilliseconds*(): int {.inline.} = playdate.system.getCurrentTimeMilliseconds.int
+proc currentTimeSeconds*(): Seconds {.inline.} = (currentTimeMilliseconds() / 1000).Seconds
 
 proc expire*(expireAt: var Option[Seconds], currentTime: Seconds): bool =
   ## Sets expireAt to none and returns true if expireAt is after currentTime
@@ -21,7 +22,7 @@ proc expire*(expireAt: var Option[Seconds], currentTime: Seconds): bool =
 ### Logging
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
-  playdate.system.logToConsole($now() & ": " &  things.join("\t"))
+  playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
 
 ## Text
 proc vertical*(text: string): string =

@@ -12,6 +12,7 @@ import utils
 import globals
 import cache/bitmaptable_cache
 import lcd_patterns
+import screens/hit_stop/hit_stop_screen
 
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
@@ -241,6 +242,13 @@ method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
 
 method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
   return asset.bitmapTable.getBitmap((frameCounter div 2'i32) mod asset.frameCount)
+
+proc createHitstopScreen*(): HitStopScreen =
+  # Creates hitstopscreen without menu items
+  return newHitStopScreen(
+    position = (50'i32,50'i32),
+    bitmap = riderHeadImageTable.getBitmap(0),
+  )
 
 proc drawPlayer(state: GameState) =
   let chassis = state.chassis
