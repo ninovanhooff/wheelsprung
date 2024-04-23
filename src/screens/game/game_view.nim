@@ -243,13 +243,6 @@ method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
 method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
   return asset.bitmapTable.getBitmap((frameCounter div 2'i32) mod asset.frameCount)
 
-proc createHitstopScreen*(): HitStopScreen =
-  # Creates hitstopscreen without menu items
-  return newHitStopScreen(
-    position = (50'i32,50'i32),
-    bitmap = riderHeadImageTable.getBitmap(0),
-  )
-
 proc drawPlayer(state: GameState) =
   let chassis = state.chassis
   let camera = state.camera
@@ -362,3 +355,24 @@ proc drawGame*(statePtr: ptr GameState) =
     else:
       gfx.drawTextAligned("Go!", 200, messageY)
   
+proc createHitstopScreen*(state: GameState): HitStopScreen =
+  # Creates hitstopscreen without menu items
+  drawGame(unsafeAddr state)
+  let bitmapA = gfx.copyFrameBufferBitmap()
+
+  gfx.setDrawMode(kDrawmodeFillWhite)
+  let chassis = state.chassis
+  let camera = state.camera
+  let riderHead = state.riderHead
+  let riderHeadScreenPos = riderHead.position - camera
+  if state.finishFlipDirectionAt.isSome:
+    # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
+    let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
+    let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
+    riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
+  else:
+    riderHeadImageTable.drawRotated(riderHead, state)
+  gfx.setDrawMode(kDrawmodeCopy)
+
+  let bitmapB = gfx.copyFrameBufferBitmap()
+  return newHitStopScreen(bitmapA, bitmapB)

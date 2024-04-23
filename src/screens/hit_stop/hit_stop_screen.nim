@@ -15,19 +15,20 @@ type
   MenuItemDefinition = tuple[name: string, action: proc() {.raises: [].}]
   MenuItemDefinitions = seq[MenuItemDefinition]
   HitStopScreen* = ref object of Screen
-    position: Vertex
-    bitmap: LCDBitmap
+    currentBitmap: LCDBitmap
+    otherBitmap: LCDBitmap
+    flipBitmapsAt: Seconds
     menuItems: MenuItemDefinitions
     finishAt: Seconds
 
 
 proc newHitStopScreen*(
-  position: Vertex,
-  bitmap: LCDBitmap,
+  bitmapA: LCDBitmap,
+  bitmapB: LCDBitmap,
   menuItems: MenuItemDefinitions = @[],
   duration: Seconds = 0.5.Seconds
 ): HitStopScreen =
-  result = HitStopScreen(position: position, bitmap: bitmap, menuItems: menuItems,
+  result = HitStopScreen(currentBitmap: bitmapA, otherBitmap: bitmapB, menuItems: menuItems,
     finishAt: currentTimeSeconds() + duration,
     screenType: ScreenType.HitStop
   )
@@ -46,4 +47,8 @@ method update*(screen: HitStopScreen): int =
   if currentTimeSeconds() > screen.finishAt:
     print "HitStopScreen finished", currentTimeSeconds(), screen.finishAt
     popScreen()
+  elif currentTimeSeconds() > screen.flipBitmapsAt:
+    swap(screen.currentBitmap, screen.otherBitmap)
+    screen.currentBitmap.draw(0,0, kBitmapUnflipped)
+    screen.flipBitmapsAt = currentTimeSeconds() + 0.1.Seconds
   return 1
