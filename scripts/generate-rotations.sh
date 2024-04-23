@@ -1,5 +1,11 @@
 #!/bin/bash
 
+## Create rotated images for the bike and rider sprites, in a png format that can be converted
+## to pdt using the ./compile_images.sh script
+
+## Requires spriterot to be installed.
+## Install it using: https://github.com/samdze/spriterot/releases/tag/v1.0.1
+
 spriterot -v -r 64 -o ../../source/images/bike-wheel-table-22-22.png ./wheel.png
 spriterot -v -w 48 -h 48 -k -r 64 -o ../../source/images/bike-chassis-table-48-48.png ./bike-chassis.png
 
