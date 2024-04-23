@@ -25,13 +25,13 @@ var
 # forward declarations
 proc onResetGame() {.raises: [].}
 
-proc setGameResult(state: GameState, resultType: GameResultType): GameResult {.discardable.} =
+proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
   result = GameResult(
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.level.starPosition.isSome,
   )
-  state.resetGameOnResume = true
+  state.resetGameOnResume = resetGameOnResume
   state.gameResult = some(result)
 
 proc updateGameResult(state: GameState) {.raises: [].} =
@@ -110,8 +110,8 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     # Can't be game over if the game was already won
     return true # process collision normally
 
-  state.setGameResult(GameResultType.GameOver)
-  pushScreen(createHitStopScreen())
+  state.setGameResult(GameResultType.GameOver, false)
+  pushScreen(createHitStopScreen(state))
   discard space.addPostStepCallback(gameOverPostStepCallback, nil, nil)
   return true # we still want to collide
 
