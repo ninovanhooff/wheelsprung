@@ -5,8 +5,6 @@ import navigation/[screen, navigator]
 import graphics_types
 import shared_types
 import screens/settings/settings_screen
-import options
-import screens/game/game_types
 
 type DialogScreen = ref object of Screen
   gameResult: GameResult
@@ -19,9 +17,8 @@ proc newDialogScreen*(gameResult: GameResult): DialogScreen {.raises: [].} =
   )
 
 
-proc navigateToGameResult*(state: GameState) =
-  state.resetGameOnResume = true
-  newDialogScreen(state.gameResult.get).pushScreen()
+proc navigateToGameResult*(result: GameResult) =
+  newDialogScreen(result).pushScreen()
 
 proc formatTime(time: Seconds): string {.raises: [], tags: [].} =
   try:

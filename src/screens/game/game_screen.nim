@@ -31,6 +31,7 @@ proc setGameResult(state: GameState, resultType: GameResultType): GameResult {.d
     time: state.time,
     starCollected: state.remainingStar.isNone and state.level.starPosition.isSome,
   )
+  state.resetGameOnResume = true
   state.gameResult = some(result)
 
 proc updateGameResult(state: GameState) {.raises: [].} =
@@ -110,7 +111,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     return true # process collision normally
 
   state.setGameResult(GameResultType.GameOver)
-  pushScreen(createHitStopScreen(state))
+  pushScreen(createHitStopScreen())
   discard space.addPostStepCallback(gameOverPostStepCallback, nil, nil)
   return true # we still want to collide
 
@@ -201,7 +202,7 @@ proc updateTimers(state: GameState) =
     let gameResult = state.gameResult.get
     let finishTime = gameResult.time
     if currentTime > finishTime + 2.5.Seconds: # this timeout can be skipped by pressing any button
-      navigateToGameResult(state)
+      navigateToGameResult(gameResult)
 
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
@@ -263,7 +264,7 @@ method update*(gameScreen: GameScreen): int =
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
         playScreamSound()
-      navigateToGameResult(state)
+      navigateToGameResult(state.gameResult.get)
 
   state.updateCamera()
   drawGame(addr state) # todo pass as object?
