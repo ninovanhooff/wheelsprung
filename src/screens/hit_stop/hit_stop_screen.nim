@@ -20,12 +20,11 @@ type
     menuItems*: MenuItemDefinitions
     finishAt: Seconds
 
-
 proc newHitStopScreen*(
   bitmapA: LCDBitmap,
   bitmapB: LCDBitmap,
   menuItems: MenuItemDefinitions = @[],
-  duration: Seconds = 0.5.Seconds
+  duration: Seconds = 0.28.Seconds
 ): HitStopScreen =
   result = HitStopScreen(currentBitmap: bitmapA, otherBitmap: bitmapB, menuItems: menuItems,
     finishAt: currentTimeSeconds() + duration,
@@ -53,5 +52,5 @@ method update*(screen: HitStopScreen): int =
   elif currentTimeSeconds() > screen.flipBitmapsAt:
     swap(screen.currentBitmap, screen.otherBitmap)
     screen.currentBitmap.draw(0,0, kBitmapUnflipped)
-    screen.flipBitmapsAt = currentTimeSeconds() + 0.1.Seconds
+    screen.flipBitmapsAt = currentTimeSeconds() + 0.06.Seconds
   return 1
