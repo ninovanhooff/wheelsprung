@@ -1,5 +1,5 @@
 {. push warning[LockLevel]:off.}
-import options
+import options, sugar
 import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
@@ -19,6 +19,11 @@ import screens/hit_stop/hit_stop_screen
 
 type GameScreen* = ref object of Screen
 
+const
+  restartLevelLabel = "Restart level"
+  levelSelectLabel = "Level select"
+  settingsLabel = "Settings"
+
 var 
   state: GameState
 
@@ -37,6 +42,16 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
 proc updateGameResult(state: GameState) {.raises: [].} =
   if state.gameResult.isSome:
     state.setGameResult(state.gameResult.get.resultType)
+
+proc buildHitStopScreen(state: GameState): HitStopScreen {.raises: [].} =
+  var screen = createHitstopScreen(state)
+  screen.menuItems = @[
+    MenuItemDefinition(name: settingsLabel, action: () => pushScreen(newSettingsScreen())),
+    MenuItemDefinition(name: levelSelectLabel, action: popScreen),
+    MenuItemDefinition(name: restartLevelLabel, action: onResetGame),
+  ]
+
+  return screen
 
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
   print("coin post step callback")
@@ -111,7 +126,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     return true # process collision normally
 
   state.setGameResult(GameResultType.GameOver, false)
-  pushScreen(createHitStopScreen(state))
+  pushScreen(buildHitStopScreen(state))
   discard space.addPostStepCallback(gameOverPostStepCallback, nil, nil)
   return true # we still want to collide
 
@@ -227,13 +242,13 @@ proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
-  discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
+  discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
   )
-  discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
+  discard playdate.system.addMenuItem(levelSelectLabel, proc(menuItem: PDMenuItemButton) =
     popScreen()
   )
-  discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
+  discard playdate.system.addMenuItem(restartLevelLabel, proc(menuItem: PDMenuItemButton) =
     onResetGame()
   )
 

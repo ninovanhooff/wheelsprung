@@ -2,23 +2,22 @@
 
 import playdate/api
 import navigation/[screen, navigator]
-import graphics_types
 import shared_types
 import utils
-
-import screens/settings/settings_screen
 
 
 ## A Screen that Blinks the screen for a few frames
 
 type
-  MenuItemDefinition = tuple[name: string, action: proc() {.raises: [].}]
-  MenuItemDefinitions = seq[MenuItemDefinition]
+  MenuItemDefinition* = ref object of RootObj 
+    name*: string
+    action*: proc() {.raises: [].}
+  MenuItemDefinitions* = seq[MenuItemDefinition]
   HitStopScreen* = ref object of Screen
     currentBitmap: LCDBitmap
     otherBitmap: LCDBitmap
     flipBitmapsAt: Seconds
-    menuItems: MenuItemDefinitions
+    menuItems*: MenuItemDefinitions
     finishAt: Seconds
 
 
@@ -33,14 +32,18 @@ proc newHitStopScreen*(
     screenType: ScreenType.HitStop
   )
 
+proc createMenuCallback(menuItem: MenuItemDefinition): proc(button: PDMenuItemButton) {.raises: [].} =
+  print "createMenuCallback", menuItem.name
+  return proc(button: PDMenuItemButton) {.raises:[].}=
+    popScreen() # pop self (HitStopScreen)
+    print "executing menu callback for", menuItem.name
+    menuItem.action()
+
 method resume*(screen: HitStopScreen) =
   for menuItem in screen.menuItems:
-    let action = menuItem.action
-    let outerCallback = proc() =
-      popScreen() # pop self
-      action()
-    discard playdate.system.addMenuItem(menuItem.name, proc(button: PDMenuItemButton) {.raises: [].} =
-      outerCallback()
+    discard playdate.system.addMenuItem(
+      menuItem.name, 
+      createMenuCallback(menuItem)
     )
 
 method update*(screen: HitStopScreen): int =
