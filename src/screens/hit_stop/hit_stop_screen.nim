@@ -2,10 +2,10 @@
 
 import random
 import playdate/api
-import chipmunk7
+import chipmunk7, chipmunk_utils
 import navigation/[screen, navigator]
 import shared_types
-import utils
+import utils, graphics_utils
 
 
 ## A Screen that Blinks the screen for a few frames
@@ -21,19 +21,19 @@ type
     flipBitmapsAt: Seconds
     menuItems*: MenuItemDefinitions
     finishAt: Seconds
-    maxShakeMagnitude: Float
+    maxShakeMagnitude: Vect
 
 proc newHitStopScreen*(
   bitmapA: LCDBitmap,
   bitmapB: LCDBitmap,
-  maxShakeMagnitude: Float = 10.0f,
+  maxShakeMagnitude: Vect = v(10f, 10f),
   menuItems: MenuItemDefinitions = @[],
   duration: Seconds = 0.38.Seconds
 ): HitStopScreen =
   result = HitStopScreen(currentBitmap: bitmapA, otherBitmap: bitmapB, menuItems: menuItems,
     finishAt: currentTimeSeconds() + duration,
     screenType: ScreenType.HitStop,
-    maxShakeMagnitude: duration * maxShakeMagnitude, # normalize to duration
+    maxShakeMagnitude: maxShakeMagnitude.vmult(duration).abs, # normalize to duration
   )
 
 proc createMenuCallback(menuItem: MenuItemDefinition): proc(button: PDMenuItemButton) {.raises: [].} =
@@ -62,10 +62,9 @@ method update*(screen: HitStopScreen): int =
   
   # Screen shake
   # Background color is set at program init, in wheelsprung.nim
-  let magnitude = (remainingSeconds * screen.maxShakeMagnitude).int32
+  let magnitude = screen.maxShakeMagnitude.abs.vmult(remainingSeconds).toVertex()
   playdate.display.setOffset(
-    rand(-magnitude .. magnitude),
-    rand(-magnitude .. magnitude),
+    rand(-magnitude.x .. magnitude.x),
+    rand(-magnitude.y .. magnitude.y),
   )
-
   return 1

@@ -378,5 +378,5 @@ proc createHitstopScreen*(state: GameState): HitStopScreen =
   return newHitStopScreen(
     bitmapA = bitmapA, 
     bitmapB = bitmapB, 
-    maxShakeMagnitude = chassis.velocity.vlength * 0.2f
+    maxShakeMagnitude = chassis.velocity.vmult(0.2f)
   )

@@ -17,6 +17,9 @@ proc round*(v: Vect): Vect {.inline.} =
 proc floor*(v: Vect): Vect {.inline.} =
   result = v(v.x.floor, v.y.floor)
 
+proc abs*(v: Vect): Vect {.inline.} =
+  result = v(v.x.abs, v.y.abs)
+
 proc `/`*(v: Vect, s: Float): Vect {.inline.} =
   result = v(v.x / s, v.y / s)
 
