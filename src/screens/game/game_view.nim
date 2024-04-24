@@ -375,4 +375,8 @@ proc createHitstopScreen*(state: GameState): HitStopScreen =
   gfx.setDrawMode(kDrawmodeCopy)
 
   let bitmapB = gfx.copyFrameBufferBitmap()
-  return newHitStopScreen(bitmapA, bitmapB)
+  return newHitStopScreen(
+    bitmapA = bitmapA, 
+    bitmapB = bitmapB, 
+    maxShakeMagnitude = chassis.velocity.vlength * 0.2f
+  )
