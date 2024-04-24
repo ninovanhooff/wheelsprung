@@ -57,6 +57,9 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
 
     font = try: playdate.graphics.newFont(FONT_PATH) except: nil
     playdate.graphics.setFont(font)
+    # The color used when the display is drawn at an offset. See HitStopScreen
+    playdate.graphics.setBackgroundColor(kColorBlack)
+
 
     if defined(debug):
       runCatching(runTests, "UNIT TESTS FAILED")
