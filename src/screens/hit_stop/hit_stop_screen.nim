@@ -62,10 +62,10 @@ method update*(screen: HitStopScreen): int =
   
   # Screen shake
   # Background color is set at program init, in wheelsprung.nim
-  let magnitude = (remainingSeconds * screen.maxShakeMagnitude).int32
+  let magnitude = (remainingSeconds * screen.maxShakeMagnitude).abs
   playdate.display.setOffset(
-    rand(-magnitude .. magnitude),
-    rand(-magnitude .. magnitude),
+    rand(-magnitude .. magnitude).int32,
+    rand(-magnitude .. magnitude).int32,
   )
 
   return 1
