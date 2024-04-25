@@ -43,8 +43,11 @@ proc updateGameResult(state: GameState) {.raises: [].} =
   if state.gameResult.isSome:
     state.setGameResult(state.gameResult.get.resultType)
 
-proc buildHitStopScreen(state: GameState): HitStopScreen {.raises: [].} =
-  var screen = createHitstopScreen(state)
+proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen {.raises: [].} =
+  # todo find body / shape that collided
+  # note: shape.body exists. The shape can be added as param to this function
+  # beware that this is currently called from a begin func, not a post step func
+  var screen = createHitstopScreen(state, collisionShape)
   screen.menuItems = @[
     MenuItemDefinition(name: settingsLabel, action: () => pushScreen(newSettingsScreen())),
     MenuItemDefinition(name: levelSelectLabel, action: popScreen),
@@ -125,8 +128,13 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     # Can't be game over if the game was already won
     return true # process collision normally
 
+  var
+    shapeA: Shape
+    shapeB: Shape
+  arb.shapes(addr(shapeA), addr(shapeB))
+
   state.setGameResult(GameResultType.GameOver, false)
-  pushScreen(buildHitStopScreen(state))
+  pushScreen(buildHitStopScreen(state, shapeB))
   discard space.addPostStepCallback(gameOverPostStepCallback, nil, nil)
   return true # we still want to collide
 

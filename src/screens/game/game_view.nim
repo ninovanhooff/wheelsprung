@@ -355,23 +355,27 @@ proc drawGame*(statePtr: ptr GameState) =
     else:
       gfx.drawTextAligned("Go!", 200, messageY)
   
-proc createHitstopScreen*(state: GameState): HitStopScreen =
+proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
   drawGame(unsafeAddr state)
   let bitmapA = gfx.copyFrameBufferBitmap()
 
+  let body = collisionShape.body
+  let imageTable = if body == state.riderHead: riderHeadImageTable else: bikeWheelImageTable
+
   gfx.setDrawMode(kDrawmodeFillWhite)
+  imageTable.drawRotated(body, state)
   let chassis = state.chassis
-  let camera = state.camera
-  let riderHead = state.riderHead
-  let riderHeadScreenPos = riderHead.position - camera
-  if state.finishFlipDirectionAt.isSome:
-    # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
-    let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
-    let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
-    riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
-  else:
-    riderHeadImageTable.drawRotated(riderHead, state)
+  # let camera = state.camera
+  # let riderHead = state.riderHead
+  # let riderHeadScreenPos = riderHead.position - camera
+  # if state.finishFlipDirectionAt.isSome:
+  #   # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
+  #   let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
+  #   let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
+  #   riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
+  # else:
+  #   riderHeadImageTable.drawRotated(riderHead, state)
   gfx.setDrawMode(kDrawmodeCopy)
 
   let bitmapB = gfx.copyFrameBufferBitmap()
