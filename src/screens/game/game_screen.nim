@@ -227,7 +227,7 @@ proc updateTimers(state: GameState) =
   if state.gameResult.isSome:
     let gameResult = state.gameResult.get
     let finishTime = gameResult.time
-    if currentTime > finishTime + 2.5.Seconds: # this timeout can be skipped by pressing any button
+    if currentTime > finishTime + 5.Seconds: # this timeout can be skipped by pressing any button
       state.resetGameOnResume = true
       navigateToGameResult(gameResult)
 
