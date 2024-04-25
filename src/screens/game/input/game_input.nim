@@ -1,6 +1,5 @@
 {.push raises: [].}
 import std/[options, sugar]
-import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
 import utils
@@ -140,10 +139,6 @@ proc resetGameInput*(state: GameState) =
   print("resetGameInput")
   state.isThrottlePressed = false
   state.applyConfig()
-
-const allButtons: PDButtons = PDButton.fullSet
-proc anyButton(buttons: PDButtons): bool =
-  (buttons * allButtons).len > 0
 
 proc handleInput*(state: GameState) =
   state.isThrottlePressed = false

@@ -1,5 +1,5 @@
 import std/[math, options]
-import std/strutils
+import std/[strutils, setutils]
 import playdate/api
 import shared_types
 
@@ -76,7 +76,6 @@ proc lerp*(initial, target, factor: float32): float32 =
   result = (initial * (1.0f - factor)) + (target * factor)
   result = min(max(result, initial), target)
 
-
 ### Sequences
 
 proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
@@ -86,3 +85,9 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
     if pred(x):
       result = some[T](x)
       break
+
+### input
+
+const allButtons: PDButtons = PDButton.fullSet
+proc anyButton*(buttons: PDButtons): bool =
+  (buttons * allButtons).len > 0

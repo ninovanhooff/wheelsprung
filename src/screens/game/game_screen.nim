@@ -53,6 +53,9 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
     MenuItemDefinition(name: levelSelectLabel, action: popScreen),
     MenuItemDefinition(name: restartLevelLabel, action: onResetGame),
   ]
+  screen.onCanceled = proc() =
+    state.resetGameOnResume = true
+    navigateToGameResult(state.gameResult.get)
 
   return screen
 

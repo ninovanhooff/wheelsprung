@@ -20,6 +20,7 @@ type
     otherBitmap: LCDBitmap
     flipBitmapsAt: Seconds
     menuItems*: MenuItemDefinitions
+    onCanceled*: VoidCallBack
     finishAt: Seconds
     maxShakeMagnitude: Float
 
@@ -28,6 +29,7 @@ proc newHitStopScreen*(
   bitmapB: LCDBitmap,
   maxShakeMagnitude: Float = 10.0f,
   menuItems: MenuItemDefinitions = @[],
+  onCanceled: VoidCallBack = noOp,
   duration: Seconds = 0.38.Seconds
 ): HitStopScreen =
   result = HitStopScreen(currentBitmap: bitmapA, otherBitmap: bitmapB, menuItems: menuItems,
@@ -51,6 +53,13 @@ method resume*(screen: HitStopScreen) =
     )
 
 method update*(screen: HitStopScreen): int =
+  let buttonState = playdate.system.getButtonState()
+
+  if buttonState.pushed.anyButton:
+    popScreen()
+    screen.onCanceled()
+    return 0
+  
   let remainingSeconds = screen.finishAt - currentTimeSeconds()
   if remainingSeconds <= 0.Seconds :
     print "HitStopScreen finished", currentTimeSeconds(), screen.finishAt
