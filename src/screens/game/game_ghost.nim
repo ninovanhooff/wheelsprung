@@ -33,6 +33,8 @@ proc newGhost*(): Ghost =
   )
 
 proc pickBestGhost*(ghostA: Ghost, ghostB: Ghost): Ghost =
+  ## When equal, ghostA is picked
+  
   if ghostA.gameResult.resultType > ghostB.gameResult.resultType:
     print "ghostA is better because gameResult.resultType"
     return ghostA
