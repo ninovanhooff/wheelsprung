@@ -33,6 +33,7 @@ type
     headPose*: Pose
     frontWheelPose*: Pose
     rearWheelPose*: Pose
+    flipX*: bool
 
   Ghost* = ref object
     poses*: seq[PlayerPose]

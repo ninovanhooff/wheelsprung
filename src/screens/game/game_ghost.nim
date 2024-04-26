@@ -1,5 +1,6 @@
 import chipmunk7
 import options
+import math
 import playdate/api
 import game_types, shared_types
 import graphics_types
@@ -23,7 +24,7 @@ proc drawGhostPose*(state: GameState, pose: PlayerPose) =
     riderGhostHeadImageTable,
     pose.headPose.position - camera,
     pose.headPose.angle,
-    # todo flip
+    if pose.flipX: kBitmapFlippedX else: kBitmapUnflipped
   )
   drawCircle(camera, pose.frontWheelPose.position, 10f, pose.frontWheelPose.angle, kColorBlack)
   drawCircle(camera, pose.rearWheelPose.position, 10f, pose.rearWheelPose.angle, kColorBlack)
@@ -41,8 +42,10 @@ proc newPlayerPose*(state: GameState): PlayerPose =
   result.headPose = state.riderHead.pose
   result.frontWheelPose = state.frontWheel.pose
   result.rearWheelPose = state.rearWheel.pose
+  result.flipX = state.driveDirection.signbit # signbit is true if driveDirection is negative
 
 proc newGhost*(): Ghost =
+  print "pose size", sizeof PlayerPose
   Ghost(
     poses: newSeqOfCap[PlayerPose](100), # 2 seconds at 50fps
     coinProgress: 0f,
