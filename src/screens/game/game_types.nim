@@ -25,16 +25,18 @@ type
   RiderAttitudePosition* {.pure.} = enum
     Neutral, Forward, Backward
 
-  Pose* = ref object
+  Pose* = object
     position*: Vect
     angle*: Float
 
-  PlayerPose* = object
+  PlayerPose* = ref object
     headPose*: Pose
     frontWheelPose*: Pose
     rearWheelPose*: Pose
 
-  Ghost* = seq[PlayerPose]
+  Ghost* = ref object
+    poses*: seq[PlayerPose]
+    coinProgress*: float32
 
 
 const DD_LEFT*: DriveDirection = -1.0

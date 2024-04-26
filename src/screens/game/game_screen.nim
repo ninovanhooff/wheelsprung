@@ -200,8 +200,8 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
     level: level, 
     background: background,
     space: space,
-    ghostRecording: @[],
-    ghostPlayback: ghostPlayBack.get(@[]),
+    ghostRecording: newGhost(),
+    ghostPlayback: ghostPlayBack.get(newGhost()),
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
   )
@@ -219,7 +219,7 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
 
 proc onResetGame() {.raises: [].} =
   state.destroy()
-  state = newGameState(state.level, state.background, some(state.ghostRecording))
+  state = newGameState(level = state.level, background = state.background, ghostPlayback = some(state.ghostRecording))
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =

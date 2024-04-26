@@ -285,8 +285,9 @@ proc drawGame*(statePtr: ptr GameState) =
 
     drawFinish(state)
 
-  if state.ghostPlayback.high >= state.frameCounter:
-    let ghostPose = state.ghostPlayback[state.frameCounter]
+  let playbackPoses = state.ghostPlayback.poses
+  if playbackPoses.high >= state.frameCounter:
+    let ghostPose = playbackPoses[state.frameCounter]
     state.drawGhostPose(ghostPose)
     
     
