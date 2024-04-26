@@ -4,8 +4,9 @@ import chipmunk7
 import playdate/api
 import utils, chipmunk_utils
 import levels
-import game_bike, game_rider, game_coin, game_star, game_killer, game_finish
-import game_terrain, game_gravity_zone
+import game_bike, game_rider, game_ghost
+import game_coin, game_star, game_killer, game_finish, game_gravity_zone
+import game_terrain
 import game_camera
 import sound/game_sound
 import shared_types
@@ -193,12 +194,14 @@ proc createSpace(level: Level): Space {.raises: [].} =
       
   return space
 
-proc newGameState(level: Level, background: LCDBitmap = nil): GameState {.raises: [].} =
+proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Option[Ghost] = none(Ghost)): GameState {.raises: [].} =
   let space = level.createSpace()
   state = GameState(
     level: level, 
     background: background,
     space: space,
+    ghostRecording: @[],
+    ghostPlayback: ghostPlayBack.get(@[]),
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
   )
@@ -216,7 +219,7 @@ proc newGameState(level: Level, background: LCDBitmap = nil): GameState {.raises
 
 proc onResetGame() {.raises: [].} =
   state.destroy()
-  state = newGameState(state.level, state.background)
+  state = newGameState(state.level, state.background, some(state.ghostRecording))
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =
@@ -285,13 +288,16 @@ method update*(gameScreen: GameScreen): int =
   if state.isGameStarted:
     updateAttitudeAdjust(state)
     state.space.step(timeStep)
-    state.updateTimers()
+    state.ghostRecording.addFrame(state)
 
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
         playScreamSound()
       navigateToGameResult(state.gameResult.get)
+    
+    state.updateTimers() # increment for next frame
+
 
   state.updateCamera()
   drawGame(addr state) # todo pass as object?

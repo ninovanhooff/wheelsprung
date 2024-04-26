@@ -25,6 +25,16 @@ type
   RiderAttitudePosition* {.pure.} = enum
     Neutral, Forward, Backward
 
+  Pose* = ref object
+    position*: Vect
+    angle*: Float
+
+  PlayerPose* = object
+    headPose*: Pose
+    frontWheelPose*: Pose
+    rearWheelPose*: Pose
+
+  Ghost* = seq[PlayerPose]
 
 
 const DD_LEFT*: DriveDirection = -1.0
@@ -116,37 +126,42 @@ type GameState* = ref object of RootObj
 
   background*: LCDBitmap
 
-  ## Game state
+  # Game state
   isGameStarted*: bool
   remainingCoins*: seq[Coin]
   remainingStar*: Option[Star]
   killers*: seq[Body]
   gameResult*: Option[GameResult]
 
-  ## Input
+  # Input
   isThrottlePressed*: bool
   isAccelerometerEnabled*: bool
   lastTorque*: Float # only used to display attitude indicator
 
-  ## Navigation state
+  # Navigation state
   resetGameOnResume*: bool
 
-  ## time
+  # time
   time*: Seconds
   frameCounter*: int32
   finishFlipDirectionAt*: Option[Seconds]
   finishTrophyBlinkerAt*: Option[Seconds]
 
 
-  ## Physics
+  # Physics
   space*: Space
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect
   driveDirection*: DriveDirection
 
-  ## Player
-
+  ## Ghost
+  ghostRecording*: Ghost 
+    ## A ghost that is being recorded
+  ghostPlayback*: Ghost 
+    ## A ghost that represents the best time for the level
+  
+  # Player
   # bike bodies
   rearWheel*: Body
   frontWheel*: Body
