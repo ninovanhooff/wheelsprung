@@ -245,6 +245,8 @@ proc drawGame*(statePtr: ptr GameState) =
   let level = state.level
   let camera = state.camera
   let camVertex = camera.toVertex()
+  let frameCounter: int32 = state.frameCounter
+
 
   if debugDrawLevel:
     state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
@@ -259,7 +261,6 @@ proc drawGame*(statePtr: ptr GameState) =
 
   if debugDrawTextures:
     # assets
-    let frameCounter: int32 = state.frameCounter
     for asset in level.assets:
       let assetScreenPos = asset.position - camVertex
       asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
@@ -285,11 +286,9 @@ proc drawGame*(statePtr: ptr GameState) =
 
     drawFinish(state)
 
-  let playbackPoses = state.ghostPlayback.poses
-  if playbackPoses.high >= state.frameCounter:
-    let ghostPose = playbackPoses[state.frameCounter]
-    state.drawGhostPose(ghostPose)
-    
+  ## do not store poses in a variable to avoid copying
+  if state.ghostPlayback.poses.high >= frameCounter:
+    state.drawGhostPose(state.ghostPlayback.poses[frameCounter])
     
 
   if debugDrawPlayer:

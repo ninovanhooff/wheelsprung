@@ -2,7 +2,6 @@ import chipmunk7
 import playdate/api
 import game_types
 import game_debug_view
-import utils
 
 proc drawGhostPose*(state: GameState, pose: PlayerPose) =
   let camera = state.camera
@@ -11,7 +10,6 @@ proc drawGhostPose*(state: GameState, pose: PlayerPose) =
   drawCircle(camera, pose.rearWheelPose.position, 10f, pose.rearWheelPose.angle, kColorBlack)
 
 proc pose(body: Body): Pose {.inline.} =
-  let position = body.position
   result.position = body.position
   result.angle = body.angle
 
@@ -22,10 +20,9 @@ proc newPlayerPose*(state: GameState): PlayerPose =
 
 proc newGhost*(): Ghost =
   Ghost(
-    poses: @[],
+    poses: newSeqOfCap[PlayerPose](100), # 2 seconds at 50fps
     coinProgress: 0f,
   )
 
 proc addFrame*(ghost: var Ghost, state: GameState) {.inline.} =
-  print "poses len", ghost.poses.len
   ghost.poses.add(state.newPlayerPose)
