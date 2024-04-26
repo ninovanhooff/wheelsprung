@@ -1,5 +1,6 @@
 import chipmunk7
 import options
+import sugar
 import math
 import playdate/api
 import game_types, shared_types
@@ -9,13 +10,44 @@ import cache/bitmaptable_cache
 import game_debug_view
 import utils
 
+type
+  Comparable = concept x, y
+    (x < y) is bool
+
+  AnnotatedComparator = object of RootObj
+    selector: proc(ghost: Ghost): float32
+    descending: bool
+    description: string
+
 var
   riderGhostHeadImageTable: AnnotatedBitmapTable
+  bikeGhostWheelImageTable: AnnotatedBitmapTable
+
+let ghostComparators: seq[AnnotatedComparator] = @[
+  AnnotatedComparator(
+    selector: proc(ghost: Ghost): Comparable = ghost.gameResult.resultType.float32,
+    descending: false,
+    description: "by result type"
+  ),
+  AnnotatedComparator(
+    selector: proc(ghost: Ghost): Comparable = ghost.coinProgress,
+    descending: false,
+    description: "by coin progress"
+  ),
+  AnnotatedComparator(
+    selector: proc(ghost: Ghost): Comparable = ghost.gameResult.time,
+    descending: true,
+    description: "by time"
+  )
+
+]
+
 
 proc initGameGhost*() =
   if riderGhostHeadImageTable != nil: return # already initialized
 
   riderGhostHeadImageTable = getOrLoadBitmapTable(BitmapTableId.RiderGhostHead)
+  bikeGhostWheelImageTable = getOrLoadBitmapTable(BitmapTableId.BikeGhostWheel)
 
 
 proc drawGhostPose*(state: GameState, pose: PlayerPose) =
@@ -26,8 +58,18 @@ proc drawGhostPose*(state: GameState, pose: PlayerPose) =
     pose.headPose.angle,
     if pose.flipX: kBitmapFlippedX else: kBitmapUnflipped
   )
-  drawCircle(camera, pose.frontWheelPose.position, 10f, pose.frontWheelPose.angle, kColorBlack)
-  drawCircle(camera, pose.rearWheelPose.position, 10f, pose.rearWheelPose.angle, kColorBlack)
+  drawRotated(
+    bikeGhostWheelImageTable,
+    pose.frontWheelPose.position - camera,
+    pose.frontWheelPose.angle,
+    kBitmapUnflipped
+  )
+  drawRotated(
+    bikeGhostWheelImageTable,
+    pose.rearWheelPose.position - camera,
+    pose.rearWheelPose.angle,
+    kBitmapUnflipped
+  )
 
 proc updateGhostRecording*(state: GameState, coinProgress: float32) =
   ## takes coinProgress as arg to prevent dependency on game_coin.nim
@@ -52,31 +94,41 @@ proc newGhost*(): Ghost =
     gameResult: fallbackGameResult
   )
 
+proc compare(
+  ghostA: Ghost, 
+  ghostB: Ghost, 
+  byKey: Ghost -> Comparable,
+  descending: bool = false
+): Option[Ghost] =
+  ## Returns the better ghost according to the comparator
+  ## If ghosts are equal, ghostA is picked
+  
+  var keyA = byKey(ghostA)
+  var keyB = byKey(ghostB)
+  if keyA < keyB:
+    return some(if descending: ghostB else: ghostA)
+  elif keyA > keyB:
+    return some(if descending: ghostA else: ghostB)
+  else:
+    return none(Ghost)
+
+
 proc pickBestGhost*(ghostA: Ghost, ghostB: Ghost): Ghost =
   ## When equal, ghostA is picked
+  ## 
   
-  if ghostA.gameResult.resultType > ghostB.gameResult.resultType:
-    print "ghostA is better because gameResult.resultType"
-    return ghostA
-  elif ghostA.gameResult.resultType < ghostB.gameResult.resultType:
-    print "ghostB is better because gameResult.resultType"
-    return ghostB
-  elif ghostA.coinProgress > ghostB.coinProgress:
-    print "ghostA is better because coinProgress"
-    return ghostA
-  elif ghostA.coinProgress < ghostB.coinProgress:
-    print "ghostB is better because coinProgress"
-    return ghostB
-  elif ghostA.gameResult.time < ghostB.gameResult.time:
-    print "ghostA is better because gameResult.time"
-    return ghostA
-  elif ghostA.gameResult.time > ghostB.gameResult.time:
-    print "ghostB is better because gameResult.time"
-    return ghostB
-  else:
-    # extremely unlikely, but possible
-    print "picking ghostA because it's the default"
-    return ghostA
+  result = ghostA.compare(
+    ghostB, 
+    (ghost => ghost.gameResult.resultType)
+  ).get(ghostA.compare(
+    ghostB, 
+    (ghost => ghost.coinProgress),
+  ).get(ghostA.compare(
+    ghostB, 
+    (ghost => ghost.gameResult.time),
+    descending = true
+  ).get(ghostA)
+  ))
 
 proc addPose*(ghost: var Ghost, state: GameState) {.inline.} =
   ghost.poses.add(state.newPlayerPose)
