@@ -7,7 +7,6 @@ import game_types, shared_types
 import graphics_types
 import graphics_utils
 import cache/bitmaptable_cache
-import game_debug_view
 import utils
 
 type
@@ -15,8 +14,8 @@ type
     (x < y) is bool
 
   AnnotatedComparator = object of RootObj
-    selector: proc(ghost: Ghost): float32
-    descending: bool
+    selector: proc(ghost: Ghost): float32 {.raises:[]}
+    preferLargeValue: bool
     description: string
 
 var
@@ -26,20 +25,19 @@ var
 let ghostComparators: seq[AnnotatedComparator] = @[
   AnnotatedComparator(
     selector: proc(ghost: Ghost): Comparable = ghost.gameResult.resultType.float32,
-    descending: false,
-    description: "by result type"
+    preferLargeValue: true,
+    description: "result type"
   ),
   AnnotatedComparator(
     selector: proc(ghost: Ghost): Comparable = ghost.coinProgress,
-    descending: false,
-    description: "by coin progress"
+    preferLargeValue: true,
+    description: "coin progress"
   ),
   AnnotatedComparator(
     selector: proc(ghost: Ghost): Comparable = ghost.gameResult.time,
-    descending: true,
-    description: "by time"
+    preferLargeValue: false,
+    description: "time"
   )
-
 ]
 
 
@@ -87,7 +85,6 @@ proc newPlayerPose*(state: GameState): PlayerPose =
   result.flipX = state.driveDirection.signbit # signbit is true if driveDirection is negative
 
 proc newGhost*(): Ghost =
-  print "pose size", sizeof PlayerPose
   Ghost(
     poses: newSeqOfCap[PlayerPose](100), # 2 seconds at 50fps
     coinProgress: 0f,
@@ -98,37 +95,41 @@ proc compare(
   ghostA: Ghost, 
   ghostB: Ghost, 
   byKey: Ghost -> Comparable,
-  descending: bool = false
+  preferLargeValue: bool = true
 ): Option[Ghost] =
   ## Returns the better ghost according to the comparator
   ## If ghosts are equal, ghostA is picked
   
   var keyA = byKey(ghostA)
   var keyB = byKey(ghostB)
-  if keyA < keyB:
-    return some(if descending: ghostB else: ghostA)
+  if keyB > keyA:
+    return some(if preferLargeValue: ghostB else: ghostA)
   elif keyA > keyB:
-    return some(if descending: ghostA else: ghostB)
+    return some(if preferLargeValue: ghostA else: ghostB)
   else:
     return none(Ghost)
 
 
-proc pickBestGhost*(ghostA: Ghost, ghostB: Ghost): Ghost =
+proc pickBestGhost*(ghostA: Ghost, ghostB: Ghost): Ghost {.raises:[].} =
   ## When equal, ghostA is picked
-  ## 
   
-  result = ghostA.compare(
-    ghostB, 
-    (ghost => ghost.gameResult.resultType)
-  ).get(ghostA.compare(
-    ghostB, 
-    (ghost => ghost.coinProgress),
-  ).get(ghostA.compare(
-    ghostB, 
-    (ghost => ghost.gameResult.time),
-    descending = true
-  ).get(ghostA)
-  ))
+  if ghostA.gameResult.time == 0.Seconds:
+    print "Picked ghostB because ghostA has no time"
+    return ghostB
+  elif ghostB.gameResult.time == 0.Seconds:
+    print "Picked ghostA because ghostB has no time"
+    return ghostA
+  
+  for comparator in ghostComparators:
+    let comparisionResult = compare(ghostA, ghostB, comparator.selector, comparator.preferLargeValue)
+    if comparisionResult.isSome:
+      if comparisionResult.get == ghostA:
+        print "Picked ghostA by", comparator.description
+      else:
+        print "Picked ghostB by", comparator.description
+      return comparisionResult.get
+
+  return ghostA
 
 proc addPose*(ghost: var Ghost, state: GameState) {.inline.} =
   ghost.poses.add(state.newPlayerPose)

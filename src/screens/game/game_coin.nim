@@ -22,7 +22,7 @@ proc totalCount*(coins: seq[Coin]): int32 =
     result += coin.count
 
 proc coinProgress*(state: GameState): float32 =
-  let safeTotalCount: float32 = max(1f, state.remainingCoins.totalCount.float32) # avoid division by zero
+  let safeTotalCount: float32 = max(1f, state.level.coins.totalCount.float32) # avoid division by zero
   let coinProgress = 1f - (state.remainingCoins.totalCount.float32 / safeTotalCount)
   print ("coin progress: " & $coinProgress)
   return coinProgress
