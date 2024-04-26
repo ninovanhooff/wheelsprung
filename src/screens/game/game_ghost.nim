@@ -10,17 +10,15 @@ proc drawGhostPose*(state: GameState, pose: PlayerPose) =
   drawCircle(camera, pose.frontWheelPose.position, 10f, pose.frontWheelPose.angle, kColorBlack)
   drawCircle(camera, pose.rearWheelPose.position, 10f, pose.rearWheelPose.angle, kColorBlack)
 
-proc pose(body: Body): Pose {.inline.} = # todo not public
+proc pose(body: Body): Pose {.inline.} =
   let position = body.position
   result.position = body.position
   result.angle = body.angle
 
 proc newPlayerPose*(state: GameState): PlayerPose =
-  PlayerPose(
-    headPose: state.riderHead.pose,
-    frontWheelPose: state.frontWheel.pose,
-    rearWheelPose: state.rearWheel.pose,
-  )
+  result.headPose = state.riderHead.pose
+  result.frontWheelPose = state.frontWheel.pose
+  result.rearWheelPose = state.rearWheel.pose
 
 proc newGhost*(): Ghost =
   Ghost(

@@ -29,7 +29,7 @@ type
     position*: Vect
     angle*: Float
 
-  PlayerPose* = ref object
+  PlayerPose* = object
     headPose*: Pose
     frontWheelPose*: Pose
     rearWheelPose*: Pose
