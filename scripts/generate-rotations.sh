@@ -15,3 +15,4 @@ spriterot -v -r 64 -o ../../source/images/rider/upper-leg-table-18-18.png ./ride
 spriterot -v -r 64 -o ../../source/images/rider/lower-leg-table-14-14.png ./rider/lower-leg.png
 spriterot -v -r 64 -o ../../source/images/rider/torso-table-18-18.png ./rider/torso.png
 spriterot -v -r 64 -o ../../source/images/rider/head-table-14-14.png ./rider/head.png
+spriterot -v -r 64 -o ../../source/images/rider/ghost-head-table-14-14.png ./rider/ghost-head.png

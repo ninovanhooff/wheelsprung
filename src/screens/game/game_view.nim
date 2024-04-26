@@ -56,6 +56,7 @@ proc initGameView*() =
   killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
   gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
   initGameFinish()
+  initGameGhost()
 
   try:
     coinImage = gfx.newBitmap("images/coin")

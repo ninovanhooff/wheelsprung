@@ -2,12 +2,29 @@ import chipmunk7
 import options
 import playdate/api
 import game_types, shared_types
+import graphics_types
+import graphics_utils
+import cache/bitmaptable_cache
 import game_debug_view
 import utils
 
+var
+  riderGhostHeadImageTable: AnnotatedBitmapTable
+
+proc initGameGhost*() =
+  if riderGhostHeadImageTable != nil: return # already initialized
+
+  riderGhostHeadImageTable = getOrLoadBitmapTable(BitmapTableId.RiderGhostHead)
+
+
 proc drawGhostPose*(state: GameState, pose: PlayerPose) =
   let camera = state.camera
-  drawCircle(camera, pose.headPose.position, 10f, pose.headPose.angle, kColorBlack)
+  drawRotated(
+    riderGhostHeadImageTable,
+    pose.headPose.position - camera,
+    pose.headPose.angle,
+    # todo flip
+  )
   drawCircle(camera, pose.frontWheelPose.position, 10f, pose.frontWheelPose.angle, kColorBlack)
   drawCircle(camera, pose.rearWheelPose.position, 10f, pose.rearWheelPose.angle, kColorBlack)
 

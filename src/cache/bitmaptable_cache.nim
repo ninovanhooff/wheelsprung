@@ -14,6 +14,7 @@ type
     BikeChassis = "images/bike-chassis"
     BikeWheel = "images/bike-wheel"
     RiderTorso = "images/rider/torso"
+    RiderGhostHead = "images/rider/ghost-head"
     RiderHead = "images/rider/head"
     RiderUpperArm = "images/rider/upper-arm"
     RiderLowerArm = "images/rider/lower-arm"
@@ -37,6 +38,7 @@ proc frameCount(id: BitmapTableId): int32 =
   of BitmapTableId.BikeChassis,
     BitmapTableId.BikeWheel,
     BitmapTableId.RiderTorso,
+    BitmapTableId.RiderGhostHead,
     BitmapTableId.RiderHead,
     BitmapTableId.RiderUpperArm,
     BitmapTableId.RiderLowerArm,
