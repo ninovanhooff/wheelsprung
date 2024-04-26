@@ -72,7 +72,7 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
     coin.count -= 1
     coin.activeFrom = state.time + 2.0.Seconds
     print("new count for coin: " & repr(coin))
-    playCoinSound(1f - coin.count.float32 * 0.1f)
+    playCoinSound(state.coinProgress)
     return
 
   print("deleting coin: " & repr(coin))
@@ -83,9 +83,7 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
   else:
     print("deleting coin at index: " & repr(deleteIndex))
     state.remainingCoins.delete(deleteIndex)
-    let coinProgress = 1f - (state.remainingCoins.len.float32 / state.level.coins.len.float32)
-    print ("coin progress: " & $coinProgress)
-    playCoinSound(coinProgress)
+    playCoinSound(state.coinProgress)
 
     if state.remainingCoins.len == 0:
       print("all coins collected")
@@ -219,7 +217,12 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
 
 proc onResetGame() {.raises: [].} =
   state.destroy()
-  state = newGameState(level = state.level, background = state.background, ghostPlayback = some(state.ghostRecording))
+  state.updateGhostRecording(state.coinProgress)
+  state = newGameState(
+    level = state.level, 
+    background = state.background, 
+    ghostPlayback = some(pickBestGhost(state.ghostRecording, state.ghostPlayback))
+  )
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =
@@ -288,7 +291,7 @@ method update*(gameScreen: GameScreen): int =
   if state.isGameStarted:
     updateAttitudeAdjust(state)
     state.space.step(timeStep)
-    state.ghostRecording.addFrame(state)
+    state.ghostRecording.addPose(state)
 
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:

@@ -2,6 +2,8 @@ import math
 import sugar
 import utils
 import options
+import screens/game/game_types
+import screens/game/game_coin
 
 proc runTests*() =
     print "Test: Running tests..."
@@ -30,5 +32,13 @@ proc runTests*() =
     assert @[1, 2, 3].findFirst(it => it mod 2 == 1).get == 1 # should return first match if multiple
     assert @[1, 2, 3].findFirst(it => it == 2).get == 2
     assert @[1, 2, 3].findFirst(it => it == 5).isNone
+
+    let coins: seq[Coin] = @[]
+    let level: Level = Level(coins: coins)
+    let state: GameState = GameState(
+        remainingCoins : coins,
+        level : level
+    )
+    assert state.coinProgress == 1f, "When level has no coins, progress should be 1"
     
     print "Test: Tests passed."

@@ -37,6 +37,7 @@ type
   Ghost* = ref object
     poses*: seq[PlayerPose]
     coinProgress*: float32
+    gameResult*: GameResult
 
 
 const DD_LEFT*: DriveDirection = -1.0

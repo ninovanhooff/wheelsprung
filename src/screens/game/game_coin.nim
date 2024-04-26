@@ -16,6 +16,17 @@ proc addCoins(space: Space, coins: seq[Coin]) =
     shape.userData = cast[DataPointer](coin)
     discard space.addShape(shape)
 
+proc totalCount*(coins: seq[Coin]): int32 =
+  result = 0
+  for coin in coins:
+    result += coin.count
+
+proc coinProgress*(state: GameState): float32 =
+  let safeTotalCount: float32 = max(1f, state.remainingCoins.totalCount.float32) # avoid division by zero
+  let coinProgress = 1f - (state.remainingCoins.totalCount.float32 / safeTotalCount)
+  print ("coin progress: " & $coinProgress)
+  return coinProgress
+
 # better deepCopy implementation: https://github.com/nim-lang/Nim/issues/23460
 proc myDeepCopy[T](src: ref T): ref T =
   new(result)
