@@ -12,6 +12,7 @@ const
 type
   BitmapTableId* {.pure.} = enum
     BikeChassis = "images/bike-chassis"
+    BikeGhostWheel = "images/bike-ghost-wheel"
     BikeWheel = "images/bike-wheel"
     RiderTorso = "images/rider/torso"
     RiderGhostHead = "images/rider/ghost-head"
@@ -36,6 +37,7 @@ proc frameCount(id: BitmapTableId): int32 =
   of BitmapTableId.Gravity: return 33'i32
   
   of BitmapTableId.BikeChassis,
+    BitmapTableId.BikeGhostWheel,
     BitmapTableId.BikeWheel,
     BitmapTableId.RiderTorso,
     BitmapTableId.RiderGhostHead,
