@@ -22,7 +22,6 @@ method resume*(screen: Screen) =
   ## either for the first time or after it was paused
   ## and subsequently brought back to the front of the backstack
   ## This is a good place to add system menu items for this screen.
-  ## For one-time initialization, use init()
   ## Called before update()
   discard
 

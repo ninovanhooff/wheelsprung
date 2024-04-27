@@ -56,6 +56,7 @@ proc drawGhostPose*(state: GameState, pose: PlayerPose) =
     pose.headPose.angle,
     if pose.flipX: kBitmapFlippedX else: kBitmapUnflipped
   )
+  # when the bike is flipped, the wheels don't need to be flipped, so we use kBitmapUnflipped
   drawRotated(
     bikeGhostWheelImageTable,
     pose.frontWheelPose.position - camera,
@@ -75,17 +76,21 @@ proc updateGhostRecording*(state: GameState, coinProgress: float32) =
   state.ghostRecording.gameResult = state.gameResult.get
 
 proc pose(body: Body): Pose {.inline.} =
-  result.position = body.position
-  result.angle = body.angle
+  result = Pose(
+    position: body.position,
+    angle: body.angle
+  )
 
 proc newPlayerPose*(state: GameState): PlayerPose =
-  result.headPose = state.riderHead.pose
-  result.frontWheelPose = state.frontWheel.pose
-  result.rearWheelPose = state.rearWheel.pose
-  result.flipX = state.driveDirection.signbit # signbit is true if driveDirection is negative
+  result = PlayerPose(
+    headPose: state.riderHead.pose,
+    frontWheelPose: state.frontWheel.pose,
+    rearWheelPose: state.rearWheel.pose,
+    flipX: state.driveDirection.signbit # signbit is true if driveDirection is negative
+  )
 
 proc newGhost*(): Ghost =
-  Ghost(
+  result = Ghost(
     poses: newSeqOfCap[PlayerPose](100), # 2 seconds at 50fps
     coinProgress: 0f,
     gameResult: fallbackGameResult
