@@ -127,7 +127,7 @@ let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   playCollisionSound()
   if state.gameResult.isSome:
-    # Can't be game over if the game was already won
+    # Can't be game over if the game was already won or lost
     return true # process collision normally
 
   var
@@ -297,6 +297,7 @@ method update*(gameScreen: GameScreen): int =
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
         playScreamSound()
+      state.resetGameOnResume = true
       navigateToGameResult(state.gameResult.get)
     
     state.updateTimers() # increment for next frame
