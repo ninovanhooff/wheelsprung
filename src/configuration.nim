@@ -15,7 +15,7 @@ proc save*(config: Config) =
     let lenWritten = file.write(jsonString, jsonString.len.uint32)
     if lenWritten != jsonString.len:
       print "Failed to write config file, wrote", lenWritten, "bytes out of", jsonString.len, "bytes"
-    file.close()
+    # no need to close file as Playdate API will do it for us
   except:
     print "Failed to save config file", getCurrentExceptionMsg()
 
@@ -33,6 +33,7 @@ proc makeDir(dir: string) =
 
 proc loadConfig(): Config =
   try:
+    # no need to close file as Playdate API will do it for us
     let jsonString = playdate.file.open("config.json", kFileReadData).readString()
     let config = jsonString.parseJson().to(Config)
     print "Loaded config", repr(config)
