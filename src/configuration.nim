@@ -33,9 +33,8 @@ proc makeDir(dir: string) =
 
 proc loadConfig(): Config =
   try:
-    let file = playdate.file.open("config.json", kFileReadData)
-    let jsonString = file.readString()
-    # file.close()
+    # no need to close file as Playdate API will do it for us
+    let jsonString = playdate.file.open("config.json", kFileReadData).readString()
     let config = jsonString.parseJson().to(Config)
     print "Loaded config", repr(config)
     return config
