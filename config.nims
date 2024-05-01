@@ -16,3 +16,5 @@ else:
     echo "Platform not supported!"
 # Link the chipmunk library.
 switch("passL", "-lchipmunk")
+# Link the HEBitmap library.
+switch("passL", "-lHEBitmap")

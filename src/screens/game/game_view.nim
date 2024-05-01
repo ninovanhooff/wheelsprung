@@ -13,6 +13,7 @@ import globals
 import cache/bitmaptable_cache
 import lcd_patterns
 import screens/hit_stop/hit_stop_screen
+import hebitmap/hebitmap
 
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
@@ -58,6 +59,8 @@ proc initGameView*() =
 
   try:
     coinImage = gfx.newBitmap("images/coin")
+    heBitmapSetPlaydateAPI(playdate)
+    let heCoin = gfx.newHeBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
