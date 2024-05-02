@@ -34,6 +34,7 @@ var
   killerImageTable: AnnotatedBitmapTable
   gravityImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
+  heCoin: HeBitmap
   starImage: LCDBitmap
   gridImage: LCDBitmap
 
@@ -60,7 +61,7 @@ proc initGameView*() =
   try:
     coinImage = gfx.newBitmap("images/coin")
     heBitmapSetPlaydateAPI(playdate)
-    let heCoin = gfx.newHeBitmap("images/coin")
+    heCoin = gfx.newHeBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
@@ -357,6 +358,8 @@ proc drawGame*(statePtr: ptr GameState) =
       gfx.drawTextAligned("Ready?", 200, messageY)
     else:
       gfx.drawTextAligned("Go!", 200, messageY)
+
+  heCoin.draw(100, 100)
   
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
