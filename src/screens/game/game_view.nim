@@ -34,7 +34,7 @@ var
   killerImageTable: AnnotatedBitmapTable
   gravityImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
-  heCoin: HeBitmap
+  heCoin: HEBitmap
   starImage: LCDBitmap
   gridImage: LCDBitmap
 
@@ -60,7 +60,6 @@ proc initGameView*() =
 
   try:
     coinImage = gfx.newBitmap("images/coin")
-    heBitmapSetPlaydateAPI(playdate)
     heCoin = newHeBitmap(coinImage)
     starImage = gfx.newBitmap("images/star")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
