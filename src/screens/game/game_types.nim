@@ -1,5 +1,5 @@
-import playdate/api
 import chipmunk7
+import hebitmap/hebitmap
 import options
 import graphics_types
 import utils
@@ -114,7 +114,7 @@ type AttitudeAdjust* = ref object
 type GameState* = ref object of RootObj
   level*: Level
 
-  background*: LCDBitmap
+  background*: HEBitmap
 
   ## Game state
   isGameStarted*: bool

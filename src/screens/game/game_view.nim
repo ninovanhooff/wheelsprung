@@ -34,7 +34,6 @@ var
   killerImageTable: AnnotatedBitmapTable
   gravityImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
-  heCoin: HEBitmap
   starImage: LCDBitmap
   gridImage: LCDBitmap
 
@@ -60,7 +59,6 @@ proc initGameView*() =
 
   try:
     coinImage = gfx.newBitmap("images/coin")
-    heCoin = newHeBitmap(coinImage)
     starImage = gfx.newBitmap("images/star")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
@@ -121,11 +119,11 @@ proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
 
 proc initGameBackground*(state: GameState) =
   let level = state.level
-  state.background = gfx.newBitmap(
+  let lcdBitmap = gfx.newBitmap(
     level.size.x, level.size.y, kColorWhite
   )
 
-  gfx.pushContext(state.background)
+  gfx.pushContext(lcdBitmap)
 
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
@@ -144,6 +142,7 @@ proc initGameBackground*(state: GameState) =
         fillCircle(vertex.x, vertex.y, radius)
 
   gfx.popContext()
+  state.background = newHeBitmap(lcdBitmap)
 
 proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
@@ -302,7 +301,7 @@ proc drawGame*(statePtr: ptr GameState) =
   let camVertex = camera.toVertex()
 
   if debugDrawLevel:
-    state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
+    state.background.draw(-camVertex.x, -camVertex.y)
   else:
     gfx.clear(kColorWhite)
 
@@ -358,8 +357,6 @@ proc drawGame*(statePtr: ptr GameState) =
     else:
       gfx.drawTextAligned("Go!", 200, messageY)
 
-  heCoin.draw(100, 100)
-  
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
   drawGame(unsafeAddr state)

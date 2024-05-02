@@ -2,6 +2,7 @@
 import options, sugar
 import chipmunk7
 import playdate/api
+import hebitmap/hebitmap
 import utils, chipmunk_utils
 import levels
 import game_bike, game_rider, game_coin, game_star, game_killer, game_finish
@@ -193,7 +194,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
       
   return space
 
-proc newGameState(level: Level, background: LCDBitmap = nil): GameState {.raises: [].} =
+proc newGameState(level: Level, background: HEBitmap = nil): GameState {.raises: [].} =
   let space = level.createSpace()
   state = GameState(
     level: level, 
