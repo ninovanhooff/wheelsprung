@@ -61,7 +61,7 @@ proc initGameView*() =
   try:
     coinImage = gfx.newBitmap("images/coin")
     heBitmapSetPlaydateAPI(playdate)
-    heCoin = gfx.newHeBitmap("images/coin")
+    heCoin = newHeBitmap(coinImage)
     starImage = gfx.newBitmap("images/star")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:

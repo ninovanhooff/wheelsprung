@@ -1,14 +1,13 @@
 {.push raises: [].}
 import std/importutils
 
-import playdate/api
+import playdate/api {.all}
 import utils
 
 type HEBitmapPtr* = pointer
 proc privateHeBitmapFree*(heBitmap: HEBitmapPtr) {.importc: "HEBitmapFree", cdecl.}
 
 type HEBitmapObj* = object of RootObj
-  # lcdBitmapPtr {.requiresInit.}: LCDBitmapPtr
   resource {.requiresInit.}: HEBitmapPtr
   free: bool
 proc `=destroy`(this: var HEBitmapObj) =
@@ -18,7 +17,7 @@ type HEBitmap* = ref HEBitmapObj
 
 type ConstChar {.importc: "const char*".} = cstring
 
-type LCDBitmapPtr* {.importc: "LCDBitmap*", header: "pd_api.h".} = pointer
+# type LCDBitmapPtr* {.importc: "LCDBitmap*", header: "pd_api.h".} = pointer
 
 proc heBitmapSetPlaydateAPI*(api: ptr PlaydateAPI) {.importc: "HEBitmapSetPlaydateAPI", cdecl.}
 
@@ -32,6 +31,12 @@ proc newHeBitmap*(this: ptr PlaydateGraphics, path: string): HEBitmap {.raises: 
     this.freeBitmap(lcdBitmapPtr)
     if heBitmap.resource == nil:
         raise newException(IOError, $err)
+    return heBitmap
+
+proc newHeBitmap*(lcdBitmap: LCDbitmap): HEBitmap =
+    privateAccess(LCDBitmap)
+    var heBitmapPtr = privateHeBitmapNew(lcdBitmap.resource)
+    let heBitmap = HEBitmap(resource: heBitmapPtr, free: true)
     return heBitmap
 
 proc privateHeBitmapDraw*(heBitmap: HEBitmapPtr, x: cint, y: cint) {.importc: "HEBitmapDraw", cdecl.}
