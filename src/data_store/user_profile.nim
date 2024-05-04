@@ -3,6 +3,7 @@ import options
 import common/shared_types
 import level_meta/level_data
 import common/json_utils
+import common/utils
 
 const 
   saveSlotVersion = 1
@@ -15,7 +16,7 @@ type
     bestTime: Option[Seconds]
     hasCollectedStar: bool
   
-  SaveSlot* {.requiresInit.} = ref object of RootObj
+  SaveSlot* = ref object of RootObj
     progress: Table[Path, LevelProgress]
     modelVersion: int
 
@@ -30,7 +31,7 @@ proc getOrInsertProgress(id: Path): LevelProgress =
     saveSlot.progress[id] = result
 
 proc setBestTime*(id: Path, time: Seconds) =
-  let progress: LevelProgress = getOrInsertProgress(id)
+  var progress: LevelProgress = getOrInsertProgress(id)
   progress.bestTime = some(time)
 
 proc getBestTime*(id: Path): Option[Seconds] =
@@ -40,7 +41,7 @@ proc getBestTime*(id: Path): Option[Seconds] =
     result = none(Seconds)
 
 proc setHasCollectedStar*(id: Path) =
-  let progress: LevelProgress = getOrInsertProgress(id)
+  var progress: LevelProgress = getOrInsertProgress(id)
   progress.hasCollectedStar = true
 
 proc getHasCollectedStar*(id: Path): bool =
@@ -53,11 +54,13 @@ proc loadSaveSlot*(): SaveSlot =
   let optSaveSlot = loadJson[SaveSlot](filePath)
   if optSaveSlot.isSome:
     saveSlot = optSaveSlot.get
+    print("Loaded save slot", saveSlot.repr)
   else:
     saveSlot = SaveSlot(
       progress: initTable[Path, LevelProgress](), 
       modelVersion: saveSlotVersion
     )
+    print("Created new save slot")
   result = saveSlot
 
 proc getSaveSlot*(): SaveSlot =
@@ -66,5 +69,5 @@ proc getSaveSlot*(): SaveSlot =
   else:
     result = saveSlot
 
-proc save*() =
+proc saveSaveSlot*() =
   saveSlot.saveJson(filePath)
