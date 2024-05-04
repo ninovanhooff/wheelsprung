@@ -1,7 +1,7 @@
 {.push raises: [].}
 import std/importutils
 
-import playdate/api {.all}
+import playdate/api
 
 type HEBitmapPtr* = pointer
 proc privateHeBitmapFree*(heBitmap: HEBitmapPtr) {.importc: "HEBitmapFree", cdecl.}
@@ -16,12 +16,11 @@ type HEBitmap* = ref HEBitmapObj
 
 type ConstChar {.importc: "const char*".} = cstring
 
-# type LCDBitmapPtr* {.importc: "LCDBitmap*", header: "pd_api.h".} = pointer
-
 proc heBitmapSetPlaydateAPI*(api: ptr PlaydateAPI) {.importc: "HEBitmapSetPlaydateAPI", cdecl.}
 
-proc privateHeBitmapNew*(lcdBitmap: pointer): HEBitmapPtr {.importc: "HEBitmapNew", cdecl.}
+proc privateHeBitmapNew(lcdBitmap: pointer): HEBitmapPtr {.importc: "HEBitmapNew", cdecl.}
 proc newHeBitmap*(this: ptr PlaydateGraphics, path: string): HEBitmap {.raises: [IOError]} =
+  ## Load an image from a file.
   privateAccess(PlaydateGraphics)
   var err: ConstChar = nil
   var lcdBitmapPtr = this.loadBitmap(path, addr(err))
@@ -32,7 +31,9 @@ proc newHeBitmap*(this: ptr PlaydateGraphics, path: string): HEBitmap {.raises: 
     raise newException(IOError, $err)
   return heBitmap
 
-proc newHeBitmap*(lcdBitmap: LCDbitmap): HEBitmap =
+proc newHeBitmap*(lcdBitmap: LCDBitmap): HEBitmap =
+  ## Create a new bitmap from an existing LCDBitmap.
+  ## The LCDBitmap is not freed or changed and can still be used.
   privateAccess(LCDBitmap)
   var heBitmapPtr = privateHeBitmapNew(lcdBitmap.resource)
   let heBitmap = HEBitmap(resource: heBitmapPtr, free: true)
