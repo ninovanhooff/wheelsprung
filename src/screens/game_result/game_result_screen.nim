@@ -4,10 +4,13 @@ import playdate/api
 import navigation/[screen, navigator]
 import common/graphics_types
 import common/shared_types
+import common/utils
 import screens/settings/settings_screen
+import data_store/user_profile
 
 type GameResultScreen = ref object of Screen
   gameResult: GameResult
+  hasPersistedResult: bool
 
 
 proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
@@ -42,10 +45,20 @@ proc drawGameResult(self: GameResultScreen) =
 
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
 
+proc persistGameResult(gameResult: GameResult) =
+  try:
+    setBestTime(gameResult.levelId, gameResult.time)
+  except:
+    print("Failed to persist game result", getCurrentExceptionMsg())
+
 method resume*(self: GameResultScreen) =
 
   drawGameResult(self) # once in resume is enough, static screen
-  
+
+  if not self.hasPersistedResult:
+    persistGameResult(self.gameResult)
+    self.hasPersistedResult = true
+
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
   )
