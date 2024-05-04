@@ -1,14 +1,16 @@
 import playdate/api
-import json
+import marshal
 import utils
 import options
+import tables
 
 let kFileReadAny*: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
-
 proc saveJson*[T](value: T, path: string) {.raises:[].} =
-  let bytes: seq[byte] = cast[seq[byte]]($(%value))
   try:
+    let jsonNode = $$value
+    let jsonString = $jsonNode
+    let bytes: seq[byte] = cast[seq[byte]](jsonString)
     let file = playdate.file.open(path, kFileWrite)
     let lenWritten = file.write(bytes, bytes.len.uint32)
     if lenWritten != bytes.len:
@@ -20,7 +22,7 @@ proc saveJson*[T](value: T, path: string) {.raises:[].} =
 proc loadJson*[T](path: string, fileOptions: FileOptions = kFileReadAny): Option[T] {.raises:[].} =
   try:
     let jsonString = playdate.file.open(path, fileOptions).readString()
-    let value = parseJson(jsonString).to(T)
+    let value = to[T](jsonString)
     # no need to close file as Playdate API will do it for us
     return some(value)
   except:
