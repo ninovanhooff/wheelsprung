@@ -4,7 +4,7 @@ import sugar
 import options
 import common/utils
 import common/shared_types
-import configuration/configuration_types
+import data_store/configuration_types
 import common/json_utils
 
 var config: Config

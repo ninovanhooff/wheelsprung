@@ -5,7 +5,7 @@ import strformat
 import ../tests/tests
 import common/utils
 import globals
-import configuration/configuration
+import data_store/configuration
 import navigation/[navigator, screen]
 
 

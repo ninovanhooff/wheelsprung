@@ -8,7 +8,7 @@ import screens/game/[
 ]
 import input/input_manager
 import common/shared_types
-import configuration/configuration
+import data_store/configuration
 import input/input_response
 import screens/dialog/dialog_screen
 

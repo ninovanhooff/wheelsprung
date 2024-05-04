@@ -2,7 +2,7 @@ import playdate/api
 import navigation/[screen, navigator]
 import common/graphics_types
 import common/utils
-import configuration/configuration
+import data_store/configuration
 import level_meta/level_data
 import screens/game/game_screen
 import screens/settings/settings_screen

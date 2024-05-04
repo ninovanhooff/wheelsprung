@@ -3,7 +3,7 @@ import common/utils
 import common/[graphics_utils, graphics_types]
 import common/shared_types
 import input/input_response
-import configuration/configuration_types
+import data_store/configuration_types
 
 proc drawDPadInputResponsePreview*(config: Config, rect: Rect) =
   rect.fill(kColorWhite)
