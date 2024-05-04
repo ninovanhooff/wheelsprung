@@ -11,39 +11,39 @@ const
 
 type 
   LevelProgress* = ref object of RootObj
-    levelId: LevelId
+    levelId: Path
     bestTime: Option[Seconds]
     hasCollectedStar: bool
   
   SaveSlot* {.requiresInit.} = ref object of RootObj
-    progress: Table[LevelId, LevelProgress]
+    progress: Table[Path, LevelProgress]
     modelVersion: int
 
 var saveSlot: SaveSlot
   ## Global singleton
 
-proc getOrInsertProgress(id: LevelId): LevelProgress =
+proc getOrInsertProgress(id: Path): LevelProgress =
   if saveSlot.progress.hasKey(id):
     result = saveSlot.progress[id]
   else:
     result = LevelProgress(levelId: id)
     saveSlot.progress[id] = result
 
-proc setBestTime*(id: LevelId, time: Seconds) =
+proc setBestTime*(id: Path, time: Seconds) =
   let progress: LevelProgress = getOrInsertProgress(id)
   progress.bestTime = some(time)
 
-proc getBestTime*(id: LevelId): Option[Seconds] =
+proc getBestTime*(id: Path): Option[Seconds] =
   if saveSlot.progress.hasKey(id):
     result = saveSlot.progress[id].bestTime
   else:
     result = none(Seconds)
 
-proc setHasCollectedStar*(id: LevelId) =
+proc setHasCollectedStar*(id: Path) =
   let progress: LevelProgress = getOrInsertProgress(id)
   progress.hasCollectedStar = true
 
-proc getHasCollectedStar*(id: LevelId): bool =
+proc getHasCollectedStar*(id: Path): bool =
   if saveSlot.progress.hasKey(id):
     result = saveSlot.progress[id].hasCollectedStar
   else:
@@ -55,7 +55,7 @@ proc loadSaveSlot*(): SaveSlot =
     saveSlot = optSaveSlot.get
   else:
     saveSlot = SaveSlot(
-      progress: initTable[LevelId, LevelProgress](), 
+      progress: initTable[Path, LevelProgress](), 
       modelVersion: saveSlotVersion
     )
   result = saveSlot

@@ -3,7 +3,7 @@ import sugar
 import sequtils
 
 type
-  Path = string 
+  Path* = string
   LevelMeta* = ref object of RootObj
     name*: string
     path*: string
