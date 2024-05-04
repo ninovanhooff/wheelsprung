@@ -98,8 +98,8 @@ proc refreshLevelMetas(screen: LevelSelectScreen) =
   print "unknown levels: ", repr(levelPaths)
 
   for levelPath in levelPaths:
+    # for unknown levels, add them to the list using path as name
     let levelMeta = newLevelMeta(
-      LevelId.Unknown,
       levelPath,
       levelPath
     )
