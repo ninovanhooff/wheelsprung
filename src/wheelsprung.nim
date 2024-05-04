@@ -6,6 +6,7 @@ import ../tests/tests
 import common/utils
 import globals
 import data_store/configuration
+import data_store/user_profile
 import navigation/[navigator, screen]
 
 
@@ -52,6 +53,7 @@ proc catchingUpdate(): int {.raises: [].} =
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   if event == kEventInit:
+    discard getSaveSlot() # preload user profile
     playdate.display.setRefreshRate(refreshRate)
     playdate.system.randomize() # seed the random number generator
 
@@ -74,6 +76,9 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)
+  elif event == kEventTerminate or event == kEventLowPower:
+    print("Program will terminate")
+    saveSaveSlot()
   elif event == kEventKeyReleased:
     if keycode == 116:
       print("T")
@@ -110,5 +115,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("refreshRate:" & $refreshRate)
     else:
       print("keycode:" & $keycode)
+  else:
+    print("unhandled event:" & $event & " keycode:" & $keycode)
 # Used to setup the SDK entrypoint
 initSDK()
