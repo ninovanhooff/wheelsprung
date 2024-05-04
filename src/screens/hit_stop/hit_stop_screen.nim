@@ -4,8 +4,8 @@ import random
 import playdate/api
 import chipmunk7
 import navigation/[screen, navigator]
-import shared_types
-import utils
+import common/shared_types
+import common/utils
 
 
 ## A Screen that Blinks the screen for a few frames

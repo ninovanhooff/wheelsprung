@@ -1,8 +1,8 @@
 {.push raises: [].}
 import tables
 import playdate/api
-import graphics_types
-import utils
+import common/graphics_types
+import common/utils
 
 type 
   # a table mapping image path to LCDBitmap

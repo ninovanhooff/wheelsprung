@@ -2,9 +2,9 @@ import chipmunk7
 import math
 import options
 import playdate/api
-import graphics_types, graphics_utils
+import common/[graphics_types, graphics_utils]
 import game_types
-import shared_types
+import common/shared_types
 import cache/bitmaptable_cache
 
 

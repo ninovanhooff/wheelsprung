@@ -1,6 +1,6 @@
 import game_types
 import chipmunk7, chipmunk_utils
-import graphics_utils
+import common/graphics_utils
 
 const
   cameraLerpSpeed = 0.05

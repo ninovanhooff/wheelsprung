@@ -3,9 +3,9 @@ import options
 import std/strutils
 import strformat
 import ../tests/tests
-import utils
+import common/utils
 import globals
-import configuration
+import configuration/configuration
 import navigation/[navigator, screen]
 
 

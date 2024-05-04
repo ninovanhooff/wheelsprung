@@ -1,11 +1,12 @@
 import playdate/api
 import navigation/[screen, navigator]
-import graphics_types
-import utils
-import configuration
-
+import common/graphics_types
+import common/utils
+import configuration/configuration
+import level_meta/level_data
 import screens/game/game_screen
 import screens/settings/settings_screen
+import tables
 
 const 
   borderInset = 24
@@ -13,7 +14,7 @@ const
   maxLines = 8 
 
 type LevelSelectScreen = ref object of Screen
-  levelPaths: seq[string]
+  levelMetas: seq[LevelMeta]
   selectedIndex: int
   scrollPosition: int
 
@@ -21,7 +22,10 @@ proc getLevelPaths(): seq[string] =
   playdate.file.listFiles(levelsBasePath)
 
 proc newLevelSelectScreen*(): LevelSelectScreen =
-  return LevelSelectScreen(screenType: ScreenType.LevelSelect)
+  return LevelSelectScreen(
+    levelMetas: @[],
+    screenType: ScreenType.LevelSelect
+  )
 
 proc updateScrollPosition(screen: LevelSelectScreen) =
   if screen.selectedIndex < screen.scrollPosition:
@@ -33,7 +37,7 @@ proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonState()
 
   if kButtonA in buttonState.pushed:
-    let levelPath = levelsBasePath & screen.levelPaths[screen.selectedIndex]
+    let levelPath = levelsBasePath & screen.levelMetas[screen.selectedIndex].path
     let gameScreen = newGameScreen(levelPath)
     # the ganme screen loaded successfully, save as last opened level
     setLastOpenedLevel(levelPath)
@@ -41,14 +45,14 @@ proc updateInput(screen: LevelSelectScreen) =
   elif kButtonUp in buttonState.pushed:
     screen.selectedIndex -= 1
     if screen.selectedIndex < 0:
-      screen.selectedIndex = screen.levelPaths.len - 1
+      screen.selectedIndex = screen.levelMetas.len - 1
   elif kButtonDown in buttonState.pushed:
     screen.selectedIndex += 1
-    if screen.selectedIndex >= screen.levelPaths.len:
+    if screen.selectedIndex >= screen.levelMetas.len:
       screen.selectedIndex = 0
   elif kButtonDown in buttonState.pushed:
     screen.selectedIndex += 1
-    if screen.selectedIndex >= screen.levelPaths.len:
+    if screen.selectedIndex >= screen.levelMetas.len:
       screen.selectedIndex = 0
 
   updateScrollPosition(screen)
@@ -64,16 +68,17 @@ proc drawLevelPaths(screen: LevelSelectScreen) =
   var y = 40
   let maxIdx = clamp(
     screen.scrollPosition + maxLines - 1, 
-    0, screen.levelPaths.high
+    0, screen.levelMetas.high
   )
-  for level in screen.levelPaths[screen.scrollPosition .. maxIdx]:
-    gfx.drawText(level, borderInset * 2, y)
+  for level in screen.levelMetas[screen.scrollPosition .. maxIdx]:
+    gfx.drawText(level.name, borderInset * 2, y)
     y += 20
   let cursorY = 40 + 20 * (screen.selectedIndex - screen.scrollPosition)
   gfx.drawText(">", borderInset + 8, cursorY)
 
 proc drawButtons(screen: LevelSelectScreen) =
-  let selectedFileName = screen.levelPaths[screen.selectedIndex]
+  discard
+  let selectedFileName = screen.levelMetas[screen.selectedIndex].name
   gfx.drawTextAligned("Ⓐ Play " & selectedFileName, 200, 218)
 
 proc draw(screen: LevelSelectScreen) =
@@ -83,14 +88,31 @@ proc draw(screen: LevelSelectScreen) =
   drawLevelPaths(screen)
   drawButtons(screen)
 
+proc refreshLevelMetas(screen: LevelSelectScreen) =
+  var levelPaths = getLevelPaths()
+  for levelMeta in levels.values:
+    let metaIndex = levelPaths.find(levelMeta.path)
+    if metaIndex >= 0:
+      screen.levelMetas.add(levelMeta)
+      levelPaths.del(metaIndex)
+  print "unknown levels: ", repr(levelPaths)
+
+  for levelPath in levelPaths:
+    let levelMeta = newLevelMeta(
+      LevelId.Unknown,
+      levelPath,
+      levelPath
+    )
+    screen.levelMetas.add(levelMeta)
+
 method resume*(screen: LevelSelectScreen) =
   try:
-    screen.levelPaths = getLevelPaths()
+    screen.refreshLevelMetas()
   except IOError:
     print("Error reading level paths")
 
-  print("paths: ")
-  print(screen.levelPaths)
+  print("metas: ")
+  print(repr(screen.levelMetas))
 
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())

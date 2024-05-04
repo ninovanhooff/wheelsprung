@@ -2,13 +2,13 @@
 import options, sugar
 import chipmunk7
 import playdate/api
-import utils, chipmunk_utils
-import levels
+import common/utils, chipmunk_utils
+import game_level_loader
 import game_bike, game_rider, game_coin, game_star, game_killer, game_finish
 import game_terrain, game_gravity_zone
 import game_camera
 import sound/game_sound
-import shared_types
+import common/shared_types
 import game_types, game_constants
 import input/game_input
 import game_view

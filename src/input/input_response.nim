@@ -2,8 +2,8 @@
 import std/[sugar, math]
 import chipmunk7
 import screens/game/game_constants
-import shared_types
-import configuration, configuration_types
+import common/shared_types
+import configuration/[configuration, configuration_types]
 
 type InputResponse = (Seconds) -> Float
 

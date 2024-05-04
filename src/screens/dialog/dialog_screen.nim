@@ -2,8 +2,8 @@
 import std/strformat
 import playdate/api
 import navigation/[screen, navigator]
-import graphics_types
-import shared_types
+import common/graphics_types
+import common/shared_types
 import screens/settings/settings_screen
 
 type DialogScreen = ref object of Screen

@@ -1,9 +1,9 @@
 import playdate/api
 import chipmunk7
 import options
-import graphics_types
-import utils
-import shared_types
+import common/graphics_types
+import common/utils
+import common/shared_types
 
 type 
   Camera* = Vect

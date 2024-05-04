@@ -3,8 +3,8 @@
 import sugar, options
 import strformat
 import playdate/api
-import graphics_types
-import configuration_types
+import common/graphics_types
+import configuration/configuration_types
 
 const cellPadding = 8
 

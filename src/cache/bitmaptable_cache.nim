@@ -1,8 +1,8 @@
 {.push raises: [].}
 import tables
 import playdate/api
-import graphics_types
-import utils
+import common/graphics_types
+import common/utils
 
 const
   ## Amount of rotation images (angle steps) for sprites which sjhould be freely rotatable

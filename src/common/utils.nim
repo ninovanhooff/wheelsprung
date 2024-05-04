@@ -1,7 +1,7 @@
 import std/[math, options]
 import std/[strutils, setutils]
 import playdate/api
-import shared_types
+import common/shared_types
 
 const
   Pi32*: float32 = PI

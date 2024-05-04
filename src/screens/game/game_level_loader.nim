@@ -1,16 +1,17 @@
 import chipmunk7
 import options
-import utils
+import common/utils
 import sugar
 import std/json
 import std/sequtils
 import playdate/api
 import game_types
-import graphics_types
-import graphics_utils
+import common/graphics_types
+import common/graphics_utils
+import common/json_utils
 import cache/bitmap_cache
 import cache/bitmaptable_cache
-import lcd_patterns
+import common/lcd_patterns
 
 type
   LevelPropertiesEntity = ref object of RootObj
@@ -54,8 +55,6 @@ const
   vPlayerChassisOffset: Vect = v(30.0, 36.0)
   ## The amount of pixels the chassis center can be outside the level bounds before the game over
   chassisLevelBoundsSlop: Float = 50.Float
-
-let kFileReadAny: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
 proc toLCDPattern(str: string): LCDPattern =
   case str

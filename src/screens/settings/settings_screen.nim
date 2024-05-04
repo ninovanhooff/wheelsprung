@@ -4,8 +4,8 @@
 import sugar, options
 import playdate/api
 import navigation/[navigator, screen]
-import configuration_types, configuration
-import graphics_types, graphics_utils
+import configuration/[configuration_types, configuration]
+import common/[graphics_types, graphics_utils]
 import editor, preview
 
 const 

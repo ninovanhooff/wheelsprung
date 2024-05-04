@@ -1,6 +1,6 @@
 import math
 import sugar
-import utils
+import common/utils
 import options
 
 proc runTests*() =

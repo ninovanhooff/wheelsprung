@@ -2,14 +2,14 @@
 import std/[options, sugar]
 import playdate/api
 import chipmunk7, chipmunk_utils
-import utils
+import common/utils
 import screens/game/[
   game_types, game_constants, game_bike, game_rider
 ]
 import input/input_manager
-import shared_types
-import configuration
-import input_response
+import common/shared_types
+import configuration/configuration
+import input/input_response
 import screens/dialog/dialog_screen
 
 const

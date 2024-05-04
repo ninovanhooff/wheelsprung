@@ -12,7 +12,7 @@
 
 import std/sugar
 import screen
-import utils
+import common/utils
 import playdate/api
 
 type Navigator = () -> (void)

@@ -1,7 +1,7 @@
 import playdate/api
 import sugar
-import utils, audio_utils
-import shared_types
+import common/[utils, audio_utils]
+import common/shared_types
 import screens/game/game_types
 import bike_engine
 
@@ -44,4 +44,3 @@ proc updateBikeKickStart*(state: GameState) =
     # nearly at the end of the kickstart sound.
     # since gapless playback is hard, start the engine now
     startBikeEngine()
-  

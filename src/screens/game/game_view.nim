@@ -4,14 +4,15 @@ import playdate/api
 import math
 import options
 import chipmunk7
-import game_types, graphics_types, shared_types
+import game_types
+import common/[graphics_types, shared_types]
 import game_bike, game_finish
-import graphics_utils
+import common/graphics_utils
 import chipmunk_utils
-import utils
+import common/utils
 import globals
 import cache/bitmaptable_cache
-import lcd_patterns
+import common/lcd_patterns
 import screens/hit_stop/hit_stop_screen
 
 const
