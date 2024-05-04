@@ -3,6 +3,8 @@ import chipmunk7
 type
   Seconds* = Float
 
+  Path* = string
+
   DPadInputType* {.pure.} = enum
     Constant, Linear, Parabolic, Sinical, EaseOutBack, Jolt
 
@@ -10,6 +12,7 @@ type
     GameOver, LevelComplete
 
   GameResult* = ref object of RootObj
+    levelId*: Path
     resultType*: GameResultType
     time*: Seconds
     starCollected*: bool

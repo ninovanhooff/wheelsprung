@@ -282,6 +282,7 @@ proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
 
 proc loadLevel*(path: string): Level =
   var level = Level(
+    id: path,
     terrainPolygons: @[],
     initialChassisPosition: v(80.0, 80.0),
     initialDriveDirection: DD_RIGHT,

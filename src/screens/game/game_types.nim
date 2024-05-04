@@ -90,6 +90,7 @@ type Direction8* = enum
 const D8_FALLBACK* = D8_UP
 
 type Level* = ref object of RootObj
+  id*: Path
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
   coins*: seq[Coin]

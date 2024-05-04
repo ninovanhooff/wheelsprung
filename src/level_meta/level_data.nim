@@ -1,9 +1,9 @@
 import tables
 import sugar
 import sequtils
+import common/shared_types
 
 type
-  Path* = string
   LevelMeta* = ref object of RootObj
     name*: string
     path*: string

@@ -7,7 +7,7 @@ type
     LevelSelect
     Game
     HitStop
-    Dialog
+    GameResult
     Settings
   Screen* {.requiresInit.} = ref object of RootObj
     screenType*: ScreenType

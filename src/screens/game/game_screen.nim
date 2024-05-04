@@ -13,7 +13,7 @@ import game_types, game_constants
 import input/game_input
 import game_view
 import navigation/[screen, navigator]
-import screens/dialog/dialog_screen
+import screens/game_result/game_result_screen
 import screens/settings/settings_screen
 import screens/hit_stop/hit_stop_screen
 
@@ -32,6 +32,7 @@ proc onResetGame() {.raises: [].}
 
 proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
   result = GameResult(
+    levelId: state.level.id,
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.level.starPosition.isSome,

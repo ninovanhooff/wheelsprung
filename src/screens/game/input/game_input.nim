@@ -10,7 +10,7 @@ import input/input_manager
 import common/shared_types
 import data_store/configuration
 import input/input_response
-import screens/dialog/dialog_screen
+import screens/game_result/game_result_screen
 
 const
   maxWheelAngularVelocity = 30.0

@@ -6,19 +6,19 @@ import common/graphics_types
 import common/shared_types
 import screens/settings/settings_screen
 
-type DialogScreen = ref object of Screen
+type GameResultScreen = ref object of Screen
   gameResult: GameResult
 
 
-proc newDialogScreen*(gameResult: GameResult): DialogScreen {.raises: [].} =
-  return DialogScreen(
+proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
+  return GameResultScreen(
     gameResult: gameResult,
-    screenType: ScreenType.Dialog
+    screenType: ScreenType.GameResult
   )
 
 
 proc navigateToGameResult*(result: GameResult) =
-  newDialogScreen(result).pushScreen()
+  newGameResultScreen(result).pushScreen()
 
 proc formatTime(time: Seconds): string {.raises: [], tags: [].} =
   try:
@@ -32,7 +32,7 @@ proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].
   of GameResultType.LevelComplete:
     return "Level Complete"
 
-proc drawDialog(self: DialogScreen) =
+proc drawGameResult(self: GameResultScreen) =
   playdate.graphics.clear(kColorWhite)
   let gameResult = self.gameResult
   gfx.drawTextAligned(gameResult.resultType.displayText, 200, 80)
@@ -42,9 +42,9 @@ proc drawDialog(self: DialogScreen) =
 
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
 
-method resume*(self: DialogScreen) =
+method resume*(self: GameResultScreen) =
 
-  drawDialog(self) # once in resume is enough, static screen
+  drawGameResult(self) # once in resume is enough, static screen
   
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
@@ -56,7 +56,7 @@ method resume*(self: DialogScreen) =
     popScreen()
   )
 
-method update*(self: DialogScreen): int =
+method update*(self: GameResultScreen): int =
   # no drawing needed here, we do it in resume
   let buttonState = playdate.system.getButtonState()
 
@@ -67,5 +67,5 @@ method update*(self: DialogScreen): int =
 
   return 0
 
-method `$`*(self: DialogScreen): string {.raises: [], tags: [].} =
-  return "DialogScreen; type: " & repr(self.gameResult.resultType)
+method `$`*(self: GameResultScreen): string {.raises: [], tags: [].} =
+  return "GameResultScreen; type: " & repr(self.gameResult.resultType)
