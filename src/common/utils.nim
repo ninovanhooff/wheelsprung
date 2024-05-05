@@ -78,15 +78,17 @@ proc lerp*(initial, target, factor: not float32): float64 =
   ## linear interpolation between initial and target
   ## factor is a value between 0.0 and 1.0
   ## the result is clamped between initial and target
-  result = (initial * (1.0 - factor)) + (target * factor)
-  result = min(max(result, initial), target)
+  result = initial + (target - initial) * clamp(factor, 0.0, 1.0)
 
 proc lerp*(initial, target, factor: float32): float32 =
   ## linear interpolation between initial and target
   ## factor is a value between 0.0 and 1.0
   ## the result is clamped between initial and target
-  result = (initial * (1.0f - factor)) + (target * factor)
-  result = min(max(result, initial), target)
+  # if target < initial:
+  #   (initial, target) = (target, initial)
+  # result = (initial * (1.0f - factor)) + (target * factor)
+  # result = min(max(result, initial), target)
+  result = initial + (target - initial) * clamp(factor, 0f, 1f)
 
 ### Sequences
 
