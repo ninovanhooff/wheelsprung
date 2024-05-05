@@ -44,6 +44,7 @@ proc updateScrollPosition(screen: LevelSelectScreen) =
   )
 
 proc selectPreviousRow(screen: LevelSelectScreen, force: bool) =
+  screen.downActivatedAt = none(Seconds)
   if force or currentTimeSeconds() > screen.upActivatedAt.get(0):
     screen.selectedIndex -= 1
     if screen.selectedIndex < 0:
@@ -52,6 +53,7 @@ proc selectPreviousRow(screen: LevelSelectScreen, force: bool) =
     screen.upActivatedAt = some(currentTimeSeconds() + timeout)
 
 proc selectNextRow(screen: LevelSelectScreen, force: bool) =
+  screen.upActivatedAt = none(Seconds)
   if force or currentTimeSeconds() > screen.downActivatedAt.get(0):
     screen.selectedIndex += 1
     if screen.selectedIndex >= screen.levelRows.len:
@@ -90,6 +92,8 @@ proc newLevelRow(levelMeta: LevelMeta): LevelRow =
 
 
 proc refreshLevelRows(screen: LevelSelectScreen) =
+  screen.levelRows.setLen(0)
+
   var levelPaths = getLevelPaths()
   for levelMeta in officialLevels.values:
     let metaIndex = levelPaths.find(levelMeta.path)
@@ -107,6 +111,8 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
     screen.levelRows.add(levelMeta.newLevelRow())
 
 method resume*(screen: LevelSelectScreen) =
+  screen.upActivatedAt = none(Seconds)
+  screen.downActivatedAt = none(Seconds)
   initLevelSelectView()
   resumeLevelSelectView()
   try:
