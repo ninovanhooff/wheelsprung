@@ -9,6 +9,7 @@ const
   # Also, this might be desirable for slow motion effects.
   physicsTickRate* = 50
   timeStep*: int32 = 1000.Milliseconds div physicsTickRate
-  timeStepSeconds*: Seconds = (timeStep.float64 / 1000.0)
+  timeStepSeconds64*: float64 = 1.0 / physicsTickRate.float64
+    ## timeStepSeconds64 is used to advance the physics simulation, let's go for maximum precision to minimise drift
   riderOffset* = v(-4.0, -18.0) # offset from chassis center
   HALF_PI*: float = PI * 0.5

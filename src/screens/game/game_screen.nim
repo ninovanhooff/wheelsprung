@@ -285,7 +285,7 @@ method update*(gameScreen: GameScreen): int =
 
   if state.isGameStarted:
     updateAttitudeAdjust(state)
-    state.space.step(timeStepSeconds)
+    state.space.step(timeStepSeconds64)
     state.updateTimers()
 
     if not state.isBikeInLevelBounds():
