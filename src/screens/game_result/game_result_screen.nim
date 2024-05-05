@@ -47,7 +47,7 @@ proc drawGameResult(self: GameResultScreen) =
 
 proc persistGameResult(gameResult: GameResult) =
   try:
-    setBestTime(gameResult.levelId, gameResult.time)
+    updateLevelProgress(gameResult)
   except:
     print("Failed to persist game result", getCurrentExceptionMsg())
 

@@ -19,25 +19,37 @@ proc getOrInsertProgress(id: Path): LevelProgress =
     result = LevelProgress(levelId: id)
     saveSlot.progress[id] = result
 
-proc setBestTime*(id: Path, time: Seconds) =
+proc updateLevelProgress*(gameResult: GameResult) =
+  let id = gameResult.levelId
+
+  case gameResult.resultType
+    of GameResultType.GameOver:
+      return
+    of GameResultType.LevelComplete:
+      discard # Continue to update progress
+
   var progress: LevelProgress = getOrInsertProgress(id)
-  progress.bestTime = some(time)
+  if gameResult.time < progress.bestTime.get(Seconds.high) :
+    progress.bestTime = some(gameResult.time)
 
-proc getBestTime*(id: Path): Option[Seconds] =
-  if saveSlot.progress.hasKey(id):
-    result = saveSlot.progress[id].bestTime
-  else:
-    result = none(Seconds)
+  if gameResult.starCollected:
+    progress.hasCollectedStar = true
 
-proc setHasCollectedStar*(id: Path) =
-  var progress: LevelProgress = getOrInsertProgress(id)
-  progress.hasCollectedStar = true
+# proc getBestTime*(id: Path): Option[Seconds] =
+#   if saveSlot.progress.hasKey(id):
+#     result = saveSlot.progress[id].bestTime
+#   else:
+#     result = none(Seconds)
 
-proc getHasCollectedStar*(id: Path): bool =
-  if saveSlot.progress.hasKey(id):
-    result = saveSlot.progress[id].hasCollectedStar
-  else:
-    result = false
+# proc setHasCollectedStar*(id: Path) =
+#   var progress: LevelProgress = getOrInsertProgress(id)
+#   progress.hasCollectedStar = true
+
+# proc getHasCollectedStar*(id: Path): bool =
+#   if saveSlot.progress.hasKey(id):
+#     result = saveSlot.progress[id].hasCollectedStar
+#   else:
+#     result = false
 
 proc loadSaveSlot*(): SaveSlot =
   let optSaveSlotEntity = loadJson[SaveSlotEntity](filePath)
