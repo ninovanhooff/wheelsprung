@@ -3,7 +3,6 @@
 import playdate/api
 import navigation/[screen, navigator]
 import common/utils
-import std/sugar
 import std/sequtils
 import data_store/configuration
 import data_store/user_profile
@@ -12,6 +11,7 @@ import level_select_types
 import level_select_view
 import screens/game/game_screen
 import screens/settings/settings_screen
+import math
 import tables
 
 
@@ -30,10 +30,16 @@ proc newLevelSelectScreen*(): LevelSelectScreen =
   )
 
 proc updateScrollPosition(screen: LevelSelectScreen) =
-  if screen.selectedIndex < screen.scrollPosition:
-    screen.scrollPosition = screen.selectedIndex
-  elif screen.selectedIndex > screen.scrollPosition + LEVEL_SELECT_VISIBLE_ROWS - 1:
-    screen.scrollPosition = screen.selectedIndex - LEVEL_SELECT_VISIBLE_ROWS + 1
+  screen.scrollTarget = screen.selectedIndex.float32
+  screen.scrollTarget = clamp(screen.scrollTarget, 0, (screen.levelRows.len - LEVEL_SELECT_VISIBLE_ROWS).float32)
+
+  screen.scrollPosition += (screen.scrollTarget - screen.scrollPosition) * 0.1
+  print("scrollPos", screen.scrollPosition)
+
+  # if screen.selectedIndex < screen.scrollPosition:
+  #   screen.scrollPosition = screen.selectedIndex
+  # elif screen.selectedIndex > screen.scrollPosition + LEVEL_SELECT_VISIBLE_ROWS - 1:
+  #   screen.scrollPosition = screen.selectedIndex - LEVEL_SELECT_VISIBLE_ROWS + 1
 
 proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonState()

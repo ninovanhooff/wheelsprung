@@ -2,8 +2,6 @@ import tables
 import sugar
 import sequtils
 import common/shared_types
-import std/strutils
-import common/utils
 
 const 
   levelsBasePath* = "levels/"

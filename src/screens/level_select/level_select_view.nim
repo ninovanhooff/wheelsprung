@@ -1,5 +1,6 @@
 import playdate/api
 import level_select_types
+import math
 import common/graphics_types
 import common/utils
 import options
@@ -48,16 +49,24 @@ proc timeText(progress: LevelProgress): string =
 proc drawLevelRows(screen: LevelSelectScreen) =
   let x = levelDrawRegion.x
   let scrollPosition = screen.scrollPosition
-  var y = levelDrawRegion.y
+  var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).int32
   let maxIdx = clamp(
-    screen.scrollPosition + LEVEL_SELECT_VISIBLE_ROWS - 1, 
+    screen.scrollPosition.int + LEVEL_SELECT_VISIBLE_ROWS - 1, 
     0, screen.levelRows.high
+  ).int32
+
+  # Draw the selected row background
+  let selectedRowY = y + (screen.selectedIndex - scrollPosition.int32) * rowHeight
+  gfx.fillRect(
+    levelDrawRegion.x, selectedRowY, 
+    levelDrawRegion.width, rowHeight, 
+    kColorXOR
   )
 
-  for idx, row in screen.levelRows[scrollPosition .. maxIdx]:
+  for idx, row in screen.levelRows[scrollPosition.int32 .. maxIdx]:
     let levelMeta = row.levelMeta
     let progress = row.progress
-    let displayIdx = idx + scrollPosition + 1
+    let displayIdx = idx + scrollPosition.int32 + 1
     let nameText: string = fmt"{displayIdx}. {levelMeta.name}"
     gfx.drawText(nameText, x + borderInset, y+4)
 
@@ -66,14 +75,6 @@ proc drawLevelRows(screen: LevelSelectScreen) =
 
     gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
     y += 20
-
-proc drawSelection(screen: LevelSelectScreen) =
-  let selectedRowY = levelDrawRegion.y + rowHeight * (screen.selectedIndex - screen.scrollPosition)
-  gfx.fillRect(
-    levelDrawRegion.x, selectedRowY, 
-    levelDrawRegion.width, rowHeight, 
-    kColorXOR
-  )
 
 proc prepareDrawRegion(screen: LevelSelectScreen) =
   gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
@@ -84,7 +85,6 @@ proc prepareDrawRegion(screen: LevelSelectScreen) =
 proc draw*(screen: LevelSelectScreen) =
   prepareDrawRegion(screen)
   gfx.setDrawMode(kDrawModeNXOR)
-  drawSelection(screen)
   drawLevelRows(screen)
 
 proc resumeLevelSelectView*() =

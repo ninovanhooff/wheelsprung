@@ -1,5 +1,4 @@
 import chipmunk7
-import math
 import options
 import playdate/api
 import common/[graphics_types, graphics_utils]

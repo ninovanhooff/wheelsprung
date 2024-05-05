@@ -1,5 +1,4 @@
 {. push warning[LockLevel]:off.}
-import std/strformat
 import playdate/api
 import navigation/[screen, navigator]
 import common/graphics_types

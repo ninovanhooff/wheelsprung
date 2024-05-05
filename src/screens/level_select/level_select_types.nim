@@ -4,7 +4,7 @@ import common/save_slot_types
 export save_slot_types
 
 const 
-  LEVEL_SELECT_VISIBLE_ROWS* = 6
+  LEVEL_SELECT_VISIBLE_ROWS*: int = 6
 
 
 type 
@@ -15,4 +15,5 @@ type
   LevelSelectScreen* = ref object of Screen
     levelRows*: seq[LevelRow]
     selectedIndex*: int
-    scrollPosition*: int
+    scrollPosition*: float32
+    scrollTarget*: float32
