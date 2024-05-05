@@ -3,7 +3,9 @@
 import playdate/api
 import navigation/[screen, navigator]
 import common/utils
+import common/shared_types
 import std/sequtils
+import std/options
 import data_store/configuration
 import data_store/user_profile
 import level_meta/level_data
@@ -11,9 +13,11 @@ import level_select_types
 import level_select_view
 import screens/game/game_screen
 import screens/settings/settings_screen
-import math
 import tables
 
+const
+  pushedButtonTimeout = 0.35.Seconds
+  heldButtonTimeout = 0.2.Seconds
 
 
 proc getLevelPaths(): seq[string] =
@@ -39,6 +43,23 @@ proc updateScrollPosition(screen: LevelSelectScreen) =
     0.2
   )
 
+proc selectPreviousRow(screen: LevelSelectScreen, force: bool) =
+  if force or currentTimeSeconds() > screen.upActivatedAt.get(0):
+    screen.selectedIndex -= 1
+    if screen.selectedIndex < 0:
+      screen.selectedIndex = screen.levelRows.len - 1
+    let timeout: Seconds = if screen.upActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
+    screen.upActivatedAt = some(currentTimeSeconds() + timeout)
+
+proc selectNextRow(screen: LevelSelectScreen, force: bool) =
+  if force or currentTimeSeconds() > screen.downActivatedAt.get(0):
+    screen.selectedIndex += 1
+    if screen.selectedIndex >= screen.levelRows.len:
+      screen.selectedIndex = 0
+    let timeout: Seconds = if screen.downActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
+    screen.downActivatedAt = some(currentTimeSeconds() + timeout)
+
+
 proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonState()
   let rows = screen.levelRows
@@ -50,14 +71,10 @@ proc updateInput(screen: LevelSelectScreen) =
     # the ganme screen loaded successfully, save as last opened level
     setLastOpenedLevel(levelPath)
     pushScreen(gameScreen)
-  elif kButtonUp in buttonState.pushed:
-    screen.selectedIndex -= 1
-    if screen.selectedIndex < 0:
-      screen.selectedIndex = numRows - 1
-  elif kButtonDown in buttonState.pushed:
-    screen.selectedIndex += 1
-    if screen.selectedIndex >= numRows:
-      screen.selectedIndex = 0
+  elif kButtonUp in buttonState.current:
+    selectPreviousRow(screen, kbuttonUp in buttonState.pushed)
+  elif kButtonDown in buttonState.current:
+    selectNextRow(screen, kButtonDown in buttonState.pushed)
   elif kButtonDown in buttonState.pushed:
     screen.selectedIndex += 1
     if screen.selectedIndex >= numRows:

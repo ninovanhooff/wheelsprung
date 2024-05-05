@@ -1,5 +1,7 @@
 import level_meta/level_data
 import navigation/screen
+import std/options
+import common/shared_types
 import common/save_slot_types
 export save_slot_types
 
@@ -17,3 +19,5 @@ type
     selectedIndex*: int
     scrollPosition*: float32
     scrollTarget*: float32
+    upActivatedAt*: Option[Seconds]
+    downActivatedAt*: Option[Seconds]
