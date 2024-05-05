@@ -1,7 +1,6 @@
 import tables
 import options
 import common/shared_types
-import std/json
 import common/data_utils
 import common/utils
 import save_slot_types
