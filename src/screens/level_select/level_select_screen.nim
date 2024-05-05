@@ -1,22 +1,17 @@
 import playdate/api
 import navigation/[screen, navigator]
-import common/graphics_types
 import common/utils
 import data_store/configuration
 import level_meta/level_data
+import level_select_types
+import level_select_view
 import screens/game/game_screen
 import screens/settings/settings_screen
 import tables
 
-const 
-  borderInset = 24
-  levelsBasePath = "levels/"
-  maxLines = 8 
 
-type LevelSelectScreen = ref object of Screen
-  levelMetas: seq[LevelMeta]
-  selectedIndex: int
-  scrollPosition: int
+const 
+  levelsBasePath = "levels/"
 
 proc getLevelPaths(): seq[string] =
   playdate.file.listFiles(levelsBasePath)
@@ -30,8 +25,8 @@ proc newLevelSelectScreen*(): LevelSelectScreen =
 proc updateScrollPosition(screen: LevelSelectScreen) =
   if screen.selectedIndex < screen.scrollPosition:
     screen.scrollPosition = screen.selectedIndex
-  elif screen.selectedIndex > screen.scrollPosition + maxLines - 1:
-    screen.scrollPosition = screen.selectedIndex - maxLines + 1
+  elif screen.selectedIndex > screen.scrollPosition + LEVEL_SELECT_VISIBLE_ROWS - 1:
+    screen.scrollPosition = screen.selectedIndex - LEVEL_SELECT_VISIBLE_ROWS + 1
 
 proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonState()
@@ -57,36 +52,7 @@ proc updateInput(screen: LevelSelectScreen) =
 
   updateScrollPosition(screen)
 
-proc drawBackground() =
-  gfx.drawRect(borderInset, borderInset, 400 - 2 * borderInset, 240 - 2 *
-      borderInset, kColorBlack)
 
-proc drawTitle(title: string) =
-  gfx.drawTextAligned(title, 200, 2)
-
-proc drawLevelPaths(screen: LevelSelectScreen) =
-  var y = 40
-  let maxIdx = clamp(
-    screen.scrollPosition + maxLines - 1, 
-    0, screen.levelMetas.high
-  )
-  for level in screen.levelMetas[screen.scrollPosition .. maxIdx]:
-    gfx.drawText(level.name, borderInset * 2, y)
-    y += 20
-  let cursorY = 40 + 20 * (screen.selectedIndex - screen.scrollPosition)
-  gfx.drawText(">", borderInset + 8, cursorY)
-
-proc drawButtons(screen: LevelSelectScreen) =
-  discard
-  let selectedFileName = screen.levelMetas[screen.selectedIndex].name
-  gfx.drawTextAligned("Ⓐ Play " & selectedFileName, 200, 218)
-
-proc draw(screen: LevelSelectScreen) =
-  gfx.clear(kColorWhite)
-  drawBackground()
-  drawTitle("Select a level")
-  drawLevelPaths(screen)
-  drawButtons(screen)
 
 proc refreshLevelMetas(screen: LevelSelectScreen) =
   var levelPaths = getLevelPaths()
@@ -106,6 +72,7 @@ proc refreshLevelMetas(screen: LevelSelectScreen) =
     screen.levelMetas.add(levelMeta)
 
 method resume*(screen: LevelSelectScreen) =
+  initLevelSelectView()
   try:
     screen.refreshLevelMetas()
   except IOError:

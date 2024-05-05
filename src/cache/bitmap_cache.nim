@@ -15,5 +15,5 @@ proc getOrLoadBitmap*(path: string): LCDBitmap =
   try:
     return bitmapCache.mgetOrPut(path, gfx.newBitmap(path))
   except IOError:
-    print getCurrentExceptionMsg()
+    playdate.system.error("FATAL: " & getCurrentExceptionMsg())
 
