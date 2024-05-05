@@ -23,11 +23,6 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
 proc navigateToGameResult*(result: GameResult) =
   newGameResultScreen(result).pushScreen()
 
-proc formatTime(time: Seconds): string {.raises: [], tags: [].} =
-  try:
-    fmt"{time:.2f}"
-  except: "unknown time"
-
 proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].} =
   case gameResultType
   of GameResultType.GameOver:

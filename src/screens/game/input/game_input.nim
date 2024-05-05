@@ -94,7 +94,7 @@ proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let adjust = optAdjust.get
 
   let direction = adjust.direction
-  let response = attitudeInputResponse(state.time - adjust.startedAt)
+  let response = attitudeInputResponse((state.time - adjust.startedAt).toSeconds())
   let torque = direction * response
   if abs(torque) < minAttitudeAdjustForce:
     return # todo remove adjust? note this would cancel jolt
@@ -127,7 +127,7 @@ proc onFlipDirection(state: GameState) =
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
   state.flipRiderDirection(riderPosition)
-  state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
+  state.finishFlipDirectionAt = some(state.time + 500.Milliseconds)
 
 proc applyConfig*(state: GameState) =
   let config = getConfig()

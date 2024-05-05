@@ -11,8 +11,8 @@ import cache/bitmaptable_cache
 const
   vFinishSize = v(38.0, 38.0)
 
-  blinkerPeriod = 0.5
-  halfBlinkerPeriod = blinkerPeriod / 2.0
+  blinkerPeriod = 500.Milliseconds
+  halfBlinkerPeriod = blinkerPeriod div 2
   trophyBlinkerPos: Vertex = (360, 8)
 
 var trophyImageTable: AnnotatedBitmapTable

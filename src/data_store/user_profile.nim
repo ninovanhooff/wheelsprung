@@ -33,7 +33,7 @@ proc updateLevelProgress*(gameResult: GameResult) =
       discard # Continue to update progress
   
   var progress: LevelProgress = getOrInsertProgress(id)
-  let bestTime = progress.bestTime.get(Seconds.high)
+  let bestTime = progress.bestTime.get(Milliseconds.high)
   if gameResult.time < bestTime :
     print ("New best time", gameResult.time, "for level", id)
     progress.bestTime = some(gameResult.time)
@@ -44,24 +44,6 @@ proc updateLevelProgress*(gameResult: GameResult) =
 
   print ("Saving progress for level", id, repr(progress))
   saveSlot.progress[id] = progress
-
-  
-
-# proc getBestTime*(id: Path): Option[Seconds] =
-#   if saveSlot.progress.hasKey(id):
-#     result = saveSlot.progress[id].bestTime
-#   else:
-#     result = none(Seconds)
-
-# proc setHasCollectedStar*(id: Path) =
-#   var progress: LevelProgress = getOrInsertProgress(id)
-#   progress.hasCollectedStar = true
-
-# proc getHasCollectedStar*(id: Path): bool =
-#   if saveSlot.progress.hasKey(id):
-#     result = saveSlot.progress[id].hasCollectedStar
-#   else:
-#     result = false
 
 proc loadSaveSlot*(): SaveSlot =
   let optSaveSlotEntity = loadJson[SaveSlotEntity](filePath)

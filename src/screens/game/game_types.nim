@@ -13,7 +13,7 @@ type
   Coin* = ref object
     position*: Vertex
     count*: int32
-    activeFrom*: Seconds
+    activeFrom*: Milliseconds
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
@@ -110,7 +110,7 @@ type Level* = ref object of RootObj
 type AttitudeAdjust* = ref object
   # adjustType*: AttitudeAdjustType #todo move DpadInputType type def to proper place
   direction*: Float # 1.0 or -1.0, not necessarily the same as drive direction
-  startedAt*: Seconds
+  startedAt*: Milliseconds
 
 type GameState* = ref object of RootObj
   level*: Level
@@ -133,10 +133,10 @@ type GameState* = ref object of RootObj
   resetGameOnResume*: bool
 
   ## time
-  time*: Seconds
+  time*: Milliseconds
   frameCounter*: int32
-  finishFlipDirectionAt*: Option[Seconds]
-  finishTrophyBlinkerAt*: Option[Seconds]
+  finishFlipDirectionAt*: Option[Milliseconds]
+  finishTrophyBlinkerAt*: Option[Milliseconds]
 
 
   ## Physics

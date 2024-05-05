@@ -8,21 +8,26 @@ const
   TwoPi*: float32 = 2 * PI
 
 ### Time
-proc currentTimeMilliseconds*(): int {.inline.} = playdate.system.getCurrentTimeMilliseconds.int
+proc currentTimeMilliseconds*(): int32 {.inline.} = playdate.system.getCurrentTimeMilliseconds.int32
 proc currentTimeSeconds*(): Seconds {.inline.} = (currentTimeMilliseconds() / 1000).Seconds
 
 proc formatTime*(time: Seconds): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"
-  let minutes = time.int div 60
-  let seconds = time.int mod 60
-  let hundredths = (time.float32 * 100).int mod 100
+  return formatTime(time * 1000)
+
+proc formatTime*(time: Milliseconds): string =
+  ## Format time in seconds to a string in the format "MM:SS.ff"
+  let minutes = time div 360_000
+  let seconds = time mod 60_000 div 1000
+  let hundredths = time mod 1000 div 10
   return fmt"{minutes:02}:{seconds:02}.{hundredths:02}"
 
-proc expire*(expireAt: var Option[Seconds], currentTime: Seconds): bool =
+
+proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): bool =
   ## Sets expireAt to none and returns true if expireAt is after currentTime
   if expireAt.isSome:
     if currentTime > expireAt.get:
-      expireAt = none[Seconds]()
+      expireAt = none[Milliseconds]()
       return true
   return false
 

@@ -70,7 +70,7 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
     return
   if coin.count > 1:
     coin.count -= 1
-    coin.activeFrom = state.time + 2.0.Seconds
+    coin.activeFrom = state.time + 2000.Milliseconds
     print("new count for coin: " & repr(coin))
     playCoinSound(1f - coin.count.float32 * 0.1f)
     return
@@ -89,7 +89,7 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
 
     if state.remainingCoins.len == 0:
       print("all coins collected")
-      state.finishTrophyBlinkerAt = some(state.time + 2.5.Seconds)
+      state.finishTrophyBlinkerAt = some(state.time + 2500.Milliseconds)
 
 let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
   print("star post step callback")
@@ -223,12 +223,12 @@ proc onResetGame() {.raises: [].} =
 proc updateTimers(state: GameState) =
   state.frameCounter += 1
   state.time += timeStep
-  let currentTime = state.time
+  let currentTime: Milliseconds = state.time
 
   if state.gameResult.isSome:
     let gameResult = state.gameResult.get
     let finishTime = gameResult.time
-    if currentTime > finishTime + 5.Seconds: # this timeout can be skipped by pressing any button
+    if currentTime > finishTime + 5000.Milliseconds: # this timeout can be skipped by pressing any button
       state.resetGameOnResume = true
       navigateToGameResult(gameResult)
 
@@ -285,7 +285,7 @@ method update*(gameScreen: GameScreen): int =
 
   if state.isGameStarted:
     updateAttitudeAdjust(state)
-    state.space.step(timeStep)
+    state.space.step(timeStepSeconds)
     state.updateTimers()
 
     if not state.isBikeInLevelBounds():

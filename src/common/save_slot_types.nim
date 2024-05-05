@@ -6,7 +6,7 @@ import tables
 type 
   LevelProgress* = ref object of RootObj
     levelId*: Path
-    bestTime*: Option[Seconds]
+    bestTime*: Option[Milliseconds]
     hasCollectedStar*: bool
   
   SaveSlot* = ref object of RootObj
@@ -17,7 +17,7 @@ type
 type 
   LevelProgressEntity* = ref object of RootObj
     levelId*: Path
-    bestTime*: Option[Seconds]
+    bestTime*: Option[Milliseconds]
     hasCollectedStar*: bool
   
   SaveSlotEntity* = ref object of RootObj

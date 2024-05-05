@@ -349,7 +349,7 @@ proc drawGame*(statePtr: ptr GameState) =
     let forkImpulse: int32 = state.forkArmSpring.impulse.int32
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
-  if state.time < 0.5:
+  if state.time < 500.Milliseconds:
     let messageY = (state.riderHead.position.y - camera.y - 26.0).int32
     if not state.isGameStarted:
       gfx.drawTextAligned("Ready?", 200, messageY)
@@ -367,16 +367,6 @@ proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScree
   gfx.setDrawMode(kDrawmodeFillWhite)
   imageTable.drawRotated(body, state)
   let chassis = state.chassis
-  # let camera = state.camera
-  # let riderHead = state.riderHead
-  # let riderHeadScreenPos = riderHead.position - camera
-  # if state.finishFlipDirectionAt.isSome:
-  #   # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
-  #   let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
-  #   let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
-  #   riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
-  # else:
-  #   riderHeadImageTable.drawRotated(riderHead, state)
   gfx.setDrawMode(kDrawmodeCopy)
 
   let bitmapB = gfx.copyFrameBufferBitmap()
