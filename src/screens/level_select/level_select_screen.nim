@@ -30,16 +30,14 @@ proc newLevelSelectScreen*(): LevelSelectScreen =
   )
 
 proc updateScrollPosition(screen: LevelSelectScreen) =
-  screen.scrollTarget = screen.selectedIndex.float32
-  screen.scrollTarget = clamp(screen.scrollTarget, 0, (screen.levelRows.len - LEVEL_SELECT_VISIBLE_ROWS).float32)
+  screen.scrollTarget = screen.selectedIndex.float32 - LEVEL_SELECT_VISIBLE_ROWS / 2 + 0.8f
+  screen.scrollTarget = clamp(screen.scrollTarget, 0f, screen.levelRows.len.float32 - LEVEL_SELECT_VISIBLE_ROWS)
 
-  screen.scrollPosition += (screen.scrollTarget - screen.scrollPosition) * 0.1
-  print("scrollPos", screen.scrollPosition)
-
-  # if screen.selectedIndex < screen.scrollPosition:
-  #   screen.scrollPosition = screen.selectedIndex
-  # elif screen.selectedIndex > screen.scrollPosition + LEVEL_SELECT_VISIBLE_ROWS - 1:
-  #   screen.scrollPosition = screen.selectedIndex - LEVEL_SELECT_VISIBLE_ROWS + 1
+  screen.scrollPosition = lerp(
+    screen.scrollPosition, 
+    screen.scrollTarget, 
+    0.2
+  )
 
 proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonState()

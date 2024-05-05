@@ -4,7 +4,7 @@ import common/save_slot_types
 export save_slot_types
 
 const 
-  LEVEL_SELECT_VISIBLE_ROWS*: int = 6
+  LEVEL_SELECT_VISIBLE_ROWS*: float32 = 5.5f
 
 
 type 

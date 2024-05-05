@@ -49,9 +49,9 @@ proc timeText(progress: LevelProgress): string =
 proc drawLevelRows(screen: LevelSelectScreen) =
   let x = levelDrawRegion.x
   let scrollPosition = screen.scrollPosition
-  var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).int32
+  var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).round.int32
   let maxIdx = clamp(
-    screen.scrollPosition.int + LEVEL_SELECT_VISIBLE_ROWS - 1, 
+    screen.scrollPosition.int + LEVEL_SELECT_VISIBLE_ROWS.ceil.int32, 
     0, screen.levelRows.high
   ).int32
 
