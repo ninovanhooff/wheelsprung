@@ -73,6 +73,7 @@ proc refreshLevelMetas(screen: LevelSelectScreen) =
 
 method resume*(screen: LevelSelectScreen) =
   initLevelSelectView()
+  resumeLevelSelectView()
   try:
     screen.refreshLevelMetas()
   except IOError:

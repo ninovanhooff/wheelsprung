@@ -45,6 +45,12 @@ proc popScreenImmediately() =
     backStack.del(backStack.high)
     activeScreen.destroy()
 
+proc resetGraphicsState() =
+  ## Reset the graphics state to the default state
+  ## Does NOT clear the screen
+  playdate.graphics.clearClipRect()
+  playdate.graphics.setDrawMode(kDrawModeCopy)
+
 proc resumeActiveScreen() =
   ## Ensure that the backstack is non-empty and resumes the the screen at the top of the backstack
   ## If the backstack is empty, an Initial Screen will be inserted and an error logged
@@ -56,6 +62,7 @@ proc resumeActiveScreen() =
     backStack.add(activeScreen)
   
   printNavigation("Resuming screen", activeScreen)
+  resetGraphicsState()
   activeScreen.resume()
 
 proc pushScreen*(toScreen: Screen) =

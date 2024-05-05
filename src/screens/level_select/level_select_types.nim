@@ -1,7 +1,7 @@
 import level_meta/level_data
 import navigation/screen
 
-const LEVEL_SELECT_VISIBLE_ROWS* = 5
+const LEVEL_SELECT_VISIBLE_ROWS* = 6
 
 
 type LevelSelectScreen* = ref object of Screen
