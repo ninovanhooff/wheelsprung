@@ -1,6 +1,7 @@
 import playdate/api
 import level_select_types
 import common/graphics_types
+import common/utils
 import options
 import cache/bitmap_cache
 import cache/bitmaptable_cache
@@ -38,6 +39,12 @@ proc getLevelStatusImage(progress: LevelProgress): LCDBitmap =
   else:
     return levelStatusImages.getBitmap(1)
 
+proc timeText(progress: LevelProgress): string =
+  if progress.bestTime.isNone:
+    return "--:--.--"
+  else:
+    return progress.bestTime.get.formatTime()
+
 proc drawLevelRows(screen: LevelSelectScreen) =
   let x = levelDrawRegion.x
   let scrollPosition = screen.scrollPosition
@@ -57,6 +64,7 @@ proc drawLevelRows(screen: LevelSelectScreen) =
     let statusImage = getLevelStatusImage(progress)
     statusImage.draw(x + 200, y + 2, kBitmapUnflipped)
 
+    gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
     y += 20
 
 proc drawSelection(screen: LevelSelectScreen) =

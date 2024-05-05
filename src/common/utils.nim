@@ -11,6 +11,13 @@ const
 proc currentTimeMilliseconds*(): int {.inline.} = playdate.system.getCurrentTimeMilliseconds.int
 proc currentTimeSeconds*(): Seconds {.inline.} = (currentTimeMilliseconds() / 1000).Seconds
 
+proc formatTime*(time: Seconds): string =
+  ## Format time in seconds to a string in the format "MM:SS.ff"
+  let minutes = time.int div 60
+  let seconds = time.int mod 60
+  let hundredths = (time.float32 * 100).int mod 100
+  return fmt"{minutes:02}:{seconds:02}.{hundredths:02}"
+
 proc expire*(expireAt: var Option[Seconds], currentTime: Seconds): bool =
   ## Sets expireAt to none and returns true if expireAt is after currentTime
   if expireAt.isSome:
