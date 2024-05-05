@@ -12,7 +12,7 @@ type
 proc newLevelMeta*(name: string, path: Path): LevelMeta =
   result = LevelMeta(name: name, path: path)
 
-let levels*:  OrderedTable[Path, level_data.LevelMeta] = @[
+let officialLevels*:  OrderedTable[Path, level_data.LevelMeta] = @[
   newLevelMeta(name = "Dragster", path = "dragster.tmj"),
   newLevelMeta(name= "Level 1", path= "level1.tmj"),
   newLevelMeta(name= "Globe of Death", path= "globe_of_death.tmj"),

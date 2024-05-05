@@ -1,9 +1,11 @@
+{.push raises: [].}
+
 import tables
 import options
 import common/shared_types
 import common/data_utils
 import common/utils
-import save_slot_types
+import common/save_slot_types
 
 const 
   saveSlotVersion = 1
@@ -12,10 +14,10 @@ const
 var saveSlot: SaveSlot
   ## Global singleton
 
-proc getOrInsertProgress(id: Path): LevelProgress =
-  if saveSlot.progress.hasKey(id):
+proc getOrInsertProgress*(id: Path): LevelProgress =
+  try:
     result = saveSlot.progress[id]
-  else:
+  except KeyError:
     result = LevelProgress(levelId: id)
     saveSlot.progress[id] = result
 

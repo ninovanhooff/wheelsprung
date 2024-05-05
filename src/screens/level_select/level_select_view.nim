@@ -1,7 +1,9 @@
 import playdate/api
 import level_select_types
 import common/graphics_types
+import options
 import cache/bitmap_cache
+import cache/bitmaptable_cache
 import cache/font_cache
 
 const 
@@ -13,36 +15,49 @@ const
 let 
   levelDrawRegion = Rect(x: 30,y: 70, width: 342, height:110)
 
-var backgroundBitmap: LCDBitmap
-var levelFont: LCDFont
+var 
+  backgroundBitmap: LCDBitmap
+  levelStatusImages: AnnotatedBitmapTable
+  levelFont: LCDFont
 
 proc initLevelSelectView*() =
   if not backgroundBitmap.isNil: return # already initialized
     
   backgroundBitmap = getOrLoadBitmap("images/level_select/select-bg")
+  levelStatusImages = getOrLoadBitmapTable(BitmapTableId.LevelStatus)
   levelFont = getOrLoadFont("fonts/m6x11-12.pft")
 
 proc drawBackground() =
   backgroundBitmap.draw(0, 0, kBitmapUnflipped)
 
-proc drawLevelPaths(screen: LevelSelectScreen) =
+proc getLevelStatusImage(progress: LevelProgress): LCDBitmap =
+  if progress.bestTime.isNone:
+    return levelStatusImages.getBitmap(0)
+  elif progress.hasCollectedStar:
+    return levelStatusImages.getBitmap(2)
+  else:
+    return levelStatusImages.getBitmap(1)
+
+proc drawLevelRows(screen: LevelSelectScreen) =
   let x = levelDrawRegion.x
   let scrollPosition = screen.scrollPosition
   var y = levelDrawRegion.y
   let maxIdx = clamp(
     screen.scrollPosition + LEVEL_SELECT_VISIBLE_ROWS - 1, 
-    0, screen.levelMetas.high
+    0, screen.levelRows.high
   )
-  for idx, level in screen.levelMetas[scrollPosition .. maxIdx]:
-    let displayIdx = idx + scrollPosition + 1
-    let text: string = fmt"{displayIdx}. {level.name}"
-    gfx.drawText(text, x + borderInset, y+4)
-    y += 20
 
-proc drawButtons(screen: LevelSelectScreen) =
-  discard
-  let selectedFileName = screen.levelMetas[screen.selectedIndex].name
-  gfx.drawTextAligned("Ⓐ Play " & selectedFileName, 200, 218)
+  for idx, row in screen.levelRows[scrollPosition .. maxIdx]:
+    let levelMeta = row.levelMeta
+    let progress = row.progress
+    let displayIdx = idx + scrollPosition + 1
+    let nameText: string = fmt"{displayIdx}. {levelMeta.name}"
+    gfx.drawText(nameText, x + borderInset, y+4)
+
+    let statusImage = getLevelStatusImage(progress)
+    statusImage.draw(x + 200, y + 2, kBitmapUnflipped)
+
+    y += 20
 
 proc drawSelection(screen: LevelSelectScreen) =
   let selectedRowY = levelDrawRegion.y + rowHeight * (screen.selectedIndex - screen.scrollPosition)
@@ -62,8 +77,7 @@ proc draw*(screen: LevelSelectScreen) =
   prepareDrawRegion(screen)
   gfx.setDrawMode(kDrawModeNXOR)
   drawSelection(screen)
-  drawLevelPaths(screen)
-  drawButtons(screen)
+  drawLevelRows(screen)
 
 proc resumeLevelSelectView*() =
   gfx.setFont(levelFont)

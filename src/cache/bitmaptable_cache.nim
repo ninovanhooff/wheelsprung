@@ -23,6 +23,7 @@ type
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
     Gravity = "images/gravity"
+    LevelStatus = "images/level_select/level-status"
   BitmapTableCache = TableRef[BitmapTableId, AnnotatedBitmapTable]
 
 # global singleton
@@ -30,9 +31,10 @@ let bitmapTableCache = BitmapTableCache()
 
 proc frameCount(id: BitmapTableId): int32 =
   case id
-  of BitmapTableId.Trophy: return 2'i32
-  of BitmapTableId.Flag: return 46'i32
-  of BitmapTableId.Gravity: return 33'i32
+  of BitmapTableId.Trophy: return 2
+  of BitmapTableId.Flag: return 46
+  of BitmapTableId.Gravity: return 33
+  of BitmapTableId.LevelStatus: return 3
   
   of BitmapTableId.BikeChassis,
     BitmapTableId.BikeWheel,
