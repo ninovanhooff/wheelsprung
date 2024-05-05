@@ -3,23 +3,10 @@ import std/json
 import std/options
 import utils
 
-import shared_types
-
 let kFileReadAny*: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
-type 
-  LevelProgressEntity* = ref object of RootObj
-    levelId*: Path
-    bestTime*: Option[Seconds]
-    hasCollectedStar*: bool
-  
-  SaveSlotEntity* = ref object of RootObj
-    progress*: seq[LevelProgressEntity]
-    modelVersion*: int
-
-
 proc saveJson*[T](value: T, path: string) {.raises:[].} =
-  let jsonNode = %(value)
+  let jsonNode = %value
   let jsonStr = $jsonNode
   let bytes: seq[byte] = cast[seq[byte]](jsonStr)
   try:

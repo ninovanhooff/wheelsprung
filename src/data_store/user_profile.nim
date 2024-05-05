@@ -4,21 +4,11 @@ import common/shared_types
 import std/json
 import common/data_utils
 import common/utils
+import save_slot_types
 
 const 
   saveSlotVersion = 1
   filePath = "saveslot1.json"
-
-
-type 
-  LevelProgress* = ref object of RootObj
-    levelId: Path
-    bestTime: Option[Seconds]
-    hasCollectedStar: bool
-  
-  SaveSlot* = ref object of RootObj
-    progress: Table[Path, LevelProgress]
-    modelVersion: int
 
 var saveSlot: SaveSlot
   ## Global singleton
@@ -51,7 +41,8 @@ proc getHasCollectedStar*(id: Path): bool =
     result = false
 
 proc loadSaveSlot*(): SaveSlot =
-  let optSaveSlot = loadJson[SaveSlot](filePath)
+  let optSaveSlotEntity = loadJson[SaveSlotEntity](filePath)
+  let optSaveSlot = optSaveSlotEntity.map(saveSlotFromEntity)
   if optSaveSlot.isSome:
     saveSlot = optSaveSlot.get
     print("Loaded save slot", saveSlot.repr)
@@ -70,8 +61,4 @@ proc getSaveSlot*(): SaveSlot =
     result = saveSlot
 
 proc saveSaveSlot*() =
-  let saveSlotEntity = SaveSlotEntity(
-    progress: @[],
-    modelVersion: 1
-  )
-  saveJson(saveSlotEntity, filePath)
+  saveSlotToEntity(saveSlot).saveJson(filePath)
