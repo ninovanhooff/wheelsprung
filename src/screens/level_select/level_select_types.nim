@@ -3,7 +3,8 @@ import navigation/screen
 import common/save_slot_types
 export save_slot_types
 
-const LEVEL_SELECT_VISIBLE_ROWS* = 6
+const 
+  LEVEL_SELECT_VISIBLE_ROWS* = 6
 
 
 type 

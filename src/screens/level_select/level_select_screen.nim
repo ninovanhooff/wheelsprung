@@ -3,6 +3,8 @@
 import playdate/api
 import navigation/[screen, navigator]
 import common/utils
+import std/sugar
+import std/sequtils
 import data_store/configuration
 import data_store/user_profile
 import level_meta/level_data
@@ -13,12 +15,10 @@ import screens/settings/settings_screen
 import tables
 
 
-const 
-  levelsBasePath = "levels/"
 
 proc getLevelPaths(): seq[string] =
   try:
-    return playdate.file.listFiles(levelsBasePath)
+    return playdate.file.listFiles(levelsBasePath).mapIt(levelsBasePath & it)
   except IOError:
     print("ERROR reading level paths", getCurrentExceptionMsg())
     return @[]
@@ -41,7 +41,7 @@ proc updateInput(screen: LevelSelectScreen) =
   let numRows = rows.len
 
   if kButtonA in buttonState.pushed:
-    let levelPath = levelsBasePath & rows[screen.selectedIndex].levelMeta.path
+    let levelPath = rows[screen.selectedIndex].levelMeta.path
     let gameScreen = newGameScreen(levelPath)
     # the ganme screen loaded successfully, save as last opened level
     setLastOpenedLevel(levelPath)

@@ -1,7 +1,8 @@
 {.push raises: [].}
 
-import tables
-import options
+import std/tables
+import std/options
+import std/strutils
 import common/shared_types
 import common/data_utils
 import common/utils
@@ -18,6 +19,7 @@ proc getOrInsertProgress*(id: Path): LevelProgress =
   try:
     result = saveSlot.progress[id]
   except KeyError:
+    print ("Creating new progress for level", id)
     result = LevelProgress(levelId: id)
     saveSlot.progress[id] = result
 
@@ -29,13 +31,21 @@ proc updateLevelProgress*(gameResult: GameResult) =
       return
     of GameResultType.LevelComplete:
       discard # Continue to update progress
-
+  
   var progress: LevelProgress = getOrInsertProgress(id)
-  if gameResult.time < progress.bestTime.get(Seconds.high) :
+  let bestTime = progress.bestTime.get(Seconds.high)
+  if gameResult.time < bestTime :
+    print ("New best time", gameResult.time, "for level", id)
     progress.bestTime = some(gameResult.time)
 
   if gameResult.starCollected:
+    print ("Collected star for level", id)
     progress.hasCollectedStar = true
+
+  print ("Saving progress for level", id, repr(progress))
+  saveSlot.progress[id] = progress
+
+  
 
 # proc getBestTime*(id: Path): Option[Seconds] =
 #   if saveSlot.progress.hasKey(id):
