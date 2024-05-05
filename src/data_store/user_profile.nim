@@ -1,13 +1,12 @@
 import tables
 import options
 import common/shared_types
-import level_meta/level_data
 import common/json_utils
 import common/utils
 
 const 
   saveSlotVersion = 1
-  filePath = "user_profile.json"
+  filePath = "saveslot1.json"
 
 
 type 
