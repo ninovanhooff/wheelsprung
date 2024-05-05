@@ -1,7 +1,7 @@
 import playdate/api
-import json
+import std/json
+import std/options
 import utils
-import options
 
 import shared_types
 
@@ -9,19 +9,17 @@ let kFileReadAny*: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
 type 
   LevelProgressEntity* = ref object of RootObj
-    levelId: Path
-    bestTime: Option[Seconds]
-    hasCollectedStar: bool
+    levelId*: Path
+    bestTime*: Option[Seconds]
+    hasCollectedStar*: bool
   
   SaveSlotEntity* = ref object of RootObj
-    progress: seq[LevelProgressEntity]
-    modelVersion: int
+    progress*: seq[LevelProgressEntity]
+    modelVersion*: int
 
 
 proc saveJson*[T](value: T, path: string) {.raises:[].} =
-  let testObj = SaveSlotEntity(progress: @[LevelProgressEntity(levelId: "test", bestTime: some(1.0.Seconds), hasCollectedStar: true)], modelVersion: 1)
-  
-  let jsonNode = %testObj
+  let jsonNode = %(value)
   let jsonStr = $jsonNode
   let bytes: seq[byte] = cast[seq[byte]](jsonStr)
   try:

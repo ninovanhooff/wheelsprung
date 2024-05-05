@@ -5,7 +5,7 @@ import options
 import common/utils
 import common/shared_types
 import data_store/configuration_types
-import common/json_utils
+import common/data_utils
 
 var config: Config
 

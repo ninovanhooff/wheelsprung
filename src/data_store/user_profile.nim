@@ -1,7 +1,8 @@
 import tables
 import options
 import common/shared_types
-import common/json_utils
+import std/json
+import common/data_utils
 import common/utils
 
 const 
@@ -69,4 +70,8 @@ proc getSaveSlot*(): SaveSlot =
     result = saveSlot
 
 proc saveSaveSlot*() =
-  saveSlot.saveJson(filePath)
+  let saveSlotEntity = SaveSlotEntity(
+    progress: @[],
+    modelVersion: 1
+  )
+  saveJson(saveSlotEntity, filePath)

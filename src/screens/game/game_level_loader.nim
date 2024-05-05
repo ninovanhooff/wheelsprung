@@ -8,7 +8,7 @@ import playdate/api
 import game_types
 import common/graphics_types
 import common/graphics_utils
-import common/json_utils
+import common/data_utils
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import common/lcd_patterns
