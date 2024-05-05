@@ -15,14 +15,6 @@ type
       ## path is used as id, must be unique (which it is, enforced by the file system)
       ## 
 
-proc pathFromLevelId*(levelId: int): Path =
-  result = $"levels/{levelId}"
-
-proc levelIdFromPath*(path: Path): Path =
-  if not path.startsWith(levelsBasePath):
-    print "ERROR: path is not a level path", path
-  result = path[7 .. path.len]
-
 proc newLevelMeta*(name: string, path: Path): LevelMeta =
   result = LevelMeta(name: name, path: path)
 
