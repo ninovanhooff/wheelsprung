@@ -32,7 +32,12 @@ proc comparisonTimeString(gameResult: GameResult): string =
 proc unlockText(gameResult: GameResult): string =
   let levelProgress = getLevelProgress(gameResult.levelId)
   if levelProgress.bestTime.isNone:
-    result = "Star unlocked"
+    result = "Star unlocked!"
+  elif gameResult.resultType == GameResultType.LevelComplete:
+    if levelProgress.bestTime.get > gameResult.time:
+      result = "New Personal best!"
+    elif gameResult.starCollected and not levelProgress.hasCollectedStar:
+      result = "Star collected!"
 
 proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].} =
   case gameResultType
