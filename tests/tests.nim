@@ -5,8 +5,8 @@ import options
 
 import strformat, strutils, macros
 
-
-template check*(exp:untyped, expected: untyped, failureMsg:string="failed", indent:uint=0): void =
+## Inspired by https://github.com/xmonader/nim-minitest
+template check*(exp:untyped, expected: untyped, failureMsg:string="FAILED", indent:uint=0): void =
   let indentationStr = repeat(' ', indent)
   let expStr: string = astToStr(exp)
   var msg: string
@@ -18,7 +18,7 @@ template check*(exp:untyped, expected: untyped, failureMsg:string="failed", inde
   print(msg) # replace this by your print function
 
 proc runTests*() =
-  print "Test: Running tests..."
+  print "======== Test: Running tests ========="
 
   assert normalizeAngle(0) == 0
   assert normalizeAngle(Pi32) == Pi32
@@ -48,4 +48,6 @@ proc runTests*() =
   check(1234.formatTime, "00:01.23")
   check(-1234.formatTime(signed = true), "-00:01.23")
   check(1234.formatTime(signed = true), "+00:01.23")
+
+  print "======== Test: Tests Completed ========="
   
