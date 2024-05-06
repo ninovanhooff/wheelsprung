@@ -76,6 +76,10 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)
+  elif event == kEventLock:
+    onLockScreen()
+  elif event == kEventUnlock:
+    onUnlockScreen()
   elif event == kEventTerminate or event == kEventLowPower:
     print("Program will terminate")
     saveSaveSlot()

@@ -45,12 +45,6 @@ proc popScreenImmediately() =
     backStack.del(backStack.high)
     activeScreen.destroy()
 
-proc resetGraphicsState() =
-  ## Reset the graphics state to the default state
-  ## Does NOT clear the screen
-  playdate.graphics.clearClipRect()
-  playdate.graphics.setDrawMode(kDrawModeCopy)
-
 proc resumeActiveScreen() =
   ## Ensure that the backstack is non-empty and resumes the the screen at the top of the backstack
   ## If the backstack is empty, an Initial Screen will be inserted and an error logged
@@ -62,7 +56,6 @@ proc resumeActiveScreen() =
     backStack.add(activeScreen)
   
   printNavigation("Resuming screen", activeScreen)
-  resetGraphicsState()
   activeScreen.resume()
 
 proc pushScreen*(toScreen: Screen) =
@@ -110,6 +103,22 @@ proc updateNavigator*(): int =
   executePendingNavigators()
   if backStack.len == 0:
     print("TODO updateNavigator: No active screen")
-    return 0
+    result = 0
   else:
-    return getActiveScreen().update()
+    ## Update the active screen in a separate graphics context
+    playdate.graphics.pushContext(nil)
+    result = getActiveScreen().update()
+    ## Ensure no graphics state is leaked
+    playdate.graphics.popContext()
+
+proc onLockScreen*() =
+  let activeScreen = getActiveScreen()
+  if activeScreen != nil:
+    printNavigation("Screen will lock, Pausing screen", activeScreen)
+    activeScreen.pause()
+
+proc onUnlockScreen*() =
+  let activeScreen = getActiveScreen()
+  if activeScreen != nil:
+    printNavigation("Screen will unlock, Resuming screen", activeScreen)
+    activeScreen.resume()
