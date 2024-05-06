@@ -16,7 +16,7 @@ import screens/settings/settings_screen
 import tables
 
 const
-  pushedButtonTimeout = 0.35.Seconds
+  pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
 
 
