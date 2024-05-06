@@ -15,12 +15,18 @@ proc formatTime*(time: Seconds): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"
   return formatTime(time * 1000)
 
-proc formatTime*(time: Milliseconds): string =
+proc formatTime*(time: Milliseconds, signed: bool = false): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"
-  let minutes = time div 360_000
-  let seconds = time mod 60_000 div 1000
-  let hundredths = time mod 1000 div 10
-  return fmt"{minutes:02}:{seconds:02}.{hundredths:02}"
+  
+  let absTime = abs(time)
+  let minutes = absTime div 360_000
+  let seconds = absTime mod 60_000 div 1000
+  let hundredths = absTime mod 1000 div 10
+  let signString = 
+    if signed and time < 0: "-" 
+    elif signed and time >= 0: "+" 
+    else: ""
+  return fmt"{signString}{minutes:02}:{seconds:02}.{hundredths:02}"
 
 
 proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): bool =

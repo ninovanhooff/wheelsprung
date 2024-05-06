@@ -87,7 +87,7 @@ proc updateInput(screen: LevelSelectScreen) =
 proc newLevelRow(levelMeta: LevelMeta): LevelRow =
   return LevelRow(
     levelMeta: levelMeta,
-    progress: getOrInsertProgress(levelMeta.path)
+    progress: getLevelProgress(levelMeta.path)
   )
 
 

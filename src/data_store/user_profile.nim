@@ -15,7 +15,7 @@ const
 var saveSlot: SaveSlot
   ## Global singleton
 
-proc getOrInsertProgress*(id: Path): LevelProgress =
+proc getLevelProgress*(id: Path): LevelProgress =
   try:
     result = saveSlot.progress[id]
   except KeyError:
@@ -32,7 +32,7 @@ proc updateLevelProgress*(gameResult: GameResult) =
     of GameResultType.LevelComplete:
       discard # Continue to update progress
   
-  var progress: LevelProgress = getOrInsertProgress(id)
+  var progress: LevelProgress = getLevelProgress(id)
   let bestTime = progress.bestTime.get(Milliseconds.high)
   if gameResult.time < bestTime :
     print ("New best time", gameResult.time, "for level", id)

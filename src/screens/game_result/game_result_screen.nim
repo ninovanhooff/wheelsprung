@@ -1,6 +1,7 @@
 {. push warning[LockLevel]:off.}
 import playdate/api
 import navigation/[screen, navigator]
+import std/options
 import common/graphics_types
 import common/shared_types
 import common/utils
@@ -18,9 +19,20 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     screenType: ScreenType.GameResult
   )
 
-
 proc navigateToGameResult*(result: GameResult) =
   newGameResultScreen(result).pushScreen()
+
+proc comparisonTimeString(gameResult: GameResult): string =
+  let levelProgress = getLevelProgress(gameResult.levelId)
+  if gameResult.resultType == GameResultType.GAME_OVER or levelProgress.bestTime.isNone:
+    return ""
+  let bestTime = levelProgress.bestTime.get
+  return fmt"({formatTime(gameResult.time - bestTime, signed = true)})"
+
+proc unlockText(gameResult: GameResult): string =
+  let levelProgress = getLevelProgress(gameResult.levelId)
+  if levelProgress.bestTime.isNone:
+    result = "Star unlocked"
 
 proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].} =
   case gameResultType
@@ -33,9 +45,9 @@ proc drawGameResult(self: GameResultScreen) =
   playdate.graphics.clear(kColorWhite)
   let gameResult = self.gameResult
   gfx.drawTextAligned(gameResult.resultType.displayText, 200, 80)
-  gfx.drawTextAligned("Your time: " & formatTime(gameResult.time), 200, 120)
-  if gameResult.resultType == GameResultType.LevelComplete and gameResult.starCollected:
-    gfx.drawTextAligned("You collected a star!", 200, 140)
+  let timeString = fmt"Your time: {formatTime(gameResult.time)} {comparisonTimeString(gameResult)}"
+  gfx.drawTextAligned(timeString, 200, 120)
+  gfx.drawTextAligned(gameResult.unlockText, 200, 140)
 
   gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
 
