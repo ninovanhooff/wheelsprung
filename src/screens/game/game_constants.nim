@@ -7,7 +7,8 @@ const
   # this is better than letting the physics engine run at a variable rate
   # which can cause instability.
   # Also, this might be desirable for slow motion effects.
-  physicsTickRate* = 45
+  physicsTickRate* = 50 
+    ## typically equal to the frame rate, but frame rate may vary depending on slow motion or user settings
   timeStep*: int32 = 1000.Milliseconds div physicsTickRate
   timeStepSeconds64*: float64 = timeStep.float64 / 1_000.0'f64
     ## timeStepSeconds64 is used to advance the physics simulation, let's go for maximum precision to minimise drift
