@@ -6,8 +6,9 @@ import options
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
-import game_bike, game_finish
+import game_bike, game_finish, game_ghost
 import common/graphics_utils
+import game_debug_view
 import chipmunk_utils
 import common/utils
 import globals
@@ -56,6 +57,7 @@ proc initGameView*() =
   killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
   gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
   initGameFinish()
+  initGameGhost()
 
   try:
     coinImage = gfx.newBitmap("images/coin")
@@ -63,59 +65,6 @@ proc initGameView*() =
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
     echo getCurrentExceptionMsg()
-
-proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: LCDColor) =
-  # covert from center position to top left
-  let drawPos = pos - camera
-  let x = (drawPos.x - radius).toInt
-  let y = (drawPos.y - radius).toInt
-  let size: int = (radius * 2f).toInt
-  # angle is in radians, convert to degrees
-  let deg = radTodeg(angle)
-  gfx.drawEllipse(x,y,size, size, 1, deg+10, deg + 350, color);
-
-proc drawSegment(camera: Camera, segment: SegmentShape, color: LCDColor) =
-  let drawAPos = segment.a - camera
-  let drawBPos = segment.b - camera
-  # gfx.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
-  gfx.drawLine(drawAPos.x.int32, drawAPos.y.int32, drawBPos.x.int32, drawBPos.y.int32, 1, color);
-
-proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
-  let state = cast[ptr GameState](data)
-  let camera = state.camera
-  if shape.kind == cpCircleShape:
-    let circle = cast[CircleShape](shape)
-    drawCircle(camera, circle.body.position + circle.offset, circle.radius, circle.body.angle, kColorBlack)
-  elif shape.kind == cpSegmentShape:
-    let segment = cast[SegmentShape](shape)
-    drawSegment(camera, segment, kColorBlack)
-  elif shape.kind == cpPolyShape:
-    let poly = cast[PolyShape](shape)
-    let numVerts = poly.count
-    for i in 0 ..< numVerts:
-      let a = localToWorld(poly.body, poly.vert(i)) - camera
-      let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts)) - camera
-      gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-
-proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
-  let state = cast[ptr GameState](data)
-  let camera = state.camera
-  if constraint.isGrooveJoint:
-    # discard
-    let groove = cast[GrooveJoint](constraint)
-    let a = localToWorld(groove.bodyA, groove.grooveA) - camera
-    let b = localToWorld(groove.bodyA, groove.grooveB) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-  elif constraint.isDampedSpring:
-    let spring = cast[DampedSpring](constraint)
-    let a = localToWorld(spring.bodyA, spring.anchorA) - camera
-    let b = localToWorld(spring.bodyB, spring.anchorB) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-  elif constraint.isDampedRotarySpring:
-    let spring = cast[DampedRotarySpring](constraint)
-    let a = localToWorld(spring.bodyA, vzero) - camera
-    let b = localToWorld(spring.bodyB, vzero) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
 
 proc initGameBackground*(state: GameState) =
   let level = state.level
@@ -298,6 +247,8 @@ proc drawGame*(statePtr: ptr GameState) =
   let level = state.level
   let camera = state.camera
   let camVertex = camera.toVertex()
+  let frameCounter: int32 = state.frameCounter
+
 
   if debugDrawLevel:
     state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
@@ -312,7 +263,6 @@ proc drawGame*(statePtr: ptr GameState) =
 
   if debugDrawTextures:
     # assets
-    let frameCounter: int32 = state.frameCounter
     for asset in level.assets:
       let assetScreenPos = asset.position - camVertex
       asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
@@ -337,6 +287,11 @@ proc drawGame*(statePtr: ptr GameState) =
       killerImageTable.drawRotated(killerScreenPos, killer.angle)
 
     drawFinish(state)
+
+  ## do not store poses in a variable to avoid copying
+  if state.ghostPlayback.poses.high >= frameCounter:
+    state.drawGhostPose(state.ghostPlayback.poses[frameCounter])
+
 
   if debugDrawPlayer:
     drawPlayer(state)

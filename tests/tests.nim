@@ -2,6 +2,8 @@ import math
 import sugar
 import common/utils
 import options
+import screens/game/game_types
+import screens/game/game_coin
 
 import strformat, strutils, macros
 
@@ -14,7 +16,7 @@ template check*(exp:untyped, expected: untyped, failureMsg:string="FAILED", inde
     msg = indentationStr & expStr & " .. " & failureMsg & "\n (expected: " & astToStr(expected) & ", actual: " & $exp & ")"
   else:
     msg = indentationStr & expStr & " .. passed"
-  
+
   print(msg) # replace this by your print function
 
 proc runTests*() =
@@ -45,9 +47,17 @@ proc runTests*() =
   assert @[1, 2, 3].findFirst(it => it == 2).get == 2
   assert @[1, 2, 3].findFirst(it => it == 5).isNone
 
+  let coins: seq[Coin] = @[]
+  let level: Level = Level(coins: coins)
+  let state: GameState = GameState(
+      remainingCoins : coins,
+      level : level
+  )
+  assert state.coinProgress == 1f, "When level has no coins, progress should be 1"
+
+
   check(1234.formatTime, "00:01.23")
   check(-1234.formatTime(signed = true), "-00:01.23")
   check(1234.formatTime(signed = true), "+00:01.23")
 
   print "======== Test: Tests Completed ========="
-  

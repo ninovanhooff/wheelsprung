@@ -4,8 +4,9 @@ import chipmunk7
 import playdate/api
 import common/utils, chipmunk_utils
 import game_level_loader
-import game_bike, game_rider, game_coin, game_star, game_killer, game_finish
-import game_terrain, game_gravity_zone
+import game_bike, game_rider, game_ghost
+import game_coin, game_star, game_killer, game_finish, game_gravity_zone
+import game_terrain
 import game_camera
 import sound/game_sound
 import common/shared_types
@@ -72,7 +73,7 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
     coin.count -= 1
     coin.activeFrom = state.time + 2000.Milliseconds
     print("new count for coin: " & repr(coin))
-    playCoinSound(1f - coin.count.float32 * 0.1f)
+    playCoinSound(state.coinProgress)
     return
 
   print("deleting coin: " & repr(coin))
@@ -83,9 +84,7 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
   else:
     print("deleting coin at index: " & repr(deleteIndex))
     state.remainingCoins.delete(deleteIndex)
-    let coinProgress = 1f - (state.remainingCoins.len.float32 / state.level.coins.len.float32)
-    print ("coin progress: " & $coinProgress)
-    playCoinSound(coinProgress)
+    playCoinSound(state.coinProgress)
 
     if state.remainingCoins.len == 0:
       print("all coins collected")
@@ -129,7 +128,7 @@ let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   playCollisionSound()
   if state.gameResult.isSome:
-    # Can't be game over if the game was already won
+    # Can't be game over if the game was already won or lost
     return true # process collision normally
 
   var
@@ -194,12 +193,14 @@ proc createSpace(level: Level): Space {.raises: [].} =
       
   return space
 
-proc newGameState(level: Level, background: LCDBitmap = nil): GameState {.raises: [].} =
+proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Option[Ghost] = none(Ghost)): GameState {.raises: [].} =
   let space = level.createSpace()
   state = GameState(
     level: level, 
     background: background,
     space: space,
+    ghostRecording: newGhost(),
+    ghostPlayback: ghostPlayBack.get(newGhost()),
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
   )
@@ -217,7 +218,12 @@ proc newGameState(level: Level, background: LCDBitmap = nil): GameState {.raises
 
 proc onResetGame() {.raises: [].} =
   state.destroy()
-  state = newGameState(state.level, state.background)
+  state.updateGhostRecording(state.coinProgress)
+  state = newGameState(
+    level = state.level,
+    background = state.background,
+    ghostPlayback = some(pickBestGhost(state.ghostRecording, state.ghostPlayback))
+  )
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =
@@ -286,13 +292,17 @@ method update*(gameScreen: GameScreen): int =
   if state.isGameStarted:
     updateAttitudeAdjust(state)
     state.space.step(timeStepSeconds64)
-    state.updateTimers()
+    state.ghostRecording.addPose(state)
 
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
         playScreamSound()
+      state.resetGameOnResume = true
       navigateToGameResult(state.gameResult.get)
+
+    state.updateTimers() # increment for next frame
+
 
   state.updateCamera()
   drawGame(addr state) # todo pass as object?
