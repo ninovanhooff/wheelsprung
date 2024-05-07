@@ -1,6 +1,6 @@
 import playdate/api
 import chipmunk7
-import utils
+import common/utils
 import screens/game/game_types
 
 const

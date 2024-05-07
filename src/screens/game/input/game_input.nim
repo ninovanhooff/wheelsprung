@@ -2,15 +2,15 @@
 import std/[options, sugar]
 import playdate/api
 import chipmunk7, chipmunk_utils
-import utils
+import common/utils
 import screens/game/[
   game_types, game_constants, game_bike, game_rider
 ]
 import input/input_manager
-import shared_types
-import configuration
-import input_response
-import screens/dialog/dialog_screen
+import common/shared_types
+import data_store/configuration
+import input/input_response
+import screens/game_result/game_result_screen
 
 const
   maxWheelAngularVelocity = 30.0
@@ -94,7 +94,7 @@ proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let adjust = optAdjust.get
 
   let direction = adjust.direction
-  let response = attitudeInputResponse(state.time - adjust.startedAt)
+  let response = attitudeInputResponse((state.time - adjust.startedAt).toSeconds())
   let torque = direction * response
   if abs(torque) < minAttitudeAdjustForce:
     return # todo remove adjust? note this would cancel jolt
@@ -127,7 +127,7 @@ proc onFlipDirection(state: GameState) =
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
   state.flipRiderDirection(riderPosition)
-  state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
+  state.finishFlipDirectionAt = some(state.time + 500.Milliseconds)
 
 proc applyConfig*(state: GameState) =
   let config = getConfig()

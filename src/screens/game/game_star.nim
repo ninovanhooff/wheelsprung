@@ -1,5 +1,5 @@
 import chipmunk7
-import graphics_utils
+import common/graphics_utils
 import game_types
 
 const

@@ -4,15 +4,16 @@ import playdate/api
 import math
 import options
 import chipmunk7
-import game_types, graphics_types, shared_types
+import game_types
+import common/[graphics_types, shared_types]
 import game_bike, game_finish, game_ghost
-import graphics_utils
+import common/graphics_utils
 import game_debug_view
 import chipmunk_utils
-import utils
+import common/utils
 import globals
 import cache/bitmaptable_cache
-import lcd_patterns
+import common/lcd_patterns
 import screens/hit_stop/hit_stop_screen
 
 const
@@ -290,7 +291,7 @@ proc drawGame*(statePtr: ptr GameState) =
   ## do not store poses in a variable to avoid copying
   if state.ghostPlayback.poses.high >= frameCounter:
     state.drawGhostPose(state.ghostPlayback.poses[frameCounter])
-    
+
 
   if debugDrawPlayer:
     drawPlayer(state)
@@ -303,7 +304,7 @@ proc drawGame*(statePtr: ptr GameState) =
     let forkImpulse: int32 = state.forkArmSpring.impulse.int32
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
-  if state.time < 0.5:
+  if state.time < 500.Milliseconds:
     let messageY = (state.riderHead.position.y - camera.y - 26.0).int32
     if not state.isGameStarted:
       gfx.drawTextAligned("Ready?", 200, messageY)
@@ -320,22 +321,11 @@ proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScree
 
   gfx.setDrawMode(kDrawmodeFillWhite)
   imageTable.drawRotated(body, state)
-  let chassis = state.chassis
-  # let camera = state.camera
-  # let riderHead = state.riderHead
-  # let riderHeadScreenPos = riderHead.position - camera
-  # if state.finishFlipDirectionAt.isSome:
-  #   # flip rider head in direction of new DriveDirection when upperLeg has rotated past 0 degrees
-  #   let flipThreshold = ((state.riderUpperLeg.angle - chassis.angle).signbit != state.driveDirection.signbit)
-  #   let flipDirection = if flipThreshold: state.driveDirection else: -state.driveDirection
-  #   riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
-  # else:
-  #   riderHeadImageTable.drawRotated(riderHead, state)
   gfx.setDrawMode(kDrawmodeCopy)
 
   let bitmapB = gfx.copyFrameBufferBitmap()
   return newHitStopScreen(
     bitmapA = bitmapA, 
     bitmapB = bitmapB, 
-    maxShakeMagnitude = chassis.velocity.vlength * 0.2f
+    maxShakeMagnitude = state.chassis.velocity.vlength * 0.2f
   )

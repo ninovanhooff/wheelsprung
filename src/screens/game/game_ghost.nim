@@ -3,11 +3,12 @@ import options
 import sugar
 import math
 import playdate/api
-import game_types, shared_types
-import graphics_types
-import graphics_utils
+import game_types
+import common/shared_types
+import common/graphics_types
+import common/graphics_utils
+import common/utils
 import cache/bitmaptable_cache
-import utils
 
 type
   Comparable = concept x, y
@@ -34,7 +35,7 @@ let ghostComparators: seq[AnnotatedComparator] = @[
     description: "coin progress"
   ),
   AnnotatedComparator(
-    selector: proc(ghost: Ghost): Comparable = ghost.gameResult.time,
+    selector: proc(ghost: Ghost): Comparable = ghost.gameResult.time.float32,
     preferLargeValue: false,
     description: "time"
   )
@@ -118,10 +119,10 @@ proc compare(
 proc pickBestGhost*(ghostA: Ghost, ghostB: Ghost): Ghost {.raises:[].} =
   ## When equal, ghostA is picked
   
-  if ghostA.gameResult.time == 0.Seconds:
+  if ghostA.gameResult.time == 0.Milliseconds:
     print "Picked ghostB because ghostA has no time"
     return ghostB
-  elif ghostB.gameResult.time == 0.Seconds:
+  elif ghostB.gameResult.time == 0.Milliseconds:
     print "Picked ghostA because ghostB has no time"
     return ghostA
   

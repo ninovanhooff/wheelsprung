@@ -1,7 +1,0 @@
-import playdate/api
-
-let
-  patDot1*: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
-  patGrid4*: LCDPattern = makeLCDOpaquePattern(0xE7, 0xDB, 0xBD, 0x7E, 0x7E, 0xBD, 0xDB, 0xE7)
-
-  gridPattern*: LCDPattern = patDot1

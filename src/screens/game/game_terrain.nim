@@ -1,6 +1,7 @@
 import chipmunk7
-import game_types, graphics_types
-import graphics_utils
+import game_types
+import common/graphics_types
+import common/graphics_utils
 import std/sequtils
 
 const

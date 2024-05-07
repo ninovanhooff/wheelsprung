@@ -1,8 +1,9 @@
 import chipmunk7
-import math
 import playdate/api
-import game_types, graphics_types
-import graphics_utils
+import std/math
+import game_types
+import common/graphics_types
+import common/graphics_utils
 
 proc drawCircle*(camera: Camera, pos: Vect, radius: float, angle: float, color: LCDColor) =
   # covert from center position to top left
