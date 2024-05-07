@@ -1,23 +1,16 @@
 import playdate/api
-import std/json
 import sugar
 import options
-import utils
-import configuration_types, shared_types
+import common/utils
+import common/shared_types
+import data_store/configuration_types
+import common/data_utils
 
 var config: Config
 
 proc save*(config: Config) =
-  print "Saving config", repr(config)
-  let jsonString: seq[byte] = cast[seq[byte]]($(%config))
-  try:
-    let file = playdate.file.open("config.json", kFileWrite)
-    let lenWritten = file.write(jsonString, jsonString.len.uint32)
-    if lenWritten != jsonString.len:
-      print "Failed to write config file, wrote", lenWritten, "bytes out of", jsonString.len, "bytes"
-    # no need to close file as Playdate API will do it for us
-  except:
-    print "Failed to save config file", getCurrentExceptionMsg()
+  print "Saving", repr(config)
+  saveJson(config, "config.json")
 
 proc createAndsave(): Config =
   let config = Config(lastOpenedLevel: none(string))
@@ -32,14 +25,11 @@ proc makeDir(dir: string) =
     print "Failed to create directory", dir, getCurrentExceptionMsg()
 
 proc loadConfig(): Config =
-  try:
-    # no need to close file as Playdate API will do it for us
-    let jsonString = playdate.file.open("config.json", kFileReadData).readString()
-    let config = jsonString.parseJson().to(Config)
-    print "Loaded config", repr(config)
-    return config
-  except:
-    print "Failed to load config file:", getCurrentExceptionMsg()
+  let optConfig = loadJson[Config]("config.json")
+  if optConfig.isSome:
+    print "Loaded", repr(optConfig.get)
+    return optConfig.get
+  else:
     # we usually end up here when the data folder doesn't exist yet.
     # this is a good time to create the levels folder too.
     makeDir("levels")

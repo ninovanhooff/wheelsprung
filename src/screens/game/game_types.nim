@@ -1,9 +1,9 @@
 import playdate/api
 import chipmunk7
 import options
-import graphics_types
-import utils
-import shared_types
+import common/graphics_types
+import common/utils
+import common/shared_types
 
 type 
   Camera* = Vect
@@ -13,7 +13,7 @@ type
   Coin* = ref object
     position*: Vertex
     count*: int32
-    activeFrom*: Seconds
+    activeFrom*: Milliseconds
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
@@ -90,6 +90,7 @@ type Direction8* = enum
 const D8_FALLBACK* = D8_UP
 
 type Level* = ref object of RootObj
+  id*: Path
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
   coins*: seq[Coin]
@@ -109,7 +110,7 @@ type Level* = ref object of RootObj
 type AttitudeAdjust* = ref object
   # adjustType*: AttitudeAdjustType #todo move DpadInputType type def to proper place
   direction*: Float # 1.0 or -1.0, not necessarily the same as drive direction
-  startedAt*: Seconds
+  startedAt*: Milliseconds
 
 type GameState* = ref object of RootObj
   level*: Level
@@ -132,10 +133,10 @@ type GameState* = ref object of RootObj
   resetGameOnResume*: bool
 
   ## time
-  time*: Seconds
+  time*: Milliseconds
   frameCounter*: int32
-  finishFlipDirectionAt*: Option[Seconds]
-  finishTrophyBlinkerAt*: Option[Seconds]
+  finishFlipDirectionAt*: Option[Milliseconds]
+  finishTrophyBlinkerAt*: Option[Milliseconds]
 
 
   ## Physics

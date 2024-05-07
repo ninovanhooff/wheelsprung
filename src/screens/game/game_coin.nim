@@ -1,7 +1,7 @@
 import chipmunk7
-import graphics_utils
+import common/graphics_utils
 import game_types
-import utils
+import common/utils
 
 const
   coinRadius = 10.0

@@ -4,8 +4,8 @@ import random
 import playdate/api
 import chipmunk7
 import navigation/[screen, navigator]
-import shared_types
-import utils
+import common/shared_types
+import common/utils
 
 
 ## A Screen that Blinks the screen for a few frames
@@ -39,10 +39,8 @@ proc newHitStopScreen*(
   )
 
 proc createMenuCallback(menuItem: MenuItemDefinition): proc(button: PDMenuItemButton) {.raises: [].} =
-  print "createMenuCallback", menuItem.name
   return proc(button: PDMenuItemButton) {.raises:[].}=
     popScreen() # pop self (HitStopScreen)
-    print "executing menu callback for", menuItem.name
     menuItem.action()
 
 method resume*(screen: HitStopScreen) =
@@ -62,7 +60,6 @@ method update*(screen: HitStopScreen): int =
   
   let remainingSeconds = screen.finishAt - currentTimeSeconds()
   if remainingSeconds <= 0.Seconds :
-    print "HitStopScreen finished", currentTimeSeconds(), screen.finishAt
     popScreen()
   elif currentTimeSeconds() > screen.flipBitmapsAt:
     swap(screen.currentBitmap, screen.otherBitmap)

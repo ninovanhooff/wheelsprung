@@ -1,21 +1,39 @@
 import std/[math, options]
 import std/[strutils, setutils]
 import playdate/api
-import shared_types
+import common/shared_types
 
 const
   Pi32*: float32 = PI
   TwoPi*: float32 = 2 * PI
 
 ### Time
-proc currentTimeMilliseconds*(): int {.inline.} = playdate.system.getCurrentTimeMilliseconds.int
+proc currentTimeMilliseconds*(): int32 {.inline.} = playdate.system.getCurrentTimeMilliseconds.int32
 proc currentTimeSeconds*(): Seconds {.inline.} = (currentTimeMilliseconds() / 1000).Seconds
 
-proc expire*(expireAt: var Option[Seconds], currentTime: Seconds): bool =
+proc formatTime*(time: Seconds): string =
+  ## Format time in seconds to a string in the format "MM:SS.ff"
+  return formatTime(time * 1000)
+
+proc formatTime*(time: Milliseconds, signed: bool = false): string =
+  ## Format time in seconds to a string in the format "MM:SS.ff"
+  
+  let absTime = abs(time)
+  let minutes = absTime div 360_000
+  let seconds = absTime mod 60_000 div 1000
+  let hundredths = absTime mod 1000 div 10
+  let signString = 
+    if signed and time < 0: "-" 
+    elif signed and time >= 0: "+" 
+    else: ""
+  return fmt"{signString}{minutes:02}:{seconds:02}.{hundredths:02}"
+
+
+proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): bool =
   ## Sets expireAt to none and returns true if expireAt is after currentTime
   if expireAt.isSome:
     if currentTime > expireAt.get:
-      expireAt = none[Seconds]()
+      expireAt = none[Milliseconds]()
       return true
   return false
 
@@ -66,15 +84,17 @@ proc lerp*(initial, target, factor: not float32): float64 =
   ## linear interpolation between initial and target
   ## factor is a value between 0.0 and 1.0
   ## the result is clamped between initial and target
-  result = (initial * (1.0 - factor)) + (target * factor)
-  result = min(max(result, initial), target)
+  result = initial + (target - initial) * clamp(factor, 0.0, 1.0)
 
 proc lerp*(initial, target, factor: float32): float32 =
   ## linear interpolation between initial and target
   ## factor is a value between 0.0 and 1.0
   ## the result is clamped between initial and target
-  result = (initial * (1.0f - factor)) + (target * factor)
-  result = min(max(result, initial), target)
+  # if target < initial:
+  #   (initial, target) = (target, initial)
+  # result = (initial * (1.0f - factor)) + (target * factor)
+  # result = min(max(result, initial), target)
+  result = initial + (target - initial) * clamp(factor, 0f, 1f)
 
 ### Sequences
 

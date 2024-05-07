@@ -1,8 +1,7 @@
 {.push raises: [].}
 import tables
 import playdate/api
-import graphics_types
-import utils
+import common/graphics_types
 
 type 
   # a table mapping image path to LCDBitmap
@@ -15,5 +14,5 @@ proc getOrLoadBitmap*(path: string): LCDBitmap =
   try:
     return bitmapCache.mgetOrPut(path, gfx.newBitmap(path))
   except IOError:
-    print getCurrentExceptionMsg()
+    playdate.system.error("FATAL: " & getCurrentExceptionMsg())
 

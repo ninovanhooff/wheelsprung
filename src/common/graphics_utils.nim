@@ -1,8 +1,8 @@
 import playdate/api
 import chipmunk7
 import std/math
-import utils
-import graphics_types
+import common/utils
+import common/graphics_types
 import cache/bitmaptable_cache
 import random
 

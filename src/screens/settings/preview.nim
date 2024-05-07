@@ -1,9 +1,9 @@
 import playdate/api
-import utils
-import graphics_utils, graphics_types
-import shared_types
-import input_response
-import configuration_types
+import common/utils
+import common/[graphics_utils, graphics_types]
+import common/shared_types
+import input/input_response
+import data_store/configuration_types
 
 proc drawDPadInputResponsePreview*(config: Config, rect: Rect) =
   rect.fill(kColorWhite)

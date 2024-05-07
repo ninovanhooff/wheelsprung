@@ -1,5 +1,5 @@
 import options
-import shared_types
+import common/shared_types
 
 type Config* = ref object of RootObj
   lastOpenedLevel*: Option[string]

@@ -2,18 +2,18 @@
 import options, sugar
 import chipmunk7
 import playdate/api
-import utils, chipmunk_utils
-import levels
+import common/utils, chipmunk_utils
+import game_level_loader
 import game_bike, game_rider, game_coin, game_star, game_killer, game_finish
 import game_terrain, game_gravity_zone
 import game_camera
 import sound/game_sound
-import shared_types
+import common/shared_types
 import game_types, game_constants
 import input/game_input
 import game_view
 import navigation/[screen, navigator]
-import screens/dialog/dialog_screen
+import screens/game_result/game_result_screen
 import screens/settings/settings_screen
 import screens/hit_stop/hit_stop_screen
 
@@ -32,6 +32,7 @@ proc onResetGame() {.raises: [].}
 
 proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
   result = GameResult(
+    levelId: state.level.id,
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.level.starPosition.isSome,
@@ -69,7 +70,7 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
     return
   if coin.count > 1:
     coin.count -= 1
-    coin.activeFrom = state.time + 2.0.Seconds
+    coin.activeFrom = state.time + 2000.Milliseconds
     print("new count for coin: " & repr(coin))
     playCoinSound(1f - coin.count.float32 * 0.1f)
     return
@@ -88,7 +89,7 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
 
     if state.remainingCoins.len == 0:
       print("all coins collected")
-      state.finishTrophyBlinkerAt = some(state.time + 2.5.Seconds)
+      state.finishTrophyBlinkerAt = some(state.time + 2500.Milliseconds)
 
 let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
   print("star post step callback")
@@ -222,12 +223,12 @@ proc onResetGame() {.raises: [].} =
 proc updateTimers(state: GameState) =
   state.frameCounter += 1
   state.time += timeStep
-  let currentTime = state.time
+  let currentTime: Milliseconds = state.time
 
   if state.gameResult.isSome:
     let gameResult = state.gameResult.get
     let finishTime = gameResult.time
-    if currentTime > finishTime + 5.Seconds: # this timeout can be skipped by pressing any button
+    if currentTime > finishTime + 5000.Milliseconds: # this timeout can be skipped by pressing any button
       state.resetGameOnResume = true
       navigateToGameResult(gameResult)
 
@@ -284,7 +285,7 @@ method update*(gameScreen: GameScreen): int =
 
   if state.isGameStarted:
     updateAttitudeAdjust(state)
-    state.space.step(timeStep)
+    state.space.step(timeStepSeconds64)
     state.updateTimers()
 
     if not state.isBikeInLevelBounds():
