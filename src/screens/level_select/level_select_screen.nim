@@ -94,7 +94,7 @@ proc newLevelRow(levelMeta: LevelMeta): LevelRow =
 
 proc refreshLevelRows(screen: LevelSelectScreen) =
   screen.levelRows.setLen(0)
-  var numLevelsCommpleted = 0
+  var numLevelsUnlocked = 0
   var levelPaths = getLevelPaths()
   for levelMeta in officialLevels.values:
     let metaIndex = levelPaths.find(levelMeta.path)
@@ -103,9 +103,9 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
       screen.levelRows.add(levelRow)
       levelPaths.del(metaIndex)
       if levelRow.progress.bestTime.isSome:
-        inc numLevelsCommpleted
+        inc numLevelsUnlocked
   
-  screen.firstLockedRowIdx = some(initialUnlockedLevels + numLevelsCommpleted)
+  screen.firstLockedRowIdx = some(initialUnlockedLevels + numLevelsUnlocked + levelPaths.len)
 
   print "unknown levels: ", repr(levelPaths)
   print "firstLockedRowIdx: ", screen.firstLockedRowIdx
@@ -116,7 +116,7 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
       levelPath,
       levelPath
     )
-    screen.levelRows.add(levelMeta.newLevelRow())
+    screen.levelRows.insert(levelMeta.newLevelRow())
 
 method resume*(screen: LevelSelectScreen) =
   screen.upActivatedAt = none(Seconds)
