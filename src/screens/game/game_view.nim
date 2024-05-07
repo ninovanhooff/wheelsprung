@@ -366,12 +366,11 @@ proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScree
 
   gfx.setDrawMode(kDrawmodeFillWhite)
   imageTable.drawRotated(body, state)
-  let chassis = state.chassis
   gfx.setDrawMode(kDrawmodeCopy)
 
   let bitmapB = gfx.copyFrameBufferBitmap()
   return newHitStopScreen(
     bitmapA = bitmapA, 
     bitmapB = bitmapB, 
-    maxShakeMagnitude = chassis.velocity.vlength * 0.2f
+    maxShakeMagnitude = state.chassis.velocity.vlength * 0.2f
   )
