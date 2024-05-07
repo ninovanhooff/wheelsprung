@@ -23,6 +23,10 @@ proc getLevelProgress*(id: Path): LevelProgress =
     result = LevelProgress(levelId: id)
     saveSlot.progress[id] = result
 
+proc isStarEnabled*(id: Path): bool =
+  let progress = getLevelProgress(id)
+  result = progress.bestTime.isSome
+
 proc updateLevelProgress*(gameResult: GameResult) =
   let id = gameResult.levelId
 

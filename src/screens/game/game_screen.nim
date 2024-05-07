@@ -1,8 +1,10 @@
 {. push warning[LockLevel]:off.}
 import options, sugar
 import chipmunk7
+import chipmunk_utils
 import playdate/api
-import common/utils, chipmunk_utils
+import common/utils
+import data_store/user_profile
 import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
@@ -36,7 +38,7 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
     levelId: state.level.id,
     resultType: resultType,
     time: state.time,
-    starCollected: state.remainingStar.isNone and state.level.starPosition.isSome,
+    starCollected: state.remainingStar.isNone and state.starEnabled and state.level.starPosition.isSome,
   )
   state.resetGameOnResume = resetGameOnResume
   state.gameResult = some(result)
@@ -203,6 +205,7 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
     ghostPlayback: ghostPlayBack.get(newGhost()),
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
+    starEnabled: level.id.isStarEnabled,
   )
   initGameBike(state)
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)

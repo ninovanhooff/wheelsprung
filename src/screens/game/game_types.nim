@@ -135,6 +135,8 @@ type GameState* = ref object of RootObj
   isGameStarted*: bool
   remainingCoins*: seq[Coin]
   remainingStar*: Option[Star]
+  starEnabled*: bool
+    ## If the star is enabled, the player can collect it. Stars are enabled by finishing the level at least once.
   killers*: seq[Body]
   gameResult*: Option[GameResult]
 

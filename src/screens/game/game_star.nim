@@ -1,6 +1,7 @@
 import chipmunk7
 import common/graphics_utils
 import game_types
+import std/options
 
 const
   starRadius = 10.0
@@ -8,7 +9,10 @@ const
 
 proc initGameStar*(state: GameState) =
   # asssigment by copy
-  state.remainingStar = state.level.starPosition
+  if state.starEnabled:
+    state.remainingStar = state.level.starPosition
+  else:
+    state.remainingStar = none(Star)
 
 proc addStar*(space: Space, star: Star) =
   let shape: Shape = newCircleShape(space.staticBody, starRadius, toVect(star) + vStarOffset)
