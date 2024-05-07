@@ -2,6 +2,7 @@ import playdate/api
 import level_select_types
 import math
 import common/graphics_types
+import common/lcd_patterns
 import common/utils
 import options
 import cache/bitmap_cache
@@ -76,6 +77,26 @@ proc drawLevelRows(screen: LevelSelectScreen) =
     gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
     y += 20
 
+proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
+  if screen.firstLockedRowIdx.isNone:
+    return
+
+  let rowIdx = screen.firstLockedRowIdx.get
+
+  var scrimY = levelDrawRegion.y + ((-screen.scrollPosition + rowIdx.float32) * rowHeight).round.int32
+
+
+  gfx.fillRect(
+    levelDrawRegion.x, scrimY, 
+    levelDrawRegion.width, screen.levelRows.len * rowHeight, # fill to the bottom of the screen
+    patGrayTransparent
+  )
+  gfx.drawLine(
+    levelDrawRegion.x, scrimY, 
+    levelDrawRegion.x + levelDrawRegion.width, scrimY, 
+    2, kColorBlack
+  )
+
 proc prepareDrawRegion(screen: LevelSelectScreen) =
   gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
   gfx.clear(kColorWhite)
@@ -86,6 +107,9 @@ proc draw*(screen: LevelSelectScreen) =
   prepareDrawRegion(screen)
   gfx.setDrawMode(kDrawModeNXOR)
   drawLevelRows(screen)
+  gfx.setDrawMode(kDrawModeCopy)
+  drawLockedLevelsScrim(screen)
+
 
 proc resumeLevelSelectView*() =
   gfx.setFont(levelFont)

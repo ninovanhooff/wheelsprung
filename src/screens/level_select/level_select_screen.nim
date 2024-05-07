@@ -16,6 +16,7 @@ import screens/settings/settings_screen
 import tables
 
 const
+  initialUnlockedLevels = 3
   pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
 
@@ -43,18 +44,18 @@ proc updateScrollPosition(screen: LevelSelectScreen) =
     0.2
   )
 
-proc selectPreviousRow(screen: LevelSelectScreen, force: bool) =
+proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
   screen.downActivatedAt = none(Seconds)
-  if force or currentTimeSeconds() > screen.upActivatedAt.get(0):
+  if immediately or currentTimeSeconds() > screen.upActivatedAt.get(0):
     screen.selectedIndex -= 1
     if screen.selectedIndex < 0:
       screen.selectedIndex = screen.levelRows.len - 1
     let timeout: Seconds = if screen.upActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
     screen.upActivatedAt = some(currentTimeSeconds() + timeout)
 
-proc selectNextRow(screen: LevelSelectScreen, force: bool) =
+proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
   screen.upActivatedAt = none(Seconds)
-  if force or currentTimeSeconds() > screen.downActivatedAt.get(0):
+  if immediately or currentTimeSeconds() > screen.downActivatedAt.get(0):
     screen.selectedIndex += 1
     if screen.selectedIndex >= screen.levelRows.len:
       screen.selectedIndex = 0
@@ -93,14 +94,21 @@ proc newLevelRow(levelMeta: LevelMeta): LevelRow =
 
 proc refreshLevelRows(screen: LevelSelectScreen) =
   screen.levelRows.setLen(0)
-
+  var numLevelsCommpleted = 0
   var levelPaths = getLevelPaths()
   for levelMeta in officialLevels.values:
     let metaIndex = levelPaths.find(levelMeta.path)
     if metaIndex >= 0:
-      screen.levelRows.add(levelMeta.newLevelRow())
+      let levelRow = levelMeta.newLevelRow()
+      screen.levelRows.add(levelRow)
       levelPaths.del(metaIndex)
+      if levelRow.progress.bestTime.isSome:
+        inc numLevelsCommpleted
+  
+  screen.firstLockedRowIdx = some(initialUnlockedLevels + numLevelsCommpleted)
+
   print "unknown levels: ", repr(levelPaths)
+  print "firstLockedRowIdx: ", screen.firstLockedRowIdx
 
   for levelPath in levelPaths:
     # for unknown levels, add them to the list using path as name
@@ -113,8 +121,6 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
 method resume*(screen: LevelSelectScreen) =
   screen.upActivatedAt = none(Seconds)
   screen.downActivatedAt = none(Seconds)
-  initLevelSelectView()
-  resumeLevelSelectView()
   try:
     screen.refreshLevelRows()
   except IOError:
@@ -122,6 +128,9 @@ method resume*(screen: LevelSelectScreen) =
 
   print("rows: ")
   print(repr(screen.levelRows))
+
+  initLevelSelectView()
+  resumeLevelSelectView()
 
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())

@@ -19,5 +19,6 @@ type
     selectedIndex*: int
     scrollPosition*: float32
     scrollTarget*: float32
+    firstLockedRowIdx*: Option[int]
     upActivatedAt*: Option[Seconds]
     downActivatedAt*: Option[Seconds]
