@@ -56,7 +56,7 @@ proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
     screen.upActivatedAt = some(currentTimeSeconds() + timeout)
 
 proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
-  if screen.selectedIndex >= screen.firstLockedRowIdx.get(screen.levelRows.len) - 1:
+  if screen.selectedIndex > screen.firstLockedRowIdx.get(screen.levelRows.len) - 1:
     return
 
   screen.upActivatedAt = none(Seconds)
