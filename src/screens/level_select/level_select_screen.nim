@@ -46,6 +46,7 @@ proc updateScrollPosition(screen: LevelSelectScreen) =
 
 proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
   if screen.selectedIndex <= 0 and screen.firstLockedRowIdx.get(screen.levelRows.len) < screen.levelRows.len:
+    if immediately: screen.scrollPosition = -1f
     return
   screen.downActivatedAt = none(Seconds)
   if immediately or currentTimeSeconds() > screen.upActivatedAt.get(0):
@@ -57,7 +58,8 @@ proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
 
 proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
   if screen.selectedIndex > screen.firstLockedRowIdx.get(screen.levelRows.len) - 1:
-    return
+    if immediately: screen.scrollPosition += 1f
+    return  
 
   screen.upActivatedAt = none(Seconds)
   if immediately or currentTimeSeconds() > screen.downActivatedAt.get(0):
