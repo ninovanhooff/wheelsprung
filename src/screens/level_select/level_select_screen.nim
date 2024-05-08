@@ -20,6 +20,14 @@ const
   pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
 
+var
+  backgroundAudioPlayer: FilePlayer
+
+proc initLevelSelectScreen() =
+  backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/level_select/ambience") 
+  except:
+    playdate.system.error(getCurrentExceptionMsg())
+    nil
 
 proc getLevelPaths(): seq[string] =
   try:
@@ -136,8 +144,10 @@ method resume*(screen: LevelSelectScreen) =
   print("rows: ")
   print(repr(screen.levelRows))
 
+  initLevelSelectScreen()
   initLevelSelectView()
   resumeLevelSelectView()
+  backgroundAudioPlayer.play(0)
 
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
