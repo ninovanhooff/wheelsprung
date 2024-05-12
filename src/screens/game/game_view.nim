@@ -3,17 +3,18 @@
 import playdate/api
 import math
 import options
+import std/sequtils
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
 import game_bike, game_finish, game_ghost
 import common/graphics_utils
+import common/lcd_patterns
 import game_debug_view
 import chipmunk_utils
 import common/utils
 import globals
 import cache/bitmaptable_cache
-import common/lcd_patterns
 import screens/hit_stop/hit_stop_screen
 
 const
@@ -66,20 +67,50 @@ proc initGameView*() =
   except:
     echo getCurrentExceptionMsg()
 
-proc initGameBackground*(state: GameState) =
-  let level = state.level
-  state.background = gfx.newBitmap(
-    level.size.x, level.size.y, kColorWhite
+proc getCenter(vertices: seq[Vertex]): Vertex =
+  var 
+    minX: int32 = int32.high
+    minY: int32 = int32.high
+    maxX: int32 = int32.low
+    maxY: int32 = int32.low
+  for vertex in vertices:
+    minX = min(minX, vertex.x)
+    minY = min(minY, vertex.y)
+    maxX = max(maxX, vertex.x)
+    maxY = max(maxY, vertex.y)
+  return (
+    ((minX + maxX) / 2).roundToNearestInt, 
+    ((minY + maxY) / 2).roundToNearestInt
   )
 
-  gfx.pushContext(state.background)
+proc drawGameBackground*(state: GameState) =
+  let level = state.level
+  let camVertex = state.camera.toVertex()
+  gfx.clear(kColorWhite)
 
   let terrainPolygons = level.terrainPolygons
+
+    # draw driving surface
+  for polygon in level.terrainPolygons:
+    let polygonCenter = polygon.vertices.getCenter()
+    let camCenter = camVertex + halfDisplaySize.toVertex
+    let perspectiveShiftVect: Vect = ((camCenter - polygonCenter).toVect.vmult(0.05f))
+    let perspectiveShift: Vertex = newBB(-5f, -5f, 5f, 5f).clampVect(perspectiveShiftVect).toVertex
+    gfx.setDrawOffset(-camVertex.x + perspectiveShift.x, -camVertex.y + perspectiveShift.y)
+    gfx.fillPolygon(polygon.vertices, patGray, kPolygonFillNonZero)
+    # drawPolyline(polygon.vertices)
+  # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon.
+  # As a workaround, we re-copy the data back to the level
+  level.terrainPolygons = terrainPolygons
+
+
+  # draw solid terrain
+  gfx.setDrawOffset(-camVertex.x, -camVertex.y)
   for polygon in level.terrainPolygons:
     gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
     drawPolyline(polygon.vertices)
-  # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
-  # as a workaround, we re-copy the data back to the level
+  # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon.
+  # As a workaround, we re-copy the data back to the level
   level.terrainPolygons = terrainPolygons
 
   for polyline in level.terrainPolylines:
@@ -89,8 +120,9 @@ proc initGameBackground*(state: GameState) =
       let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
       if radius > 0:
         fillCircle(vertex.x, vertex.y, radius)
+  
+  gfx.setDrawOffset(0,0)
 
-  gfx.popContext()
 
 proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
@@ -251,7 +283,7 @@ proc drawGame*(statePtr: ptr GameState) =
 
 
   if debugDrawLevel:
-    state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
+    drawGameBackground(state)
   else:
     gfx.clear(kColorWhite)
 
