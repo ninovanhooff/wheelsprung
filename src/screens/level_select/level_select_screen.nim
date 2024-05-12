@@ -4,8 +4,11 @@ import playdate/api
 import navigation/[screen, navigator]
 import common/utils
 import common/shared_types
+import common/audio_utils
 import std/sequtils
 import std/options
+import std/tables
+import cache/sound_cache
 import data_store/configuration
 import data_store/user_profile
 import level_meta/level_data
@@ -13,7 +16,6 @@ import level_select_types
 import level_select_view
 import screens/game/game_screen
 import screens/settings/settings_screen
-import tables
 
 const
   initialUnlockedLevels = 3
@@ -22,12 +24,20 @@ const
 
 var
   backgroundAudioPlayer: FilePlayer
+  confirmPlayer: SamplePlayer
+  selectNextPlayer, selectPreviousPlayer, selectBumperPlayer: SamplePlayer
 
 proc initLevelSelectScreen() =
   backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/level_select/ambience") 
   except:
     playdate.system.error(getCurrentExceptionMsg())
     nil
+  
+  selectPreviousPlayer = getOrLoadSamplePlayer("audio/menu/select_previous")
+  selectNextPlayer = getOrLoadSamplePlayer("audio/menu/select_next")
+  confirmPlayer = getOrLoadSamplePlayer("audio/menu/confirm")
+  selectBumperPlayer = getOrLoadSamplePlayer("audio/menu/bumper")
+
 
 proc getLevelPaths(): seq[string] =
   try:
@@ -54,10 +64,13 @@ proc updateScrollPosition(screen: LevelSelectScreen) =
 
 proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
   if screen.selectedIndex <= 0 and screen.firstLockedRowIdx.get(screen.levelRows.len) < screen.levelRows.len:
-    if immediately: screen.scrollPosition = -1f
+    if immediately: 
+      screen.scrollPosition = -1f
+      selectBumperPlayer.playVariation()
     return
   screen.downActivatedAt = none(Seconds)
   if immediately or currentTimeSeconds() > screen.upActivatedAt.get(0):
+    selectPreviousPlayer.play()
     screen.selectedIndex -= 1
     if screen.selectedIndex < 0:
       screen.selectedIndex = screen.levelRows.len - 1
@@ -66,11 +79,14 @@ proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
 
 proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
   if screen.selectedIndex >= screen.firstLockedRowIdx.get(screen.levelRows.len) - 1:
-    if immediately: screen.scrollPosition += 1f
+    if immediately: 
+      screen.scrollPosition += 1f
+      selectBumperPlayer.playVariation()
     return  
 
   screen.upActivatedAt = none(Seconds)
   if immediately or currentTimeSeconds() > screen.downActivatedAt.get(0):
+    selectNextPlayer.play()
     screen.selectedIndex += 1
     if screen.selectedIndex >= screen.levelRows.len:
       screen.selectedIndex = 0
@@ -87,6 +103,7 @@ proc updateInput(screen: LevelSelectScreen) =
     let levelPath = rows[screen.selectedIndex].levelMeta.path
     let gameScreen = newGameScreen(levelPath)
     # the ganme screen loaded successfully, save as last opened level
+    confirmPlayer.playVariation
     setLastOpenedLevel(levelPath)
     pushScreen(gameScreen)
   elif kButtonUp in buttonState.current:
