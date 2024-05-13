@@ -263,9 +263,9 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   let height = obj.height
   let vertices: seq[Vertex] = @[
     objOffset,
-    objOffset + (width, 0'i32),
-    objOffset + (width, height),
     objOffset + (0'i32, height),
+    objOffset + (width, height),
+    objOffset + (width, 0'i32),
     objOffset
   ]
   level.terrainPolygons.add(newPolygon(vertices, obj.fill()))
