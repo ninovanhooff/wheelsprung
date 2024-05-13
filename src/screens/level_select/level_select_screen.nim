@@ -170,6 +170,9 @@ method resume*(screen: LevelSelectScreen) =
     pushScreen(newSettingsScreen())
   )
 
+method pause*(screen: LevelSelectScreen) =
+  backgroundAudioPlayer.stop()
+
 method update*(screen: LevelSelectScreen): int =
   updateInput(screen)
   draw(screen)
