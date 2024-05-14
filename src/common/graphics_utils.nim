@@ -76,6 +76,9 @@ proc drawPolyline*(vertices: seq[Vertex], width: int32 = 1, color: LCDColor = kC
     let v1 = vertices[i+1]
     gfx.drawLine(v0.x, v0.y, v1.x, v1.y, width, color)
 
+proc drawLine*(v0: Vertex, v1: Vertex, color: LCDColor = kColorBlack) {.inline.} =
+  gfx.drawLine(v0.x, v0.y, v1.x, v1.y, 1, color)
+
 proc fillCircle*(x, y: int32, radius: int32, color: LCDColor = kColorBlack ) {.inline.} =
   gfx.fillEllipse(x - radius,y - radius,radius * 2'i32, radius * 2'i32, 0f, 0f, color);
 

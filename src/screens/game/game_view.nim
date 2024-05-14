@@ -67,59 +67,75 @@ proc initGameView*() =
   except:
     echo getCurrentExceptionMsg()
 
-proc getCenter(vertices: seq[Vertex]): Vertex =
-  var 
-    minX: int32 = int32.high
-    minY: int32 = int32.high
-    maxX: int32 = int32.low
-    maxY: int32 = int32.low
-  for vertex in vertices:
-    minX = min(minX, vertex.x)
-    minY = min(minY, vertex.y)
-    maxX = max(maxX, vertex.x)
-    maxY = max(maxY, vertex.y)
-  return (
-    ((minX + maxX) / 2).roundToNearestInt, 
-    ((minY + maxY) / 2).roundToNearestInt
-  )
+proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
+  let perspectiveShiftVect: Vect = ((cameraCenter - vertex).toVect.vmult(0.05f))
+  result = vertex + newBB(-5f, -5f, 5f, 5f).clampVect(perspectiveShiftVect).toVertex
+  # print "cameraShift: ", vertex, " -> ", perspectiveShiftVect, "->", result
 
+proc cameraShiftV(vertex: Vertex, cameraCenter: Vertex): Vect {.inline.} =
+  let perspectiveShiftVect: Vect = ((cameraCenter - vertex).toVect.vmult(0.05f))
+  result = newBB(-5f, -5f, 5f, 5f).clampVect(perspectiveShiftVect)
+  # print "cameraShift: ", vertex, " -> ", perspectiveShiftVect, "->", result
+    
 proc drawGameBackground*(state: GameState) =
   let level = state.level
   let camVertex = state.camera.toVertex()
   gfx.clear(kColorWhite)
 
-  let terrainPolygons = level.terrainPolygons
-
-    # draw driving surface
-  for polygon in level.terrainPolygons:
-    let polygonCenter = polygon.vertices.getCenter()
-    let camCenter = camVertex + halfDisplaySize.toVertex
-    let perspectiveShiftVect: Vect = ((camCenter - polygonCenter).toVect.vmult(0.05f))
-    let perspectiveShift: Vertex = newBB(-5f, -5f, 5f, 5f).clampVect(perspectiveShiftVect).toVertex
-    gfx.setDrawOffset(-camVertex.x + perspectiveShift.x, -camVertex.y + perspectiveShift.y)
-    gfx.fillPolygon(polygon.vertices, patGray, kPolygonFillNonZero)
-    # drawPolyline(polygon.vertices)
-  # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon.
-  # As a workaround, we re-copy the data back to the level
-  level.terrainPolygons = terrainPolygons
-
-
-  # draw solid terrain
   gfx.setDrawOffset(-camVertex.x, -camVertex.y)
-  for polygon in level.terrainPolygons:
-    gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
-    drawPolyline(polygon.vertices)
-  # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon.
-  # As a workaround, we re-copy the data back to the level
-  level.terrainPolygons = terrainPolygons
 
-  for polyline in level.terrainPolylines:
-    drawPolyline(polyline.vertices, polyline.thickness.int32)
-    for vertex in polyline.vertices:
-      # fill the gaps between sharp-angled line segments
-      let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
-      if radius > 0:
-        fillCircle(vertex.x, vertex.y, radius)
+  # draw driving surface
+  let camCenter = camVertex + halfDisplaySize.toVertex
+  for polygon in level.terrainPolygons:
+    var shiftedVertices = polygon.vertices.mapIt(it.cameraShift(camCenter))
+    let shiftedVertices2 = shiftedVertices
+    # for some reason, shiftedVertices is modified by calling gfx.fillPolygon.
+    # As a workaround, we keep a duplicate of the data
+
+    for i in 0..polygon.vertices.len - 2:
+      # todo 2 shiftedVertices2 seq is not needed
+      let v1 = polygon.vertices[i].toVect
+      let v2 = polygon.vertices[i + 1].toVect
+      ## https://stackoverflow.com/a/1243676/923557
+      let vNormal = v(v2.y - v1.y, v1.x - v2.x)
+
+      # todo can we use the same shiftedVertices2 seq?
+      let sv1: Vect = cameraShiftV(shiftedVertices2[i], camCenter)
+      let sv2: Vect = cameraShiftV(shiftedVertices2[i + 1], camCenter)
+      let sSum = sv1 + sv2
+      let dot = vNormal.vdot(sSum)
+      print "dot for segment ", i, ":", dot, "shift: ", sv1, sv2, "normal: ", vNormal
+
+      # todo levels: ccw winding order
+
+      if dot < 0:
+        gfx.fillPolygon([polygon.vertices[i], shiftedVertices2[i], shiftedVertices2[i+1], polygon.vertices[i + 1]], patGray, kPolygonFillNonZero)
+
+    for i in 0..polygon.vertices.len - 1:
+      # use the uncorrupted data to draw the perspective lines
+      drawLine(shiftedVertices2[i], polygon.vertices[i], kColorBlack)
+      gfx.drawTextAligned($i, polygon.vertices[i].x, polygon.vertices[i].y)
+
+
+
+  if debugDrawPlayer:
+    # draw solid terrain
+    # todo use the state.background for this
+    let terrainPolygons = level.terrainPolygons
+    for polygon in level.terrainPolygons:
+      gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
+      drawPolyline(polygon.vertices)
+    # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon.
+    # As a workaround, we re-copy the data back to the level
+    level.terrainPolygons = terrainPolygons
+
+    for polyline in level.terrainPolylines:
+      drawPolyline(polyline.vertices, polyline.thickness.int32)
+      for vertex in polyline.vertices:
+        # fill the gaps between sharp-angled line segments
+        let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
+        if radius > 0:
+          fillCircle(vertex.x, vertex.y, radius)
   
   gfx.setDrawOffset(0,0)
 
