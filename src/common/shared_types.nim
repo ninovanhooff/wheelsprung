@@ -23,7 +23,7 @@ type
 
 let fallbackGameResult*: GameResult = GameResult(
   resultType: GameResultType.low,
-  time: 0,
+  time: Milliseconds.high, # use the worst possible time, so that when comparing, it will be the worst
   starCollected: false
 )
 
