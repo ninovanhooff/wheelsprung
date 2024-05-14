@@ -1,4 +1,4 @@
-{.push raises: [].}
+{.push raises: [], warning[LockLevel]:off.}
 
 import playdate/api
 import navigation/[screen, navigator]
