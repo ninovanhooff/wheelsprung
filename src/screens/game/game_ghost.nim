@@ -74,7 +74,7 @@ proc drawGhostPose*(state: GameState, pose: PlayerPose) =
 proc updateGhostRecording*(state: GameState, coinProgress: float32) =
   ## takes coinProgress as arg to prevent dependency on game_coin.nim
   state.ghostRecording.coinProgress = coinProgress
-  state.ghostRecording.gameResult = state.gameResult.get
+  state.ghostRecording.gameResult = state.gameResult.get(fallbackGameResult)
 
 proc pose(body: Body): Pose {.inline.} =
   result = Pose(
@@ -119,13 +119,6 @@ proc compare(
 proc pickBestGhost*(ghostA: Ghost, ghostB: Ghost): Ghost {.raises:[].} =
   ## When equal, ghostA is picked
   
-  if ghostA.gameResult.time == 0.Milliseconds:
-    print "Picked ghostB because ghostA has no time"
-    return ghostB
-  elif ghostB.gameResult.time == 0.Milliseconds:
-    print "Picked ghostA because ghostB has no time"
-    return ghostA
-  
   for comparator in ghostComparators:
     let comparisionResult = compare(ghostA, ghostB, comparator.selector, comparator.preferLargeValue)
     if comparisionResult.isSome:
@@ -135,6 +128,7 @@ proc pickBestGhost*(ghostA: Ghost, ghostB: Ghost): Ghost {.raises:[].} =
         print "Picked ghostB by", comparator.description
       return comparisionResult.get
 
+  print "Picked ghostA because no comparator could decide"
   return ghostA
 
 proc addPose*(ghost: var Ghost, state: GameState) {.inline.} =
