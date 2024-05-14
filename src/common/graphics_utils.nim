@@ -10,6 +10,7 @@ const
   displaySize* = v(400.0, 240.0)
   halfDisplaySize*: Vect = displaySize.vmult(0.5)
 
+# Note: these are not marked with .inline. because that prevents them from being used in closures (map calls)
 proc toVertex*(v: Vect): Vertex = 
   (v.x.round.int32, v.y.round.int32)
 
@@ -21,6 +22,9 @@ proc `-`*(a: Vertex, b: Vertex): Vertex =
 
 proc `+`*(a: Vertex, b: Vertex): Vertex =
   return (a[0] + b[0], a[1] + b[1])
+
+proc `div`*(a: Vertex, b: int32): Vertex {.inline.} =
+  return (x: a.x div b, y: a.y div b)
 
 proc drawRotated*(annotatedT: AnnotatedBitmapTable, center: Vect, angle: float32, flip: LCDBitmapFlip = kBitmapUnflipped) {.inline.} =
   ## angle is in radians
@@ -114,3 +118,14 @@ proc inset*(rect: Rect, size: int32): Rect =
     width: rect.width - size * 2, 
     height: rect.height - size * 2
   )
+
+# LCDRect
+
+proc clampVertex*(lcdRect: LCDRect, v: Vertex): Vertex {.inline.} =
+  return (
+    x: clamp(v.x, lcdRect.left, lcdRect.right), 
+    y: clamp(v.y, lcdRect.top, lcdRect.bottom)
+  )
+
+proc dotVertex*(v1: Vertex, v2: Vertex): int32 {.inline.} =
+  return v1.x * v2.x + v1.y * v2.y

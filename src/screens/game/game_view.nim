@@ -67,16 +67,12 @@ proc initGameView*() =
   except:
     echo getCurrentExceptionMsg()
 
+const perspectiveShiftBounds = LCDRect(left: -5, right: 5, top: -5, bottom: 5)
 proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
-  let perspectiveShiftVect: Vect = ((cameraCenter - vertex).toVect.vmult(0.05f))
-  result = vertex + newBB(-5f, -5f, 5f, 5f).clampVect(perspectiveShiftVect).toVertex
-  # print "cameraShift: ", vertex, " -> ", perspectiveShiftVect, "->", result
+  let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
+  result = perspectiveShiftBounds.clampVertex(perspectiveShift) # todo is clamping necessary?
+  print "cameraShift: ", vertex, " -> ", perspectiveShift, "->", result
 
-proc cameraShiftV(vertex: Vertex, cameraCenter: Vertex): Vect {.inline.} =
-  let perspectiveShiftVect: Vect = ((cameraCenter - vertex).toVect.vmult(0.05f))
-  result = newBB(-5f, -5f, 5f, 5f).clampVect(perspectiveShiftVect)
-  # print "cameraShift: ", vertex, " -> ", perspectiveShiftVect, "->", result
-    
 proc drawGameBackground*(state: GameState) =
   let level = state.level
   let camVertex = state.camera.toVertex()
@@ -87,41 +83,39 @@ proc drawGameBackground*(state: GameState) =
   # draw driving surface
   let camCenter = camVertex + halfDisplaySize.toVertex
   for polygon in level.terrainPolygons:
-    var shiftedVertices = polygon.vertices.mapIt(it.cameraShift(camCenter))
-    let shiftedVertices2 = shiftedVertices
-    # for some reason, shiftedVertices is modified by calling gfx.fillPolygon.
-    # As a workaround, we keep a duplicate of the data
+    # todo make sure this is a reference, not a copy
+    let polyVerts = polygon.vertices
+    var shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))
 
-    for i in 0..polygon.vertices.len - 2:
-      # todo 2 shiftedVertices2 seq is not needed
-      let v1 = polygon.vertices[i].toVect
-      let v2 = polygon.vertices[i + 1].toVect
+
+    for i in 0..polyVerts.len - 2:
+      let v1 = polyVerts[i]
+      let v2 = polyVerts[i + 1]
       ## https://stackoverflow.com/a/1243676/923557
-      let vNormal = v(v2.y - v1.y, v1.x - v2.x)
+      let vNormal: Vertex = (x: v2.y - v1.y, y: v1.x - v2.x)
 
-      # todo can we use the same shiftedVertices2 seq?
-      let sv1: Vect = cameraShiftV(shiftedVertices2[i], camCenter)
-      let sv2: Vect = cameraShiftV(shiftedVertices2[i + 1], camCenter)
+      let sv1: Vertex = shiftedVertices[i]
+      let sv2: Vertex = shiftedVertices[i + 1]
       let sSum = sv1 + sv2
-      let dot = vNormal.vdot(sSum)
+      let dot = vNormal.dotVertex(sSum)
       print "dot for segment ", i, ":", dot, "shift: ", sv1, sv2, "normal: ", vNormal
 
       # todo levels: ccw winding order
 
       if dot < 0:
-        gfx.fillPolygon([polygon.vertices[i], shiftedVertices2[i], shiftedVertices2[i+1], polygon.vertices[i + 1]], patGray, kPolygonFillNonZero)
+        gfx.fillPolygon([v1, v1 + sv1, v2 + sv2, v2], patGray, kPolygonFillNonZero)
 
-    for i in 0..polygon.vertices.len - 1:
+    for i in 0..polyVerts.len - 1:
       # use the uncorrupted data to draw the perspective lines
-      drawLine(shiftedVertices2[i], polygon.vertices[i], kColorBlack)
-      gfx.drawTextAligned($i, polygon.vertices[i].x, polygon.vertices[i].y)
+      drawLine(polyVerts[i] + shiftedVertices[i], polyVerts[i], kColorBlack)
+      gfx.drawTextAligned($i, polyVerts[i].x, polyVerts[i].y)
 
 
 
   if debugDrawPlayer:
+    let terrainPolygons = level.terrainPolygons
     # draw solid terrain
     # todo use the state.background for this
-    let terrainPolygons = level.terrainPolygons
     for polygon in level.terrainPolygons:
       gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
       drawPolyline(polygon.vertices)
