@@ -105,10 +105,11 @@ proc drawGameBackground*(state: GameState) =
       if dot < 0:
         gfx.fillPolygon([v1, v1 + sv1, v2 + sv2, v2], patGray, kPolygonFillNonZero)
 
-    for i in 0..polyVerts.len - 1:
-      # use the uncorrupted data to draw the perspective lines
-      drawLine(polyVerts[i] + shiftedVertices[i], polyVerts[i], kColorBlack)
-      gfx.drawTextAligned($i, polyVerts[i].x, polyVerts[i].y)
+    if not debugDrawPlayer:
+      for i in 0..polyVerts.len - 1:
+        # use the uncorrupted data to draw the perspective lines
+        drawLine(polyVerts[i] + shiftedVertices[i], polyVerts[i], kColorBlack)
+        gfx.drawTextAligned($i, polyVerts[i].x, polyVerts[i].y)
 
 
 
