@@ -1,3 +1,5 @@
+import { ensureWindingOrder } from "./ensureWindingOrder.mjs";
+
 function forceIntegerCoordinates(mapOrLayer) {
 	tiled.log("Running forceIntegerCoordinates:" + mapOrLayer);
 	if(!mapOrLayer){
@@ -5,7 +7,7 @@ function forceIntegerCoordinates(mapOrLayer) {
 	};
 	if(mapOrLayer.isObjectLayer) {
 		let objects = mapOrLayer.objects;
-		for(object of objects) {
+		for(let object of objects) {
 			object.x = Math.round(object.x);
 			object.y = Math.round(object.y);
 			object.width = Math.round(object.width);
@@ -16,7 +18,8 @@ function forceIntegerCoordinates(mapOrLayer) {
 						Math.round(p.x), 
 						Math.round(p.y)
 					)
-				); 
+				);
+				object.polygon = ensureWindingOrder(object.polygon);
 			}
 		}
 	} else if(mapOrLayer.isTileMap || mapOrLayer.isGroupLayer) {
