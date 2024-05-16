@@ -67,11 +67,9 @@ proc initGameView*() =
   except:
     echo getCurrentExceptionMsg()
 
-const perspectiveShiftBounds = LCDRect(left: -5, right: 5, top: -5, bottom: 5)
 proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
-  result = perspectiveShiftBounds.clampVertex(perspectiveShift) # todo is clamping necessary?
-  print "cameraShift: ", vertex, " -> ", perspectiveShift, "->", result
+  result = perspectiveShift # todo is clamping necessary?
 
 proc drawGameBackground*(state: GameState) =
   let level = state.level
@@ -98,7 +96,6 @@ proc drawGameBackground*(state: GameState) =
       let sv2: Vertex = shiftedVertices[i + 1]
       let sSum = sv1 + sv2
       let dot = vNormal.dotVertex(sSum)
-      print "dot for segment ", i, ":", dot, "shift: ", sv1, sv2, "normal: ", vNormal
 
       # todo levels: ccw winding order
 

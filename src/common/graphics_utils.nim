@@ -119,13 +119,6 @@ proc inset*(rect: Rect, size: int32): Rect =
     height: rect.height - size * 2
   )
 
-# LCDRect
-
-proc clampVertex*(lcdRect: LCDRect, v: Vertex): Vertex {.inline.} =
-  return (
-    x: clamp(v.x, lcdRect.left, lcdRect.right), 
-    y: clamp(v.y, lcdRect.top, lcdRect.bottom)
-  )
-
 proc dotVertex*(v1: Vertex, v2: Vertex): int32 {.inline.} =
+  ## 2D Dot product of two vectors
   return v1.x * v2.x + v1.y * v2.y
