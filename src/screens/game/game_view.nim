@@ -152,7 +152,7 @@ proc drawBikeForks*(state: GameState) =
   let camera = state.camera
   let driveDirection = state.driveDirection
 
-  if state.gameResult.isSome and state.gameResult.get.resultType == GameResultType.GameOver:
+  if state.bikeConstraints.len == 0:
     #drawLineOutlined from top of forkArm to bottom of forkArm
     let forkArm = state.forkArm
     let forkArmTopCenter = localToWorld(forkArm, forkArmTopCenterOffset) - camera
