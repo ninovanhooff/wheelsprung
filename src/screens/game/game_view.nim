@@ -79,7 +79,7 @@ proc drawGameBackground*(state: GameState) =
   gfx.setDrawOffset(-camVertex.x, -camVertex.y)
 
   # draw driving surface
-  let camCenter = camVertex + halfDisplaySize.toVertex
+  let camCenter = camVertex + halfDisplaySize.toVertex + (x: 0'i32, y: -30'i32)
   for polygon in level.terrainPolygons:
     # todo make sure this is a reference, not a copy
     let polyVerts = polygon.vertices
