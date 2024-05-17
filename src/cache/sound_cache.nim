@@ -21,5 +21,3 @@ proc getOrLoadSample(path: string): AudioSample =
 proc getOrLoadSamplePlayer*(path: string): SamplePlayer =
   result = snd.newSamplePlayer()
   result.sample= getOrLoadSample(path)
-
-# todo use in game screen

@@ -48,9 +48,6 @@ proc updateGameResult(state: GameState) {.raises: [].} =
     state.setGameResult(state.gameResult.get.resultType)
 
 proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen {.raises: [].} =
-  # todo find body / shape that collided
-  # note: shape.body exists. The shape can be added as param to this function
-  # beware that this is currently called from a begin func, not a post step func
   var screen = createHitstopScreen(state, collisionShape)
   screen.menuItems = @[
     MenuItemDefinition(name: settingsLabel, action: () => pushScreen(newSettingsScreen())),
