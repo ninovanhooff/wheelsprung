@@ -69,7 +69,7 @@ proc initGameView*() =
 
 proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
-  result = perspectiveShift # todo is clamping necessary?
+  result = perspectiveShift
 
 proc drawGameBackground*(state: GameState) =
   let level = state.level
@@ -96,8 +96,6 @@ proc drawGameBackground*(state: GameState) =
       let sv2: Vertex = shiftedVertices[i + 1]
       let sSum = sv1 + sv2
       let dot = vNormal.dotVertex(sSum)
-
-      # todo levels: ccw winding order
 
       if dot < 0:
         gfx.fillPolygon([v1, v1 + sv1, v2 + sv2, v2], patGray, kPolygonFillNonZero)
