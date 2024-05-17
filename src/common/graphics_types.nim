@@ -6,20 +6,21 @@ type
   Vertex* = tuple [x, y: int32]
   Size* = Vertex
   Polygon* = object of RootObj
-        vertices*: seq[Vertex]
-        fill*: LCDPattern
+    vertices*: seq[Vertex]
+    fill*: LCDPattern
+    bounds*: LCDRect
   Polyline* = object of RootObj
-        vertices*: seq[Vertex]
-        stroke*: LCDPattern
-        thickness*: float32
+    vertices*: seq[Vertex]
+    stroke*: LCDPattern
+    thickness*: float32
   Rect* {.requiresInit.} = object of RootObj
     x*, y*, width*, height*: int32
 
   AnnotatedBitmapTable* = ref object of RootObj
-      bitmapTable*: LCDBitmapTable
-      frameCount*: int32
-      halfFrameWidth*: float32
-      halfFrameHeight*: float32
+    bitmapTable*: LCDBitmapTable
+    frameCount*: int32
+    halfFrameWidth*: float32
+    halfFrameHeight*: float32
 
   Asset* = ref object of RootObj
     position*: Vertex
@@ -32,8 +33,8 @@ type
     startOffset*: int32
 
 let
-    emptyPolygon*: Polygon = Polygon(vertices: @[], fill: nil)
-    emptyPolyline*: Polyline = Polyline(vertices: @[], stroke: nil)
+  emptyPolygon*: Polygon = Polygon(vertices: @[], fill: nil)
+  emptyPolyline*: Polyline = Polyline(vertices: @[], stroke: nil)
 
 proc bottom*(rect: Rect): int32 =
   result = rect.y + rect.height
@@ -50,14 +51,17 @@ proc getBitmap*(annotatedTable: AnnotatedBitmapTable, frame: int32): LCDBitmap {
 proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): AnnotatedBitmapTable =
   let firstBitmap = bitmapTable.getBitmap(0)
   result = AnnotatedBitmapTable(
-    bitmapTable: bitmapTable,
-    frameCount: frameCount,
-    halfFrameWidth: firstBitmap.width.float32 * 0.5f,
-    halfFrameHeight: firstBitmap.height.float32 * 0.5f
+  bitmapTable: bitmapTable,
+  frameCount: frameCount,
+  halfFrameWidth: firstBitmap.width.float32 * 0.5f,
+  halfFrameHeight: firstBitmap.height.float32 * 0.5f
   )
 
 proc newPolyline*(vertices: seq[Vertex], thickness: float32, stroke: LCDPattern = nil): Polyline =
-    result = Polyline(vertices: vertices, thickness: thickness, stroke: stroke)
+  result = Polyline(vertices: vertices, thickness: thickness, stroke: stroke)
 
 proc newPolygon*(vertices: seq[Vertex], fill: LCDPattern = nil): Polygon =
-    result = Polygon(vertices: vertices, fill: fill)
+  result = Polygon(vertices: vertices, fill: fill)
+
+proc newVertex*(x, y: int32): Vertex =
+  result = (x: x, y: y)

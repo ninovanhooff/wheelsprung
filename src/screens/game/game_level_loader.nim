@@ -176,10 +176,14 @@ proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
   if polygon.vertices.len < 3:
     return false # polygons require at least 3 vertices
 
+  var bounds = LCDRect(left: 0, right: 0, top: 0, bottom: 0)
+
   # Offset the polygon by the object's position (localToWorld)
   for vertex in polygon.vertices.mItems():
     vertex = vertex + objOffset
+    bounds.encapsulate(vertex)
 
+  polygon.bounds = bounds
   level.terrainPolygons.add(polygon)
 
 proc loadPolyline(level: var Level, obj: LevelObjectEntity): bool =

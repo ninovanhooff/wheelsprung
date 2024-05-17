@@ -1,8 +1,10 @@
+
 import playdate/api
 import chipmunk7
 import std/math
 import common/utils
 import common/graphics_types
+export graphics_types
 import cache/bitmaptable_cache
 import random
 
@@ -25,6 +27,10 @@ proc `+`*(a: Vertex, b: Vertex): Vertex =
 
 proc `div`*(a: Vertex, b: int32): Vertex {.inline.} =
   return (x: a.x div b, y: a.y div b)
+
+proc dotVertex*(v1: Vertex, v2: Vertex): int32 {.inline.} =
+  ## 2D Dot product of two vectors
+  return v1.x * v2.x + v1.y * v2.y
 
 proc drawRotated*(annotatedT: AnnotatedBitmapTable, center: Vect, angle: float32, flip: LCDBitmapFlip = kBitmapUnflipped) {.inline.} =
   ## angle is in radians
@@ -95,6 +101,8 @@ proc fill*(rect: Rect, color: LCDColor) {.inline.} =
 proc setScreenClipRect*(rect: Rect) {.inline.} =
   gfx.setClipRect(rect.x, rect.y, rect.width, rect.height)
 
+# Rect
+
 proc inset*(rect: Rect, left, top, right, bottom: int32): Rect =
   return Rect(
     x: rect.x + left, 
@@ -119,6 +127,14 @@ proc inset*(rect: Rect, size: int32): Rect =
     height: rect.height - size * 2
   )
 
-proc dotVertex*(v1: Vertex, v2: Vertex): int32 {.inline.} =
-  ## 2D Dot product of two vectors
-  return v1.x * v2.x + v1.y * v2.y
+# LCDRect
+
+proc encapsulate*(lcdRect: var LCDRect, vertex: Vertex) =
+  ## Stretch the lcdRect to include the vertex
+  lcdRect.left = min(lcdRect.left, vertex.x)
+  lcdRect.right = max(lcdRect.right, vertex.x)
+  lcdRect.top = min(lcdRect.top, vertex.y)
+  lcdRect.bottom = max(lcdRect.bottom, vertex.y)
+
+proc contains*(lcdRect: LCDRect, vertex: Vertex): bool =
+  return vertex.x >= lcdRect.left and vertex.x <= lcdRect.right and vertex.y >= lcdRect.top and vertex.y <= lcdRect.bottom

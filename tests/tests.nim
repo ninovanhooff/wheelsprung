@@ -1,14 +1,16 @@
 import math
 import sugar
 import common/utils
+import common/graphics_utils
 import options
 import screens/game/game_types
 import screens/game/game_coin
+import playdate/api
 
 import strformat, strutils, macros
 
 ## Inspired by https://github.com/xmonader/nim-minitest
-template check*(exp:untyped, expected: untyped, failureMsg:string="FAILED", indent:uint=0): void =
+template check*(exp:untyped, expected: untyped = true, failureMsg:string="FAILED", indent:uint=0): void =
   let indentationStr = repeat(' ', indent)
   let expStr: string = astToStr(exp)
   var msg: string
@@ -59,5 +61,19 @@ proc runTests*() =
   check(1234.formatTime, "00:01.23")
   check(-1234.formatTime(signed = true), "-00:01.23")
   check(1234.formatTime(signed = true), "+00:01.23")
+
+  var testBounds = LCDRect(left: 0, top: 0, right: 100, bottom: 100)
+  check(testBounds.contains(newVertex(0, 0)))
+  check(testBounds.contains(newVertex(100, 100)))
+  check(testBounds.contains(newVertex(50, 50)))
+  check(not testBounds.contains(newVertex(-1, 0)))
+  check(not testBounds.contains(newVertex(101, 0)))
+  
+  testBounds.encapsulate(newVertex(105, 110))
+  check(testBounds.contains(newVertex(3, 0)))
+  check(testBounds.contains(newVertex(105, 109)))
+  check(testBounds.contains(newVertex(105, 110)))
+  check(not testBounds.contains(newVertex(105, 111)))
+
 
   print "======== Test: Tests Completed ========="
