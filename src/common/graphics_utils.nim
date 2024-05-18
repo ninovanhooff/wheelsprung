@@ -14,19 +14,19 @@ const
 
 # Note: these are not marked with .inline. because that prevents them from being used in closures (map calls)
 proc toVertex*(v: Vect): Vertex = 
-  (v.x.round.int32, v.y.round.int32)
+  newVertex(x = v.x.round.int32, y = v.y.round.int32)
 
 proc toVect*(vertex: Vertex): Vect =
   return v(x = vertex.x.Float, y = vertex.y.Float)
 
 proc `-`*(a: Vertex, b: Vertex): Vertex = 
-  return (a[0] - b[0], a[1] - b[1])
+  return newVertex(x = a.x - b.x, y = a.y - b.y)
 
 proc `+`*(a: Vertex, b: Vertex): Vertex =
-  return (a[0] + b[0], a[1] + b[1])
+  return newVertex(x = a.x + b.x, y = a.y + b.y)
 
 proc `div`*(a: Vertex, b: int32): Vertex {.inline.} =
-  return (x: a.x div b, y: a.y div b)
+  return newVertex(x = a.x div b, y = a.y div b)
 
 proc dotVertex*(v1: Vertex, v2: Vertex): int32 {.inline.} =
   ## 2D Dot product of two vectors

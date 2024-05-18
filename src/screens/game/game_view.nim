@@ -91,7 +91,7 @@ proc drawGameBackground*(state: GameState) =
 
   # draw driving surface
   let viewport: LCDRect = LCD_SCREEN_RECT.offsetBy(camVertex)
-  let camCenter = camVertex + halfDisplaySize.toVertex + (x: 0'i32, y: -30'i32)
+  let camCenter = camVertex + halfDisplaySize.toVertex + Vertex(x: 0, y: -30)
   for polygon in level.terrainPolygons:
     if not polygon.bounds.intersects(viewport):
       continue # skip drawing polygons that are not visible
@@ -105,7 +105,7 @@ proc drawGameBackground*(state: GameState) =
       let v1 = polyVerts[i]
       let v2 = polyVerts[i + 1]
       ## https://stackoverflow.com/a/1243676/923557
-      let vNormal: Vertex = (x: v2.y - v1.y, y: v1.x - v2.x)
+      let vNormal: Vertex = Vertex(x: v2.y - v1.y, y: v1.x - v2.x)
 
       let sv1: Vertex = shiftedVertices[i]
       let sv2: Vertex = shiftedVertices[i + 1]
@@ -226,8 +226,8 @@ const
 
 proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
   let
-    x = center[0] - rotationIndicatorRadius
-    y = center[1] - rotationIndicatorSize
+    x = center.x - rotationIndicatorRadius
+    y = center.y - rotationIndicatorSize
   # total rotation range indicator
   gfx.drawEllipse(
     x, y, rotationIndicatorSize, rotationIndicatorSize, 
@@ -318,27 +318,27 @@ proc drawGame*(statePtr: ptr GameState) =
   # draw grid
   if debugDrawGrid:
     gfx.setDrawMode(kDrawmodeWhiteTransparent)
-    gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
+    gridImage.draw(-camVertex.x mod patternSize, -camVertex.y mod patternSize, kBitmapUnflipped)
     gfx.setDrawMode(kDrawmodeCopy)
 
   if debugDrawTextures:
     # assets
     for asset in level.assets:
       let assetScreenPos = asset.position - camVertex
-      asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
+      asset.getBitmap(frameCounter).draw(assetScreenPos.x, assetScreenPos.y, asset.flip)
 
     # coins
     for coin in state.remainingCoins:
       let coinScreenPos = coin.position - camVertex
       if coin.count < 2:
-        coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+        coinImage.draw(coinScreenPos.x, coinScreenPos.y, kBitmapUnflipped)
       else:
-        gfx.drawTextAligned($coin.count, coinScreenPos[0] + 10, coinScreenPos[1])
+        gfx.drawTextAligned($coin.count, coinScreenPos.x + 10, coinScreenPos.y)
 
     # star
     if state.remainingStar.isSome:
       let starScreenPos = state.remainingStar.get - camVertex
-      starImage.draw(starScreenPos[0], starScreenPos[1], kBitmapUnflipped)
+      starImage.draw(starScreenPos.x, starScreenPos.y, kBitmapUnflipped)
 
 
     # killer

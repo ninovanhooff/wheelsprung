@@ -1,12 +1,13 @@
 import playdate/api
 when defined(DEBUG):
   import common/utils
-import common/utils
 
 template gfx*: untyped = playdate.graphics
 
 type
-  Vertex* = tuple [x, y: int32]
+  Vertex* = object # Cannot inherit from RootObj, must be sizeof(int32) * 2
+    x*, y*: int32
+    # no other fields allowed, fillPolygon requires vertices of sizeof(int32) * 2
   Size* = Vertex
   Polygon* = object of RootObj
     vertices*: seq[Vertex]
@@ -73,4 +74,4 @@ proc newPolygon*(vertices: seq[Vertex], bounds: LCDRect, fill: LCDPattern = nil)
   result = Polygon(vertices: vertices, bounds: bounds, fill: fill)
 
 proc newVertex*(x, y: int32): Vertex =
-  result = (x: x, y: y)
+  result = Vertex(x: x, y: y)

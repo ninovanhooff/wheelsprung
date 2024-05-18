@@ -150,15 +150,13 @@ proc parseLevel(path: string): LevelEntity {.raises: [].} =
     return nil
 
 proc toVertex(obj: LevelVertexEntity): Vertex =
-  return (obj.x, obj.y)
+  return newVertex(x = obj.x, y = obj.y)
 
 proc getPolyline(obj: LevelObjectEntity): Polyline {.raises: [].} =
   if obj.polyline.isSome:
     return newPolyline(vertices = obj.polyline.get.map(toVertex), thickness = obj.thickness)
   else:
     return emptyPolyline
-
-proc `+`*(v1, v2: Vertex): Vertex = (v1[0] + v2[0], v1[1] + v2[1])
 
 proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
   if obj.polygon.isNone:
@@ -169,7 +167,7 @@ proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
   segments.add(segments[0])
   var vertices = segments.map(toVertex)
 
-  let objOffset: Vertex = (obj.x, obj.y)
+  let objOffset: Vertex = newVertex(x = obj.x, y = obj.y)
 
   if vertices.len < 3:
     print("SKIP Polygon has less than 3 vertices")
@@ -186,7 +184,7 @@ proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
   return true
 
 proc loadPolyline(level: var Level, obj: LevelObjectEntity): bool =
-  let objOffset: Vertex = (obj.x, obj.y)
+  let objOffset: Vertex = newVertex(obj.x, obj.y)
   var polyline: Polyline = obj.getPolyline()
 
   if polyline.vertices.len < 2:
@@ -207,7 +205,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   let hFlip: bool = (gid and GID_HFLIP_MASK).bool
   let classId: ClassIds = (gid and GID_CLASS_MASK).ClassIds
 
-  let position: Vertex = (obj.x, obj.y)
+  let position: Vertex = newVertex(obj.x, obj.y)
 
   case classId:
     of ClassIds.Player:
@@ -262,14 +260,14 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
-  let objOffset: Vertex = (obj.x, obj.y)
+  let objOffset: Vertex = newVertex(obj.x, obj.y)
   let width = obj.width
   let height = obj.height
   let vertices: seq[Vertex] = @[
     objOffset,
-    objOffset + (0'i32, height),
-    objOffset + (width, height),
-    objOffset + (width, 0'i32),
+    objOffset + newVertex(0, height),
+    objOffset + newVertex(width, height),
+    objOffset + newVertex(width, 0),
     objOffset
   ]
   let bounds = LCDRect(left: obj.x, right: obj.x + width, top: obj.y, bottom: obj.y + height)
@@ -294,7 +292,7 @@ proc loadLevel*(path: string): Level =
   )
   
   let levelEntity = parseLevel(path)
-  let size: Size = (levelEntity.width * levelEntity.tilewidth, levelEntity.height * levelEntity.tileheight)
+  let size: Size = newVertex(levelEntity.width * levelEntity.tilewidth, levelEntity.height * levelEntity.tileheight)
   level.size = size
   # BB uses a y-axis that points up
   level.cameraBounds = newBB(
