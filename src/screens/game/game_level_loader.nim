@@ -4,6 +4,7 @@ import common/utils
 import sugar
 import std/json
 import std/sequtils
+import std/tables
 import playdate/api
 import game_types
 import common/graphics_types
@@ -182,7 +183,7 @@ proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
     vertex = vertex + objOffset
     bounds.encapsulate(vertex)
 
-  level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
+  level.terrainPolygons.add(newPolygon(vertices = vertices, bounds = bounds, fill = obj.fill))
   return true
 
 proc loadPolyline(level: var Level, obj: LevelObjectEntity): bool =
@@ -313,5 +314,19 @@ proc loadLevel*(path: string): Level =
 
   for layer in levelEntity.layers:
     level.loadLayer(layer)
+
+  var vertexCounts: CountTable[Vertex] = CountTable[Vertex]()
+  for polygon in level.terrainPolygons:
+    for i in 0 ..< polygon.vertices.high: # skip the last vertex, which is the same as the first
+      vertexCounts.inc(polygon.vertices[i])
+
+  for polygon in level.terrainPolygons.mitems:
+    var edgeVerts = newSeq[bool](polygon.vertices.len) #todo not needed
     
+    for idx, vertex in polygon.vertices:
+      edgeVerts[idx] = vertexCounts[vertex] > 1
+    
+    polygon.edgeIndices = edgeVerts
+    assert(polygon.edgeIndices.len == polygon.vertices.len)
+
   return level
