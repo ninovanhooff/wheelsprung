@@ -1,4 +1,6 @@
 import playdate/api
+when defined(DEBUG):
+  import common/utils
 
 template gfx*: untyped = playdate.graphics
 
@@ -31,6 +33,12 @@ type
     bitmapTable*: LCDBitmapTable
     frameCount*: int32
     startOffset*: int32
+
+when defined(DEBUG):
+  proc `=copy`(dest: var Polygon; src: Polygon) =
+    # Echo some message when Foo is copied
+    print src, " is copied"
+    dest = Polygon(vertices: src.vertices, fill: src.fill, bounds: src.bounds)
 
 let
   emptyPolygon*: Polygon = Polygon(vertices: @[], fill: nil)
