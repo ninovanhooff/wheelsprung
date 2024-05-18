@@ -4,6 +4,7 @@ import playdate/api
 import math
 import options
 import std/sequtils
+import std/algorithm
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
@@ -71,6 +72,16 @@ proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
   result = perspectiveShift
 
+proc drawPerspectiveStrip(stripStartIdx: int, stripEndIdx: int, polyVerts, shiftedVerts: seq[Vertex]) =
+  if stripEndIdx > stripStartIdx:
+    var stripVerts: seq[Vertex] = @[]
+    for i in stripStartIdx..stripEndIdx:
+      stripVerts.add(shiftedVerts[i] + polyVerts[i])
+    for i in countDown(stripEndIdx, stripStartIdx):
+      stripVerts.add(polyVerts[i])
+
+    gfx.fillPolygon(stripVerts, patGray, kPolygonFillNonZero)
+
 proc drawGameBackground*(state: GameState) =
   let level = state.level
   let camVertex = state.camera.toVertex()
@@ -89,7 +100,7 @@ proc drawGameBackground*(state: GameState) =
     let polyVerts = polygon.vertices
     var shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))
 
-
+    var stripStartIdx = -1
     for i in 0..polyVerts.len - 2:
       let v1 = polyVerts[i]
       let v2 = polyVerts[i + 1]
@@ -102,11 +113,18 @@ proc drawGameBackground*(state: GameState) =
       let dot = vNormal.dotVertex(sSum)
 
       if dot < 0:
-        gfx.fillPolygon([v1, v1 + sv1, v2 + sv2, v2], patGray, kPolygonFillNonZero)
+        if stripStartIdx == -1:
+          stripStartIdx = i
+      else:
+        if stripStartIdx != -1:
+          drawPerspectiveStrip(stripStartIdx, i, polyVerts, shiftedVertices)
+          stripStartIdx = -1
+
+    if stripStartIdx != -1:
+      drawPerspectiveStrip(stripStartIdx, polyVerts.len - 1, polyVerts, shiftedVertices)
 
     if not debugDrawPlayer:
       for i in 0..polyVerts.len - 1:
-        # use the uncorrupted data to draw the perspective lines
         drawLine(polyVerts[i] + shiftedVertices[i], polyVerts[i], kColorBlack)
         gfx.drawTextAligned($i, polyVerts[i].x, polyVerts[i].y)
 
