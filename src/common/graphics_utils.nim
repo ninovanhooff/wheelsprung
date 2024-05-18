@@ -141,3 +141,11 @@ proc contains*(lcdRect: LCDRect, vertex: Vertex): bool =
 
 proc intersects*(lcdRect: LCDRect, other: LCDRect): bool =
   return lcdRect.left <= other.right and lcdRect.right >= other.left and lcdRect.top <= other.bottom and lcdRect.bottom >= other.top
+
+proc offsetBy*(lcdRect: LCDRect, offset: Vertex): LCDRect =
+  return LCDRect(
+    left: lcdRect.left + offset.x,
+    right: lcdRect.right + offset.x,
+    top: lcdRect.top + offset.y,
+    bottom: lcdRect.bottom + offset.y
+  )

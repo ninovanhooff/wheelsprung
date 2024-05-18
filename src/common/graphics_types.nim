@@ -60,8 +60,8 @@ proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): A
 proc newPolyline*(vertices: seq[Vertex], thickness: float32, stroke: LCDPattern = nil): Polyline =
   result = Polyline(vertices: vertices, thickness: thickness, stroke: stroke)
 
-proc newPolygon*(vertices: seq[Vertex], fill: LCDPattern = nil): Polygon =
-  result = Polygon(vertices: vertices, fill: fill)
+proc newPolygon*(vertices: seq[Vertex], bounds: LCDRect, fill: LCDPattern = nil): Polygon =
+  result = Polygon(vertices: vertices, bounds: bounds, fill: fill)
 
 proc newVertex*(x, y: int32): Vertex =
   result = (x: x, y: y)

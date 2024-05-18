@@ -79,8 +79,12 @@ proc drawGameBackground*(state: GameState) =
   gfx.setDrawOffset(-camVertex.x, -camVertex.y)
 
   # draw driving surface
+  let viewport: LCDRect = LCD_SCREEN_RECT.offsetBy(camVertex)
   let camCenter = camVertex + halfDisplaySize.toVertex + (x: 0'i32, y: -30'i32)
   for polygon in level.terrainPolygons:
+    if not polygon.bounds.intersects(viewport):
+      continue # skip drawing polygons that are not visible
+
     # todo make sure this is a reference, not a copy
     let polyVerts = polygon.vertices
     var shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))

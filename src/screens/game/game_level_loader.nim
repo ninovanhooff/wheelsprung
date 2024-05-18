@@ -152,15 +152,6 @@ proc parseLevel(path: string): LevelEntity {.raises: [].} =
 proc toVertex(obj: LevelVertexEntity): Vertex =
   return (obj.x, obj.y)
 
-proc getPolygon(obj: LevelObjectEntity): Polygon {.raises: [].} =
-  if obj.polygon.isSome:
-    var segments: seq[LevelVertexEntity] = obj.polygon.get
-    # close the polygon by adding the first vertex to the end
-    segments.add(segments[0])
-    return newPolygon(vertices = segments.map(toVertex), fill = obj.fill)
-  else:
-    return emptyPolygon
-
 proc getPolyline(obj: LevelObjectEntity): Polyline {.raises: [].} =
   if obj.polyline.isSome:
     return newPolyline(vertices = obj.polyline.get.map(toVertex), thickness = obj.thickness)
@@ -170,21 +161,29 @@ proc getPolyline(obj: LevelObjectEntity): Polyline {.raises: [].} =
 proc `+`*(v1, v2: Vertex): Vertex = (v1[0] + v2[0], v1[1] + v2[1])
 
 proc loadPolygon(level: var Level, obj: LevelObjectEntity): bool =
-  let objOffset: Vertex = (obj.x, obj.y)
-  var polygon: Polygon = obj.getPolygon()
+  if obj.polygon.isNone:
+    return false
 
-  if polygon.vertices.len < 3:
+  var segments: seq[LevelVertexEntity] = obj.polygon.get
+  # close the polygon by adding the first vertex to the end
+  segments.add(segments[0])
+  var vertices = segments.map(toVertex)
+
+  let objOffset: Vertex = (obj.x, obj.y)
+
+  if vertices.len < 3:
+    print("SKIP Polygon has less than 3 vertices")
     return false # polygons require at least 3 vertices
 
-  var bounds = LCDRect(left: 0, right: 0, top: 0, bottom: 0)
+  var bounds = LCDRect(left: int32.high, right: int32.low, top: int32.high, bottom: int32.low)
 
   # Offset the polygon by the object's position (localToWorld)
-  for vertex in polygon.vertices.mItems():
+  for vertex in vertices.mItems():
     vertex = vertex + objOffset
     bounds.encapsulate(vertex)
 
-  polygon.bounds = bounds
-  level.terrainPolygons.add(polygon)
+  level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
+  return true
 
 proc loadPolyline(level: var Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = (obj.x, obj.y)
@@ -198,6 +197,7 @@ proc loadPolyline(level: var Level, obj: LevelObjectEntity): bool =
     vertex = vertex + objOffset
 
   level.terrainPolylines.add(polyline)
+  return true
 
 proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   if obj.gid.isNone:
@@ -272,7 +272,8 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
     objOffset + (width, 0'i32),
     objOffset
   ]
-  level.terrainPolygons.add(newPolygon(vertices, obj.fill()))
+  let bounds = LCDRect(left: obj.x, right: obj.x + width, top: obj.y, bottom: obj.y + height)
+  level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
   return true
 
 proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
