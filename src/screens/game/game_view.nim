@@ -4,7 +4,7 @@ import playdate/api
 import math
 import options
 import std/sequtils
-import std/algorithm
+import std/sets
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
@@ -101,23 +101,30 @@ proc drawGameBackground*(state: GameState) =
     var shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))
 
     var stripStartIdx = -1
-    for i in 0..polyVerts.len - 2:
-      let v1 = polyVerts[i]
-      let v2 = polyVerts[i + 1]
+    for curIndex in 0..polyVerts.len - 2:
+      let nextIndex = curIndex + 1
+      let v1 = polyVerts[curIndex]
+      let v2 = polyVerts[nextIndex]
+
+      if polygon.edgeIndices[curIndex] == true and polygon.edgeIndices[nextIndex] == true:
+        if stripStartIdx != -1:
+          drawPerspectiveStrip(stripStartIdx, curIndex, polyVerts, shiftedVertices)
+          stripStartIdx = -1
+        continue
       ## https://stackoverflow.com/a/1243676/923557
       let vNormal: Vertex = (x: v2.y - v1.y, y: v1.x - v2.x)
 
-      let sv1: Vertex = shiftedVertices[i]
-      let sv2: Vertex = shiftedVertices[i + 1]
+      let sv1: Vertex = shiftedVertices[curIndex]
+      let sv2: Vertex = shiftedVertices[nextIndex]
       let sSum = sv1 + sv2
       let dot = vNormal.dotVertex(sSum)
 
       if dot < 0:
         if stripStartIdx == -1:
-          stripStartIdx = i
+          stripStartIdx = curIndex
       else:
         if stripStartIdx != -1:
-          drawPerspectiveStrip(stripStartIdx, i, polyVerts, shiftedVertices)
+          drawPerspectiveStrip(stripStartIdx, curIndex, polyVerts, shiftedVertices)
           stripStartIdx = -1
 
     if stripStartIdx != -1:

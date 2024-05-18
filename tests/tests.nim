@@ -85,5 +85,21 @@ proc runTests*() =
   check(not lcdRect1.intersects(lcdRect3))
   check(not lcdRect3.intersects(lcdRect1))
 
+  let expectPolygon = Polygon(
+    vertices: @[newVertex(0, 0), newVertex(100, 0), newVertex(100, 100), newVertex(0, 100)],
+    bounds: LCDRect(left: 0, top: 0, right: 100, bottom: 100),
+    edgeIndices: @[false, false, false, false],
+    fill: nil
+  )
+
+  let actualPolygon = newPolygon(
+    vertices = @[newVertex(0, 0), newVertex(100, 0), newVertex(100, 100), newVertex(0, 100)],
+    bounds = LCDRect(left: 0, top: 0, right: 100, bottom: 100),
+  )
+  
+  check(expectPolygon, actualPolygon)
+  check(actualPolygon.edgeIndices, @[false, false, false, false])
+  check(actualPolygon.edgeIndices[0], false)
+
 
   print "======== Test: Tests Completed ========="
