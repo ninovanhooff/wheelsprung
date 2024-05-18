@@ -209,6 +209,8 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
   
   initGameCoins(state)
   initGameStar(state)
+  if background.isNil:
+    initGameBackground(state)
 
   state.killers = space.addKillers(level)
   return state

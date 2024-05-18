@@ -71,10 +71,35 @@ proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
   result = perspectiveShift
 
-proc drawGameBackground*(state: GameState) =
+proc initGameBackground*(state: GameState) =
+  let level = state.level
+  state.background = gfx.newBitmap(
+    level.size.x, level.size.y, kColorWhite
+  )
+
+  gfx.pushContext(state.background)
+
+  let terrainPolygons = level.terrainPolygons
+  for polygon in level.terrainPolygons:
+    gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
+    drawPolyline(polygon.vertices)
+  # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
+  # as a workaround, we re-copy the data back to the level
+  level.terrainPolygons = terrainPolygons
+
+  for polyline in level.terrainPolylines:
+    drawPolyline(polyline.vertices, polyline.thickness.int32)
+    for vertex in polyline.vertices:
+      # fill the gaps between sharp-angled line segments
+      let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
+      if radius > 0:
+        fillCircle(vertex.x, vertex.y, radius)
+
+  gfx.popContext()
+
+proc drawPolygonDepth*(state: GameState) =
   let level = state.level
   let camVertex = state.camera.toVertex()
-  gfx.clear(kColorWhite)
 
   gfx.setDrawOffset(-camVertex.x, -camVertex.y)
 
@@ -109,27 +134,6 @@ proc drawGameBackground*(state: GameState) =
         # use the uncorrupted data to draw the perspective lines
         drawLine(polyVerts[i] + shiftedVertices[i], polyVerts[i], kColorBlack)
         gfx.drawTextAligned($i, polyVerts[i].x, polyVerts[i].y)
-
-
-
-  if debugDrawPlayer:
-    let terrainPolygons = level.terrainPolygons
-    # draw solid terrain
-    # todo use the state.background for this
-    for polygon in level.terrainPolygons:
-      gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
-      drawPolyline(polygon.vertices)
-    # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon.
-    # As a workaround, we re-copy the data back to the level
-    level.terrainPolygons = terrainPolygons
-
-    for polyline in level.terrainPolylines:
-      drawPolyline(polyline.vertices, polyline.thickness.int32)
-      for vertex in polyline.vertices:
-        # fill the gaps between sharp-angled line segments
-        let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
-        if radius > 0:
-          fillCircle(vertex.x, vertex.y, radius)
   
   gfx.setDrawOffset(0,0)
 
@@ -293,7 +297,8 @@ proc drawGame*(statePtr: ptr GameState) =
 
 
   if debugDrawLevel:
-    drawGameBackground(state)
+    state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
+    state.drawPolygonDepth()
   else:
     gfx.clear(kColorWhite)
 
