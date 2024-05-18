@@ -138,3 +138,6 @@ proc encapsulate*(lcdRect: var LCDRect, vertex: Vertex) =
 
 proc contains*(lcdRect: LCDRect, vertex: Vertex): bool =
   return vertex.x >= lcdRect.left and vertex.x <= lcdRect.right and vertex.y >= lcdRect.top and vertex.y <= lcdRect.bottom
+
+proc intersects*(lcdRect: LCDRect, other: LCDRect): bool =
+  return lcdRect.left <= other.right and lcdRect.right >= other.left and lcdRect.top <= other.bottom and lcdRect.bottom >= other.top

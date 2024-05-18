@@ -75,5 +75,15 @@ proc runTests*() =
   check(testBounds.contains(newVertex(105, 110)))
   check(not testBounds.contains(newVertex(105, 111)))
 
+  let lcdRect1 = LCDRect(left: 0, top: 0, right: 100, bottom: 100)
+  let lcdRect2 = LCDRect(left: 50, top: 50, right: 150, bottom: 150)
+  let lcdRect3 = LCDRect(left: 150, top: 150, right: 250, bottom: 250)
+  check(lcdRect1.intersects(lcdRect2))
+  check(lcdRect2.intersects(lcdRect1))
+  check(lcdRect1.intersects(lcdRect1))
+  check(lcdRect2.intersects(lcdRect3))
+  check(not lcdRect1.intersects(lcdRect3))
+  check(not lcdRect3.intersects(lcdRect1))
+
 
   print "======== Test: Tests Completed ========="
