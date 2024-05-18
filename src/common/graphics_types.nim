@@ -1,6 +1,7 @@
 import playdate/api
 when defined(DEBUG):
   import common/utils
+import common/utils
 
 template gfx*: untyped = playdate.graphics
 
