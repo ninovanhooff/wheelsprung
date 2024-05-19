@@ -80,7 +80,7 @@ proc drawPerspectiveStrip(stripStartIdx: int, stripEndIdx: int, polyVerts, shift
     for i in countDown(stripEndIdx, stripStartIdx):
       stripVerts.add(polyVerts[i])
 
-    gfx.fillPolygon(stripVerts, patGray, kPolygonFillNonZero)
+    gfx.fillPolygon(stripVerts, patGrayTransparent, kPolygonFillNonZero)
 
 proc initGameBackground*(state: GameState) =
   let level = state.level
