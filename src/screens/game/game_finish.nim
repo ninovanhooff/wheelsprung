@@ -12,7 +12,7 @@ const
 
   blinkerPeriod = 500.Milliseconds
   halfBlinkerPeriod = blinkerPeriod div 2
-  trophyBlinkerPos: Vertex = (360, 8)
+  trophyBlinkerPos: Vertex = (360'i32, 8'i32)
 
 var trophyImageTable: AnnotatedBitmapTable
 
