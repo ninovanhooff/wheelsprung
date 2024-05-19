@@ -56,6 +56,9 @@ proc resumeActiveScreen() =
     backStack.add(activeScreen)
   
   printNavigation("Resuming screen", activeScreen)
+  # Since resume isthe callback where menu items are added, 
+  # we remove all menu items before resuming
+  playdate.system.removeAllMenuItems() 
   activeScreen.resume()
 
 proc pushScreen*(toScreen: Screen) =
@@ -84,19 +87,18 @@ proc clearNavigationStack*() =
 proc executePendingNavigators() =
   if pendingNavigators.len == 0: return
 
-  let activeScreen = getActiveScreen()  
+  let previousActiveScreen = getActiveScreen()
   for navigation in pendingNavigators:
     navigation()
   pendingNavigators.setLen(0)
 
-  let activeScreenIndex = backStack.find(activeScreen)
-  if activeScreen != nil and activeScreenIndex != backStack.high:
-    if activeScreenIndex != -1:
+  let prevActiveScreenIndex = backStack.find(previousActiveScreen)
+  if previousActiveScreen != nil and prevActiveScreenIndex != backStack.high:
+    if prevActiveScreenIndex != -1:
       # the activeScreen was moved from the top of the stack to another position
-      printNavigation("Pausing screen", activeScreen)
-      activeScreen.pause()
+      printNavigation("Pausing screen", previousActiveScreen)
+      previousActiveScreen.pause()
 
-  playdate.system.removeAllMenuItems()
   resumeActiveScreen()
 
 proc updateNavigator*(): int =
@@ -110,15 +112,3 @@ proc updateNavigator*(): int =
     result = getActiveScreen().update()
     ## Ensure no graphics state is leaked
     playdate.graphics.popContext()
-
-proc onLockScreen*() =
-  let activeScreen = getActiveScreen()
-  if activeScreen != nil:
-    printNavigation("Screen will lock, Pausing screen", activeScreen)
-    activeScreen.pause()
-
-proc onUnlockScreen*() =
-  let activeScreen = getActiveScreen()
-  if activeScreen != nil:
-    printNavigation("Screen will unlock, Resuming screen", activeScreen)
-    activeScreen.resume()
