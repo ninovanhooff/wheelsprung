@@ -1,17 +1,16 @@
 {.push raises: [].}
 import std/[options, sugar]
-import std/setutils
 import playdate/api
 import chipmunk7, chipmunk_utils
-import utils
+import common/utils
 import screens/game/[
   game_types, game_constants, game_bike, game_rider
 ]
 import input/input_manager
-import shared_types
-import configuration
-import input_response
-import screens/dialog/dialog_screen
+import common/shared_types
+import data_store/configuration
+import input/input_response
+import screens/game_result/game_result_screen
 
 const
   maxWheelAngularVelocity = 30.0
@@ -64,6 +63,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
   if direction == 0.0:
     if state.attitudeAdjust.isSome:
       state.attitudeAdjust = none(AttitudeAdjust)
+      state.resetRiderAttitudePosition()
     return
 
   let optAdjust = state.attitudeAdjust
@@ -80,6 +80,13 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
     if state.attitudeAdjust.isNone: # this type can only be applied once the previous jolt has been reset
       state.setAttitudeAdjust(direction)
 
+  # if not currently flipping, set rider animation
+  # this check is done to prevent clashing animations
+  if state.finishFlipDirectionAt.isNone:
+    state.setRiderAttitudeAdjustPosition(
+      direction * state.driveDirection,
+    )
+
 proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let optAdjust = state.attitudeAdjust
   if optAdjust.isNone:
@@ -87,7 +94,7 @@ proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let adjust = optAdjust.get
 
   let direction = adjust.direction
-  let response = attitudeInputResponse(state.time - adjust.startedAt)
+  let response = attitudeInputResponse((state.time - adjust.startedAt).toSeconds())
   let torque = direction * response
   if abs(torque) < minAttitudeAdjustForce:
     return # todo remove adjust? note this would cancel jolt
@@ -110,11 +117,17 @@ proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
 
 
 proc onFlipDirection(state: GameState) =
+  if state.attitudeAdjust.isSome:
+    print("attitude adjust in progress, reset attitude adjust force before flipping")
+    # reset animation to neutral
+    state.resetRiderAttitudePosition()
+    state.attitudeAdjust = none(AttitudeAdjust)
+  
   state.driveDirection *= -1.0
   state.flipBikeDirection()
   let riderPosition = localToWorld(state.chassis, riderOffset.transform(state.driveDirection))
   state.flipRiderDirection(riderPosition)
-  state.finishFlipDirectionAt = some(state.time + 0.5.Seconds)
+  state.finishFlipDirectionAt = some(state.time + 500.Milliseconds)
 
 proc applyConfig*(state: GameState) =
   let config = getConfig()
@@ -126,10 +139,6 @@ proc resetGameInput*(state: GameState) =
   print("resetGameInput")
   state.isThrottlePressed = false
   state.applyConfig()
-
-const allButtons: PDButtons = PDButton.fullSet
-proc anyButton(buttons: PDButtons): bool =
-  (buttons * allButtons).len > 0
 
 proc handleInput*(state: GameState) =
   state.isThrottlePressed = false
@@ -143,6 +152,7 @@ proc handleInput*(state: GameState) =
     # when the game is over, the bike cannot be controlled anymore,
     # but any button can be pressed to navigate to the result screen
     if buttonState.pushed.anyButton:
+      state.resetGameOnResume = true
       navigateToGameResult(state.gameResult.get)
     return
 
@@ -156,9 +166,9 @@ proc handleInput*(state: GameState) =
     state.setAttitudeAdjust(getAccelerometerX())
   else:
     if actionLeanLeft in buttonState.current:
-      state.onButtonAttitudeAdjust(-1.0)
+      state.onButtonAttitudeAdjust(ROT_CCW)
     elif actionLeanRight in buttonState.current:
-      state.onButtonAttitudeAdjust(1.0)
+      state.onButtonAttitudeAdjust(ROT_CW)
     else:
       state.onButtonAttitudeAdjust(0.0)
 

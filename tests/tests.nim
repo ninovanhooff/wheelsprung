@@ -1,31 +1,105 @@
-import std/math
-import utils
+import math
+import sugar
+import common/utils
+import common/graphics_utils
+import options
+import screens/game/game_types
+import screens/game/game_coin
+import playdate/api
 
-proc testNotify(message: string): bool =
-    print("Test: " & message)
-    return true
+import strformat, strutils, macros
+
+## Inspired by https://github.com/xmonader/nim-minitest
+template check*(exp:untyped, expected: untyped = true, failureMsg:string="FAILED", indent:uint=0): void =
+  let indentationStr = repeat(' ', indent)
+  let expStr: string = astToStr(exp)
+  var msg: string
+  if exp != expected:
+    msg = indentationStr & expStr & " .. " & failureMsg & "\n (expected: " & astToStr(expected) & ", actual: " & $exp & ")"
+  else:
+    msg = indentationStr & expStr & " .. passed"
+
+  print(msg) # replace this by your print function
 
 proc runTests*() =
-    # All calls should be passed to assert, so that this proc gets optimized out in release builds
+  print "======== Test: Running tests ========="
 
-    assert testNotify "Running tests..."
-    
-    assert normalizeAngle(0) == 0
-    assert normalizeAngle(PI) == PI
-    assert normalizeAngle(2 * PI) == 0
-    assert normalizeAngle(3 * PI) == PI
-    assert normalizeAngle(-PI) == PI
-    assert normalizeAngle(-2 * PI) == 0
-    assert normalizeAngle(-3 * PI) == PI
+  assert normalizeAngle(0) == 0
+  assert normalizeAngle(Pi32) == Pi32
+  assert normalizeAngle(TwoPi) == 0f
+  assert normalizeAngle(3 * Pi32).almostEqual(Pi32)
+  assert normalizeAngle(-Pi32) == Pi32
+  assert normalizeAngle(-2 * Pi32) == 0f
+  assert normalizeAngle(-3 * Pi32).almostEqual(Pi32)
 
-    assert roundToNearest(1305, 100) == 1300
-    assert roundToNearest(1351, 100) == 1400
+  assert roundToNearestInt(1305, 100) == 1300
+  assert roundToNearestInt(1351, 100) == 1400
 
-    assert lerp(0, 10, 0) == 0
-    assert lerp(0, 10, 1) == 10
-    assert lerp(0, 10, 0.5) == 5
-    # test clamping
-    assert lerp(0, 10, -1) == 0
-    assert lerp(0, 10, 2) == 10
-    
-    assert testNotify "Tests passed."
+  assert lerp(0, 10, 0) == 0
+  assert lerp(0, 10, 1) == 10
+  assert lerp(0, 10, 0.5) == 5
+  # test clamping
+  assert lerp(0, 10, -1) == 0
+  assert lerp(0, 10, 2) == 10
+
+  assert @[1, 2, 3].findFirst(it => false).isNone
+  assert @[1, 2, 3].findFirst(it => it == 2).isSome
+  assert @[1, 2, 3].findFirst(it => it == 2).get == 2
+  assert @[1, 2, 3].findFirst(it => it mod 2 == 1).get == 1 # should return first match if multiple
+  assert @[1, 2, 3].findFirst(it => it == 2).get == 2
+  assert @[1, 2, 3].findFirst(it => it == 5).isNone
+
+  let coins: seq[Coin] = @[]
+  let level: Level = Level(coins: coins)
+  let state: GameState = GameState(
+      remainingCoins : coins,
+      level : level
+  )
+  assert state.coinProgress == 1f, "When level has no coins, progress should be 1"
+
+
+  check(1234.formatTime, "00:01.23")
+  check(-1234.formatTime(signed = true), "-00:01.23")
+  check(1234.formatTime(signed = true), "+00:01.23")
+
+  var testBounds = LCDRect(left: 0, top: 0, right: 100, bottom: 100)
+  check(testBounds.contains(newVertex(0, 0)))
+  check(testBounds.contains(newVertex(100, 100)))
+  check(testBounds.contains(newVertex(50, 50)))
+  check(not testBounds.contains(newVertex(-1, 0)))
+  check(not testBounds.contains(newVertex(101, 0)))
+  
+  testBounds.encapsulate(newVertex(105, 110))
+  check(testBounds.contains(newVertex(3, 0)))
+  check(testBounds.contains(newVertex(105, 109)))
+  check(testBounds.contains(newVertex(105, 110)))
+  check(not testBounds.contains(newVertex(105, 111)))
+
+  let lcdRect1 = LCDRect(left: 0, top: 0, right: 100, bottom: 100)
+  let lcdRect2 = LCDRect(left: 50, top: 50, right: 150, bottom: 150)
+  let lcdRect3 = LCDRect(left: 150, top: 150, right: 250, bottom: 250)
+  check(lcdRect1.intersects(lcdRect2))
+  check(lcdRect2.intersects(lcdRect1))
+  check(lcdRect1.intersects(lcdRect1))
+  check(lcdRect2.intersects(lcdRect3))
+  check(not lcdRect1.intersects(lcdRect3))
+  check(not lcdRect3.intersects(lcdRect1))
+
+  let expectPolygon = Polygon(
+    vertices: @[newVertex(0, 0), newVertex(100, 0), newVertex(100, 100), newVertex(0, 100)],
+    bounds: LCDRect(left: 0, top: 0, right: 100, bottom: 100),
+    edgeIndices: @[false, false, false, false],
+    fill: nil
+  )
+
+  let actualPolygon = newPolygon(
+    vertices = @[newVertex(0, 0), newVertex(100, 0), newVertex(100, 100), newVertex(0, 100)],
+    bounds = LCDRect(left: 0, top: 0, right: 100, bottom: 100),
+  )
+  
+  check(expectPolygon, actualPolygon)
+  check(actualPolygon.edgeIndices, @[false, false, false, false])
+  check(actualPolygon.edgeIndices[0], false)
+
+
+  print "======== Test: Tests Completed ========="

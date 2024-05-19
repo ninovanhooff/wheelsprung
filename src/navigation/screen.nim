@@ -1,12 +1,13 @@
 ## Ported from https://github.com/ninovanhooff/playdate-navigator/blob/a33c2b724dfe7f83d7c406eed3d3aabbb8b550c2/Screen.lua
 {.push base, raises: [].}
-import utils
+import common/utils
 
 type 
   ScreenType* {.pure.}= enum
     LevelSelect
     Game
-    Dialog
+    HitStop
+    GameResult
     Settings
   Screen* {.requiresInit.} = ref object of RootObj
     screenType*: ScreenType
@@ -21,7 +22,6 @@ method resume*(screen: Screen) =
   ## either for the first time or after it was paused
   ## and subsequently brought back to the front of the backstack
   ## This is a good place to add system menu items for this screen.
-  ## For one-time initialization, use init()
   ## Called before update()
   discard
 

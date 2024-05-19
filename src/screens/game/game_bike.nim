@@ -15,8 +15,8 @@ const
   # offset for driveDirection DD_RIGHT
   wheelRadius = 10.0
   wheelFriction = 30.0
-  rearWheelOffset = v(-20, 10)
-  frontWheelOffset = v(21, 12)
+  rearWheelOffset = v(-20.0f, 14.0f)
+  frontWheelOffset = v(21.0f, 14.0f)
   
   swingArmWidth = 18.0
   halfSwingArmWidth* = swingArmWidth*0.5

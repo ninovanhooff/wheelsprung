@@ -1,8 +1,8 @@
 {.push raises: [].}
 import tables
 import playdate/api
-import graphics_types
-import utils
+import common/graphics_types
+import common/utils
 
 const
   ## Amount of rotation images (angle steps) for sprites which sjhould be freely rotatable
@@ -12,8 +12,10 @@ const
 type
   BitmapTableId* {.pure.} = enum
     BikeChassis = "images/bike-chassis"
+    BikeGhostWheel = "images/bike-ghost-wheel"
     BikeWheel = "images/bike-wheel"
     RiderTorso = "images/rider/torso"
+    RiderGhostHead = "images/rider/ghost-head"
     RiderHead = "images/rider/head"
     RiderUpperArm = "images/rider/upper-arm"
     RiderLowerArm = "images/rider/lower-arm"
@@ -22,6 +24,8 @@ type
     Killer = "images/killer/killer"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
+    Gravity = "images/gravity"
+    LevelStatus = "images/level_select/level-status"
   BitmapTableCache = TableRef[BitmapTableId, AnnotatedBitmapTable]
 
 # global singleton
@@ -29,12 +33,16 @@ let bitmapTableCache = BitmapTableCache()
 
 proc frameCount(id: BitmapTableId): int32 =
   case id
-  of BitmapTableId.Trophy: return 2'i32
-  of BitmapTableId.Flag: return 46'i32
+  of BitmapTableId.Trophy: return 2
+  of BitmapTableId.Flag: return 46
+  of BitmapTableId.Gravity: return 33
+  of BitmapTableId.LevelStatus: return 3
   
   of BitmapTableId.BikeChassis,
+    BitmapTableId.BikeGhostWheel,
     BitmapTableId.BikeWheel,
     BitmapTableId.RiderTorso,
+    BitmapTableId.RiderGhostHead,
     BitmapTableId.RiderHead,
     BitmapTableId.RiderUpperArm,
     BitmapTableId.RiderLowerArm,

@@ -1,7 +1,7 @@
 import std/random
 import playdate/api
 import chipmunk7
-import utils, audio_utils
+import common/[utils, audio_utils]
 import screens/game/game_types
 import system
 

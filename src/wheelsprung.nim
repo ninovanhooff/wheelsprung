@@ -3,9 +3,10 @@ import options
 import std/strutils
 import strformat
 import ../tests/tests
-import utils
+import common/utils
 import globals
-import configuration
+import data_store/configuration
+import data_store/user_profile
 import navigation/[navigator, screen]
 
 
@@ -52,13 +53,18 @@ proc catchingUpdate(): int {.raises: [].} =
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   if event == kEventInit:
+    discard getSaveSlot() # preload user profile
     playdate.display.setRefreshRate(refreshRate)
     playdate.system.randomize() # seed the random number generator
 
     font = try: playdate.graphics.newFont(FONT_PATH) except: nil
     playdate.graphics.setFont(font)
+    # The color used when the display is drawn at an offset. See HitStopScreen
+    playdate.graphics.setBackgroundColor(kColorBlack)
 
-    runCatching(runTests, "UNIT TESTS FAILED")
+
+    if defined(debug):
+      runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
     let lastOpenedLevelPath = getConfig().lastOpenedLevel
     if false:
@@ -70,6 +76,13 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)
+  elif event == kEventLock:
+    onLockScreen()
+  elif event == kEventUnlock:
+    onUnlockScreen()
+  elif event == kEventTerminate or event == kEventLowPower:
+    print("Program will terminate")
+    saveSaveSlot()
   elif event == kEventKeyReleased:
     if keycode == 116:
       print("T")
@@ -106,5 +119,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("refreshRate:" & $refreshRate)
     else:
       print("keycode:" & $keycode)
+  else:
+    print("unhandled event:" & $event & " keycode:" & $keycode)
 # Used to setup the SDK entrypoint
 initSDK()

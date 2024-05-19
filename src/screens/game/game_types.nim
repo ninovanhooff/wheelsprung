@@ -1,22 +1,51 @@
 import playdate/api
 import chipmunk7
 import options
-import graphics_types
-import utils
-import shared_types
+import common/graphics_types
+import common/utils
+import common/shared_types
 
 type 
   Camera* = Vect
   DriveDirection* = Float
+  RotationDirection* = DriveDirection
 
-  Coin* = Vertex
+  Coin* = ref object
+    position*: Vertex
+    count*: int32
+    activeFrom*: Milliseconds
   Star* = Vertex
   Killer* = Vertex
   Finish* = Vertex
+  GravityZone* = ref object
+    position*: Vertex
+    gravity*: Vect
   GameCollisionType* = CollisionType
+
+  RiderAttitudePosition* {.pure.} = enum
+    Neutral, Forward, Backward
+
+  Pose* = object
+    position*: Vect
+    angle*: Float
+
+  PlayerPose* = object
+    headPose*: Pose
+    frontWheelPose*: Pose
+    rearWheelPose*: Pose
+    flipX*: bool
+
+  Ghost* = ref object
+    poses*: seq[PlayerPose]
+    coinProgress*: float32
+    gameResult*: GameResult
+
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
+
+const ROT_CCW*: RotationDirection = -1.0 # Counter Clockwise
+const ROT_CW*: RotationDirection = 1.0 # Clockwise
 
 const GameCollisionTypes* = (
   None: cast[GameCollisionType](0), 
@@ -28,6 +57,7 @@ const GameCollisionTypes* = (
   Finish: cast[GameCollisionType](6),
   Chassis: cast[GameCollisionType](7),
   Star: cast[GameCollisionType](8),
+  GravityZone: cast[GameCollisionType](9),
 )
 
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
@@ -35,11 +65,13 @@ const COLLECTIBLE_MASK_BIT = cuint(1 shl 29)
 const KILLER_MASK_BIT = cuint(1 shl 28)
 const FINISH_MASK_BIT = cuint(1 shl 27)
 const PLAYER_MASK_BIT = cuint(1 shl 26)
+const GRAVITY_ZONE_MASK_BIT = cuint(1 shl 25)
 
 const GameShapeFilters* = (
   Player: ShapeFilter(
     categories: PLAYER_MASK_BIT,
-    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or FINISH_MASK_BIT
+    mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or
+      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT
   ),
   Terrain: ShapeFilter(
     categories: TERRAIN_MASK_BIT,
@@ -57,14 +89,29 @@ const GameShapeFilters* = (
     categories: FINISH_MASK_BIT,
     mask: PLAYER_MASK_BIT
   ),
-  # remember that collisions only happen when mask of both shapes match the category of the other
+  GravityZone: ShapeFilter(
+    categories: GRAVITY_ZONE_MASK_BIT,
+    mask: PLAYER_MASK_BIT
+  ),
+  # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
 
+
+type Direction8* = enum
+  ## 4 horizontal and 4 diagonal directions
+  D8_UP, D8_UP_RIGHT, D8_RIGHT, D8_DOWN_RIGHT, D8_DOWN, D8_DOWN_LEFT, D8_LEFT, D8_UP_LEFT
+
+const D8_FALLBACK* = D8_UP
+
 type Level* = ref object of RootObj
+  id*: Path
   terrainPolygons*: seq[Polygon]
+  terrainPolylines*: seq[Polyline]
   coins*: seq[Coin]
   killers*: seq[Killer]
+  gravityZones*: seq[GravityZone]
   finishPosition*: Vertex
+  finishRequiredRotations*: int32
   starPosition*: Option[Vertex]
   assets*: seq[Asset]
   ## Level size in Pixels
@@ -75,46 +122,52 @@ type Level* = ref object of RootObj
   initialDriveDirection*: DriveDirection
 
 type AttitudeAdjust* = ref object
-  # adjustType*: AttitudeAdjustType #todo move DpadInputType type def to proper place
   direction*: Float # 1.0 or -1.0, not necessarily the same as drive direction
-  startedAt*: Seconds
+  startedAt*: Milliseconds
 
 type GameState* = ref object of RootObj
   level*: Level
 
   background*: LCDBitmap
 
-  ## Game state
+  # Game state
   isGameStarted*: bool
   remainingCoins*: seq[Coin]
   remainingStar*: Option[Star]
+  starEnabled*: bool
+    ## If the star is enabled, the player can collect it. Stars are enabled by finishing the level at least once.
   killers*: seq[Body]
   gameResult*: Option[GameResult]
 
-  ## Input
+  # Input
   isThrottlePressed*: bool
   isAccelerometerEnabled*: bool
   lastTorque*: Float # only used to display attitude indicator
 
-  ## Navigation state
+  # Navigation state
   resetGameOnResume*: bool
 
-  ## time
-  time*: Seconds
+  # time
+  time*: Milliseconds
   frameCounter*: int32
-  finishFlipDirectionAt*: Option[Seconds]
-  finishTrophyBlinkerAt*: Option[Seconds]
+  finishFlipDirectionAt*: Option[Milliseconds]
+  finishTrophyBlinkerAt*: Option[Milliseconds]
 
 
-  ## Physics
+  # Physics
   space*: Space
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect
   driveDirection*: DriveDirection
 
-  ## Player
+  ## Ghost
+  ghostRecording*: Ghost
+    ## A ghost that is being recorded
+  ghostPlayback*: Ghost
+    ## A ghost that represents the best time for the level
 
+  # Player
   # bike bodies
   rearWheel*: Body
   frontWheel*: Body
@@ -127,6 +180,13 @@ type GameState* = ref object of RootObj
   swingArmShape*: Shape
   forkArmShape*: Shape
 
+  # Bike Constraints
+  forkArmSpring*: DampedSpring
+  bikeConstraints*: seq[Constraint]
+
+  ## Rider
+  riderAttitudePosition*: RiderAttitudePosition
+
   # rider bodies
   riderHead*: Body
   riderTorso*: Body
@@ -135,10 +195,6 @@ type GameState* = ref object of RootObj
   riderUpperLeg*: Body
   riderLowerLeg*: Body
   # keep in sync with getRiderBodies()
-
-  # Bike Constraints
-  forkArmSpring*: DampedSpring
-  bikeConstraints*: seq[Constraint]
 
   # Rider Constraints
   riderConstraints*: seq[Constraint] # todo remove if unused
@@ -149,11 +205,18 @@ type GameState* = ref object of RootObj
   # upper arm to torso
   upperArmPivot*: PivotJoint
   elbowPivot*: PivotJoint
+  elbowRotaryLimit*: RotaryLimitJoint
   hipPivot*: PivotJoint
   chassisKneePivot*: PivotJoint
   footPivot*: PivotJoint
   handPivot*: PivotJoint
   headPivot*: PivotJoint
+
+proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
+  result = Coin(position: position, count: count)
+
+proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
+  result = GravityZone(position: position, gravity: gravity)
 
 proc getRiderBodies*(state: GameState): seq[Body] =
   result = @[

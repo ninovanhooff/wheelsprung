@@ -289,7 +289,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"game_objects.tsx"
+         "source":"game_objects.tsj"
         }],
  "tilewidth":20,
  "type":"map",

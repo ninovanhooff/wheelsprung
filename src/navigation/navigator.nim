@@ -12,7 +12,7 @@
 
 import std/sugar
 import screen
-import utils
+import common/utils
 import playdate/api
 
 type Navigator = () -> (void)
@@ -103,6 +103,22 @@ proc updateNavigator*(): int =
   executePendingNavigators()
   if backStack.len == 0:
     print("TODO updateNavigator: No active screen")
-    return 0
+    result = 0
   else:
-    return getActiveScreen().update()
+    ## Update the active screen in a separate graphics context
+    playdate.graphics.pushContext(nil)
+    result = getActiveScreen().update()
+    ## Ensure no graphics state is leaked
+    playdate.graphics.popContext()
+
+proc onLockScreen*() =
+  let activeScreen = getActiveScreen()
+  if activeScreen != nil:
+    printNavigation("Screen will lock, Pausing screen", activeScreen)
+    activeScreen.pause()
+
+proc onUnlockScreen*() =
+  let activeScreen = getActiveScreen()
+  if activeScreen != nil:
+    printNavigation("Screen will unlock, Resuming screen", activeScreen)
+    activeScreen.resume()

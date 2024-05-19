@@ -3,28 +3,26 @@
 import playdate/api
 import math
 import options
+import std/sequtils
+import std/sets
 import chipmunk7
-import game_types, graphics_types, shared_types
-import game_bike # forkArmTopCenter, forkArmBottomCenter, swingArmLeftCenter, swingArmRightCenter
-import graphics_utils
+import game_types
+import common/[graphics_types, shared_types]
+import game_bike, game_finish, game_ghost
+import common/graphics_utils
+import common/lcd_patterns
+import game_debug_view
 import chipmunk_utils
-import utils
+import common/utils
 import globals
 import cache/bitmaptable_cache
+import screens/hit_stop/hit_stop_screen
 
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
   frontForkChassisAttachmentOffset = v(15.0, -3.0)
   forkOutlineWidth: int32 = 4'i32
   patternSize: int32 = 8'i32
-  blinkerPeriod = 0.5
-  halfBlinkerPeriod = blinkerPeriod / 2.0
-
-  trophyBlinkerPos: Vertex = (360, 8)
-
-
-let
-  gridPattern: LCDPattern = makeLCDOpaquePattern(0x7F.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8, 0xFF.uint8)
 
 var
   bikeChassisImageTable: AnnotatedBitmapTable
@@ -37,7 +35,7 @@ var
   riderUpperLegImageTable: AnnotatedBitmapTable
   riderLowerLegImageTable: AnnotatedBitmapTable
   killerImageTable: AnnotatedBitmapTable
-  trophyImageTable: AnnotatedBitmapTable
+  gravityImageTable: AnnotatedBitmapTable
   coinImage: LCDBitmap
   starImage: LCDBitmap
   gridImage: LCDBitmap
@@ -59,7 +57,9 @@ proc initGameView*() =
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
   killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
-  trophyImageTable = getOrLoadBitmapTable(BitmapTableId.Trophy)
+  gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
+  initGameFinish()
+  initGameGhost()
 
   try:
     coinImage = gfx.newBitmap("images/coin")
@@ -68,58 +68,19 @@ proc initGameView*() =
   except:
     echo getCurrentExceptionMsg()
 
-proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: LCDColor) =
-  # covert from center position to top left
-  let drawPos = pos - camera
-  let x = (drawPos.x - radius).toInt
-  let y = (drawPos.y - radius).toInt
-  let size: int = (radius * 2f).toInt
-  # angle is in radians, convert to degrees
-  let deg = radTodeg(angle)
-  gfx.drawEllipse(x,y,size, size, 1, deg+10, deg + 350, color);
+proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
+  let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
+  result = perspectiveShift
 
-proc drawSegment(camera: Camera, segment: SegmentShape, color: LCDColor) =
-  let drawAPos = segment.a - camera
-  let drawBPos = segment.b - camera
-  # gfx.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
-  gfx.drawLine(drawAPos.x.int32, drawAPos.y.int32, drawBPos.x.int32, drawBPos.y.int32, 1, color);
+proc drawPerspectiveStrip(stripStartIdx: int, stripEndIdx: int, polyVerts, shiftedVerts: seq[Vertex]) =
+  if stripEndIdx > stripStartIdx:
+    var stripVerts: seq[Vertex] = @[]
+    for i in stripStartIdx..stripEndIdx:
+      stripVerts.add(shiftedVerts[i] + polyVerts[i])
+    for i in countDown(stripEndIdx, stripStartIdx):
+      stripVerts.add(polyVerts[i])
 
-proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
-  let state = cast[ptr GameState](data)
-  let camera = state.camera
-  if shape.kind == cpCircleShape:
-    let circle = cast[CircleShape](shape)
-    drawCircle(camera, circle.body.position + circle.offset, circle.radius, circle.body.angle, kColorBlack)
-  elif shape.kind == cpSegmentShape:
-    let segment = cast[SegmentShape](shape)
-    drawSegment(camera, segment, kColorBlack)
-  elif shape.kind == cpPolyShape:
-    let poly = cast[PolyShape](shape)
-    let numVerts = poly.count
-    for i in 0 ..< numVerts:
-      let a = localToWorld(poly.body, poly.vert(i)) - camera
-      let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts)) - camera
-      gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-
-proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
-  let state = cast[ptr GameState](data)
-  let camera = state.camera
-  if constraint.isGrooveJoint:
-    # discard
-    let groove = cast[GrooveJoint](constraint)
-    let a = localToWorld(groove.bodyA, groove.grooveA) - camera
-    let b = localToWorld(groove.bodyA, groove.grooveB) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-  elif constraint.isDampedSpring:
-    let spring = cast[DampedSpring](constraint)
-    let a = localToWorld(spring.bodyA, spring.anchorA) - camera
-    let b = localToWorld(spring.bodyB, spring.anchorB) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-  elif constraint.isDampedRotarySpring:
-    let spring = cast[DampedRotarySpring](constraint)
-    let a = localToWorld(spring.bodyA, vzero) - camera
-    let b = localToWorld(spring.bodyB, vzero) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
+    gfx.fillPolygon(stripVerts, patGray, kPolygonFillNonZero)
 
 proc initGameBackground*(state: GameState) =
   let level = state.level
@@ -131,12 +92,77 @@ proc initGameBackground*(state: GameState) =
 
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
-    gfx.fillPolygon(polygon, kColorBlack, kPolygonFillNonZero)
+    gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
+    drawPolyline(polygon.vertices)
   # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
   # as a workaround, we re-copy the data back to the level
   level.terrainPolygons = terrainPolygons
 
+  for polyline in level.terrainPolylines:
+    drawPolyline(polyline.vertices, polyline.thickness.int32)
+    for vertex in polyline.vertices:
+      # fill the gaps between sharp-angled line segments
+      let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
+      if radius > 0:
+        fillCircle(vertex.x, vertex.y, radius)
+
   gfx.popContext()
+
+proc drawPolygonDepth*(state: GameState) =
+  let level = state.level
+  let camVertex = state.camera.toVertex()
+
+  gfx.setDrawOffset(-camVertex.x, -camVertex.y)
+
+  # draw driving surface
+  let viewport: LCDRect = LCD_SCREEN_RECT.offsetBy(camVertex)
+  let camCenter = camVertex + halfDisplaySize.toVertex + (x: 0'i32, y: -30'i32)
+  for polygon in level.terrainPolygons:
+    if not polygon.bounds.intersects(viewport):
+      continue # skip drawing polygons that are not visible
+
+    # todo make sure this is a reference, not a copy
+    let polyVerts = polygon.vertices
+    var shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))
+
+    var stripStartIdx = -1
+    for curIndex in 0..polyVerts.len - 2:
+      let nextIndex = curIndex + 1
+
+      if polygon.edgeIndices[curIndex] and polygon.edgeIndices[nextIndex]:
+        if stripStartIdx != -1:
+          drawPerspectiveStrip(stripStartIdx, curIndex, polyVerts, shiftedVertices)
+          stripStartIdx = -1
+        continue
+
+      let v1 = polyVerts[curIndex]
+      let v2 = polyVerts[nextIndex]
+      ## https://stackoverflow.com/a/1243676/923557
+      let vNormal: Vertex = (x: v2.y - v1.y, y: v1.x - v2.x)
+
+      let sv1: Vertex = shiftedVertices[curIndex]
+      let sv2: Vertex = shiftedVertices[nextIndex]
+      let sSum = sv1 + sv2
+      let dot = vNormal.dotVertex(sSum)
+
+      if dot < 0:
+        if stripStartIdx == -1:
+          stripStartIdx = curIndex
+      else:
+        if stripStartIdx != -1:
+          drawPerspectiveStrip(stripStartIdx, curIndex, polyVerts, shiftedVertices)
+          stripStartIdx = -1
+
+    if stripStartIdx != -1:
+      drawPerspectiveStrip(stripStartIdx, polyVerts.len - 1, polyVerts, shiftedVertices)
+
+    if not debugDrawPlayer:
+      for i in 0..polyVerts.len - 1:
+        drawLine(polyVerts[i] + shiftedVertices[i], polyVerts[i], kColorBlack)
+        gfx.drawTextAligned($i, polyVerts[i].x, polyVerts[i].y)
+  
+  gfx.setDrawOffset(0,0)
+
 
 proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
@@ -158,7 +184,7 @@ proc drawBikeForks*(state: GameState) =
   let camera = state.camera
   let driveDirection = state.driveDirection
 
-  if state.gameResult.isSome and state.gameResult.get.resultType == GameResultType.GameOver:
+  if state.bikeConstraints.len == 0:
     #drawLineOutlined from top of forkArm to bottom of forkArm
     let forkArm = state.forkArm
     let forkArmTopCenter = localToWorld(forkArm, forkArmTopCenterOffset) - camera
@@ -204,11 +230,6 @@ proc drawBikeForks*(state: GameState) =
       forkOutlineWidth,
       kColorWhite,
     )
-
-proc drawBlinkers(state: GameState) =
-  if state.finishTrophyBlinkerAt.isSome:
-    let blinkerOn: bool = state.time mod blinkerPeriod < halfBlinkerPeriod
-    trophyImageTable.getBitmap(blinkerOn.int32).draw(trophyBlinkerPos[0], trophyBlinkerPos[1], kBitmapUnflipped)
 
 const
   rotationIndicatorRadius = 16'i32
@@ -256,7 +277,7 @@ proc drawPlayer(state: GameState) =
   let rearWheel = state.rearWheel
   let rearWheelScreenPos = rearWheel.position - camera
   bikeWheelImageTable.drawRotated(rearWheelScreenPos, rearWheel.angle, driveDirection)
-  
+
   gfx.setLineCapStyle(kLineCapStyleRound)
 
   drawBikeForks(state)
@@ -266,7 +287,7 @@ proc drawPlayer(state: GameState) =
   bikeChassisImageTable.drawRotated(chassisScreenPos, chassis.angle, driveDirection)
 
   # rider
-  
+
   let riderHead = state.riderHead
   let riderHeadScreenPos = riderHead.position - camera
   if state.finishFlipDirectionAt.isSome:
@@ -280,10 +301,10 @@ proc drawPlayer(state: GameState) =
   var chassisTorque = 0.0
   if state.attitudeAdjust.isSome:
     chassisTorque = state.lastTorque
-  
+
   let chassisTorqueDegrees = chassisTorque / 1_000f
   drawRotationForceIndicator(
-    riderHeadScreenPos.toVertex, 
+    riderHeadScreenPos.toVertex,
     chassisTorqueDegrees
   )
 
@@ -293,15 +314,19 @@ proc drawPlayer(state: GameState) =
   riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
 
-
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
   let camera = state.camera
   let camVertex = camera.toVertex()
+  let frameCounter: int32 = state.frameCounter
+
 
   if debugDrawLevel:
     state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
+    state.drawPolygonDepth()
+  else:
+    gfx.clear(kColorWhite)
 
   # draw grid
   if debugDrawGrid:
@@ -309,36 +334,38 @@ proc drawGame*(statePtr: ptr GameState) =
     gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
     gfx.setDrawMode(kDrawmodeCopy)
 
-  drawBlinkers(state)
-
   if debugDrawTextures:
     # assets
-    let frameCounter: int32 = state.frameCounter
     for asset in level.assets:
       let assetScreenPos = asset.position - camVertex
       asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
 
     # coins
     for coin in state.remainingCoins:
-      let coinScreenPos = coin - camVertex
-      coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+      let coinScreenPos = coin.position - camVertex
+      if coin.count < 2:
+        coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+      else:
+        gfx.drawTextAligned($coin.count, coinScreenPos[0] + 10, coinScreenPos[1])
 
     # star
     if state.remainingStar.isSome:
       let starScreenPos = state.remainingStar.get - camVertex
       starImage.draw(starScreenPos[0], starScreenPos[1], kBitmapUnflipped)
-      
+
 
     # killer
     for killer in state.killers:
       let killerScreenPos = killer.position - camera
       killerImageTable.drawRotated(killerScreenPos, killer.angle)
 
-    # trophy
-    let finishScreenPos: Vertex = level.finishPosition - camVertex
-    let finishTableIndex: int32 = if state.remainingCoins.len == 0: 1'i32 else: 0'i32
-    trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], kBitmapUnflipped)
-  
+    drawFinish(state)
+
+  ## do not store poses in a variable to avoid copying
+  if state.ghostPlayback.poses.high >= frameCounter:
+    state.drawGhostPose(state.ghostPlayback.poses[frameCounter])
+
+
   if debugDrawPlayer:
     drawPlayer(state)
 
@@ -350,10 +377,28 @@ proc drawGame*(statePtr: ptr GameState) =
     let forkImpulse: int32 = state.forkArmSpring.impulse.int32
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
-  if state.time < 0.5:
+  if state.time < 500.Milliseconds:
     let messageY = (state.riderHead.position.y - camera.y - 26.0).int32
     if not state.isGameStarted:
       gfx.drawTextAligned("Ready?", 200, messageY)
     else:
       gfx.drawTextAligned("Go!", 200, messageY)
   
+proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
+  # Creates hitstopscreen without menu items
+  drawGame(unsafeAddr state)
+  let bitmapA = gfx.copyFrameBufferBitmap()
+
+  let body = collisionShape.body
+  let imageTable = if body == state.riderHead: riderHeadImageTable else: bikeWheelImageTable
+
+  gfx.setDrawMode(kDrawmodeFillWhite)
+  imageTable.drawRotated(body, state)
+  gfx.setDrawMode(kDrawmodeCopy)
+
+  let bitmapB = gfx.copyFrameBufferBitmap()
+  return newHitStopScreen(
+    bitmapA = bitmapA, 
+    bitmapB = bitmapB, 
+    maxShakeMagnitude = state.chassis.velocity.vlength * 0.2f
+  )
