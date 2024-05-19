@@ -28,6 +28,10 @@ var
   selectNextPlayer, selectPreviousPlayer, selectBumperPlayer: SamplePlayer
 
 proc initLevelSelectScreen() =
+  if not backgroundAudioPlayer.isNil:
+    print("initLevelSelectScreen: already initialized")
+    return
+
   backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/level_select/ambience") 
   except:
     playdate.system.error(getCurrentExceptionMsg())
@@ -157,9 +161,6 @@ method resume*(screen: LevelSelectScreen) =
     screen.refreshLevelRows()
   except IOError:
     print("Error reading level paths")
-
-  print("rows: ")
-  print(repr(screen.levelRows))
 
   initLevelSelectScreen()
   initLevelSelectView()
