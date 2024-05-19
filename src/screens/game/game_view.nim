@@ -128,14 +128,15 @@ proc drawPolygonDepth*(state: GameState) =
     var stripStartIdx = -1
     for curIndex in 0..polyVerts.len - 2:
       let nextIndex = curIndex + 1
-      let v1 = polyVerts[curIndex]
-      let v2 = polyVerts[nextIndex]
 
-      if polygon.edgeIndices[curIndex] == true and polygon.edgeIndices[nextIndex] == true:
+      if polygon.edgeIndices[curIndex] and polygon.edgeIndices[nextIndex]:
         if stripStartIdx != -1:
           drawPerspectiveStrip(stripStartIdx, curIndex, polyVerts, shiftedVertices)
           stripStartIdx = -1
         continue
+
+      let v1 = polyVerts[curIndex]
+      let v2 = polyVerts[nextIndex]
       ## https://stackoverflow.com/a/1243676/923557
       let vNormal: Vertex = (x: v2.y - v1.y, y: v1.x - v2.x)
 
