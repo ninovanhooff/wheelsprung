@@ -40,6 +40,8 @@ type
     coinProgress*: float32
     gameResult*: GameResult
 
+const GRAVITY_MAGNITUDE*: Float = 100.0
+
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0

@@ -76,16 +76,17 @@ proc toDirection8(str: string): Direction8 =
       print("Unknown direction: " & $str)
       return D8_FALLBACK
 
+const DIAGONAL_GRAVVITY_MAGNITUDE: float32 = 0.70710678118 * GRAVITY_MAGNITUDE
 proc toGravity(d8: Direction8): Vect =
   return case d8
-    of D8_UP: v(0.0, -100.0f)
-    of D8_DOWN: v(0.0, 100.0f)
-    of D8_LEFT: v(-100.0f, 0.0)
-    of D8_RIGHT: v(100.0f, 0.0)
-    of D8_UP_LEFT: v(-70.71f, -70.71f)
-    of D8_UP_RIGHT: v(70.71f, -70.71f)
-    of D8_DOWN_LEFT: v(-70.71f, 70.71f)
-    of D8_DOWN_RIGHT: v(70.71f, 70.71f)
+    of D8_UP: v(0.0, -GRAVITY_MAGNITUDE)
+    of D8_DOWN: v(0.0, GRAVITY_MAGNITUDE)
+    of D8_LEFT: v(-GRAVITY_MAGNITUDE, 0.0)
+    of D8_RIGHT: v(GRAVITY_MAGNITUDE, 0.0)
+    of D8_UP_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_UP_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_DOWN_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_DOWN_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
 
 proc getProp[T](obj: LevelObjectEntity, name: string, mapper: JsonNode -> T, fallback: T): T =
   if obj.properties.isSome:

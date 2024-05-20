@@ -156,7 +156,7 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
 
 proc createSpace(level: Level): Space {.raises: [].} =
   let space = newSpace()
-  space.gravity = v(0.0, 100.0)
+  space.gravity = v(0.0, GRAVITY_MAGNITUDE)
 
   var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Wheel)
   handler.beginFunc = coinBeginFunc
