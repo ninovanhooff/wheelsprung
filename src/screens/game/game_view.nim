@@ -4,7 +4,6 @@ import playdate/api
 import math
 import options
 import std/sequtils
-import std/sets
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]

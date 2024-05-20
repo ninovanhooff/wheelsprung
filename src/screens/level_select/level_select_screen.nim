@@ -9,7 +9,6 @@ import std/sequtils
 import std/options
 import std/tables
 import cache/sound_cache
-import data_store/configuration
 import data_store/user_profile
 import level_meta/level_data
 import level_select_types

@@ -5,7 +5,6 @@ import strformat
 import ../tests/tests
 import common/utils
 import globals
-import data_store/configuration
 import data_store/user_profile
 import navigation/[navigator, screen]
 
@@ -66,7 +65,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     if defined(debug):
       runCatching(runTests, "UNIT TESTS FAILED")
     initNavigator(initialScreenProvider)
-    let lastOpenedLevelPath = getConfig().lastOpenedLevel
+    let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
     if false:
       pushScreen(newLevelSelectScreen())
     elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):

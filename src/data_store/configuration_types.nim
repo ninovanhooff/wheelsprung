@@ -2,7 +2,6 @@ import options
 import common/shared_types
 
 type Config* = ref object of RootObj
-  lastOpenedLevel*: Option[string]
   tiltAttitudeAdjustEnabled*: Option[bool]
   dPadInputType*: Option[DPadInputType]
   dPadInputMultiplier*: Option[float]
