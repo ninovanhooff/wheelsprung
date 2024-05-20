@@ -57,6 +57,26 @@
                 "object",
                 "project"
             ]
+        },
+        {
+            "color": "#ff00f900",
+            "drawFill": true,
+            "id": 5,
+            "members": [
+                {
+                    "name": "fill",
+                    "propertyType": "Fill",
+                    "type": "string",
+                    "value": "grid4"
+                }
+            ],
+            "name": "TerrainPolygon",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object",
+                "project"
+            ]
         }
     ]
 }
