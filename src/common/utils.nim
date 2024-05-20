@@ -106,6 +106,14 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
       result = some[T](x)
       break
 
+proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) =
+  ## find the first item in the sequence that satisfies the predicate
+  result = (-1, none(T))  # return none if no item satisfies the predicate
+  for i, x in s:
+    if pred(x):
+      result = (i, some[T](x))
+      break
+
 ### input
 
 const allButtons: PDButtons = PDButton.fullSet

@@ -47,6 +47,7 @@ proc runTests*() =
   assert @[1, 2, 3].findFirst(it => it == 2).get == 2
   assert @[1, 2, 3].findFirst(it => it mod 2 == 1).get == 1 # should return first match if multiple
   assert @[1, 2, 3].findFirst(it => it == 2).get == 2
+  assert @[1, 2, 3].findFirstIndexed(it => it == 2) == (1, some(2))
   assert @[1, 2, 3].findFirst(it => it == 5).isNone
 
   let coins: seq[Coin] = @[]

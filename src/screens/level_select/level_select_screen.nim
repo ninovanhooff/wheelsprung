@@ -8,6 +8,7 @@ import common/audio_utils
 import std/sequtils
 import std/options
 import std/tables
+import std/sugar
 import cache/sound_cache
 import data_store/user_profile
 import level_meta/level_data
@@ -153,6 +154,14 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
     )
     screen.levelRows.insert(levelMeta.newLevelRow())
 
+proc selectLastOpenedLevel(screen: LevelSelectScreen) =
+  let optLastOpenedLevel = getSaveSlot().lastOpenedLevel
+  if optLastOpenedLevel.isSome:
+    let lastOpenedLevelPath = optLastOpenedLevel.get
+    let (previousRowIdx, _) = screen.levelRows.findFirstIndexed(it => it.levelMeta.path == lastOpenedLevelPath)
+    if previousRowIdx >= 0:
+      screen.selectedIndex = previousRowIdx
+
 method resume*(screen: LevelSelectScreen) =
   screen.upActivatedAt = none(Seconds)
   screen.downActivatedAt = none(Seconds)
@@ -163,6 +172,9 @@ method resume*(screen: LevelSelectScreen) =
 
   initLevelSelectScreen()
   initLevelSelectView()
+
+  selectLastOpenedLevel(screen)
+
   resumeLevelSelectView()
   backgroundAudioPlayer.play(0)
 
