@@ -149,8 +149,8 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
   for levelPath in levelPaths:
     # for unknown levels, add them to the list using path as name
     let levelMeta = newLevelMeta(
-      levelPath,
-      levelPath
+      name = levelPath[levelsBasePath.len .. ^1],
+      path = levelPath,
     )
     screen.levelRows.insert(levelMeta.newLevelRow())
 
