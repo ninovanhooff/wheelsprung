@@ -19,7 +19,7 @@ type
     name: string
     value: JsonNode
   LevelTextEntity = ref object of RootObj
-    text: string
+    text: string#[  ]#
   LevelVertexEntity {.bycopy.} = object
     x*: int32
     y*: int32
@@ -259,8 +259,8 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
-  if obj.polygon.isSome or obj.polyline.isSome or obj.ellipse.get(false):
-    # it's a rectangle only if it is not a polygon, polyline or ellipse
+  if obj.polygon.isSome or obj.polyline.isSome or obj.ellipse.get(false) or obj.text.isSome:
+    # it's a rectangle only if it is not something else
     return false
 
   if obj.width < 1 or obj.height < 1:
@@ -280,14 +280,15 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
   return true
 
-proc loadTexture(level: var Level, obj: LevelObjectEntity): bool =
+proc loadText(level: var Level, obj: LevelObjectEntity): bool =
   if obj.text.isNone:
     return false
 
   level.texts.add(newText(
-    text = obj.text.get.text,
-    position = (obj.x, obj.y)
+    value = obj.text.get.text,
+    position = newVertex(obj.x, obj.y)
   ))
+  return true
 
 proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
@@ -296,6 +297,7 @@ proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
     discard level.loadPolygon(obj) or
     level.loadPolyline(obj) or
     level.loadGid(obj) or
+    level.loadText(obj) or
     level.loadRectangle(obj)
 
 proc loadLevel*(path: string): Level =

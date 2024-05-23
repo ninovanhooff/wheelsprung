@@ -270,6 +270,8 @@ method resume*(gameScreen: GameScreen) =
     onResetGame()
   )
 
+  resumeGameView()
+
   resetGameInput(state)
 
   if state.resetGameOnResume:

@@ -15,6 +15,7 @@ import chipmunk_utils
 import common/utils
 import globals
 import cache/bitmaptable_cache
+import cache/font_cache
 import screens/hit_stop/hit_stop_screen
 
 const
@@ -104,6 +105,10 @@ proc initGameBackground*(state: GameState) =
       let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
       if radius > 0:
         fillCircle(vertex.x, vertex.y, radius)
+
+  gfx.setFont(getOrLoadFont("fonts/Roobert-10-Bold"))
+  for text in level.texts:
+    gfx.drawText(text.value, text.position.x, text.position.y)
 
   gfx.popContext()
 
@@ -253,6 +258,9 @@ proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
     forceDegrees - rotationIndicatorWidthDegrees, forceDegrees + rotationIndicatorWidthDegrees, 
     kColorXOR
   )
+
+proc resumeGameView*() =
+  gfx.setFont(getOrLoadFont("fonts/Roobert-11-Medium"))
 
 method getBitmap(asset: Asset, frameCounter: int32): LCDBitmap {.base.} =
   print("getImage not implemented for: ", repr(asset))
