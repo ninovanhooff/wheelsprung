@@ -228,7 +228,6 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.killers.add(position)
     of ClassIds.Finish:
       level.finishPosition = position
-      level.finishRequiredRotations = obj.requiredRotations
     of ClassIds.Star:
       level.starPosition = some(position)
     of ClassIds.SignPost:

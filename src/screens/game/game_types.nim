@@ -118,7 +118,6 @@ type Level* = ref object of RootObj
   gravityZones*: seq[GravityZone]
   texts*: seq[Text]
   finishPosition*: Vertex
-  finishRequiredRotations*: int32
   starPosition*: Option[Vertex]
   assets*: seq[Asset]
   ## Level size in Pixels
