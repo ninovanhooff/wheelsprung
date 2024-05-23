@@ -44,7 +44,7 @@ type
     value*: string
     position*: Vertex
 
-const GRAVITY_MAGNITUDE*: Float = 100.0
+const GRAVITY_MAGNITUDE*: Float = 90.0
 
 
 const DD_LEFT*: DriveDirection = -1.0
