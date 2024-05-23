@@ -18,7 +18,8 @@ type
   LevelPropertiesEntity = ref object of RootObj
     name: string
     value: JsonNode
-
+  LevelTextEntity = ref object of RootObj
+    text: string
   LevelVertexEntity {.bycopy.} = object
     x*: int32
     y*: int32
@@ -30,6 +31,7 @@ type
     polygon: Option[seq[LevelVertexEntity]]
     properties: Option[seq[LevelPropertiesEntity]]
     polyline: Option[seq[LevelVertexEntity]]
+    text: Option[LevelTextEntity]
     ellipse: Option[bool]
   
   LayerEntity = ref object of RootObj
@@ -277,6 +279,15 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   let bounds = LCDRect(left: obj.x, right: obj.x + width, top: obj.y, bottom: obj.y + height)
   level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
   return true
+
+proc loadTexture(level: var Level, obj: LevelObjectEntity): bool =
+  if obj.text.isNone:
+    return false
+
+  level.texts.add(newText(
+    text = obj.text.get.text,
+    position = (obj.x, obj.y)
+  ))
 
 proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return

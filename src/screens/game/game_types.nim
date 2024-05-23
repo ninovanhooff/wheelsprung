@@ -40,6 +40,10 @@ type
     coinProgress*: float32
     gameResult*: GameResult
 
+  Text* = object
+    value*: string
+    position*: Vertex
+
 const GRAVITY_MAGNITUDE*: Float = 100.0
 
 
@@ -112,6 +116,7 @@ type Level* = ref object of RootObj
   coins*: seq[Coin]
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]
+  texts*: seq[Text]
   finishPosition*: Vertex
   finishRequiredRotations*: int32
   starPosition*: Option[Vertex]
@@ -219,6 +224,12 @@ proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
 
 proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
   result = GravityZone(position: position, gravity: gravity)
+
+proc newText*(value: string, position: Vertex): Text =
+  result = Text(
+    value: value,
+    position: position
+  )
 
 proc getRiderBodies*(state: GameState): seq[Body] =
   result = @[
