@@ -1,5 +1,6 @@
 import std/[math, options]
 import std/[strutils, setutils]
+import std/tables
 import playdate/api
 import common/shared_types
 
@@ -41,6 +42,16 @@ proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): boo
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
+
+### Bench / trace / profile
+
+
+proc bench*(toTest: proc() {.raises:[].}, name: string = "", numSamples: int32 = 1) =
+  ## Measure the time taken by a procedure
+  let startTime = playdate.system.getElapsedTime
+  toTest()
+  let endTime = playdate.system.getElapsedTime
+  print(name, "took", (endTime - startTime) * 0.001f, "ms")
 
 ## Text
 proc vertical*(text: string): string =
