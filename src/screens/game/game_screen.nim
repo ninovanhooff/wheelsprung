@@ -292,7 +292,12 @@ method update*(gameScreen: GameScreen): int =
 
   if state.isGameStarted:
     updateAttitudeAdjust(state)
-    state.space.step(timeStepSeconds64)
+    bench(
+      proc() = state.space.step(timeStepSeconds64),
+      "space.step",
+      50
+    )
+    
     state.ghostRecording.addPose(state)
 
     if not state.isBikeInLevelBounds():

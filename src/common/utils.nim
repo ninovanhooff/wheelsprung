@@ -45,13 +45,37 @@ proc print*(things: varargs[string, `$`]) =
 
 ### Bench / trace / profile
 
+var benchTable: Table[string, seq[float32]] = initTable[string, seq[float32]]()
 
-proc bench*(toTest: proc() {.raises:[].}, name: string = "", numSamples: int32 = 1) =
+proc addBenchSample(samples: var seq[float32], sample: float32, name: string, numSamples: int32): bool =
+  samples.add(sample)
+  if samples.len < numSamples:
+    return false
+
+  # calculate mean, min and max
+  var min = float32.high
+  var max = 0f
+  var mean = 0f
+  for s in samples:
+    if s < min:
+      min = s
+    if s > max:
+      max = s
+    mean += s
+  mean /= samples.len.float32
+  print(name,"Mean:", mean, "Min:", min, "Max:", max)    
+  return true    
+
+
+proc bench*(toTest: proc() {.raises:[].}, name: string = "", numSamples: int32 = 1) {.raises:[].} =
   ## Measure the time taken by a procedure
   let startTime = playdate.system.getElapsedTime
   toTest()
   let endTime = playdate.system.getElapsedTime
-  print(name, "took", (endTime - startTime) * 0.001f, "ms")
+  if name == "" or numSamples == 1:
+    print(name, "took", (endTime - startTime) * 0.001f, "ms")
+  elif benchTable.mgetOrPut(name, @[]).addBenchSample((endTime - startTime), name, numSamples):
+    benchTable.del name
 
 ## Text
 proc vertical*(text: string): string =
