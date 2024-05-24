@@ -119,13 +119,6 @@ proc direction8(obj: LevelObjectEntity): Direction8 =
     fallback = D8_UP
   )
 
-proc requiredRotations(obj: LevelObjectEntity): int32 =
-  return obj.getProp(
-    name = "requiredRotations",
-    mapper = (node => node.getInt.int32),
-    fallback = 0'i32
-  )
-
 proc thickness(obj: LevelObjectEntity): float32 =
   return obj.getProp(
     name = "thickness",
