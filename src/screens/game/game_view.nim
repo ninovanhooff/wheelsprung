@@ -39,6 +39,7 @@ var
   coinImage: LCDBitmap
   starImage: LCDBitmap
   gridImage: LCDBitmap
+  debugBGImage: LCDBitmap
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -64,9 +65,10 @@ proc initGameView*() =
   try:
     coinImage = gfx.newBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
+    debugBGImage = gfx.newBitmap("images/debug-bg")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
-    echo getCurrentExceptionMsg()
+    print "Image load failed:", getCurrentExceptionMsg()
 
 proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
@@ -89,6 +91,12 @@ proc initGameBackground*(state: GameState) =
   )
 
   gfx.pushContext(state.background)
+
+  if not debugBGImage.isNil:
+    print "Drawing debug background"
+    debugBGImage.draw(0, 0, kBitmapUnflipped)
+  else:
+    print "no bg image"
 
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
