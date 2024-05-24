@@ -249,9 +249,9 @@ proc updateTimers(state: GameState) =
     print("blinker timeout")
 
 proc initGame*(levelPath: string) {.raises: [].} =
-  state = newGameState(loadLevel(levelPath))
   initGameSound()
   initGameView()
+  state = newGameState(loadLevel(levelPath))
 
 proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
   initGame(levelPath)
