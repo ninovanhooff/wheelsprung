@@ -1,4 +1,5 @@
 import chipmunk7
+import chipmunk_utils
 import options
 import common/utils
 import sugar
@@ -33,6 +34,7 @@ type
     polyline: Option[seq[LevelVertexEntity]]
     text: Option[LevelTextEntity]
     ellipse: Option[bool]
+    `type`: string
   
   LayerEntity = ref object of RootObj
     objects: Option[seq[LevelObjectEntity]]
@@ -225,7 +227,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.starPosition = some(position)
     of ClassIds.SignPost:
       level.assets.add(Texture(
-        image: getOrLoadBitmap("images/signpost_dpad_down"),
+        image: getOrLoadBitmap("images/signpost-dpad-down"),
         position: position,
         flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped
       ))
@@ -261,16 +263,26 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = (obj.x, obj.y)
   let width = obj.width
   let height = obj.height
-  let vertices: seq[Vertex] = @[
-    objOffset,
-    objOffset + (0'i32, height),
-    objOffset + (width, height),
-    objOffset + (width, 0'i32),
-    objOffset
-  ]
-  let bounds = LCDRect(left: obj.x, right: obj.x + width, top: obj.y, bottom: obj.y + height)
-  level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
-  return true
+  if obj.`type` == "PhysicsPolygon":
+    let centerV = v((obj.x.float32 + width.float32 * 0.5f), (obj.y.float32 + height.float32 * 0.5f))
+    let size = v(width.float32, height.float32)
+    level.physicsBoxes.add(newPhysicsBox(
+      position = centerV, 
+      size = size,
+      mass = size.area * 0.005f,
+    ))
+    return true
+  else:
+    let vertices: seq[Vertex] = @[
+      objOffset,
+      objOffset + (0'i32, height),
+      objOffset + (width, height),
+      objOffset + (width, 0'i32),
+      objOffset
+    ]
+    let bounds = LCDRect(left: obj.x, right: obj.x + width, top: obj.y, bottom: obj.y + height)
+    level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
+    return true
 
 proc loadText(level: var Level, obj: LevelObjectEntity): bool =
   if obj.text.isNone:

@@ -9,6 +9,7 @@ import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
 import game_terrain
+import game_dynamic_object
 import game_camera
 import sound/game_sound
 import common/shared_types
@@ -209,6 +210,8 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
   
   initGameCoins(state)
   initGameStar(state)
+  state.adddynamicObjects()
+
   if background.isNil:
     initGameBackground(state)
 

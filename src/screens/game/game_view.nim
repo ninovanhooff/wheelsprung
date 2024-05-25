@@ -8,6 +8,7 @@ import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
 import game_bike, game_finish, game_ghost
+import game_dynamic_object
 import common/graphics_utils
 import common/lcd_patterns
 import game_debug_view
@@ -65,8 +66,9 @@ proc initGameView*() =
   try:
     coinImage = gfx.newBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
-    debugBGImage = gfx.newBitmap("images/debug-bg")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
+    # debugBGImage must be loaded last, as it might not exist and raise an exception
+    debugBGImage = gfx.newBitmap("images/debug-bg")
   except:
     print "Image load failed:", getCurrentExceptionMsg()
 
@@ -348,6 +350,8 @@ proc drawGame*(statePtr: ptr GameState) =
     gfx.setDrawMode(kDrawmodeWhiteTransparent)
     gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
     gfx.setDrawMode(kDrawmodeCopy)
+
+  state.drawDynamicObjects()
 
   if debugDrawTextures:
     # assets
