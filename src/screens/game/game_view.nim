@@ -65,8 +65,9 @@ proc initGameView*() =
   try:
     coinImage = gfx.newBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
-    debugBGImage = gfx.newBitmap("images/debug-bg")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
+    # debugBGImage must be loaded last, as it might not exist and raise an exception
+    debugBGImage = gfx.newBitmap("images/debug-bg")
   except:
     print "Image load failed:", getCurrentExceptionMsg()
 
