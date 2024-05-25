@@ -40,6 +40,11 @@ type
     coinProgress*: float32
     gameResult*: GameResult
 
+  PhysicsBox* = object
+    position*: Vect
+    size*: Vect
+    mass*: Float
+
   Text* = object
     value*: string
     position*: Vertex
@@ -64,6 +69,7 @@ const GameCollisionTypes* = (
   Chassis: cast[GameCollisionType](7),
   Star: cast[GameCollisionType](8),
   GravityZone: cast[GameCollisionType](9),
+  DynamicObject: cast[GameCollisionType](10),
 )
 
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
@@ -72,16 +78,17 @@ const KILLER_MASK_BIT = cuint(1 shl 28)
 const FINISH_MASK_BIT = cuint(1 shl 27)
 const PLAYER_MASK_BIT = cuint(1 shl 26)
 const GRAVITY_ZONE_MASK_BIT = cuint(1 shl 25)
+const DYNAMIC_OBJECT_MASK_BIT = cuint(1 shl 24)
 
 const GameShapeFilters* = (
   Player: ShapeFilter(
     categories: PLAYER_MASK_BIT,
     mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or
-      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT
+      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   Terrain: ShapeFilter(
     categories: TERRAIN_MASK_BIT,
-    mask: PLAYER_MASK_BIT
+    mask: PLAYER_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   Collectible: ShapeFilter(
     categories: COLLECTIBLE_MASK_BIT,
@@ -99,6 +106,10 @@ const GameShapeFilters* = (
     categories: GRAVITY_ZONE_MASK_BIT,
     mask: PLAYER_MASK_BIT
   ),
+  DynamicObject: ShapeFilter(
+    categories: DYNAMIC_OBJECT_MASK_BIT,
+    mask: PLAYER_MASK_BIT or TERRAIN_MASK_BIT
+  ),
   # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
 
@@ -113,6 +124,7 @@ type Level* = ref object of RootObj
   id*: Path
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
+  physicsBoxes*: seq[PhysicsBox]
   coins*: seq[Coin]
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]
@@ -223,6 +235,9 @@ proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
 
 proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
   result = GravityZone(position: position, gravity: gravity)
+
+proc newPhysicsBox*(position: Vect, size: Vect): PhysicsBox =
+  result = PhysicsBox(position: position, size: size, mass: 1.0)
 
 proc newText*(value: string, position: Vertex): Text =
   result = Text(

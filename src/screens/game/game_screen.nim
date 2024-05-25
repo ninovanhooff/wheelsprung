@@ -9,6 +9,7 @@ import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
 import game_terrain
+import game_physics_object
 import game_camera
 import sound/game_sound
 import common/shared_types
@@ -183,6 +184,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
 
   space.addTerrain(level.terrainPolygons)
   space.addTerrain(level.terrainPolylines)
+  space.addPhysicsObjects(level.physicsBoxes)
   # cannot add coins here because they are mutable and thus are part of the state, not the level
   space.addGravityZones(level.gravityZones)
   if(level.starPosition.isSome):

@@ -3,7 +3,7 @@ var
 
   debugDrawGrid* = false
   debugDrawLevel* = true
-  debugDrawShapes* = false
+  debugDrawShapes* = true
   debugDrawTextures* = true
   debugDrawPlayer* = true
   debugDrawConstraints* = false

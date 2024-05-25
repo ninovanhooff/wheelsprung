@@ -26,7 +26,7 @@ proc flip*(body: Body, relativeTo: Body) {.inline.} =
   body.position = localToWorld(relativeTo, worldToLocal(relativeTo, body.position).transform(-1.0))
 
 proc addBox*(
-  space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f,
+  space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f, friction = 0f,
   collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE) : Body =
     let body = space.addBody(
         newBody(mass, momentForBox(mass, size.x, size.y))
@@ -38,6 +38,7 @@ proc addBox*(
       let shape = space.addShape(newBoxShape(body, size.x, size.y, 0f))
       shape.filter = shapeFilter
       shape.collisionType = collisionType
+      shape.friction = friction
 
     return body
 
