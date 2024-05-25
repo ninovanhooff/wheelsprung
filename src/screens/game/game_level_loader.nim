@@ -225,7 +225,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.starPosition = some(position)
     of ClassIds.SignPost:
       level.assets.add(Texture(
-        image: getOrLoadBitmap("images/signpost_dpad_down"),
+        image: getOrLoadBitmap("images/signpost-dpad-down"),
         position: position,
         flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped
       ))
