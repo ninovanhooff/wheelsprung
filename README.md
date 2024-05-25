@@ -1,6 +1,6 @@
 # Wheelsprung (Playdate)
 
-![Screenshot](screenshots/github_banner.png)
+![Screenshot](screenshots/wheelsprung_gameplay.gif)
 
 
 A physics-based motocross-platformer for the Playdate console. Made with the Nim programming language and the Chipmunk2D physics library for playdate. It relies on 2 libraries for that:
