@@ -180,6 +180,7 @@ type GameState* = ref object of RootObj
   camera*: Camera
   cameraOffset*: Vect
   driveDirection*: DriveDirection
+  dynamicObjectShapes*: seq[Shape]
 
   ## Ghost
   ghostRecording*: Ghost
