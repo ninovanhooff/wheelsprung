@@ -20,6 +20,9 @@ proc floor*(v: Vect): Vect {.inline.} =
 proc `/`*(v: Vect, s: Float): Vect {.inline.} =
   result = v(v.x / s, v.y / s)
 
+proc area*(v: SizeF): float32 {.inline.} =
+  result = v.x * v.y
+
 proc flip*(body: Body, relativeTo: Body) {.inline.} =
   ## Flip body horizontally relative to relativeTo
   body.angle = relativeTo.angle + (relativeTo.angle - body.angle)

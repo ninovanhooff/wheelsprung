@@ -1,4 +1,5 @@
 import chipmunk7
+import chipmunk_utils
 import options
 import common/utils
 import sugar
@@ -264,7 +265,12 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   let height = obj.height
   if obj.`type` == "PhysicsPolygon":
     let centerV = v((obj.x.float32 + width.float32 * 0.5f), (obj.y.float32 + height.float32 * 0.5f))
-    level.physicsBoxes.add(newPhysicsBox(position = centerV, size = v(width.float32, height.float32)))
+    let size = v(width.float32, height.float32)
+    level.physicsBoxes.add(newPhysicsBox(
+      position = centerV, 
+      size = size,
+      mass = size.area * 0.005f,
+    ))
     return true
   else:
     let vertices: seq[Vertex] = @[

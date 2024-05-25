@@ -25,6 +25,8 @@ type
   RiderAttitudePosition* {.pure.} = enum
     Neutral, Forward, Backward
 
+  SizeF* = Vect
+
   Pose* = object
     position*: Vect
     angle*: Float
@@ -236,8 +238,8 @@ proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
 proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
   result = GravityZone(position: position, gravity: gravity)
 
-proc newPhysicsBox*(position: Vect, size: Vect): PhysicsBox =
-  result = PhysicsBox(position: position, size: size, mass: 1.0)
+proc newPhysicsBox*(position: Vect, size: Vect, mass: Float): PhysicsBox =
+  result = PhysicsBox(position: position, size: size, mass: mass)
 
 proc newText*(value: string, position: Vertex): Text =
   result = Text(
