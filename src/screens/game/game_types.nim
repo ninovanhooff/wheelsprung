@@ -46,6 +46,7 @@ type
     position*: Vect
     size*: Vect
     mass*: Float
+    angle*: Float
 
   Text* = object
     value*: string
@@ -239,8 +240,8 @@ proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
 proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
   result = GravityZone(position: position, gravity: gravity)
 
-proc newPhysicsBox*(position: Vect, size: Vect, mass: Float): PhysicsBox =
-  result = PhysicsBox(position: position, size: size, mass: mass)
+proc newPhysicsBox*(position: Vect, size: Vect, mass: Float, angle: Float): PhysicsBox =
+  result = PhysicsBox(position: position, size: size, mass: mass, angle: angle)
 
 proc newText*(value: string, position: Vertex): Text =
   result = Text(

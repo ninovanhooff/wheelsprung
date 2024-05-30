@@ -3,6 +3,7 @@ import chipmunk_utils
 import options
 import common/utils
 import sugar
+import std/math
 import std/json
 import std/sequtils
 import std/tables
@@ -29,6 +30,7 @@ type
     gid: Option[uint32] # tile id including flip flags
     x, y: int32
     width*, height*: int32
+    rotation: float32
     polygon: Option[seq[LevelVertexEntity]]
     properties: Option[seq[LevelPropertiesEntity]]
     polyline: Option[seq[LevelVertexEntity]]
@@ -252,6 +254,16 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.gravityZones.add(gravityZone)
   return true
 
+proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): Vect =
+  let rotRad = rotDegrees.degToRad
+  let cosRotation = cos(rotRad)
+  let sinRotation = sin(rotRad)
+  let centerX = width * 0.5f
+  let centerY = height * 0.5f
+  let rotatedCenterX = centerX * cosRotation - centerY * sinRotation
+  let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
+  return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
+
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   if obj.polygon.isSome or obj.polyline.isSome or obj.ellipse.get(false) or obj.text.isSome:
     # it's a rectangle only if it is not something else
@@ -264,12 +276,13 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   let width = obj.width
   let height = obj.height
   if obj.`type` == "PhysicsPolygon":
-    let centerV = v((obj.x.float32 + width.float32 * 0.5f), (obj.y.float32 + height.float32 * 0.5f))
+    let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, width.float32, height.float32, obj.rotation)
     let size = v(width.float32, height.float32)
     level.physicsBoxes.add(newPhysicsBox(
       position = centerV, 
       size = size,
       mass = size.area * 0.005f,
+      angle = obj.rotation.degToRad,
     ))
     return true
   else:

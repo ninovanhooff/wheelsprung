@@ -15,6 +15,7 @@ proc adddynamicObjects*(state: GameState) =
       state.space.addBox(
         obj.position, obj.size, 
         mass = obj.mass,
+        angle = obj.angle,
         friction = objectsFriction,
         collisionType=GameCollisionTypes.DynamicObject,
         shapeFilter = GameShapeFilters.DynamicObject

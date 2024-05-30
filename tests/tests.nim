@@ -1,3 +1,4 @@
+import chipmunk7
 import math
 import sugar
 import common/utils
@@ -5,6 +6,7 @@ import common/graphics_utils
 import options
 import screens/game/game_types
 import screens/game/game_coin
+import screens/game/game_level_loader
 import playdate/api
 
 import strformat, strutils, macros
@@ -101,6 +103,15 @@ proc runTests*() =
   check(expectPolygon, actualPolygon)
   check(actualPolygon.edgeIndices, @[false, false, false, false])
   check(actualPolygon.edgeIndices[0], false)
+
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 0), v(50, 50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 45).toVertex, newVertex(0, 71))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, -45).toVertex, newVertex(71, 0))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 90).toVertex, newVertex(-50, 50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 180).toVertex, newVertex(-50, -50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 270).toVertex, newVertex(50, -50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, -90).toVertex, newVertex(50, -50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 360).toVertex, newVertex(50, 50))
 
 
   print "======== Test: Tests Completed ========="
