@@ -200,12 +200,23 @@ proc loadPolyline(level: var Level, obj: LevelObjectEntity): bool =
   level.terrainPolylines.add(polyline)
   return true
 
+proc lcdBitmapFlip(gid: uint32): LCDBitmapFlip =
+  let hFlip: bool = (gid and GID_HFLIP_MASK).bool
+  let vFlip: bool = (gid and GID_VFLIP_MASK).bool
+  if hFlip and vFlip:
+    return kBitmapFlippedXY
+  elif vFlip:
+    return kBitmapFlippedY
+  elif hFlip:
+    return kBitmapFlippedX
+  else:
+    return kBitmapUnflipped
+    
 proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   if obj.gid.isNone:
     return false
 
   let gid = obj.gid.get
-  let hFlip: bool = (gid and GID_HFLIP_MASK).bool
   let classId: ClassIds = (gid and GID_CLASS_MASK).ClassIds
 
   let position: Vertex = (obj.x, obj.y)
@@ -214,7 +225,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
     of ClassIds.Player:
       # player = bike + rider. chassis center is 7 pixels below the player center
       level.initialChassisPosition = position.toVect + vPlayerChassisOffset
-      if hFlip:
+      if (gid and GID_HFLIP_MASK).bool:
         level.initialDriveDirection = DD_LEFT
       else:
         level.initialDriveDirection = DD_RIGHT
@@ -224,27 +235,27 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
     of ClassIds.Killer:
       level.killers.add(position)
     of ClassIds.Finish:
-      level.finishPosition = position
+      level.finish = newFinish(position, gid.lcdBitmapFlip)
     of ClassIds.Star:
       level.starPosition = some(position)
     of ClassIds.SignPost:
       level.assets.add(Texture(
         image: getOrLoadBitmap("images/signpost-dpad-down"),
         position: position,
-        flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped
+        flip: gid.lcdBitmapFlip
       ))
     of ClassIds.Flag:
       level.assets.add(newAnimation(
         bitmapTableId = BitmapTableId.Flag,
         position = position,
-        flip = if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
+        flip = gid.lcdBitmapFlip,
         randomStartOffset = true
       ))
     of ClassIds.Gravity:
       level.assets.add(newAnimation(
         bitmapTableId = BitmapTableId.Gravity,
         position = position,
-        flip = if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
+        flip = gid.lcdBitmapFlip,
         randomStartOffset = true
       ))
       let gravityZone = newGravityZone(

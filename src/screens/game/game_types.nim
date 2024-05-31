@@ -16,7 +16,9 @@ type
     activeFrom*: Milliseconds
   Star* = Vertex
   Killer* = Vertex
-  Finish* = Vertex
+  Finish* = object
+    position*: Vertex
+    flip*: LCDBitmapFlip
   GravityZone* = ref object
     position*: Vertex
     gravity*: Vect
@@ -132,7 +134,7 @@ type Level* = ref object of RootObj
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]
   texts*: seq[Text]
-  finishPosition*: Vertex
+  finish*: Finish
   starPosition*: Option[Vertex]
   assets*: seq[Asset]
   ## Level size in Pixels
@@ -239,6 +241,9 @@ proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
 
 proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
   result = GravityZone(position: position, gravity: gravity)
+
+proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
+  result = Finish(position: position, flip: flip)
 
 proc newPhysicsBox*(position: Vect, size: Vect, mass: Float, angle: Float): PhysicsBox =
   result = PhysicsBox(position: position, size: size, mass: mass, angle: angle)

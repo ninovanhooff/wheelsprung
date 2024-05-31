@@ -188,7 +188,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
   space.addGravityZones(level.gravityZones)
   if(level.starPosition.isSome):
     space.addStar(level.starPosition.get)
-  space.addFinish(level.finishPosition)
+  space.addFinish(level.finish)
       
   return space
 
