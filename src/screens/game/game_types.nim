@@ -53,6 +53,7 @@ type
   Text* = object
     value*: string
     position*: Vertex
+    alignment*: TextAlignment
 
 const GRAVITY_MAGNITUDE*: Float = 90.0
 
@@ -248,10 +249,11 @@ proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
 proc newPhysicsBox*(position: Vect, size: Vect, mass: Float, angle: Float): PhysicsBox =
   result = PhysicsBox(position: position, size: size, mass: mass, angle: angle)
 
-proc newText*(value: string, position: Vertex): Text =
+proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(
     value: value,
-    position: position
+    position: position,
+    alignment: alignment,
   )
 
 proc getRiderBodies*(state: GameState): seq[Body] =

@@ -21,7 +21,8 @@ type
     name: string
     value: JsonNode
   LevelTextEntity = ref object of RootObj
-    text: string#[  ]#
+    halign: Option[string]
+    text: string
   LevelVertexEntity {.bycopy.} = object
     x*: int32
     y*: int32
@@ -312,9 +313,21 @@ proc loadText(level: var Level, obj: LevelObjectEntity): bool =
   if obj.text.isNone:
     return false
 
+  let textObj = obj.text.get
+  let halign = textObj.halign.get("left")
+  let alignment = if(halign == "center"): kTextAlignmentCenter elif(halign == "right"): kTextAlignmentRight else: kTextAlignmentLeft
+
+  var posX = obj.x
+  var posY = obj.y
+  if alignment == kTextAlignmentCenter:
+    posX += obj.width div 2
+  elif alignment == kTextAlignmentRight:
+    posX += obj.width
+
   level.texts.add(newText(
-    value = obj.text.get.text,
-    position = newVertex(obj.x, obj.y)
+    value = textObj.text,
+    position = newVertex(posX, posY),
+    alignment = alignment,
   ))
   return true
 

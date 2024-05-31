@@ -118,7 +118,7 @@ proc initGameBackground*(state: GameState) =
 
   gfx.setFont(getOrLoadFont("fonts/Roobert-10-Bold"))
   for text in level.texts:
-    gfx.drawText(text.value, text.position.x, text.position.y)
+    gfx.drawTextAligned(text.value, text.position.x, text.position.y, text.alignment)
 
   gfx.popContext()
 
