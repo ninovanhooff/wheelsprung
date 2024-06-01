@@ -21,6 +21,10 @@ function forceIntegerCoordinates(mapOrLayer) {
 				);
 				object.polygon = ensureWindingOrder(object.polygon);
 			}
+			if(object.shape == MapObject.Ellipse && object.className == "DynamicObject") {
+				// force circle
+				object.height = object.width;
+			}
 		}
 	} else if(mapOrLayer.isTileMap || mapOrLayer.isGroupLayer) {
 		let numLayers = mapOrLayer.layerCount;

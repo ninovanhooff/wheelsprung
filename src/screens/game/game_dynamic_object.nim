@@ -10,7 +10,7 @@ const
 
 proc adddynamicObjects*(state: GameState) =
   # Add the polygons as segment shapes to the physics space
-  for obj in state.level.physicsBoxes:
+  for obj in state.level.dynamicBoxes:
     state.dynamicObjectShapes.add(
       state.space.addBox(
         obj.position, obj.size, 

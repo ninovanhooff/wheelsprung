@@ -44,7 +44,7 @@ type
     coinProgress*: float32
     gameResult*: GameResult
 
-  PhysicsBox* = object
+  DynamicBox* = object
     position*: Vect
     size*: Vect
     mass*: Float
@@ -130,7 +130,7 @@ type Level* = ref object of RootObj
   id*: Path
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
-  physicsBoxes*: seq[PhysicsBox]
+  dynamicBoxes*: seq[DynamicBox]
   coins*: seq[Coin]
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]
@@ -246,8 +246,8 @@ proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
 proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
   result = Finish(position: position, flip: flip)
 
-proc newPhysicsBox*(position: Vect, size: Vect, mass: Float, angle: Float): PhysicsBox =
-  result = PhysicsBox(position: position, size: size, mass: mass, angle: angle)
+proc newDynamicBox*(position: Vect, size: Vect, mass: Float, angle: Float): DynamicBox =
+  result = DynamicBox(position: position, size: size, mass: mass, angle: angle)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(

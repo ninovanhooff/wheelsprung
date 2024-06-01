@@ -45,7 +45,7 @@
             "id": 7,
             "members": [
             ],
-            "name": "PhysicsPolygon",
+            "name": "DynamicObject",
             "type": "class",
             "useAs": [
                 "property",

@@ -287,10 +287,10 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   let objOffset: Vertex = (obj.x, obj.y)
   let width = obj.width
   let height = obj.height
-  if obj.`type` == "PhysicsPolygon":
+  if obj.`type` == "DynamicObject":
     let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, width.float32, height.float32, obj.rotation)
     let size = v(width.float32, height.float32)
-    level.physicsBoxes.add(newPhysicsBox(
+    level.dynamicBoxes.add(newDynamicBox(
       position = centerV, 
       size = size,
       mass = size.area * 0.005f,
