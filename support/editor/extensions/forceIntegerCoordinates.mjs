@@ -22,8 +22,16 @@ function forceIntegerCoordinates(mapOrLayer) {
 				object.polygon = ensureWindingOrder(object.polygon);
 			}
 			if(object.shape == MapObject.Ellipse && object.className == "DynamicObject") {
+				if(object.width != object.height) {
+					tiled.log("Ellipses not supported for Dynamic Objects. Making circular:" + object);
+				}
 				// force circle
+				if(object.height <= 0.0){
+					tiled.log("Circle height must be positive. Setting to 20.0:" + object);
+					object.height = 20.0;
+				}
 				object.height = object.width;
+				
 			}
 		}
 	} else if(mapOrLayer.isTileMap || mapOrLayer.isGroupLayer) {

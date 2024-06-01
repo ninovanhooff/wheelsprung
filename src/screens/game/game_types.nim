@@ -256,9 +256,13 @@ proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
   result = Finish(position: position, flip: flip)
 
 proc newDynamicBox*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float): DynamicBox =
+  if mass <= 0.0:
+    raise newException(RangeDefect, "Box mass must be greater than 0")
   result = DynamicBox(position: position, size: size, mass: mass, angle: angle, friction: friction)
 
 proc newDynamicCircle*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float): DynamicCircle =
+  if mass <= 0.0:
+    raise newException(RangeDefect, "Circle mass must be greater than 0")
   result = DynamicCircle(position: position, radius: radius, mass: mass, angle: angle, friction: friction)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
