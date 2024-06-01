@@ -46,7 +46,12 @@ proc init() {.raises: [].} =
     pushScreen(newLevelSelectScreen())
 
 proc update() {.raises: [].} =
-  discard updateNavigator()
+  bench(
+    proc(): void =
+      discard updateNavigator(),
+    "updateNavigator",
+    50
+  )
   playdate.system.drawFPS(0, 0)  
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 

@@ -376,7 +376,7 @@ proc drawGame*(statePtr: ptr GameState) =
     # killer
     for killer in state.killers:
       let killerScreenPos = killer.position - camera
-      killerImageTable.drawRotated(killerScreenPos, killer.angle)
+      killerImageTable.drawRotated(killerScreenPos, killer.angle + killer.angularVelocity * state.time.toSeconds)
 
     drawFinish(state)
 
