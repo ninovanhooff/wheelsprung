@@ -122,7 +122,7 @@ const GameShapeFilters* = (
   ),
   DynamicObject: ShapeFilter(
     categories: DYNAMIC_OBJECT_MASK_BIT,
-    mask: PLAYER_MASK_BIT or TERRAIN_MASK_BIT or KILLER_MASK_BIT
+    mask: PLAYER_MASK_BIT or TERRAIN_MASK_BIT or KILLER_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
