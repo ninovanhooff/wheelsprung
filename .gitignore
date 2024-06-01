@@ -10,3 +10,7 @@ game.map
 **.blend[0-9]
 
 support/editor/wheelsprung_template.tiled-session
+
+# Simulator outputs
+stderr.txt
+stdout.txt

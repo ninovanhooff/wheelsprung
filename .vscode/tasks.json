@@ -33,7 +33,7 @@
             "dependsOn": [
                 "Build Simulator PDX"
             ],
-            "command": "open ${workspaceFolder}/${workspaceFolderBasename}.pdx",
+            "command": "open --stdout ./stdout.txt --stderr ./stderr.txt ${workspaceFolder}/${workspaceFolderBasename}.pdx",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
