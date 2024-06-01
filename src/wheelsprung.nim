@@ -23,9 +23,31 @@ let initialScreenProvider: InitialScreenProvider =
 var 
   font: LCDFont
 
+proc init() {.raises: [].} =
+  discard getSaveSlot() # preload user profile
+  playdate.display.setRefreshRate(refreshRate)
+  playdate.system.randomize() # seed the random number generator
+
+  font = try: playdate.graphics.newFont(FONT_PATH) except: nil
+  playdate.graphics.setFont(font)
+  # The color used when the display is drawn at an offset. See HitStopScreen
+  playdate.graphics.setBackgroundColor(kColorBlack)
+
+  if defined(debug):
+    runTests()
+  
+  initNavigator(initialScreenProvider)
+  let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
+  if false:
+    pushScreen(newLevelSelectScreen())
+  elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
+    pushScreen(newGameScreen(lastOpenedLevelPath.get()))
+  else:
+    pushScreen(newLevelSelectScreen())
+
 proc update() {.raises: [].} =
   discard updateNavigator()
-  playdate.system.drawFPS(0, 0)
+  playdate.system.drawFPS(0, 0)  
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
   try:
@@ -52,26 +74,7 @@ proc catchingUpdate(): int {.raises: [].} =
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   if event == kEventInit:
-    discard getSaveSlot() # preload user profile
-    playdate.display.setRefreshRate(refreshRate)
-    playdate.system.randomize() # seed the random number generator
-
-    font = try: playdate.graphics.newFont(FONT_PATH) except: nil
-    playdate.graphics.setFont(font)
-    # The color used when the display is drawn at an offset. See HitStopScreen
-    playdate.graphics.setBackgroundColor(kColorBlack)
-
-
-    if defined(debug):
-      runCatching(runTests, "UNIT TESTS FAILED")
-    initNavigator(initialScreenProvider)
-    let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
-    if false:
-      pushScreen(newLevelSelectScreen())
-    elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
-      pushScreen(newGameScreen(lastOpenedLevelPath.get()))
-    else:
-      pushScreen(newLevelSelectScreen())
+    runCatching(init)
     
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)
