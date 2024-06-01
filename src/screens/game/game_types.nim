@@ -49,12 +49,14 @@ type
     size*: Vect
     mass*: Float
     angle*: Float
+    friction*: Float
 
   DynamicCircle* = object
     position*: Vect
     radius*: Float
     mass*: Float
     angle*: Float
+    friction*: Float
 
   Text* = object
     value*: string
@@ -253,11 +255,11 @@ proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
 proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
   result = Finish(position: position, flip: flip)
 
-proc newDynamicBox*(position: Vect, size: Vect, mass: Float, angle: Float): DynamicBox =
-  result = DynamicBox(position: position, size: size, mass: mass, angle: angle)
+proc newDynamicBox*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float): DynamicBox =
+  result = DynamicBox(position: position, size: size, mass: mass, angle: angle, friction: friction)
 
-proc newDynamicCircle*(position: Vect, radius: Float, mass: Float, angle: Float): DynamicCircle =
-  result = DynamicCircle(position: position, radius: radius, mass: mass, angle: angle)
+proc newDynamicCircle*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float): DynamicCircle =
+  result = DynamicCircle(position: position, radius: radius, mass: mass, angle: angle, friction: friction)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(

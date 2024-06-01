@@ -6,9 +6,6 @@ import common/utils
 import common/graphics_utils
 import game_types
 
-const
-  objectsFriction = 10.0
-
 proc adddynamicObjects*(state: GameState) =
   # Add the polygons as segment shapes to the physics space
   for obj in state.level.dynamicBoxes:
@@ -17,7 +14,7 @@ proc adddynamicObjects*(state: GameState) =
         obj.position, obj.size, 
         mass = obj.mass,
         angle = obj.angle,
-        friction = objectsFriction,
+        friction = obj.friction,
         collisionType=GameCollisionTypes.DynamicObject,
         shapeFilter = GameShapeFilters.DynamicObject
       )[1] # get shape from tuple
@@ -28,7 +25,7 @@ proc adddynamicObjects*(state: GameState) =
       state.space.addCircle(
         obj.position, obj.radius, 
         mass = obj.mass,
-        friction = objectsFriction,
+        friction = obj.friction,
         collisionType=GameCollisionTypes.DynamicObject,
         shapeFilter = GameShapeFilters.DynamicObject
       )[1] # get shape from tuple

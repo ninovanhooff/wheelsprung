@@ -29,6 +29,30 @@
             "valuesAsFlags": false
         },
         {
+            "color": "#ffff7e79",
+            "drawFill": true,
+            "id": 7,
+            "members": [
+                {
+                    "name": "friction",
+                    "type": "float",
+                    "value": 1
+                },
+                {
+                    "name": "massMultiplier",
+                    "type": "float",
+                    "value": 1
+                }
+            ],
+            "name": "DynamicObject",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object",
+                "project"
+            ]
+        },
+        {
             "id": 1,
             "name": "Fill",
             "storageType": "string",
@@ -38,20 +62,6 @@
                 "black"
             ],
             "valuesAsFlags": false
-        },
-        {
-            "color": "#ffff7e79",
-            "drawFill": true,
-            "id": 7,
-            "members": [
-            ],
-            "name": "DynamicObject",
-            "type": "class",
-            "useAs": [
-                "property",
-                "object",
-                "project"
-            ]
         },
         {
             "color": "#ffff9300",

@@ -131,6 +131,20 @@ proc thickness(obj: LevelObjectEntity): float32 =
     fallback = 8.0f
   )
 
+proc massMultiplier(obj: LevelObjectEntity): float32 =
+  return obj.getProp(
+    name = "massMultiplier",
+    mapper = (node => node.getFloat.float32),
+    fallback = 1.0f
+  )
+
+proc friction(obj: LevelObjectEntity): float32 =
+  return obj.getProp(
+    name = "friction",
+    mapper = (node => node.getFloat.float32),
+    fallback = 1.0f
+  )
+
 
 proc readDataFileContents(path: string): string {.raises: [].} =
   try:
@@ -293,8 +307,9 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
     level.dynamicBoxes.add(newDynamicBox(
       position = centerV, 
       size = size,
-      mass = size.area * 0.005f,
+      mass = obj.massMultiplier * size.area * 0.005f,
       angle = obj.rotation.degToRad,
+      friction = obj.friction,
     ))
     return true
   else:
@@ -322,8 +337,9 @@ proc loadEllipse(level: var Level, obj: LevelObjectEntity): bool =
   level.dynamicCircles.add(newDynamicCircle(
     position = centerV,
     radius = radius,
-    mass = area * 0.005f,
+    mass = obj.massMultiplier * area * 0.005f,
     angle = obj.rotation.degToRad,
+    friction = obj.friction,
   ))
   return true
 
