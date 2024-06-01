@@ -17,7 +17,7 @@ proc addKiller(space: Space, killer: Killer): Body =
     shapeFilter = GameShapeFilters.Killer,
     collisionType = GameCollisionTypes.Killer,
     friction = killerFriction,
-  )
+  )[0]
   body.bodyType = BODY_TYPE_KINEMATIC
   body.angularVelocity=3.0
   body.angle=rand(2.0*PI)
