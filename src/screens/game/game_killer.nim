@@ -5,7 +5,8 @@ import common/graphics_utils
 import game_types
 
 const
-  killerRadius = 10.0
+  killerRadius: Float = 10f
+  killerFriction: Float = 10f
   vKillerOffset = v(killerRadius, killerRadius)
 
 proc addKiller(space: Space, killer: Killer): Body =
@@ -15,6 +16,7 @@ proc addKiller(space: Space, killer: Killer): Body =
     mass = 1.0,
     shapeFilter = GameShapeFilters.Killer,
     collisionType = GameCollisionTypes.Killer,
+    friction = killerFriction,
   )
   body.bodyType = BODY_TYPE_KINEMATIC
   body.angularVelocity=3.0
