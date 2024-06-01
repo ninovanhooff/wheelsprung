@@ -50,6 +50,12 @@ type
     mass*: Float
     angle*: Float
 
+  DynamicCircle* = object
+    position*: Vect
+    radius*: Float
+    mass*: Float
+    angle*: Float
+
   Text* = object
     value*: string
     position*: Vertex
@@ -131,6 +137,7 @@ type Level* = ref object of RootObj
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
   dynamicBoxes*: seq[DynamicBox]
+  dynamicCircles*: seq[DynamicCircle]
   coins*: seq[Coin]
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]
@@ -248,6 +255,9 @@ proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
 
 proc newDynamicBox*(position: Vect, size: Vect, mass: Float, angle: Float): DynamicBox =
   result = DynamicBox(position: position, size: size, mass: mass, angle: angle)
+
+proc newDynamicCircle*(position: Vect, radius: Float, mass: Float, angle: Float): DynamicCircle =
+  result = DynamicCircle(position: position, radius: radius, mass: mass, angle: angle)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(

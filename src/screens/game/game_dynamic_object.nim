@@ -19,7 +19,7 @@ proc adddynamicObjects*(state: GameState) =
         friction = objectsFriction,
         collisionType=GameCollisionTypes.DynamicObject,
         shapeFilter = GameShapeFilters.DynamicObject
-      )[1]
+      )[1] # get shape from tuple
     )
 
 proc drawDynamicObjects*(state: GameState) =

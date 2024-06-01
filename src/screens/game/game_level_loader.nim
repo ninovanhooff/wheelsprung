@@ -309,6 +309,24 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
     level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
     return true
 
+proc loadEllipse(level: var Level, obj: LevelObjectEntity): bool =
+  if not obj.ellipse.get(false):
+    return false
+
+  if not (obj.`type` == "DynamicObject"):
+    return false
+
+  let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, obj.width.float32, obj.height.float32, obj.rotation)
+  let radius = obj.width.float32 * 0.5f
+  let area = PI * radius * radius 
+  level.dynamicCircles.add(newDynamicCircle(
+    position = centerV,
+    radius = radius,
+    mass = area * 0.005f,
+    angle = obj.rotation.degToRad,
+  ))
+  return true
+
 proc loadText(level: var Level, obj: LevelObjectEntity): bool =
   if obj.text.isNone:
     return false
@@ -339,6 +357,8 @@ proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
     level.loadPolyline(obj) or
     level.loadGid(obj) or
     level.loadText(obj) or
+    level.loadEllipse(obj) or
+    # rect must be last because it is not specifically marked as such
     level.loadRectangle(obj)
 
 proc loadLevel*(path: string): Level =
