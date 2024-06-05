@@ -1,4 +1,5 @@
 import playdate/api
+import std/options
 import chipmunk7
 import common/utils
 import screens/game/game_types
@@ -19,6 +20,9 @@ proc initBikeSqueak*()=
     print(getCurrentExceptionMsg())
 
 proc updateBikeSqueak*(state: GameState) =
+  if state.gameResult.isSome:
+    return
+    
   let forkImpulse: Float = state.forkArmSpring.impulse
   if not contractPlayer.isPlaying and forkImpulse > contractImpulseThreshold:
     contractPlayer.play(1, 1.0)
