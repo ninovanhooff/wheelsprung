@@ -21,6 +21,7 @@ proc initBikeSqueak*()=
 
 proc updateBikeSqueak*(state: GameState) =
   if state.gameResult.isSome:
+    # forks detached, usually constantly contracting
     return
     
   let forkImpulse: Float = state.forkArmSpring.impulse
