@@ -1,8 +1,10 @@
 import chipmunk7
 import math
 import sugar
+import common/shared_types
 import common/utils
 import common/graphics_utils
+import common/level_utils
 import options
 import screens/game/game_types
 import screens/game/game_coin
@@ -112,6 +114,10 @@ proc runTests*() =
   check(tiledRectPosToCenterPos(0, 0, 100, 100, 270).toVertex, newVertex(50, -50))
   check(tiledRectPosToCenterPos(0, 0, 100, 100, -90).toVertex, newVertex(50, -50))
   check(tiledRectPosToCenterPos(0, 0, 100, 100, 360).toVertex, newVertex(50, 50))
+
+  check("levels/tutorial_brake.tmj".nextLevelPath(), some("levels/tutorial_leaning.tmj"))
+  check("nonExisting.tmj".nextLevelPath(), none(Path))
+  check("levels/level3.tmj".nextLevelPath(), none(Path))
 
 
   print "======== Test: Tests Completed ========="

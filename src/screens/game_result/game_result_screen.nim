@@ -5,17 +5,20 @@ import std/options
 import common/graphics_types
 import common/shared_types
 import common/utils
+import common/level_utils
 import screens/settings/settings_screen
 import data_store/user_profile
 
 type GameResultScreen = ref object of Screen
   gameResult: GameResult
+  nextLevelPath: Option[Path]
   hasPersistedResult: bool
 
 
 proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
   return GameResultScreen(
     gameResult: gameResult,
+    nextLevelPath: nextLevelPath(gameResult.levelId),
     screenType: ScreenType.GameResult
   )
 
@@ -63,6 +66,9 @@ proc persistGameResult(gameResult: GameResult) =
     print("Failed to persist game result", getCurrentExceptionMsg())
 
 method resume*(self: GameResultScreen) =
+
+  # todo determine whether A is restart or next level
+
 
   drawGameResult(self) # once in resume is enough, static screen
 
