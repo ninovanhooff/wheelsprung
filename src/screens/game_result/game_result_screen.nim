@@ -7,6 +7,7 @@ import common/shared_types
 import common/utils
 import common/level_utils
 import screens/settings/settings_screen
+import screens/screen_types
 import data_store/user_profile
 
 type GameResultScreen = ref object of Screen
@@ -21,6 +22,9 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     nextLevelPath: nextLevelPath(gameResult.levelId),
     screenType: ScreenType.GameResult
   )
+
+proc isNextEnabled*(self: GameResultScreen): bool =
+  return self.gameResult.resultType == GameResultType.LevelComplete and self.nextLevelPath.isSome
 
 proc navigateToGameResult*(result: GameResult) =
   newGameResultScreen(result).pushScreen()
@@ -57,7 +61,9 @@ proc drawGameResult(self: GameResultScreen) =
   gfx.drawTextAligned(timeString, 200, 120)
   gfx.drawTextAligned(gameResult.unlockText, 200, 140)
 
-  gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
+  let confirmText = if self.isNextEnabled: "Next" else: "Restart"
+  gfx.drawTextAligned("Ⓑ Select level           Ⓐ " & confirmText, 200, 200)
+  
 
 proc persistGameResult(gameResult: GameResult) =
   try:
@@ -91,7 +97,11 @@ method update*(self: GameResultScreen): int =
   let buttonState = playdate.system.getButtonState()
 
   if kButtonA in buttonState.pushed:
-    popScreen()
+    if self.isNextEnabled:
+      popToScreenType(ScreenType.LevelSelect)
+      pushScreen(newGameScreen(self.nextLevelPath.get))
+    else:
+      popScreen()
   elif kButtonB in buttonState.pushed:
     popToScreenType(ScreenType.LevelSelect)
 

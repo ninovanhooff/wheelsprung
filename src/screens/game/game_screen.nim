@@ -17,11 +17,10 @@ import game_types, game_constants
 import input/game_input
 import game_view
 import navigation/[screen, navigator]
+import screens/screen_types
 import screens/game_result/game_result_screen
 import screens/settings/settings_screen
 import screens/hit_stop/hit_stop_screen
-
-type GameScreen* = ref object of Screen
 
 const
   restartLevelLabel = "Restart level"
@@ -256,13 +255,13 @@ proc initGame*(levelPath: string) {.raises: [].} =
   initGameView()
   state = newGameState(loadLevel(levelPath))
 
-proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
-  initGame(levelPath)
-  return GameScreen(screenType: ScreenType.Game)
-
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
+  if not gameScreen.isInitialized:
+    initGame(gameScreen.levelPath)
+    gameScreen.isInitialized = true
+  
   discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
   )

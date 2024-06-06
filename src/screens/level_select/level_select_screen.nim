@@ -14,7 +14,7 @@ import data_store/user_profile
 import level_meta/level_data
 import level_select_types
 import level_select_view
-import screens/game/game_screen
+import screens/screen_types
 import screens/settings/settings_screen
 
 const
