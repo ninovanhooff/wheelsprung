@@ -101,11 +101,14 @@ let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, 
 
 
 let removeBikeConstraintsPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
-  print("shatterBikePostStepCallback")
+  print("removeBikeConstraintsPostStepCallback")
   # detach wheels
   state.removeBikeConstraints()
-  # and make chassis collidable
-  discard addChassisShape(state)
+
+let addChassisShapePostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
+  print("addChassisShapePostStepCallback")
+  # make chassis collidable
+  addChassisShape(state)
 
 let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var 
@@ -136,7 +139,9 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     state.setGameResult(GameResultType.GameOver, false)
     pushScreen(buildHitStopScreen(state, shapeB))
   if state.bikeConstraints.len > 0:
-    discard space.addPostStepCallback(removeBikeConstraintsPostStepCallback, nil, nil)
+    discard space.addPostStepCallback(removeBikeConstraintsPostStepCallback, removeBikeConstraintsPostStepCallback, nil)
+  if state.chassisShape.isNil:
+    discard space.addPostStepCallback(addChassisShapePostStepCallback, addChassisShapePostStepCallback, nil)
   return true # we still want to collide
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
@@ -151,6 +156,9 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
   print("gameWin collision")
   state.setGameResult(GameResultType.LevelComplete)
   playFinishSound()
+
+  # make chassis collidable
+  discard space.addPostStepCallback(addChassisShapePostStepCallback, addChassisShapePostStepCallback, nil)
 
   return false # don't process the collision further
 

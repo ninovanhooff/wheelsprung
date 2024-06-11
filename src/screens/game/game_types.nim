@@ -211,6 +211,7 @@ type GameState* = ref object of RootObj
 
   # bike shapes
   bikeShapes*: seq[Shape]
+  chassisShape*: Shape
   swingArmShape*: Shape
   forkArmShape*: Shape
 
