@@ -13,6 +13,7 @@ import data_store/user_profile
 type GameResultScreen = ref object of Screen
   gameResult: GameResult
   nextLevelPath: Option[Path]
+  isNextEnabled: bool
   hasPersistedResult: bool
 
 
@@ -23,8 +24,10 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     screenType: ScreenType.GameResult
   )
 
-proc isNextEnabled*(self: GameResultScreen): bool =
-  return self.gameResult.resultType == GameResultType.LevelComplete and self.nextLevelPath.isSome
+proc isNewPersonalBest(gameResult: GameResult): bool =
+  let levelProgress = getLevelProgress(gameResult.levelId)
+  return gameResult.resultType == GameResultType.LevelComplete and 
+    (levelProgress.bestTime.isNone or levelProgress.bestTime.get > gameResult.time)
 
 proc navigateToGameResult*(result: GameResult) =
   newGameResultScreen(result).pushScreen()
@@ -41,7 +44,7 @@ proc unlockText(gameResult: GameResult): string =
   if gameResult.resultType == GameResultType.LevelComplete:
     if levelProgress.bestTime.isNone:
       result = "Star unlocked!"
-    elif levelProgress.bestTime.get > gameResult.time:
+    elif gameResult.isNewPersonalBest:
       result = "New Personal best!"
     elif gameResult.starCollected and not levelProgress.hasCollectedStar:
       result = "Star collected!"
@@ -73,7 +76,7 @@ proc persistGameResult(gameResult: GameResult) =
 
 method resume*(self: GameResultScreen) =
 
-  # todo determine whether A is restart or next level
+  self.isNextEnabled = self.gameResult.isNewPersonalBest
 
 
   drawGameResult(self) # once in resume is enough, static screen
@@ -101,6 +104,7 @@ method update*(self: GameResultScreen): int =
       popToScreenType(ScreenType.LevelSelect)
       pushScreen(newGameScreen(self.nextLevelPath.get))
     else:
+      print "next not enabled", self.gameResult.resultType == GameResultType.LevelComplete, self.nextLevelPath.isSome, self.gameResult.isNewPersonalBest
       popScreen()
   elif kButtonB in buttonState.pushed:
     popToScreenType(ScreenType.LevelSelect)
@@ -108,4 +112,4 @@ method update*(self: GameResultScreen): int =
   return 0
 
 method `$`*(self: GameResultScreen): string {.raises: [], tags: [].} =
-  return "GameResultScreen; type: " & repr(self.gameResult.resultType)
+  return "GameResultScreen; type: " & repr(self)
