@@ -28,6 +28,7 @@ proc addFinish*(space: Space, finish: Finish) =
   )
   let shape = space.addShape(space.staticBody.newBoxShape(bb, 0.0))
   shape.filter = GameShapeFilters.Finish
+  shape.sensor = true
   shape.collisionType = GameCollisionTypes.Finish
 
 proc isFinishActivated*(state: GameState): bool {.inline.} =
