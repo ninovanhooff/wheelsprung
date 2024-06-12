@@ -26,6 +26,7 @@ let officialLevels*:  OrderedTable[Path, level_data.LevelMeta] = @[
   newLevelMeta(name= "Half Pipe", path="levels/king_of_the_hill.tmj"),
   newLevelMeta(name= "Hills", path="levels/hills.tmj"),
   newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.tmj"),
+  newLevelMeta(name= "Tutorial: Gravity", path="levels/tutorial_gravity.tmj"),
   newLevelMeta(name= "Gravity Vault", path="levels/gravity_vault.tmj"),
   newLevelMeta(name= "Marble Vault", path="levels/marble_vault.tmj"),
   newLevelMeta(name= "Leg Up", path="levels/leg_up.tmj"),
