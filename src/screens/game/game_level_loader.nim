@@ -369,6 +369,10 @@ proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
+    if obj.`type` == "Reference":
+      ## skip references / helpers
+      continue
+
     discard level.loadPolygon(obj) or
     level.loadPolyline(obj) or
     level.loadGid(obj) or

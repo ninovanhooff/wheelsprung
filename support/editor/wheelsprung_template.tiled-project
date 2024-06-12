@@ -47,7 +47,6 @@
             "name": "DynamicObject",
             "type": "class",
             "useAs": [
-                "property",
                 "object",
                 "project"
             ]
@@ -77,7 +76,6 @@
             "name": "Polyline",
             "type": "class",
             "useAs": [
-                "property",
                 "object",
                 "project"
             ]
@@ -97,7 +95,19 @@
             "name": "TerrainPolygon",
             "type": "class",
             "useAs": [
-                "property",
+                "object",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 8,
+            "members": [
+            ],
+            "name": "Reference",
+            "type": "class",
+            "useAs": [
                 "object",
                 "project"
             ]
