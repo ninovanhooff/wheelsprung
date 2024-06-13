@@ -416,12 +416,12 @@ proc loadLevel*(path: string): Level =
       vertexCounts.inc(polygon.vertices[i])
 
   for polygon in level.terrainPolygons.mitems:
-    var edgeVerts = newSeq[bool](polygon.vertices.len) #todo not needed
+    var edgeSegments = newSeq[bool](polygon.vertices.len - 1) #todo not needed
     
-    for idx, vertex in polygon.vertices:
-      edgeVerts[idx] = vertexCounts[vertex] > 1
+    for idx in 0 ..< polygon.vertices.high:
+      edgeSegments[idx] = vertexCounts[polygon.vertices[idx]] > 1 and vertexCounts[polygon.vertices[idx + 1]] > 1
     
-    polygon.edgeIndices = edgeVerts
-    assert(polygon.edgeIndices.len == polygon.vertices.len)
+    polygon.edgeIndices = edgeSegments
+    assert(polygon.edgeIndices.len == polygon.vertices.len - 1)
 
   return level

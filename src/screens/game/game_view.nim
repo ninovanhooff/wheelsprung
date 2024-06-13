@@ -132,7 +132,7 @@ proc drawPolygonDepth*(state: GameState) =
     for curIndex in 0..polyVerts.len - 2:
       let nextIndex = curIndex + 1
 
-      if polygon.edgeIndices[curIndex] and polygon.edgeIndices[nextIndex]:
+      if polygon.edgeIndices[curIndex]:
         continue
 
       let v1 = polyVerts[curIndex]
@@ -148,7 +148,7 @@ proc drawPolygonDepth*(state: GameState) =
       if dot < 0:
         gfx.fillPolygon([v1, v1 + sv1, v2 + sv2, v2], patGrayTransparent, kPolygonFillNonZero)
 
-    if not debugDrawPlayer:
+    if debugDrawShapes:
       for i in 0..polyVerts.len - 1:
         drawLine(polyVerts[i] + shiftedVertices[i], polyVerts[i], kColorBlack)
         gfx.drawTextAligned($i, polyVerts[i].x, polyVerts[i].y)
@@ -319,13 +319,14 @@ proc drawGame*(statePtr: ptr GameState) =
 
   if debugDrawLevel:
     state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
-    bench(
-      proc() = state.drawPolygonDepth,
-      "drawPolygonDepth",
-      100
-    )
   else:
     gfx.clear(kColorWhite)
+
+  bench(
+    proc() = state.drawPolygonDepth,
+    "drawPolygonDepth",
+    100
+  )
 
   # draw grid
   if debugDrawGrid:
