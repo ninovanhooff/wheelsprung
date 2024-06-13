@@ -127,7 +127,7 @@ proc drawPolygonDepth*(state: GameState) =
 
     # todo make sure this is a reference, not a copy
     let polyVerts = polygon.vertices
-    var shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))
+    let shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))
 
     for curIndex in 0..polyVerts.len - 2:
       let nextIndex = curIndex + 1
@@ -137,16 +137,20 @@ proc drawPolygonDepth*(state: GameState) =
 
       let v1 = polyVerts[curIndex]
       let v2 = polyVerts[nextIndex]
-      ## https://stackoverflow.com/a/1243676/923557
-      let vNormal: Vertex = (x: v2.y - v1.y, y: v1.x - v2.x)
 
-      let sv1: Vertex = shiftedVertices[curIndex]
-      let sv2: Vertex = shiftedVertices[nextIndex]
-      let sSum = sv1 + sv2
-      let dot = vNormal.dotVertex(sSum)
+      let dot = polygon.normals[curIndex].dotVertex(shiftedVertices[curIndex] + shiftedVertices[nextIndex])
 
       if dot < 0:
-        gfx.fillPolygon([v1, v1 + sv1, v2 + sv2, v2], patGrayTransparent, kPolygonFillNonZero)
+        gfx.fillPolygon(
+          [
+            v1, 
+            v1 + shiftedVertices[curIndex], 
+            v2 + shiftedVertices[nextIndex], 
+            v2
+          ], 
+          patGrayTransparent, 
+          kPolygonFillNonZero
+        )
 
     if debugDrawShapes:
       for i in 0..polyVerts.len - 1:

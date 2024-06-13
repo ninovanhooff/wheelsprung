@@ -422,6 +422,6 @@ proc loadLevel*(path: string): Level =
       edgeSegments[idx] = vertexCounts[polygon.vertices[idx]] > 1 and vertexCounts[polygon.vertices[idx + 1]] > 1
     
     polygon.edgeIndices = edgeSegments
-    assert(polygon.edgeIndices.len == polygon.vertices.len - 1)
+    assert polygon.edgeIndices.len == polygon.vertices.len - 1, "ERROR: edgeIndices length mismatch"
 
   return level

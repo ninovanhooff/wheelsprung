@@ -92,6 +92,7 @@ proc runTests*() =
 
   let expectPolygon = Polygon(
     vertices: @[newVertex(0, 0), newVertex(100, 0), newVertex(100, 100), newVertex(0, 100)],
+    normals: @[newVertex(0, -100), newVertex(100, 0), newVertex(0, 100)],
     bounds: LCDRect(left: 0, top: 0, right: 100, bottom: 100),
     edgeIndices: @[false, false, false, false],
     fill: nil
@@ -103,6 +104,9 @@ proc runTests*() =
   )
   
   check(expectPolygon, actualPolygon)
+  check(actualPolygon.bounds, LCDRect(left: 0, top: 0, right: 100, bottom: 100))
+  check(actualPolygon.vertices, @[newVertex(0, 0), newVertex(100, 0), newVertex(100, 100), newVertex(0, 100)])
+  check(actualPolygon.normals, expectPolygon.normals)
   check(actualPolygon.edgeIndices, @[false, false, false, false])
   check(actualPolygon.edgeIndices[0], false)
 

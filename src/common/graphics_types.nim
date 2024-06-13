@@ -9,7 +9,9 @@ type
   Polygon* = object of RootObj
     vertices*: seq[Vertex]
     edgeIndices*: seq[bool]
-      ## indices of vertices that also occur in other polygons. Length must match vertices.len
+      ## indices of segments that also occur in other polygons. Length must match vertices.len - 1
+    normals*: seq[Vertex]
+      ## normals of the edges. Length must match vertices.len - 1
     fill*: LCDPattern
     bounds*: LCDRect
   Polyline* = object of RootObj
@@ -51,11 +53,23 @@ when defined(DEBUG):
       fill = src.fill, 
     )
 
+proc calculateNormals(vertices: seq[Vertex]): seq[Vertex] =
+  if vertices.len < 2:
+    return @[]
+
+  result = newSeq[Vertex](vertices.len - 1)
+  for i in 0 ..< vertices.high:
+    let v1 = vertices[i]
+    let v2 = vertices[i+1]
+    ## https://stackoverflow.com/a/1243676/923557
+    let vNormal: Vertex = (x: v2.y - v1.y, y: v1.x - v2.x)
+    result[i] = vNormal
 
 proc newPolygon*(vertices: seq[Vertex], bounds: LCDRect, fill: LCDPattern = nil, edgeIndices: seq[bool] = @[]): Polygon =
   result = Polygon(
     vertices: vertices, 
-    edgeIndices: if edgeIndices.len > 0: edgeIndices else: newSeq[bool](vertices.len), 
+    edgeIndices: if edgeIndices.len > 0: edgeIndices else: newSeq[bool](vertices.len),
+    normals: vertices.calculateNormals(),
     bounds: bounds, 
     fill: fill
     # keep up to date with =copy
