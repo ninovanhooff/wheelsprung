@@ -1,4 +1,5 @@
 import playdate/api
+{. warning[UnusedImport]:off .}
 import common/utils
 template gfx*: untyped = playdate.graphics
 

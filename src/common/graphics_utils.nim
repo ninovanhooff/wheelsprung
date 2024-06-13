@@ -1,4 +1,3 @@
-
 import playdate/api
 import chipmunk7
 import std/math
@@ -12,17 +11,16 @@ const
   displaySize* = v(400.0, 240.0)
   halfDisplaySize*: Vect = displaySize.vmult(0.5)
 
-# Note: these are not marked with .inline. because that prevents them from being used in closures (map calls)
-proc toVertex*(v: Vect): Vertex = 
+proc toVertex*(v: Vect): Vertex {.inline.} = 
   (v.x.round.int32, v.y.round.int32)
 
-proc toVect*(vertex: Vertex): Vect =
+proc toVect*(vertex: Vertex): Vect {.inline.} =
   return v(x = vertex.x.Float, y = vertex.y.Float)
 
-proc `-`*(a: Vertex, b: Vertex): Vertex = 
+proc `-`*(a: Vertex, b: Vertex): Vertex {.inline.} = 
   return (a[0] - b[0], a[1] - b[1])
 
-proc `+`*(a: Vertex, b: Vertex): Vertex =
+proc `+`*(a: Vertex, b: Vertex): Vertex {.inline.} =
   return (a[0] + b[0], a[1] + b[1])
 
 proc `div`*(a: Vertex, b: int32): Vertex {.inline.} =

@@ -210,7 +210,7 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
-    # #drawLineOutlined from left of swingArm to right of swingArm
+    # drawLineOutlined from left of swingArm to right of swingArm
     let swingArm = state.swingArm
     let swingArmLeftCenter = localToWorld(swingArm, v(-halfSwingArmWidth, 0.0)) - camera
     let swingArmRightCenter = localToWorld(swingArm, v(halfSwingArmWidth, 0.0)) - camera
