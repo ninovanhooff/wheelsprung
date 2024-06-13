@@ -76,16 +76,6 @@ proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
   result = perspectiveShift
 
-proc drawPerspectiveStrip(stripStartIdx: int, stripEndIdx: int, polyVerts, shiftedVerts: seq[Vertex]) =
-  if stripEndIdx > stripStartIdx:
-    var stripVerts: seq[Vertex] = @[]
-    for i in stripStartIdx..stripEndIdx:
-      stripVerts.add(shiftedVerts[i] + polyVerts[i])
-    for i in countDown(stripEndIdx, stripStartIdx):
-      stripVerts.add(polyVerts[i])
-
-    gfx.fillPolygon(stripVerts, patGrayTransparent, kPolygonFillNonZero)
-
 proc initGameBackground*(state: GameState) =
   let level = state.level
   state.background = gfx.newBitmap(
@@ -139,14 +129,10 @@ proc drawPolygonDepth*(state: GameState) =
     let polyVerts = polygon.vertices
     var shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))
 
-    var stripStartIdx = -1
     for curIndex in 0..polyVerts.len - 2:
       let nextIndex = curIndex + 1
 
       if polygon.edgeIndices[curIndex] and polygon.edgeIndices[nextIndex]:
-        if stripStartIdx != -1:
-          drawPerspectiveStrip(stripStartIdx, curIndex, polyVerts, shiftedVertices)
-          stripStartIdx = -1
         continue
 
       let v1 = polyVerts[curIndex]
@@ -160,15 +146,7 @@ proc drawPolygonDepth*(state: GameState) =
       let dot = vNormal.dotVertex(sSum)
 
       if dot < 0:
-        if stripStartIdx == -1:
-          stripStartIdx = curIndex
-      else:
-        if stripStartIdx != -1:
-          drawPerspectiveStrip(stripStartIdx, curIndex, polyVerts, shiftedVertices)
-          stripStartIdx = -1
-
-    if stripStartIdx != -1:
-      drawPerspectiveStrip(stripStartIdx, polyVerts.len - 1, polyVerts, shiftedVertices)
+        gfx.fillPolygon([v1, v1 + sv1, v2 + sv2, v2], patGrayTransparent, kPolygonFillNonZero)
 
     if not debugDrawPlayer:
       for i in 0..polyVerts.len - 1:
@@ -341,7 +319,11 @@ proc drawGame*(statePtr: ptr GameState) =
 
   if debugDrawLevel:
     state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
-    state.drawPolygonDepth()
+    bench(
+      proc() = state.drawPolygonDepth,
+      "drawPolygonDepth",
+      100
+    )
   else:
     gfx.clear(kColorWhite)
 

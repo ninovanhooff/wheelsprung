@@ -302,11 +302,7 @@ method update*(gameScreen: GameScreen): int =
 
   if state.isGameStarted:
     updateAttitudeAdjust(state)
-    bench(
-      proc() = state.space.step(timeStepSeconds64),
-      "space.step",
-      50
-    )
+    state.space.step(timeStepSeconds64)
     
     state.ghostRecording.addPose(state)
 
