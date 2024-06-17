@@ -215,7 +215,7 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initGameRider(state, riderPosition)
   
-  initGameCoins(state)
+  addGameCoins(state)
   initGameStar(state)
   state.adddynamicObjects()
 

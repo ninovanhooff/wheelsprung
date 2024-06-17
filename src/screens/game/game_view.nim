@@ -7,7 +7,7 @@ import std/sequtils
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
-import game_bike, game_finish, game_ghost, game_killer
+import game_bike, game_finish, game_ghost, game_killer, game_coin
 import game_dynamic_object
 import common/graphics_utils
 import common/lcd_patterns
@@ -35,9 +35,7 @@ var
   riderLowerArmImageTable: AnnotatedBitmapTable
   riderUpperLegImageTable: AnnotatedBitmapTable
   riderLowerLegImageTable: AnnotatedBitmapTable
-  killerImageTable: AnnotatedBitmapTable
   gravityImageTable: AnnotatedBitmapTable
-  coinImage: LCDBitmap
   starImage: LCDBitmap
   gridImage: LCDBitmap
   debugBGImage: LCDBitmap
@@ -59,12 +57,12 @@ proc initGameView*() =
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
   gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
+  initGameCoin()
   initGameKiller()
   initGameFinish()
   initGameGhost()
 
   try:
-    coinImage = gfx.newBitmap("images/coin")
     starImage = gfx.newBitmap("images/star")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
     # debugBGImage must be loaded last, as it might not exist and raise an exception
@@ -351,12 +349,7 @@ proc drawGame*(statePtr: ptr GameState) =
       asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
 
     # coins
-    for coin in state.remainingCoins:
-      let coinScreenPos = coin.position - camVertex
-      if coin.count < 2:
-        coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
-      else:
-        gfx.drawTextAligned($coin.count, coinScreenPos[0] + 10, coinScreenPos[1])
+    drawCoins(state.remainingCoins, camVertex)
 
     # star
     if state.remainingStar.isSome:

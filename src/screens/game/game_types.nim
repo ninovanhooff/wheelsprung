@@ -14,6 +14,7 @@ type
 
   Coin* = ref object
     position*: Vertex
+    bounds*: LCDRect
     count*: int32
     activeFrom*: Milliseconds
   Star* = Vertex
@@ -251,8 +252,17 @@ type GameState* = ref object of RootObj
   handPivot*: PivotJoint
   headPivot*: PivotJoint
 
-proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
-  result = Coin(position: position, count: count)
+proc newCoin*(position: Vertex, count: int32 = 1): Coin =
+  result = Coin(
+    position: position,
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + coinSize,
+      top: position.y,
+      bottom: position.y + coinSize,
+    ),
+    count: count
+  )
 
 proc newKiller*(position: Vertex): Killer =
   result = Killer(
