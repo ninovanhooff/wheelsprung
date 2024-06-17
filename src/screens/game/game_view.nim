@@ -117,7 +117,7 @@ proc drawPolygonDepth*(state: GameState) =
   gfx.setDrawOffset(-camVertex.x, -camVertex.y)
 
   # draw driving surface
-  let viewport: LCDRect = LCD_SCREEN_RECT.offsetBy(camVertex)
+  let viewport: LCDRect = offsetScreenRect(camVertex)
   let camCenter = camVertex + halfDisplaySize.toVertex + (x: 0'i32, y: -30'i32)
   for polygon in level.terrainPolygons:
     if not polygon.bounds.intersects(viewport):

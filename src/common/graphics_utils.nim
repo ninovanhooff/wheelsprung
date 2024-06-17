@@ -147,3 +147,6 @@ proc offsetBy*(lcdRect: LCDRect, offset: Vertex): LCDRect =
     top: lcdRect.top + offset.y,
     bottom: lcdRect.bottom + offset.y
   )
+
+proc offsetScreenRect*(vertex: Vertex): LCDRect {.inline.} =
+  return LCD_SCREEN_RECT.offsetBy(vertex)

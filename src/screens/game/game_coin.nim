@@ -45,7 +45,11 @@ proc addGameCoins*(state: GameState) =
   state.space.addCoins(state.remainingCoins)
 
 proc drawCoins*(remainingCoins: seq[Coin], camVertex: Vertex) =
+  let viewport = offsetScreenRect(camVertex)
   for coin in remainingCoins:
+      if not viewport.intersects(coin.bounds):
+        continue
+      
       let coinScreenPos = coin.position - camVertex
       if coin.count < 2:
         coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)

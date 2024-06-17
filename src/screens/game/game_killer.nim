@@ -34,7 +34,7 @@ proc addKillers*(space: Space, level: Level): seq[Killer] =
   level.killers.map(killer => space.addKiller(killer))
 
 proc drawKillers*(killers: seq[Killer], camera: Camera) =
-    let viewport = LCD_SCREEN_RECT.offsetBy(camera.toVertex())
+    let viewport = offsetScreenRect(camera.toVertex())
 
     for killer in killers:
       if not viewport.intersects(killer.bounds):
