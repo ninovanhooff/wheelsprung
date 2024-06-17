@@ -14,3 +14,8 @@ const
     ## timeStepSeconds64 is used to advance the physics simulation, let's go for maximum precision to minimise drift
   riderOffset* = v(-4.0, -18.0) # offset from chassis center
   HALF_PI*: float = PI * 0.5
+
+  ## killers
+  killerRadius*: Float = 10f
+  killerSize*: int32 = killerRadius.int32 * 2
+

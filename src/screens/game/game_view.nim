@@ -7,7 +7,7 @@ import std/sequtils
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
-import game_bike, game_finish, game_ghost
+import game_bike, game_finish, game_ghost, game_killer
 import game_dynamic_object
 import common/graphics_utils
 import common/lcd_patterns
@@ -58,8 +58,8 @@ proc initGameView*() =
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
-  killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
   gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
+  initGameKiller()
   initGameFinish()
   initGameGhost()
 
@@ -322,7 +322,11 @@ proc drawGame*(statePtr: ptr GameState) =
 
 
   if debugDrawLevel:
-    state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
+    bench(
+      proc() = state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped),
+      "drawBackground",
+      100
+    )
   else:
     gfx.clear(kColorWhite)
 
@@ -361,9 +365,13 @@ proc drawGame*(statePtr: ptr GameState) =
 
 
     # killer
-    for killer in state.killers:
-      let killerScreenPos = killer.position - camera
-      killerImageTable.drawRotated(killerScreenPos, killer.angle)
+    bench(
+      proc() = 
+        drawKillers(state.killers, camera)
+      ,
+      "drawKillers",
+      50
+    )
 
     drawFinish(state)
 

@@ -4,6 +4,8 @@ import options
 import common/graphics_types
 import common/utils
 import common/shared_types
+import game_constants
+export game_constants
 
 type 
   Camera* = Vect
@@ -15,7 +17,9 @@ type
     count*: int32
     activeFrom*: Milliseconds
   Star* = Vertex
-  Killer* = Vertex
+  Killer* = object
+    bounds*: LCDRect
+    body*: Body
   Finish* = object
     position*: Vertex
     flip*: LCDBitmapFlip
@@ -169,7 +173,7 @@ type GameState* = ref object of RootObj
   remainingStar*: Option[Star]
   starEnabled*: bool
     ## If the star is enabled, the player can collect it. Stars are enabled by finishing the level at least once.
-  killers*: seq[Body]
+  killers*: seq[Killer]
   gameResult*: Option[GameResult]
 
   # Input
@@ -249,6 +253,19 @@ type GameState* = ref object of RootObj
 
 proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
   result = Coin(position: position, count: count)
+
+proc newKiller*(position: Vertex): Killer =
+  result = Killer(
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + killerSize,
+      top: position.y,
+      bottom: position.y + killerSize,
+    )
+  )
+
+proc newKiller*(bounds: LCDRect, body: Body): Killer =
+  result = Killer(bounds: bounds, body: body)
 
 proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
   result = GravityZone(position: position, gravity: gravity)

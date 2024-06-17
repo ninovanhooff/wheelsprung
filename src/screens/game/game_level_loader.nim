@@ -248,7 +248,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
     of ClassIds.Coin:
       level.coins.add(newCoin(position = position, count = obj.count))
     of ClassIds.Killer:
-      level.killers.add(position)
+      level.killers.add(newKiller(position = position))
     of ClassIds.Finish:
       level.finish = newFinish(position, gid.lcdBitmapFlip)
     of ClassIds.Star:
