@@ -24,11 +24,14 @@ type
   AnnotatedBitmapTable* = ref object of RootObj
     bitmapTable*: LCDBitmapTable
     frameCount*: int32
-    halfFrameWidth*: float32
+    frameWidth*: int32
+    frameHeight*: int32
+    halfFrameWidth*: float32 ## separate property for efficiency, accessed every frame
     halfFrameHeight*: float32
 
   Asset* = ref object of RootObj
     position*: Vertex
+    bounds*: LCDRect
     flip*: LCDBitmapFlip
   Texture* = ref object of Asset
     image*: LCDBitmap
@@ -89,7 +92,16 @@ proc right*(rect: Rect): int32 =
   result = rect.x + rect.width
 
 proc newTexture*(image: LCDBitmap, position: Vertex, flip: LCDBitmapFlip): Texture =
-  result = Texture(image: image, position: position, flip: flip)
+  result = Texture(
+    image: image,
+    position: position,
+    bounds: LCDRect(
+      left: position.x, right: position.y + image.width.int32, 
+      top: position.y,
+      bottom: position.y + image.height.int32,
+    ),
+    flip: flip
+  )
 
 proc getBitmap*(annotatedTable: AnnotatedBitmapTable, frame: int32): LCDBitmap {.inline.} =
   result = annotatedTable.bitmapTable.getBitmap(frame)
@@ -97,10 +109,12 @@ proc getBitmap*(annotatedTable: AnnotatedBitmapTable, frame: int32): LCDBitmap {
 proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): AnnotatedBitmapTable =
   let firstBitmap = bitmapTable.getBitmap(0)
   result = AnnotatedBitmapTable(
-  bitmapTable: bitmapTable,
-  frameCount: frameCount,
-  halfFrameWidth: firstBitmap.width.float32 * 0.5f,
-  halfFrameHeight: firstBitmap.height.float32 * 0.5f
+    bitmapTable: bitmapTable,
+    frameCount: frameCount,
+    frameWidth: firstBitmap.width.int32,
+    frameHeight: firstBitmap.height.int32,
+    halfFrameWidth: firstBitmap.width.float32 * 0.5f,
+    halfFrameHeight: firstBitmap.height.float32 * 0.5f
   )
 
 proc newVertex*(x, y: int32): Vertex =

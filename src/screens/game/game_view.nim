@@ -316,23 +316,16 @@ proc drawGame*(statePtr: ptr GameState) =
   let level = state.level
   let camera = state.camera
   let camVertex = camera.toVertex()
+  let viewport: LCDRect = offsetScreenRect(camVertex)
   let frameCounter: int32 = state.frameCounter
 
 
   if debugDrawLevel:
-    bench(
-      proc() = state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped),
-      "drawBackground",
-      100
-    )
+    state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
   else:
     gfx.clear(kColorWhite)
 
-  bench(
-    proc() = state.drawPolygonDepth,
-    "drawPolygonDepth",
-    100
-  )
+  state.drawPolygonDepth()
 
   # draw grid
   if debugDrawGrid:
@@ -345,8 +338,9 @@ proc drawGame*(statePtr: ptr GameState) =
   if debugDrawTextures:
     # assets
     for asset in level.assets:
-      let assetScreenPos = asset.position - camVertex
-      asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
+      if asset.bounds.intersects(viewport):
+        let assetScreenPos = asset.position - camVertex
+        asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
 
     # coins
     drawCoins(state.remainingCoins, camVertex)
@@ -358,13 +352,7 @@ proc drawGame*(statePtr: ptr GameState) =
 
 
     # killer
-    bench(
-      proc() = 
-        drawKillers(state.killers, camera)
-      ,
-      "drawKillers",
-      50
-    )
+    drawKillers(state.killers, camera)
 
     drawFinish(state)
 

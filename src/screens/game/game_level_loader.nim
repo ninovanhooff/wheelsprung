@@ -254,10 +254,11 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
     of ClassIds.Star:
       level.starPosition = some(position)
     of ClassIds.SignPost:
-      level.assets.add(Texture(
-        image: getOrLoadBitmap("images/signpost-dpad-down"),
-        position: position,
-        flip: gid.lcdBitmapFlip
+      let signpostBitmap = getOrLoadBitmap("images/signpost-dpad-down")
+      level.assets.add(newTexture(
+        image = signpostBitmap,
+        position = position,
+        flip = gid.lcdBitmapFlip
       ))
     of ClassIds.Flag:
       level.assets.add(newAnimation(

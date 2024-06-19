@@ -54,6 +54,12 @@ proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitm
     bitmapTable: annotatedTable.bitmapTable, 
     frameCount: annotatedTable.frameCount,
     position: position,
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + annotatedTable.frameWidth, 
+      top: position.y, 
+      bottom: position.y + annotatedTable.frameHeight
+    ),
     flip: flip,
     startOffset: if randomStartOffset: rand(annotatedTable.frameCount).int32 else: 0'i32,
   )

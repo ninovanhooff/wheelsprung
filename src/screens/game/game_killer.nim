@@ -1,5 +1,4 @@
 import std/[random, math, sugar, sequtils]
-import playdate/api
 import chipmunk7
 import chipmunk_utils
 import common/graphics_utils
