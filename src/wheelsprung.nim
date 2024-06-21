@@ -118,6 +118,8 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("refreshRate:" & $refreshRate)
     else:
       print("keycode:" & $keycode)
+  elif event == kEventKeyPressed:
+    discard
   else:
     print("unhandled event:" & $event & " keycode:" & $keycode)
 # Used to setup the SDK entrypoint

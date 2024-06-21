@@ -72,18 +72,13 @@ proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
   result = perspectiveShift
 
-proc initGameBackground*(state: GameState) =
+proc initGeometryBackground(state: GameState)=
   let level = state.level
   state.background = gfx.newBitmap(
     level.size.x, level.size.y, kColorWhite
   )
 
   gfx.pushContext(state.background)
-
-  if level.background.isSome:
-    let background = level.background.get
-    background.draw(0, 0, kBitmapUnflipped)
-
 
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
@@ -106,6 +101,14 @@ proc initGameBackground*(state: GameState) =
     gfx.drawTextAligned(text.value, text.position.x, text.position.y, text.alignment)
 
   gfx.popContext()
+
+proc initGameBackground*(state: GameState) =
+  let level = state.level
+
+  if level.background.isSome:
+    state.background = level.background.get
+  else:
+    state.initGeometryBackground()
 
 proc drawPolygonDepth*(state: GameState) =
   let level = state.level
@@ -322,7 +325,8 @@ proc drawGame*(statePtr: ptr GameState) =
   else:
     gfx.clear(kColorWhite)
 
-  state.drawPolygonDepth()
+  if level.background.isNone:
+    state.drawPolygonDepth()
 
   # draw grid
   if debugDrawGrid:
