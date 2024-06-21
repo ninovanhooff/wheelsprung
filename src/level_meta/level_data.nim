@@ -5,6 +5,7 @@ import common/shared_types
 
 const 
   levelsBasePath* = "levels/"
+  levelFileExtension* = ".tmj"
 
 type
   LevelMeta* = ref object of RootObj

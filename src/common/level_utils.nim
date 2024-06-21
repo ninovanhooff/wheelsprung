@@ -11,7 +11,3 @@ proc nextLevelPath*(path: Path): Option[Path] =
     if k == path:
       isCurrentFound = true
   return none(Path)
-
-
-    
-    

@@ -6,12 +6,14 @@ import sugar
 import std/math
 import std/json
 import std/sequtils
+import std/strutils
 import std/tables
 import playdate/api
 import game_types
 import common/graphics_types
 import common/graphics_utils
 import common/data_utils
+import level_meta/level_data
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import common/lcd_patterns
@@ -41,6 +43,8 @@ type
   
   LayerEntity = ref object of RootObj
     objects: Option[seq[LevelObjectEntity]]
+    image: Option[string]
+    `type`: string
   
   LevelEntity = ref object of RootObj
     width, height: int32
@@ -366,7 +370,7 @@ proc loadText(level: var Level, obj: LevelObjectEntity): bool =
   ))
   return true
 
-proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
@@ -381,6 +385,25 @@ proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
     level.loadEllipse(obj) or
     # rect must be last because it is not specifically marked as such
     level.loadRectangle(obj)
+
+proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+  if layer.image.isNone: return
+
+  let image = layer.image.get
+  ## strip extension from image path
+  let imagePath = levelsBasePath & image.rsplit('.', maxsplit=1)[0]
+  let bitmap = getOrLoadBitmap(imagePath)
+  level.background = some(bitmap)
+
+proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+  case layer.`type`:
+    of "objectgroup":
+      level.loadObjectLayer(layer)
+    of "imagelayer":
+      level.loadImageLayer(layer)
+    else:
+      print("Unknown layer type: " & $layer.`type`)
+      return
 
 proc loadLevel*(path: string): Level =
   var level = Level(

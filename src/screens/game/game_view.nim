@@ -65,8 +65,6 @@ proc initGameView*() =
   try:
     starImage = gfx.newBitmap("images/star")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
-    # debugBGImage must be loaded last, as it might not exist and raise an exception
-    debugBGImage = gfx.newBitmap("images/debug-bg")
   except:
     print "Image load failed:", getCurrentExceptionMsg()
 
@@ -82,11 +80,10 @@ proc initGameBackground*(state: GameState) =
 
   gfx.pushContext(state.background)
 
-  if not debugBGImage.isNil:
-    print "Drawing debug background"
-    debugBGImage.draw(0, 0, kBitmapUnflipped)
-  else:
-    print "no bg image"
+  if level.background.isSome:
+    let background = level.background.get
+    background.draw(0, 0, kBitmapUnflipped)
+
 
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
