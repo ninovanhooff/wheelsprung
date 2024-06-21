@@ -132,7 +132,7 @@ proc thickness(obj: LevelObjectEntity): float32 =
   return obj.getProp(
     name = "thickness",
     mapper = (node => node.getFloat.float32),
-    fallback = 8.0f
+    fallback = 0.0f
   )
 
 proc massMultiplier(obj: LevelObjectEntity): float32 =

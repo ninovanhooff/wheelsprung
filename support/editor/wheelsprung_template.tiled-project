@@ -70,7 +70,7 @@
                 {
                     "name": "thickness",
                     "type": "float",
-                    "value": 8
+                    "value": 0
                 }
             ],
             "name": "Polyline",
