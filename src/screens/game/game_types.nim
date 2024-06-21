@@ -12,6 +12,14 @@ type
   DriveDirection* = Float
   RotationDirection* = DriveDirection
 
+  CameraController* = ref object of RootObj
+    maxHistoryLength*: int
+    integralThreshold*: Float
+    lastTarget*: Float
+    speed*: Float
+    history*: seq[Float]
+    errorIntegral*: Float
+  
   Coin* = ref object
     position*: Vertex
     bounds*: LCDRect
@@ -197,7 +205,9 @@ type GameState* = ref object of RootObj
   space*: Space
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
-  cameraOffset*: Vect
+  cameraOffset*: Vect #todo remove
+  camControllerX*: CameraController
+  camControllerY*: CameraController
   driveDirection*: DriveDirection
   dynamicObjectShapes*: seq[Shape]
 
