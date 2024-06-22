@@ -48,6 +48,7 @@
             "type": "class",
             "useAs": [
                 "object",
+                "tile",
                 "project"
             ]
         },

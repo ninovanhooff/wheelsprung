@@ -9,9 +9,9 @@
  "name":"Game Objects",
  "objectalignment":"topleft",
  "spacing":0,
- "tilecount":8,
+ "tilecount":9,
  "tiledversion":"1.10.2",
- "tileheight":72,
+ "tileheight":86,
  "tiles":[
         {
          "id":0,
@@ -75,6 +75,13 @@
                  "value":"up"
                 }],
          "type":"Gravity"
+        }, 
+        {
+         "id":8,
+         "image":"tall_book.png",
+         "imageheight":86,
+         "imagewidth":9,
+         "type":"DynamicObject"
         }],
  "tilewidth":66,
  "type":"tileset",

@@ -53,7 +53,7 @@ type
 
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
-    Flag = 7'u32, Gravity = 8'u32
+    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -283,6 +283,9 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         gravity = obj.direction8().toGravity(),
       )
       level.gravityZones.add(gravityZone)
+    of ClassIds.TallBook:
+      # todo: should a default mass be set?
+      return false # loadRectangle will handle this
   return true
 
 proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): Vect =
