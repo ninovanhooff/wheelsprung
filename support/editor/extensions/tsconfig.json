@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "rootDir": "./src/",
+    "sourceMap": true,
+    "types": ["@mapeditor/tiled-api"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler"
+  }
+}

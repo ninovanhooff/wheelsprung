@@ -1,0 +1,20 @@
+{
+  "name": "tiled-wheelsprung-extensions",
+  "version": "1.0.0",
+  "description": "Utilities for creating Wheelsprung levels",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "esbuild --watch src/index.ts --bundle --target=es2017 --outfile=wheelsprung/index.js",
+    "build": "esbuild src/index.ts --bundle --target=es2017 --outfile=wheelsprung/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nino van Hooff",
+  "license": "ISC",
+  "devDependencies": {
+    "@mapeditor/tiled-api": "^1.10.1",
+    "esbuild": "0.20.2",
+    "prettier": "3.2.5",
+    "typescript": "^5.4.5"
+  }
+}
