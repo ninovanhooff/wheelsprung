@@ -1,9 +1,11 @@
 import playdate/api
 import chipmunk7
 import options
+import std/sugar
 import common/graphics_types
 import common/utils
 import common/shared_types
+import cache/bitmaptable_cache
 import game_constants
 export game_constants
 
@@ -55,6 +57,7 @@ type
     mass*: Float
     angle*: Float
     friction*: Float
+    bitmapTable*: Option[AnnotatedBitmapTable]
 
   DynamicCircle* = object
     position*: Vect
@@ -284,10 +287,11 @@ proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
 proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
   result = Finish(position: position, flip: flip)
 
-proc newDynamicBox*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float): DynamicBox =
+proc newDynamicBox*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, bitmapTableId: Option[BitmapTableId]): DynamicBox =
   if mass <= 0.0:
     raise newException(RangeDefect, "Box mass must be greater than 0")
-  result = DynamicBox(position: position, size: size, mass: mass, angle: angle, friction: friction)
+  let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
+  result = DynamicBox(position: position, size: size, mass: mass, angle: angle, friction: friction, bitmapTable: bitmapTable)
 
 proc newDynamicCircle*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float): DynamicCircle =
   if mass <= 0.0:

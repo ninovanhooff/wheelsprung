@@ -230,6 +230,32 @@ proc lcdBitmapFlip(gid: uint32): LCDBitmapFlip =
     return kBitmapFlippedX
   else:
     return kBitmapUnflipped
+
+proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): Vect =
+  let rotRad = rotDegrees.degToRad
+  let cosRotation = cos(rotRad)
+  let sinRotation = sin(rotRad)
+  let centerX = width * 0.5f
+  let centerY = height * 0.5f
+  let rotatedCenterX = centerX * cosRotation - centerY * sinRotation
+  let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
+  return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
+
+proc loadAsDynamicObject(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
+  if obj.width < 1 or obj.height < 1:
+    return false
+
+  let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, obj.width.float32, obj.height.float32, obj.rotation)
+  let size = v(obj.width.float32, obj.height.float32)
+  level.dynamicBoxes.add(newDynamicBox(
+    position = centerV, 
+    size = size,
+    mass = obj.massMultiplier * size.area * 0.005f,
+    angle = obj.rotation.degToRad,
+    friction = obj.friction,
+    bitmapTableId = bitmapTableId,
+  ))
+  return true
     
 proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   if obj.gid.isNone:
@@ -285,18 +311,8 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.gravityZones.add(gravityZone)
     of ClassIds.TallBook:
       # todo: should a default mass be set?
-      return false # loadRectangle will handle this
+      return loadAsDynamicObject(level, obj, some(BitmapTableId.TallBook))
   return true
-
-proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): Vect =
-  let rotRad = rotDegrees.degToRad
-  let cosRotation = cos(rotRad)
-  let sinRotation = sin(rotRad)
-  let centerX = width * 0.5f
-  let centerY = height * 0.5f
-  let rotatedCenterX = centerX * cosRotation - centerY * sinRotation
-  let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
-  return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   if obj.polygon.isSome or obj.polyline.isSome or obj.ellipse.get(false) or obj.text.isSome:
@@ -306,21 +322,12 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
-  let objOffset: Vertex = (obj.x, obj.y)
-  let width = obj.width
-  let height = obj.height
   if obj.`type` == "DynamicObject":
-    let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, width.float32, height.float32, obj.rotation)
-    let size = v(width.float32, height.float32)
-    level.dynamicBoxes.add(newDynamicBox(
-      position = centerV, 
-      size = size,
-      mass = obj.massMultiplier * size.area * 0.005f,
-      angle = obj.rotation.degToRad,
-      friction = obj.friction,
-    ))
-    return true
+    return loadAsDynamicObject(level, obj)
   else:
+    let objOffset: Vertex = (obj.x, obj.y)
+    let width = obj.width
+    let height = obj.height
     let vertices: seq[Vertex] = @[
       objOffset,
       objOffset + (0'i32, height),

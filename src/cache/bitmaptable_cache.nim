@@ -22,6 +22,7 @@ type
     RiderUpperLeg = "images/rider/upper-leg"
     RiderLowerLeg = "images/rider/lower-leg"
     Killer = "images/killer/killer"
+    TallBook = "images/dynamic_objects/tall-book"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
     Gravity = "images/gravity"
@@ -48,7 +49,8 @@ proc frameCount(id: BitmapTableId): int32 =
     BitmapTableId.RiderLowerArm,
     BitmapTableId.RiderUpperLeg,
     BitmapTableId.RiderLowerLeg,
-    BitmapTableId.Killer: return imageRotations
+    BitmapTableId.Killer,
+    BitmapTableId.TallBook: return imageRotations
   
 
 proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
