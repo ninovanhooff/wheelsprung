@@ -65,8 +65,6 @@ proc initGameView*() =
   try:
     starImage = gfx.newBitmap("images/star")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
-    # debugBGImage must be loaded last, as it might not exist and raise an exception
-    debugBGImage = gfx.newBitmap("images/debug-bg")
   except:
     print "Image load failed:", getCurrentExceptionMsg()
 
@@ -74,19 +72,13 @@ proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
   result = perspectiveShift
 
-proc initGameBackground*(state: GameState) =
+proc initGeometryBackground(state: GameState)=
   let level = state.level
   state.background = gfx.newBitmap(
     level.size.x, level.size.y, kColorWhite
   )
 
   gfx.pushContext(state.background)
-
-  if not debugBGImage.isNil:
-    print "Drawing debug background"
-    debugBGImage.draw(0, 0, kBitmapUnflipped)
-  else:
-    print "no bg image"
 
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
@@ -109,6 +101,14 @@ proc initGameBackground*(state: GameState) =
     gfx.drawTextAligned(text.value, text.position.x, text.position.y, text.alignment)
 
   gfx.popContext()
+
+proc initGameBackground*(state: GameState) =
+  let level = state.level
+
+  if level.background.isSome:
+    state.background = level.background.get
+  else:
+    state.initGeometryBackground()
 
 proc drawPolygonDepth*(state: GameState) =
   let level = state.level
@@ -325,7 +325,8 @@ proc drawGame*(statePtr: ptr GameState) =
   else:
     gfx.clear(kColorWhite)
 
-  state.drawPolygonDepth()
+  if level.background.isNone:
+    state.drawPolygonDepth()
 
   # draw grid
   if debugDrawGrid:

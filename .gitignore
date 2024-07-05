@@ -9,6 +9,8 @@ game.map
 # Blender autosave files
 **.blend[0-9]
 
+# editor
+support/editor/extensions/node_modules/*
 support/editor/wheelsprung_template.tiled-session
 
 # Simulator outputs

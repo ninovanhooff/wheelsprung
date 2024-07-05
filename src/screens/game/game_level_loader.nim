@@ -6,12 +6,14 @@ import sugar
 import std/math
 import std/json
 import std/sequtils
+import std/strutils
 import std/tables
 import playdate/api
 import game_types
 import common/graphics_types
 import common/graphics_utils
 import common/data_utils
+import level_meta/level_data
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import common/lcd_patterns
@@ -41,6 +43,8 @@ type
   
   LayerEntity = ref object of RootObj
     objects: Option[seq[LevelObjectEntity]]
+    image: Option[string]
+    `type`: string
   
   LevelEntity = ref object of RootObj
     width, height: int32
@@ -49,7 +53,7 @@ type
 
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
-    Flag = 7'u32, Gravity = 8'u32
+    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -128,7 +132,7 @@ proc thickness(obj: LevelObjectEntity): float32 =
   return obj.getProp(
     name = "thickness",
     mapper = (node => node.getFloat.float32),
-    fallback = 8.0f
+    fallback = 0.0f
   )
 
 proc massMultiplier(obj: LevelObjectEntity): float32 =
@@ -226,6 +230,32 @@ proc lcdBitmapFlip(gid: uint32): LCDBitmapFlip =
     return kBitmapFlippedX
   else:
     return kBitmapUnflipped
+
+proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): Vect =
+  let rotRad = rotDegrees.degToRad
+  let cosRotation = cos(rotRad)
+  let sinRotation = sin(rotRad)
+  let centerX = width * 0.5f
+  let centerY = height * 0.5f
+  let rotatedCenterX = centerX * cosRotation - centerY * sinRotation
+  let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
+  return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
+
+proc loadAsDynamicObject(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
+  if obj.width < 1 or obj.height < 1:
+    return false
+
+  let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, obj.width.float32, obj.height.float32, obj.rotation)
+  let size = v(obj.width.float32, obj.height.float32)
+  level.dynamicBoxes.add(newDynamicBoxSpec(
+    position = centerV, 
+    size = size,
+    mass = obj.massMultiplier * size.area * 0.005f,
+    angle = obj.rotation.degToRad,
+    friction = obj.friction,
+    bitmapTableId = bitmapTableId,
+  ))
+  return true
     
 proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   if obj.gid.isNone:
@@ -279,17 +309,10 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         gravity = obj.direction8().toGravity(),
       )
       level.gravityZones.add(gravityZone)
+    of ClassIds.TallBook:
+      # todo: should a default mass be set?
+      return loadAsDynamicObject(level, obj, some(BitmapTableId.TallBook))
   return true
-
-proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): Vect =
-  let rotRad = rotDegrees.degToRad
-  let cosRotation = cos(rotRad)
-  let sinRotation = sin(rotRad)
-  let centerX = width * 0.5f
-  let centerY = height * 0.5f
-  let rotatedCenterX = centerX * cosRotation - centerY * sinRotation
-  let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
-  return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   if obj.polygon.isSome or obj.polyline.isSome or obj.ellipse.get(false) or obj.text.isSome:
@@ -299,21 +322,12 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
-  let objOffset: Vertex = (obj.x, obj.y)
-  let width = obj.width
-  let height = obj.height
   if obj.`type` == "DynamicObject":
-    let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, width.float32, height.float32, obj.rotation)
-    let size = v(width.float32, height.float32)
-    level.dynamicBoxes.add(newDynamicBox(
-      position = centerV, 
-      size = size,
-      mass = obj.massMultiplier * size.area * 0.005f,
-      angle = obj.rotation.degToRad,
-      friction = obj.friction,
-    ))
-    return true
+    return loadAsDynamicObject(level, obj)
   else:
+    let objOffset: Vertex = (obj.x, obj.y)
+    let width = obj.width
+    let height = obj.height
     let vertices: seq[Vertex] = @[
       objOffset,
       objOffset + (0'i32, height),
@@ -335,7 +349,7 @@ proc loadEllipse(level: var Level, obj: LevelObjectEntity): bool =
   let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, obj.width.float32, obj.height.float32, obj.rotation)
   let radius = obj.width.float32 * 0.5f
   let area = PI * radius * radius 
-  level.dynamicCircles.add(newDynamicCircle(
+  level.dynamicCircles.add(newDynamicCircleSpec(
     position = centerV,
     radius = radius,
     mass = obj.massMultiplier * area * 0.005f,
@@ -366,7 +380,7 @@ proc loadText(level: var Level, obj: LevelObjectEntity): bool =
   ))
   return true
 
-proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
@@ -381,6 +395,27 @@ proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
     level.loadEllipse(obj) or
     # rect must be last because it is not specifically marked as such
     level.loadRectangle(obj)
+
+proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+  if layer.image.isNone: return
+
+  var imageName = layer.image.get
+  imageName = imageName.rsplit('/', maxsplit=1)[1] # remove path
+  imageName = imageName.rsplit('.', maxsplit=1)[0] # remove extension
+  let imagePath = levelsBasePath & imageName
+  print(imagePath)
+  let bitmap = getOrLoadBitmap(imagePath)
+  level.background = some(bitmap)
+
+proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+  case layer.`type`:
+    of "objectgroup":
+      level.loadObjectLayer(layer)
+    of "imagelayer":
+      level.loadImageLayer(layer)
+    else:
+      print("Unknown layer type: " & $layer.`type`)
+      return
 
 proc loadLevel*(path: string): Level =
   var level = Level(

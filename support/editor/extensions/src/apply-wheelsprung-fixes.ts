@@ -1,7 +1,9 @@
-import { ensureWindingOrder } from "./ensureWindingOrder.mjs";
+/// <reference types="@mapeditor/tiled-api" />
 
-function forceIntegerCoordinates(mapOrLayer) {
-	tiled.log("Running forceIntegerCoordinates:" + mapOrLayer);
+import { ensureWindingOrder } from "./ensure-winding-order";
+
+export function applyWheelsprungFixes(mapOrLayer) {
+	tiled.log("Running applyWheelsprungFixes:" + mapOrLayer);
 	if(!mapOrLayer){
 		return;
 	};
@@ -37,21 +39,10 @@ function forceIntegerCoordinates(mapOrLayer) {
 	} else if(mapOrLayer.isTileMap || mapOrLayer.isGroupLayer) {
 		let numLayers = mapOrLayer.layerCount;
 		for(var i = 0; i < numLayers; i++) {
-			forceIntegerCoordinates(mapOrLayer.layerAt(i));
+			applyWheelsprungFixes(mapOrLayer.layerAt(i));
 		}
 	} else {
 		//else, do nothing
 	}
 		
 }
-
-//Auto-apply on save:
-tiled.assetAboutToBeSaved.connect(function(asset) {if(asset.isTileMap) forceIntegerCoordinates(asset); } );
-
-//Allow manually applying via an Action:
-let forceIntegerCoordinatesAction = tiled.registerAction("ForceIntegerCoordinates", function() { forceIntegerCoordinates(tiled.activeAsset); } );
-forceIntegerCoordinatesAction.text = "Force Integer Coordinates";
-//add this action to the Edit menu:
-tiled.extendMenu("Edit", [
-	{ action: "ForceIntegerCoordinates", before: "Preferences" }
-]);

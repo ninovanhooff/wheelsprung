@@ -68,6 +68,8 @@ proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
       # Log the error to the console, total stack trace might be too long for single call
       playdate.system.logToConsole(line)
 
+    playdate.system.error("FATAL:" & getCurrentExceptionMsg())
+
 proc catchingUpdate(): int {.raises: [].} = 
   runCatching(update)
   return 1 ## 1: update display
@@ -118,6 +120,8 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("refreshRate:" & $refreshRate)
     else:
       print("keycode:" & $keycode)
+  elif event == kEventKeyPressed:
+    discard
   else:
     print("unhandled event:" & $event & " keycode:" & $keycode)
 # Used to setup the SDK entrypoint

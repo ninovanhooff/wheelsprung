@@ -48,6 +48,7 @@
             "type": "class",
             "useAs": [
                 "object",
+                "tile",
                 "project"
             ]
         },
@@ -70,7 +71,7 @@
                 {
                     "name": "thickness",
                     "type": "float",
-                    "value": 8
+                    "value": 0
                 }
             ],
             "name": "Polyline",
