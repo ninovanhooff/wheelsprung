@@ -16,7 +16,7 @@ const mapFormat: ScriptedMapFormat = {
     // file.write("hoi");
     // file.commit();
 
-    tiled.mapFormatForFile("test.tmj").write(map, fileName);
+    tiled.mapFormatForFile("test.wmj").write(map, fileName);
 
     return undefined; // success
   },

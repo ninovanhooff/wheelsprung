@@ -67,7 +67,7 @@
     name: "wheelsprung",
     extension: "wmj",
     write: function(map, fileName) {
-      tiled.mapFormatForFile("test.tmj").write(map, fileName);
+      tiled.mapFormatForFile("test.wmj").write(map, fileName);
       return void 0;
     },
     read: function(fileName) {
