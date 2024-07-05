@@ -9,8 +9,11 @@ A physics-based motocross-platformer for the Playdate console. Made with the Nim
 
 [Chipmunk2D for Playdate](https://github.com/samdze/chipmunk-2d)
 
+## Level Editor
+A public level editor is available. See the [guide on the Wiki][editor] for installation and usage instructions.
+
 ## Installation
-This project should work on MacOS with Apple Silicon and Windows. See [Playdate-Nim][pdnim] for installation instructions.
+This project should work on MacOS and Windows. See [Playdate-Nim][pdnim] for installation instructions.
 
 
 ## Troubleshooting
@@ -35,3 +38,4 @@ The resulting lib is placed in the [lib](./lib) folder.
 
 
 [pdnim]: https://github.com/samdze/playdate-nim/tree/main/playdate_example
+[editor]: https://github.com/ninovanhooff/wheelsprung/wiki/Level-Editor
