@@ -32,8 +32,9 @@ proc dotVertex*(v1: Vertex, v2: Vertex): int32 {.inline.} =
 
 proc drawRotated*(annotatedT: AnnotatedBitmapTable, center: Vect, angle: float32, flip: LCDBitmapFlip = kBitmapUnflipped) {.inline.} =
   ## angle is in radians
-  let index: int32 = ((normalizeAngle(angle) / TwoPi) * annotatedT.frameCount.float32).int32
-  # let index = unboundedIndex mod frameCount
+  let frameCount = annotatedT.frameCount
+  var index: int32 = ((normalizeAngle(angle) / TwoPi) * frameCount.float32).roundToNearestInt
+  if index == frameCount: index = 0
   let bitmap = annotatedT.bitmapTable.getBitmap(index)
 
   if bitmap == nil:
