@@ -16,16 +16,22 @@ const mapFormat: ScriptedMapFormat = {
     // file.write("hoi");
     // file.commit();
 
-    tiled.mapFormatForFile("test.wmj").write(map, fileName);
+    // wmj is just a tmj file with a different extension,
+    // so we can use the tmj format to write the file
+    tiled.mapFormatForFile("test.tmj").write(map, fileName);
 
     return undefined; // success
   },
   read: function(fileName: string): TileMap {
-    const file = new TextFile(fileName, TextFile.ReadOnly);
-    const mapJson = file.readAll();
-    file.close();
+    // const file = new TextFile(fileName, TextFile.ReadOnly);
+    // const mapJson = file.readAll();
+    // file.close();
 
-    return JSON.parse(mapJson);
+    // let map = JSON.parse(mapJson) as TileMap;
+    // tiled.log(`Read map: ${JSON.stringify(map, null, 2)}`);
+    
+    let map = tiled.mapFormatForFile("test.tmj").read(fileName);
+    return map;
   },
 };
 

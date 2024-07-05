@@ -67,14 +67,12 @@
     name: "wheelsprung",
     extension: "wmj",
     write: function(map, fileName) {
-      tiled.mapFormatForFile("test.wmj").write(map, fileName);
+      tiled.mapFormatForFile("test.tmj").write(map, fileName);
       return void 0;
     },
     read: function(fileName) {
-      const file = new TextFile(fileName, TextFile.ReadOnly);
-      const mapJson = file.readAll();
-      file.close();
-      return JSON.parse(mapJson);
+      let map = tiled.mapFormatForFile("test.tmj").read(fileName);
+      return map;
     }
   };
   var wheelsprung_map_default = mapFormat;
