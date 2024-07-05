@@ -247,7 +247,7 @@ proc loadAsDynamicObject(level: Level, obj: LevelObjectEntity, bitmapTableId: Op
 
   let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, obj.width.float32, obj.height.float32, obj.rotation)
   let size = v(obj.width.float32, obj.height.float32)
-  level.dynamicBoxes.add(newDynamicBox(
+  level.dynamicBoxes.add(newDynamicBoxSpec(
     position = centerV, 
     size = size,
     mass = obj.massMultiplier * size.area * 0.005f,
@@ -349,7 +349,7 @@ proc loadEllipse(level: var Level, obj: LevelObjectEntity): bool =
   let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, obj.width.float32, obj.height.float32, obj.rotation)
   let radius = obj.width.float32 * 0.5f
   let area = PI * radius * radius 
-  level.dynamicCircles.add(newDynamicCircle(
+  level.dynamicCircles.add(newDynamicCircleSpec(
     position = centerV,
     radius = radius,
     mass = obj.massMultiplier * area * 0.005f,
@@ -399,9 +399,11 @@ proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
 proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.image.isNone: return
 
-  let image = layer.image.get
-  ## strip extension from image path
-  let imagePath = levelsBasePath & image.rsplit('.', maxsplit=1)[0]
+  var imageName = layer.image.get
+  imageName = imageName.rsplit('/', maxsplit=1)[1] # remove path
+  imageName = imageName.rsplit('.', maxsplit=1)[0] # remove extension
+  let imagePath = levelsBasePath & imageName
+  print(imagePath)
   let bitmap = getOrLoadBitmap(imagePath)
   level.background = some(bitmap)
 

@@ -38,6 +38,7 @@ proc frameCount(id: BitmapTableId): int32 =
   of BitmapTableId.Flag: return 46
   of BitmapTableId.Gravity: return 33
   of BitmapTableId.LevelStatus: return 3
+  of BitmapTableId.TallBook: return 240
   
   of BitmapTableId.BikeChassis,
     BitmapTableId.BikeGhostWheel,
@@ -49,8 +50,7 @@ proc frameCount(id: BitmapTableId): int32 =
     BitmapTableId.RiderLowerArm,
     BitmapTableId.RiderUpperLeg,
     BitmapTableId.RiderLowerLeg,
-    BitmapTableId.Killer,
-    BitmapTableId.TallBook: return imageRotations
+    BitmapTableId.Killer: return imageRotations
   
 
 proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =

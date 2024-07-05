@@ -22,4 +22,4 @@ spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/torso-table-18-18.png" "$SUPPORT
 spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/head-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/head.png"
 spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/ghost-head-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/ghost-head.png"
 
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/dynamic_objects/tall-book-table-88-88.png" "$SUPPORT_IMAGES_DIR/dynamic_objects/tall-book.png"
+spriterot -v -r 240 -o "$SOURCE_IMAGES_DIR/dynamic_objects/tall-book-table-88-88.png" "$SUPPORT_IMAGES_DIR/dynamic_objects/tall-book.png"

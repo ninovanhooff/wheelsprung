@@ -51,20 +51,26 @@ type
     coinProgress*: float32
     gameResult*: GameResult
 
-  DynamicBox* = object
+  DynamicObject* = object
+    shape*: Shape
+    bitmapTable*: Option[AnnotatedBitmapTable]
+
+  DynamicBoxSpec* = object
     position*: Vect
     size*: Vect
     mass*: Float
     angle*: Float
     friction*: Float
-    bitmapTable*: Option[AnnotatedBitmapTable]
+    bitmapTableId*: Option[BitmapTableId]
 
-  DynamicCircle* = object
+  DynamicCircleSpec* = object
     position*: Vect
     radius*: Float
     mass*: Float
     angle*: Float
     friction*: Float
+    bitmapTableId*: Option[BitmapTableId]
+
 
   Text* = object
     value*: string
@@ -147,8 +153,8 @@ type Level* = ref object of RootObj
   background*: Option[LCDBitmap]
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
-  dynamicBoxes*: seq[DynamicBox]
-  dynamicCircles*: seq[DynamicCircle]
+  dynamicBoxes*: seq[DynamicBoxSpec]
+  dynamicCircles*: seq[DynamicCircleSpec]
   coins*: seq[Coin]
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]
@@ -202,7 +208,7 @@ type GameState* = ref object of RootObj
   camera*: Camera
   cameraOffset*: Vect
   driveDirection*: DriveDirection
-  dynamicObjectShapes*: seq[Shape]
+  dynamicObjects*: seq[DynamicObject]
 
   ## Ghost
   ghostRecording*: Ghost
@@ -287,16 +293,19 @@ proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
 proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
   result = Finish(position: position, flip: flip)
 
-proc newDynamicBox*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, bitmapTableId: Option[BitmapTableId]): DynamicBox =
+proc newDynamicObject*(shape: Shape, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): DynamicObject =
+  let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
+  result = DynamicObject(shape: shape, bitmapTable: bitmapTable)
+
+proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, bitmapTableId: Option[BitmapTableId]): DynamicBoxSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Box mass must be greater than 0")
-  let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
-  result = DynamicBox(position: position, size: size, mass: mass, angle: angle, friction: friction, bitmapTable: bitmapTable)
+  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, bitmapTableId: bitmapTableId)
 
-proc newDynamicCircle*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float): DynamicCircle =
+proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float): DynamicCircleSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Circle mass must be greater than 0")
-  result = DynamicCircle(position: position, radius: radius, mass: mass, angle: angle, friction: friction)
+  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(
