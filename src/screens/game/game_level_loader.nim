@@ -400,7 +400,7 @@ proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.image.isNone: return
 
   var imageName = layer.image.get
-  imageName = imageName.rsplit('/', maxsplit=1)[1] # remove path
+  imageName = imageName.rsplit('/', maxsplit=1)[^1] # remove path
   imageName = imageName.rsplit('.', maxsplit=1)[0] # remove extension
   let imagePath = levelsBasePath & imageName
   print(imagePath)
