@@ -69,6 +69,12 @@ proc pushScreen*(toScreen: Screen) =
 proc popScreen*() =
   pendingNavigators.add(popScreenImmediately)
 
+
+proc replaceScreen*(toScreen: Screen) =
+  ## Replaces the current screen with toScreen
+  popScreen()
+  pushScreen(toScreen)
+
 proc popToScreenType*(screenType: ScreenType) =
   pendingNavigators.add(proc() =
     var activeScreen = getActiveScreen()

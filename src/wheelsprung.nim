@@ -48,27 +48,7 @@ proc init() {.raises: [].} =
 
 proc update() {.raises: [].} =
   discard updateNavigator()
-  playdate.system.drawFPS(0, 0)  
-
-proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
-  try:
-    fun()
-  except:
-    let exception = getCurrentException()
-    var message: string = ""
-    try: 
-      message = &"{messagePrefix}\n{getCurrentExceptionMsg()}\n{exception.getStackTrace()}"
-      # replace line number notation from (90) to :90, which is more common and can be picked up as source link
-      message = message.replace('(', ':')
-      message = message.replace(")", "")
-    except:
-      message = getCurrentExceptionMsg() & exception.getStackTrace()
-
-    for line in message.splitLines():
-      # Log the error to the console, total stack trace might be too long for single call
-      playdate.system.logToConsole(line)
-
-    playdate.system.error("FATAL:" & getCurrentExceptionMsg())
+  playdate.system.drawFPS(0, 0)
 
 proc catchingUpdate(): int {.raises: [].} = 
   runCatching(update)

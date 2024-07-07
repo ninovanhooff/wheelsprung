@@ -16,7 +16,7 @@ import common/shared_types
 import game_types, game_constants
 import input/game_input
 import game_view
-import navigation/[screen, navigator]
+import navigation/navigator
 import screens/screen_types
 import screens/game_result/game_result_screen
 import screens/settings/settings_screen

@@ -4,6 +4,7 @@ import common/utils
 
 type 
   ScreenType* {.pure.}= enum
+    CutScene
     LevelSelect
     Game
     HitStop
