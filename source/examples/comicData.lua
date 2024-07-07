@@ -10,10 +10,10 @@ import "5-audio.lua"
 -- you can write this all as one big table, but it gets messy...
 comicData = {
 	example1,   -- simple comic
-	example2a,  -- animation (scroll)
-	example2b,  -- animation (button)
-	example3a,  -- image transitions (scroll)
-	example3b,  -- image transitions (btton)
-	example4,   -- custom functions
-	example5,   -- audio
+	-- example2a,  -- animation (scroll)
+	-- example2b,  -- animation (button)
+	-- example3a,  -- image transitions (scroll)
+	-- example3b,  -- image transitions (btton)
+	-- example4,   -- custom functions
+	-- example5,   -- audio
 }
