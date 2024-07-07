@@ -2,3 +2,6 @@
 	path = source/levels
 	url = https://github.com/ninovanhooff/wheelsprung-levels
 	branch = main
+[submodule "source/libraries/panels"]
+	path = source/libraries/panels
+	url = https://github.com/ninovanhooff/panels
