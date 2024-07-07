@@ -16,6 +16,7 @@ import level_meta/level_data
 import level_select_types
 import level_select_view
 import screens/screen_types
+import screens/cutscene/cutscene_screen
 import screens/settings/settings_screen
 
 const
@@ -180,6 +181,10 @@ method resume*(screen: LevelSelectScreen) =
 
   resumeLevelSelectView()
   backgroundAudioPlayer.play(0)
+
+  discard playdate.system.addMenuItem("Panels Test", proc(menuItem: PDMenuItemButton) =
+    pushScreen(newCutSceneScreen())
+  )
 
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())

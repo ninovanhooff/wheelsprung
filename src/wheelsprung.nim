@@ -1,7 +1,4 @@
-import sugar
 import options
-import std/strutils
-import strformat
 import ../tests/tests
 import common/utils
 import globals

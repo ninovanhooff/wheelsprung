@@ -44,7 +44,7 @@ proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
 
-proc runCatching*(fun: () -> (void), messagePrefix: string=""): void = 
+proc runCatching*(fun: () -> (void), messagePrefix: string=""): void {.raises: [].} =
   try:
     fun()
   except:

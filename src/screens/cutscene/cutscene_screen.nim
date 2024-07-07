@@ -1,67 +1,63 @@
 {.push raises: [], warning[LockLevel]:off.}
 import playdate/api
+import std/sugar
 import common/utils
 import navigation/[screen, navigator]
 import screens/screen_types
 
-type CutSceneScreen = ref object of Screen
-    isInitialized: bool
-
-
-proc newCutsceneScreen*(): CutSceneScreen =
-    return CutSceneScreen(screenType: ScreenType.CutScene)
-
 proc finishCallback(state: LuaStatePtr): cint {.cdecl, raises: [].} =
-    let argCount = playdate.lua.getArgCount()
-    print(fmt"Nim callback with {argCount} argument(s)")
+  let argCount = playdate.lua.getArgCount()
+  print(fmt"Nim callback with {argCount} argument(s)")
 
-    try: 
-        for i in countup(1, argCount): # Lua indices start from 1...
-            let argType = playdate.lua.getArgType(i.cint)
+  try: 
+    for i in countup(1, argCount): # Lua indices start from 1...
+      let argType = playdate.lua.getArgType(i.cint)
 
-            case argType:
-                of kTypeBool:
-                    let value = playdate.lua.getArgBool(i)
-                    playdate.system.logToConsole(fmt"Argument {i} is a bool: {value}")
-                of kTypeFloat:
-                    let value = playdate.lua.getArgFloat(i)
-                    playdate.system.logToConsole(fmt"Argument {i} is a float: {value}")
-                of kTypeInt:
-                    let value = playdate.lua.getArgInt(i)
-                    playdate.system.logToConsole(fmt"Argument {i} is an int: {value}")
-                of kTypeString:
-                    let value = playdate.lua.getArgString(i)
-                    playdate.system.logToConsole(fmt"Argument {i} is a string: {value}")
-                of kTypeNil:
-                    let isNil = playdate.lua.argIsNil(i)
-                    playdate.system.logToConsole(fmt"Argument {i} is nil: {isNil}")
-                else:
-                    playdate.system.logToConsole(fmt"Argument {i} is not a recognized type.")
-    except:
-        playdate.system.logToConsole(getCurrentExceptionMsg())
+      case argType:
+        of kTypeBool:
+          let value = playdate.lua.getArgBool(i)
+          playdate.system.logToConsole(fmt"Argument {i} is a bool: {value}")
+        of kTypeFloat:
+          let value = playdate.lua.getArgFloat(i)
+          playdate.system.logToConsole(fmt"Argument {i} is a float: {value}")
+        of kTypeInt:
+          let value = playdate.lua.getArgInt(i)
+          playdate.system.logToConsole(fmt"Argument {i} is an int: {value}")
+        of kTypeString:
+          let value = playdate.lua.getArgString(i)
+          playdate.system.logToConsole(fmt"Argument {i} is a string: {value}")
+        of kTypeNil:
+          let isNil = playdate.lua.argIsNil(i)
+          playdate.system.logToConsole(fmt"Argument {i} is nil: {isNil}")
+        else:
+          playdate.system.logToConsole(fmt"Argument {i} is not a recognized type.")
+  except:
+    playdate.system.logToConsole(getCurrentExceptionMsg())
 
-    playdate.system.logToConsole("cutscene finished. Starting game")
-    replaceScreen(newGameScreen(levelPath = "levels/level1.wmj"))
-    
-    return 0
+  playdate.system.logToConsole("cutscene finished. Starting game")
+  replaceScreen(newGameScreen(levelPath = "levels/level1.wmj"))
+  
+  return 0
 
 proc init(screen: CutSceneScreen) =
-    try:
-        playdate.lua.pushFunction(finishCallback)
-        playdate.lua.callFunction("StartPanelsExample", 1) # pass 1 arg: finishCallback
-        screen.isInitialized = true
-    except:
-        print("Error initializing cutscene")
-        playdate.system.logToConsole(getCurrentExceptionMsg())
+  try:
+    playdate.lua.pushFunction(finishCallback)
+    playdate.lua.callFunction("StartPanelsExample", 1) # pass 1 arg: finishCallback
+    screen.isInitialized = true
+  except:
+    print("Error initializing cutscene")
+    playdate.system.logToConsole(getCurrentExceptionMsg())
 
 method resume*(screen: CutSceneScreen) =
-    playdate.display.setRefreshRate(30)
-    playdate.system.logToConsole("Cutscene resumed")
+  playdate.display.setRefreshRate(30)
+  playdate.system.logToConsole("Cutscene resumed")
 
 method update*(screen: CutSceneScreen): int =
-    if not screen.isInitialized:
-        screen.init()
+  if not screen.isInitialized:
+    screen.init()
 
-    playdate.display.setRefreshRate(30)
-    playdate.lua.callFunction("UpdatePanels", 0)
-    return 1
+  playdate.display.setRefreshRate(30)
+  # runCatching(proc() {.raises:LuaError.} = 
+  #   playdate.lua.callFunction("UpdatePanels", 0)
+  # )
+  return 1
