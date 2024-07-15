@@ -9,6 +9,7 @@ import navigation/[navigator, screen]
 import playdate/api
 import screens/screen_types
 import screens/game/game_screen
+import screens/cutscene/cutscene_screen
 import screens/level_select/level_select_screen
 import screens/settings/settings_screen
 
@@ -36,8 +37,8 @@ proc init() {.raises: [].} =
   
   initNavigator(initialScreenProvider)
   let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
-  if false:
-    pushScreen(newLevelSelectScreen())
+  if false: # can be set to true for debugging-convenience
+    pushScreen(newCutSceneScreen())
   elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
     pushScreen(newGameScreen(lastOpenedLevelPath.get()))
   else:
@@ -54,6 +55,8 @@ proc catchingUpdate(): int {.raises: [].} =
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   if event == kEventInit:
+    return # Do nothing, we want a Lua env for Panels
+  elif event == kEventInitLua:
     runCatching(init)
     
     # Set the update callback
