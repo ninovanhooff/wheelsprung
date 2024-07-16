@@ -1,5 +1,6 @@
 import std/[math, options]
 import std/[strutils, setutils]
+import std/tables
 import playdate/api
 import common/shared_types
 
@@ -41,6 +42,40 @@ proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): boo
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
+
+### Bench / trace / profile
+
+var benchTable: Table[string, seq[float32]] = initTable[string, seq[float32]]()
+
+proc addBenchSample(samples: var seq[float32], sample: float32, name: string, numSamples: int32): bool =
+  samples.add(sample)
+  if samples.len < numSamples:
+    return false
+
+  # calculate mean, min and max
+  var min = float32.high
+  var max = 0f
+  var mean = 0f
+  for s in samples:
+    if s < min:
+      min = s
+    if s > max:
+      max = s
+    mean += s
+  mean /= samples.len.float32
+  print(name,"Mean:", mean * 1000, "Min:", min * 1000, "Max:", max * 1000)    
+  return true    
+
+
+proc bench*(toTest: proc() {.raises:[].}, name: string = "", numSamples: int32 = 1) {.raises:[].} =
+  ## Measure the time taken by a procedure
+  let startTime = playdate.system.getElapsedTime
+  toTest()
+  let endTime = playdate.system.getElapsedTime
+  if name == "" or numSamples == 1:
+    print(name, "took", (endTime - startTime) * 0.001f, "ms")
+  elif benchTable.mgetOrPut(name, @[]).addBenchSample((endTime - startTime), name, numSamples):
+    benchTable.del name
 
 ## Text
 proc vertical*(text: string): string =
@@ -104,6 +139,14 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
   for i, x in s:
     if pred(x):
       result = some[T](x)
+      break
+
+proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) =
+  ## find the first item in the sequence that satisfies the predicate
+  result = (-1, none(T))  # return none if no item satisfies the predicate
+  for i, x in s:
+    if pred(x):
+      result = (i, some[T](x))
       break
 
 ### input

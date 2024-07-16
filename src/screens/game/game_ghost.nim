@@ -54,7 +54,7 @@ proc drawGhostPose*(state: GameState, pose: PlayerPose) =
   drawRotated(
     riderGhostHeadImageTable,
     pose.headPose.position - camera,
-    pose.headPose.angle,
+    if pose.flipX: -pose.headPose.angle else: pose.headPose.angle,
     if pose.flipX: kBitmapFlippedX else: kBitmapUnflipped
   )
   # when the bike is flipped, the wheels don't need to be flipped, so we use kBitmapUnflipped

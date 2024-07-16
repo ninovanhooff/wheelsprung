@@ -63,28 +63,28 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
     let dd = state.driveDirection
 
     let torsoAngle = state.chassis.angle + torsoRotation * dd
-    let riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)
+    let riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)[0]
     state.riderTorso = riderTorso
 
     let headPosition = localToWorld(riderTorso, headOffset.transform(dd))
     let headAngle = torsoAngle + headRotationOffset * dd
-    state.riderHead = space.addCircle(headPosition, headRadius, headMass, headAngle, GameCollisionTypes.Head, GameShapeFilters.Player)
+    state.riderHead = space.addCircle(headPosition, headRadius, headMass, headAngle, 2f, GameCollisionTypes.Head, GameShapeFilters.Player)[0]
     
     let upperArmPosition = localToWorld(riderTorso, upperArmOffset.transform(dd))
     let upperArmAngle = torsoAngle + upperArmRotationOffset * dd
-    state.riderUpperArm = space.addBox(upperArmPosition, upperArmSize, upperArmMass, upperArmAngle)
+    state.riderUpperArm = space.addBox(upperArmPosition, upperArmSize, upperArmMass, upperArmAngle)[0]
     
     let lowerArmPosition = localToWorld(state.riderUpperArm, lowerArmOffset.transform(dd))
     let lowerArmAngle = upperArmAngle + lowerArmRotationOffset * dd
-    state.riderLowerArm = space.addBox(lowerArmPosition, lowerArmSize, lowerArmMass, lowerArmAngle)
+    state.riderLowerArm = space.addBox(lowerArmPosition, lowerArmSize, lowerArmMass, lowerArmAngle)[0]
 
     let upperLegPosition = localToWorld(riderTorso, upperLegOffset.transform(dd))
     let upperLegAngle = torsoAngle + upperLegRotationOffset * dd
-    state.riderUpperLeg = space.addBox(upperLegPosition, upperLegSize, upperLegMass, upperLegAngle)
+    state.riderUpperLeg = space.addBox(upperLegPosition, upperLegSize, upperLegMass, upperLegAngle)[0]
 
     let lowerLegPosition = localToWorld(state.riderUpperLeg, lowerLegOffset.transform(dd))
     let lowerLegAngle = upperLegAngle + lowerLegRotationOffset * dd
-    state.riderLowerLeg = space.addBox(lowerLegPosition, lowerLegSize, lowerLegMass, lowerLegAngle)
+    state.riderLowerLeg = space.addBox(lowerLegPosition, lowerLegSize, lowerLegMass, lowerLegAngle)[0]
 
     # match velocity of rider to bike
     let velocity: Vect = state.chassis.velocity

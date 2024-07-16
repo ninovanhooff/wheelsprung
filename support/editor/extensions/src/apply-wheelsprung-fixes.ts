@@ -1,7 +1,9 @@
-import { ensureWindingOrder } from "./ensureWindingOrder.mjs";
+/// <reference types="@mapeditor/tiled-api" />
 
-function forceIntegerCoordinates(mapOrLayer) {
-	tiled.log("Running forceIntegerCoordinates:" + mapOrLayer);
+import { ensureWindingOrder } from "./ensure-winding-order";
+
+export function applyWheelsprungFixes(mapOrLayer) {
+	tiled.log("Running applyWheelsprungFixes:" + mapOrLayer);
 	if(!mapOrLayer){
 		return;
 	};
@@ -21,25 +23,26 @@ function forceIntegerCoordinates(mapOrLayer) {
 				);
 				object.polygon = ensureWindingOrder(object.polygon);
 			}
+			if(object.shape == MapObject.Ellipse && object.className == "DynamicObject") {
+				if(object.width != object.height) {
+					tiled.log("Ellipses not supported for Dynamic Objects. Making circular:" + object);
+				}
+				// force circle
+				if(object.height <= 0.0){
+					tiled.log("Circle height must be positive. Setting to 20.0:" + object);
+					object.height = 20.0;
+				}
+				object.height = object.width;
+				
+			}
 		}
 	} else if(mapOrLayer.isTileMap || mapOrLayer.isGroupLayer) {
 		let numLayers = mapOrLayer.layerCount;
 		for(var i = 0; i < numLayers; i++) {
-			forceIntegerCoordinates(mapOrLayer.layerAt(i));
+			applyWheelsprungFixes(mapOrLayer.layerAt(i));
 		}
 	} else {
 		//else, do nothing
 	}
 		
 }
-
-//Auto-apply on save:
-tiled.assetAboutToBeSaved.connect(function(asset) {if(asset.isTileMap) forceIntegerCoordinates(asset); } );
-
-//Allow manually applying via an Action:
-let forceIntegerCoordinatesAction = tiled.registerAction("ForceIntegerCoordinates", function() { forceIntegerCoordinates(tiled.activeAsset); } );
-forceIntegerCoordinatesAction.text = "Force Integer Coordinates";
-//add this action to the Edit menu:
-tiled.extendMenu("Edit", [
-	{ action: "ForceIntegerCoordinates", before: "Preferences" }
-]);

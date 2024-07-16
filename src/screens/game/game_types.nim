@@ -1,9 +1,13 @@
 import playdate/api
 import chipmunk7
 import options
+import std/sugar
 import common/graphics_types
 import common/utils
 import common/shared_types
+import cache/bitmaptable_cache
+import game_constants
+export game_constants
 
 type 
   Camera* = Vect
@@ -12,11 +16,16 @@ type
 
   Coin* = ref object
     position*: Vertex
+    bounds*: LCDRect
     count*: int32
     activeFrom*: Milliseconds
   Star* = Vertex
-  Killer* = Vertex
-  Finish* = Vertex
+  Killer* = object
+    bounds*: LCDRect
+    body*: Body
+  Finish* = object
+    position*: Vertex
+    flip*: LCDBitmapFlip
   GravityZone* = ref object
     position*: Vertex
     gravity*: Vect
@@ -24,6 +33,8 @@ type
 
   RiderAttitudePosition* {.pure.} = enum
     Neutral, Forward, Backward
+
+  SizeF* = Vect
 
   Pose* = object
     position*: Vect
@@ -39,6 +50,34 @@ type
     poses*: seq[PlayerPose]
     coinProgress*: float32
     gameResult*: GameResult
+
+  DynamicObject* = object
+    shape*: Shape
+    bitmapTable*: Option[AnnotatedBitmapTable]
+
+  DynamicBoxSpec* = object
+    position*: Vect
+    size*: Vect
+    mass*: Float
+    angle*: Float
+    friction*: Float
+    bitmapTableId*: Option[BitmapTableId]
+
+  DynamicCircleSpec* = object
+    position*: Vect
+    radius*: Float
+    mass*: Float
+    angle*: Float
+    friction*: Float
+    bitmapTableId*: Option[BitmapTableId]
+
+
+  Text* = object
+    value*: string
+    position*: Vertex
+    alignment*: TextAlignment
+
+const GRAVITY_MAGNITUDE*: Float = 90.0
 
 
 const DD_LEFT*: DriveDirection = -1.0
@@ -58,6 +97,7 @@ const GameCollisionTypes* = (
   Chassis: cast[GameCollisionType](7),
   Star: cast[GameCollisionType](8),
   GravityZone: cast[GameCollisionType](9),
+  DynamicObject: cast[GameCollisionType](10),
 )
 
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
@@ -66,16 +106,17 @@ const KILLER_MASK_BIT = cuint(1 shl 28)
 const FINISH_MASK_BIT = cuint(1 shl 27)
 const PLAYER_MASK_BIT = cuint(1 shl 26)
 const GRAVITY_ZONE_MASK_BIT = cuint(1 shl 25)
+const DYNAMIC_OBJECT_MASK_BIT = cuint(1 shl 24)
 
 const GameShapeFilters* = (
   Player: ShapeFilter(
     categories: PLAYER_MASK_BIT,
     mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or
-      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT
+      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   Terrain: ShapeFilter(
     categories: TERRAIN_MASK_BIT,
-    mask: PLAYER_MASK_BIT
+    mask: PLAYER_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   Collectible: ShapeFilter(
     categories: COLLECTIBLE_MASK_BIT,
@@ -83,7 +124,7 @@ const GameShapeFilters* = (
   ),
   Killer: ShapeFilter(
     categories: KILLER_MASK_BIT,
-    mask: PLAYER_MASK_BIT
+    mask: PLAYER_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   Finish: ShapeFilter(
     categories: FINISH_MASK_BIT,
@@ -92,6 +133,10 @@ const GameShapeFilters* = (
   GravityZone: ShapeFilter(
     categories: GRAVITY_ZONE_MASK_BIT,
     mask: PLAYER_MASK_BIT
+  ),
+  DynamicObject: ShapeFilter(
+    categories: DYNAMIC_OBJECT_MASK_BIT,
+    mask: PLAYER_MASK_BIT or TERRAIN_MASK_BIT or KILLER_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
@@ -105,13 +150,16 @@ const D8_FALLBACK* = D8_UP
 
 type Level* = ref object of RootObj
   id*: Path
+  background*: Option[LCDBitmap]
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
+  dynamicBoxes*: seq[DynamicBoxSpec]
+  dynamicCircles*: seq[DynamicCircleSpec]
   coins*: seq[Coin]
   killers*: seq[Killer]
   gravityZones*: seq[GravityZone]
-  finishPosition*: Vertex
-  finishRequiredRotations*: int32
+  texts*: seq[Text]
+  finish*: Finish
   starPosition*: Option[Vertex]
   assets*: seq[Asset]
   ## Level size in Pixels
@@ -136,7 +184,7 @@ type GameState* = ref object of RootObj
   remainingStar*: Option[Star]
   starEnabled*: bool
     ## If the star is enabled, the player can collect it. Stars are enabled by finishing the level at least once.
-  killers*: seq[Body]
+  killers*: seq[Killer]
   gameResult*: Option[GameResult]
 
   # Input
@@ -160,6 +208,7 @@ type GameState* = ref object of RootObj
   camera*: Camera
   cameraOffset*: Vect
   driveDirection*: DriveDirection
+  dynamicObjects*: seq[DynamicObject]
 
   ## Ghost
   ghostRecording*: Ghost
@@ -177,6 +226,7 @@ type GameState* = ref object of RootObj
 
   # bike shapes
   bikeShapes*: seq[Shape]
+  chassisShape*: Shape
   swingArmShape*: Shape
   forkArmShape*: Shape
 
@@ -212,11 +262,57 @@ type GameState* = ref object of RootObj
   handPivot*: PivotJoint
   headPivot*: PivotJoint
 
-proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
-  result = Coin(position: position, count: count)
+proc newCoin*(position: Vertex, count: int32 = 1): Coin =
+  result = Coin(
+    position: position,
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + coinSize,
+      top: position.y,
+      bottom: position.y + coinSize,
+    ),
+    count: count
+  )
+
+proc newKiller*(position: Vertex): Killer =
+  result = Killer(
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + killerSize,
+      top: position.y,
+      bottom: position.y + killerSize,
+    )
+  )
+
+proc newKiller*(bounds: LCDRect, body: Body): Killer =
+  result = Killer(bounds: bounds, body: body)
 
 proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
   result = GravityZone(position: position, gravity: gravity)
+
+proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
+  result = Finish(position: position, flip: flip)
+
+proc newDynamicObject*(shape: Shape, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): DynamicObject =
+  let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
+  result = DynamicObject(shape: shape, bitmapTable: bitmapTable)
+
+proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, bitmapTableId: Option[BitmapTableId]): DynamicBoxSpec =
+  if mass <= 0.0:
+    raise newException(RangeDefect, "Box mass must be greater than 0")
+  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, bitmapTableId: bitmapTableId)
+
+proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float): DynamicCircleSpec =
+  if mass <= 0.0:
+    raise newException(RangeDefect, "Circle mass must be greater than 0")
+  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction)
+
+proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
+  result = Text(
+    value: value,
+    position: position,
+    alignment: alignment,
+  )
 
 proc getRiderBodies*(state: GameState): seq[Body] =
   result = @[

@@ -1,4 +1,3 @@
-
 import playdate/api
 import chipmunk7
 import std/math
@@ -12,17 +11,16 @@ const
   displaySize* = v(400.0, 240.0)
   halfDisplaySize*: Vect = displaySize.vmult(0.5)
 
-# Note: these are not marked with .inline. because that prevents them from being used in closures (map calls)
-proc toVertex*(v: Vect): Vertex = 
+proc toVertex*(v: Vect): Vertex {.inline.} = 
   (v.x.round.int32, v.y.round.int32)
 
-proc toVect*(vertex: Vertex): Vect =
+proc toVect*(vertex: Vertex): Vect {.inline.} =
   return v(x = vertex.x.Float, y = vertex.y.Float)
 
-proc `-`*(a: Vertex, b: Vertex): Vertex = 
+proc `-`*(a: Vertex, b: Vertex): Vertex {.inline.} = 
   return (a[0] - b[0], a[1] - b[1])
 
-proc `+`*(a: Vertex, b: Vertex): Vertex =
+proc `+`*(a: Vertex, b: Vertex): Vertex {.inline.} =
   return (a[0] + b[0], a[1] + b[1])
 
 proc `div`*(a: Vertex, b: int32): Vertex {.inline.} =
@@ -34,8 +32,9 @@ proc dotVertex*(v1: Vertex, v2: Vertex): int32 {.inline.} =
 
 proc drawRotated*(annotatedT: AnnotatedBitmapTable, center: Vect, angle: float32, flip: LCDBitmapFlip = kBitmapUnflipped) {.inline.} =
   ## angle is in radians
-  let index: int32 = ((normalizeAngle(angle) / TwoPi) * annotatedT.frameCount.float32).int32
-  # let index = unboundedIndex mod frameCount
+  let frameCount = annotatedT.frameCount
+  var index: int32 = ((normalizeAngle(angle) / TwoPi) * frameCount.float32).roundToNearestInt
+  if index == frameCount: index = 0
   let bitmap = annotatedT.bitmapTable.getBitmap(index)
 
   if bitmap == nil:
@@ -56,6 +55,12 @@ proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitm
     bitmapTable: annotatedTable.bitmapTable, 
     frameCount: annotatedTable.frameCount,
     position: position,
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + annotatedTable.frameWidth, 
+      top: position.y, 
+      bottom: position.y + annotatedTable.frameHeight
+    ),
     flip: flip,
     startOffset: if randomStartOffset: rand(annotatedTable.frameCount).int32 else: 0'i32,
   )
@@ -149,3 +154,6 @@ proc offsetBy*(lcdRect: LCDRect, offset: Vertex): LCDRect =
     top: lcdRect.top + offset.y,
     bottom: lcdRect.bottom + offset.y
   )
+
+proc offsetScreenRect*(vertex: Vertex): LCDRect {.inline.} =
+  return LCD_SCREEN_RECT.offsetBy(vertex)

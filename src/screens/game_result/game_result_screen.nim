@@ -5,19 +5,29 @@ import std/options
 import common/graphics_types
 import common/shared_types
 import common/utils
+import common/level_utils
 import screens/settings/settings_screen
+import screens/screen_types
 import data_store/user_profile
 
 type GameResultScreen = ref object of Screen
   gameResult: GameResult
+  nextLevelPath: Option[Path]
+  isNextEnabled: bool
   hasPersistedResult: bool
 
 
 proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
   return GameResultScreen(
     gameResult: gameResult,
+    nextLevelPath: nextLevelPath(gameResult.levelId),
     screenType: ScreenType.GameResult
   )
+
+proc isNewPersonalBest(gameResult: GameResult): bool =
+  let levelProgress = getLevelProgress(gameResult.levelId)
+  return gameResult.resultType == GameResultType.LevelComplete and 
+    (levelProgress.bestTime.isNone or levelProgress.bestTime.get > gameResult.time)
 
 proc navigateToGameResult*(result: GameResult) =
   newGameResultScreen(result).pushScreen()
@@ -34,7 +44,7 @@ proc unlockText(gameResult: GameResult): string =
   if gameResult.resultType == GameResultType.LevelComplete:
     if levelProgress.bestTime.isNone:
       result = "Star unlocked!"
-    elif levelProgress.bestTime.get > gameResult.time:
+    elif gameResult.isNewPersonalBest:
       result = "New Personal best!"
     elif gameResult.starCollected and not levelProgress.hasCollectedStar:
       result = "Star collected!"
@@ -54,7 +64,9 @@ proc drawGameResult(self: GameResultScreen) =
   gfx.drawTextAligned(timeString, 200, 120)
   gfx.drawTextAligned(gameResult.unlockText, 200, 140)
 
-  gfx.drawTextAligned("Ⓑ Select level           Ⓐ Restart", 200, 200)
+  let confirmText = if self.isNextEnabled: "Next" else: "Restart"
+  gfx.drawTextAligned("Ⓑ Select level           Ⓐ " & confirmText, 200, 200)
+  
 
 proc persistGameResult(gameResult: GameResult) =
   try:
@@ -63,6 +75,9 @@ proc persistGameResult(gameResult: GameResult) =
     print("Failed to persist game result", getCurrentExceptionMsg())
 
 method resume*(self: GameResultScreen) =
+
+  self.isNextEnabled = self.gameResult.isNewPersonalBest
+
 
   drawGameResult(self) # once in resume is enough, static screen
 
@@ -85,11 +100,16 @@ method update*(self: GameResultScreen): int =
   let buttonState = playdate.system.getButtonState()
 
   if kButtonA in buttonState.pushed:
-    popScreen()
+    if self.isNextEnabled:
+      popToScreenType(ScreenType.LevelSelect)
+      pushScreen(newGameScreen(self.nextLevelPath.get))
+    else:
+      print "next not enabled", self.gameResult.resultType == GameResultType.LevelComplete, self.nextLevelPath.isSome, self.gameResult.isNewPersonalBest
+      popScreen()
   elif kButtonB in buttonState.pushed:
     popToScreenType(ScreenType.LevelSelect)
 
   return 0
 
 method `$`*(self: GameResultScreen): string {.raises: [], tags: [].} =
-  return "GameResultScreen; type: " & repr(self.gameResult.resultType)
+  return "GameResultScreen; type: " & repr(self)

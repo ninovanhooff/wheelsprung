@@ -1,15 +1,19 @@
 import chipmunk7
+import chipmunk_utils
 import options
 import common/utils
 import sugar
+import std/math
 import std/json
 import std/sequtils
+import std/strutils
 import std/tables
 import playdate/api
 import game_types
 import common/graphics_types
 import common/graphics_utils
 import common/data_utils
+import level_meta/level_data
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import common/lcd_patterns
@@ -18,7 +22,9 @@ type
   LevelPropertiesEntity = ref object of RootObj
     name: string
     value: JsonNode
-
+  LevelTextEntity = ref object of RootObj
+    halign: Option[string]
+    text: string
   LevelVertexEntity {.bycopy.} = object
     x*: int32
     y*: int32
@@ -27,13 +33,18 @@ type
     gid: Option[uint32] # tile id including flip flags
     x, y: int32
     width*, height*: int32
+    rotation: float32
     polygon: Option[seq[LevelVertexEntity]]
     properties: Option[seq[LevelPropertiesEntity]]
     polyline: Option[seq[LevelVertexEntity]]
+    text: Option[LevelTextEntity]
     ellipse: Option[bool]
+    `type`: string
   
   LayerEntity = ref object of RootObj
     objects: Option[seq[LevelObjectEntity]]
+    image: Option[string]
+    `type`: string
   
   LevelEntity = ref object of RootObj
     width, height: int32
@@ -42,7 +53,7 @@ type
 
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
-    Flag = 7'u32, Gravity = 8'u32
+    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -76,16 +87,17 @@ proc toDirection8(str: string): Direction8 =
       print("Unknown direction: " & $str)
       return D8_FALLBACK
 
+const DIAGONAL_GRAVVITY_MAGNITUDE: float32 = 0.70710678118 * GRAVITY_MAGNITUDE
 proc toGravity(d8: Direction8): Vect =
   return case d8
-    of D8_UP: v(0.0, -100.0f)
-    of D8_DOWN: v(0.0, 100.0f)
-    of D8_LEFT: v(-100.0f, 0.0)
-    of D8_RIGHT: v(100.0f, 0.0)
-    of D8_UP_LEFT: v(-70.71f, -70.71f)
-    of D8_UP_RIGHT: v(70.71f, -70.71f)
-    of D8_DOWN_LEFT: v(-70.71f, 70.71f)
-    of D8_DOWN_RIGHT: v(70.71f, 70.71f)
+    of D8_UP: v(0.0, -GRAVITY_MAGNITUDE)
+    of D8_DOWN: v(0.0, GRAVITY_MAGNITUDE)
+    of D8_LEFT: v(-GRAVITY_MAGNITUDE, 0.0)
+    of D8_RIGHT: v(GRAVITY_MAGNITUDE, 0.0)
+    of D8_UP_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_UP_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_DOWN_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_DOWN_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
 
 proc getProp[T](obj: LevelObjectEntity, name: string, mapper: JsonNode -> T, fallback: T): T =
   if obj.properties.isSome:
@@ -116,18 +128,25 @@ proc direction8(obj: LevelObjectEntity): Direction8 =
     fallback = D8_UP
   )
 
-proc requiredRotations(obj: LevelObjectEntity): int32 =
-  return obj.getProp(
-    name = "requiredRotations",
-    mapper = (node => node.getInt.int32),
-    fallback = 0'i32
-  )
-
 proc thickness(obj: LevelObjectEntity): float32 =
   return obj.getProp(
     name = "thickness",
     mapper = (node => node.getFloat.float32),
-    fallback = 8.0f
+    fallback = 0.0f
+  )
+
+proc massMultiplier(obj: LevelObjectEntity): float32 =
+  return obj.getProp(
+    name = "massMultiplier",
+    mapper = (node => node.getFloat.float32),
+    fallback = 1.0f
+  )
+
+proc friction(obj: LevelObjectEntity): float32 =
+  return obj.getProp(
+    name = "friction",
+    mapper = (node => node.getFloat.float32),
+    fallback = 1.0f
   )
 
 
@@ -200,12 +219,49 @@ proc loadPolyline(level: var Level, obj: LevelObjectEntity): bool =
   level.terrainPolylines.add(polyline)
   return true
 
+proc lcdBitmapFlip(gid: uint32): LCDBitmapFlip =
+  let hFlip: bool = (gid and GID_HFLIP_MASK).bool
+  let vFlip: bool = (gid and GID_VFLIP_MASK).bool
+  if hFlip and vFlip:
+    return kBitmapFlippedXY
+  elif vFlip:
+    return kBitmapFlippedY
+  elif hFlip:
+    return kBitmapFlippedX
+  else:
+    return kBitmapUnflipped
+
+proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): Vect =
+  let rotRad = rotDegrees.degToRad
+  let cosRotation = cos(rotRad)
+  let sinRotation = sin(rotRad)
+  let centerX = width * 0.5f
+  let centerY = height * 0.5f
+  let rotatedCenterX = centerX * cosRotation - centerY * sinRotation
+  let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
+  return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
+
+proc loadAsDynamicObject(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
+  if obj.width < 1 or obj.height < 1:
+    return false
+
+  let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, obj.width.float32, obj.height.float32, obj.rotation)
+  let size = v(obj.width.float32, obj.height.float32)
+  level.dynamicBoxes.add(newDynamicBoxSpec(
+    position = centerV, 
+    size = size,
+    mass = obj.massMultiplier * size.area * 0.005f,
+    angle = obj.rotation.degToRad,
+    friction = obj.friction,
+    bitmapTableId = bitmapTableId,
+  ))
+  return true
+    
 proc loadGid(level: Level, obj: LevelObjectEntity): bool =
   if obj.gid.isNone:
     return false
 
   let gid = obj.gid.get
-  let hFlip: bool = (gid and GID_HFLIP_MASK).bool
   let classId: ClassIds = (gid and GID_CLASS_MASK).ClassIds
 
   let position: Vertex = (obj.x, obj.y)
@@ -214,7 +270,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
     of ClassIds.Player:
       # player = bike + rider. chassis center is 7 pixels below the player center
       level.initialChassisPosition = position.toVect + vPlayerChassisOffset
-      if hFlip:
+      if (gid and GID_HFLIP_MASK).bool:
         level.initialDriveDirection = DD_LEFT
       else:
         level.initialDriveDirection = DD_RIGHT
@@ -222,30 +278,30 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
     of ClassIds.Coin:
       level.coins.add(newCoin(position = position, count = obj.count))
     of ClassIds.Killer:
-      level.killers.add(position)
+      level.killers.add(newKiller(position = position))
     of ClassIds.Finish:
-      level.finishPosition = position
-      level.finishRequiredRotations = obj.requiredRotations
+      level.finish = newFinish(position, gid.lcdBitmapFlip)
     of ClassIds.Star:
       level.starPosition = some(position)
     of ClassIds.SignPost:
-      level.assets.add(Texture(
-        image: getOrLoadBitmap("images/signpost_dpad_down"),
-        position: position,
-        flip: if hFlip: kBitmapFlippedX else: kBitmapUnflipped
+      let signpostBitmap = getOrLoadBitmap("images/signpost-dpad-down")
+      level.assets.add(newTexture(
+        image = signpostBitmap,
+        position = position,
+        flip = gid.lcdBitmapFlip
       ))
     of ClassIds.Flag:
       level.assets.add(newAnimation(
         bitmapTableId = BitmapTableId.Flag,
         position = position,
-        flip = if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
+        flip = gid.lcdBitmapFlip,
         randomStartOffset = true
       ))
     of ClassIds.Gravity:
       level.assets.add(newAnimation(
         bitmapTableId = BitmapTableId.Gravity,
         position = position,
-        flip = if hFlip: kBitmapFlippedX else: kBitmapUnflipped,
+        flip = gid.lcdBitmapFlip,
         randomStartOffset = true
       ))
       let gravityZone = newGravityZone(
@@ -253,38 +309,113 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         gravity = obj.direction8().toGravity(),
       )
       level.gravityZones.add(gravityZone)
+    of ClassIds.TallBook:
+      # todo: should a default mass be set?
+      return loadAsDynamicObject(level, obj, some(BitmapTableId.TallBook))
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
-  if obj.polygon.isSome or obj.polyline.isSome or obj.ellipse.get(false):
-    # it's a rectangle only if it is not a polygon, polyline or ellipse
+  if obj.polygon.isSome or obj.polyline.isSome or obj.ellipse.get(false) or obj.text.isSome:
+    # it's a rectangle only if it is not something else
     return false
 
   if obj.width < 1 or obj.height < 1:
     return false
 
-  let objOffset: Vertex = (obj.x, obj.y)
-  let width = obj.width
-  let height = obj.height
-  let vertices: seq[Vertex] = @[
-    objOffset,
-    objOffset + (0'i32, height),
-    objOffset + (width, height),
-    objOffset + (width, 0'i32),
-    objOffset
-  ]
-  let bounds = LCDRect(left: obj.x, right: obj.x + width, top: obj.y, bottom: obj.y + height)
-  level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
+  if obj.`type` == "DynamicObject":
+    return loadAsDynamicObject(level, obj)
+  else:
+    let objOffset: Vertex = (obj.x, obj.y)
+    let width = obj.width
+    let height = obj.height
+    let vertices: seq[Vertex] = @[
+      objOffset,
+      objOffset + (0'i32, height),
+      objOffset + (width, height),
+      objOffset + (width, 0'i32),
+      objOffset
+    ]
+    let bounds = LCDRect(left: obj.x, right: obj.x + width, top: obj.y, bottom: obj.y + height)
+    level.terrainPolygons.add(newPolygon(vertices, bounds, obj.fill))
+    return true
+
+proc loadEllipse(level: var Level, obj: LevelObjectEntity): bool =
+  if not obj.ellipse.get(false):
+    return false
+
+  if not (obj.`type` == "DynamicObject"):
+    return false
+
+  let centerV = tiledRectPosToCenterPos(obj.x.float32, obj.y.float32, obj.width.float32, obj.height.float32, obj.rotation)
+  let radius = obj.width.float32 * 0.5f
+  let area = PI * radius * radius 
+  level.dynamicCircles.add(newDynamicCircleSpec(
+    position = centerV,
+    radius = radius,
+    mass = obj.massMultiplier * area * 0.005f,
+    angle = obj.rotation.degToRad,
+    friction = obj.friction,
+  ))
   return true
 
-proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+proc loadText(level: var Level, obj: LevelObjectEntity): bool =
+  if obj.text.isNone:
+    return false
+
+  let textObj = obj.text.get
+  let halign = textObj.halign.get("left")
+  let alignment = if(halign == "center"): kTextAlignmentCenter elif(halign == "right"): kTextAlignmentRight else: kTextAlignmentLeft
+
+  var posX = obj.x
+  var posY = obj.y
+  if alignment == kTextAlignmentCenter:
+    posX += obj.width div 2
+  elif alignment == kTextAlignmentRight:
+    posX += obj.width
+
+  level.texts.add(newText(
+    value = textObj.text,
+    position = newVertex(posX, posY),
+    alignment = alignment,
+  ))
+  return true
+
+proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
+    if obj.`type` == "Reference":
+      ## skip references / helpers
+      continue
+
     discard level.loadPolygon(obj) or
     level.loadPolyline(obj) or
     level.loadGid(obj) or
+    level.loadText(obj) or
+    level.loadEllipse(obj) or
+    # rect must be last because it is not specifically marked as such
     level.loadRectangle(obj)
+
+proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+  if layer.image.isNone: return
+
+  var imageName = layer.image.get
+  imageName = imageName.rsplit('/', maxsplit=1)[^1] # remove path
+  imageName = imageName.rsplit('.', maxsplit=1)[0] # remove extension
+  let imagePath = levelsBasePath & imageName
+  print(imagePath)
+  let bitmap = getOrLoadBitmap(imagePath)
+  level.background = some(bitmap)
+
+proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+  case layer.`type`:
+    of "objectgroup":
+      level.loadObjectLayer(layer)
+    of "imagelayer":
+      level.loadImageLayer(layer)
+    else:
+      print("Unknown layer type: " & $layer.`type`)
+      return
 
 proc loadLevel*(path: string): Level =
   var level = Level(
@@ -321,12 +452,12 @@ proc loadLevel*(path: string): Level =
       vertexCounts.inc(polygon.vertices[i])
 
   for polygon in level.terrainPolygons.mitems:
-    var edgeVerts = newSeq[bool](polygon.vertices.len) #todo not needed
+    var edgeSegments = newSeq[bool](polygon.vertices.len - 1) #todo not needed
     
-    for idx, vertex in polygon.vertices:
-      edgeVerts[idx] = vertexCounts[vertex] > 1
+    for idx in 0 ..< polygon.vertices.high:
+      edgeSegments[idx] = vertexCounts[polygon.vertices[idx]] > 1 and vertexCounts[polygon.vertices[idx + 1]] > 1
     
-    polygon.edgeIndices = edgeVerts
-    assert(polygon.edgeIndices.len == polygon.vertices.len)
+    polygon.edgeIndices = edgeSegments
+    assert polygon.edgeIndices.len == polygon.vertices.len - 1, "ERROR: edgeIndices length mismatch"
 
   return level

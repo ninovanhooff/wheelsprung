@@ -98,17 +98,20 @@ proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
   )
 
 proc prepareDrawRegion(screen: LevelSelectScreen) =
-  gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
   gfx.clear(kColorWhite)
   for x in verticalLines:
     gfx.drawLine(x, levelDrawRegion.y, x, levelDrawRegion.y + levelDrawRegion.height, 2, kColorBlack)
 
 proc draw*(screen: LevelSelectScreen) =
+  gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
+
   prepareDrawRegion(screen)
   gfx.setDrawMode(kDrawModeNXOR)
   drawLevelRows(screen)
   gfx.setDrawMode(kDrawModeCopy)
   drawLockedLevelsScrim(screen)
+  
+  gfx.clearClipRect()
 
 
 proc resumeLevelSelectView*() =

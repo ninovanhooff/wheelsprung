@@ -15,4 +15,3 @@ proc getOrLoadFont*(path: string): LCDFont =
     return fontCache.mgetOrPut(path, gfx.newFont(path))
   except IOError:
     playdate.system.error("FATAL: " & getCurrentExceptionMsg())
-

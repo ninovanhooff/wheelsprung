@@ -13,7 +13,7 @@ proc save*(config: Config) =
   saveJson(config, "config.json")
 
 proc createAndsave(): Config =
-  let config = Config(lastOpenedLevel: none(string))
+  let config = Config()
   save(config)
   return config
 
@@ -44,11 +44,6 @@ proc updateConfig*(update: Config -> void) =
   discard getConfig() # Ensure config is loaded
   update(config)
   save(config)
-
-proc setLastOpenedLevel*(levelPath: string) =
-  updateConfig(proc (config: Config) = 
-    config.lastOpenedLevel = some(levelPath)
-  )
 
 proc getDPadInputType*(self: Config): DPadInputType =
   return config.dPadInputType.get(DPadInputType.Constant)

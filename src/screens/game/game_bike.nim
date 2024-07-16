@@ -58,7 +58,7 @@ proc addChassis(state: GameState, pos: Vect): Body =
 
   return body
 
-proc addChassisShape*(state: GameState): Shape =
+proc addChassisShape*(state: GameState) =
   let space = state.space
   let chassis = state.chassis
 
@@ -67,8 +67,7 @@ proc addChassisShape*(state: GameState): Shape =
   shape.collision_type = GameCollisionTypes.Chassis
   shape.friction = chassisFriction
   state.bikeShapes.add(shape)
-
-  return shape
+  state.chassisShape = shape
 
 proc addSwingArm(state: GameState, chassisOffset: Vect): Body =
   let space = state.space

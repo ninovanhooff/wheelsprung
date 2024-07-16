@@ -6,15 +6,16 @@ import common/utils
 import common/shared_types
 import common/audio_utils
 import std/sequtils
+import std/strutils
 import std/options
 import std/tables
+import std/sugar
 import cache/sound_cache
-import data_store/configuration
 import data_store/user_profile
 import level_meta/level_data
 import level_select_types
 import level_select_view
-import screens/game/game_screen
+import screens/screen_types
 import screens/settings/settings_screen
 
 const
@@ -28,6 +29,10 @@ var
   selectNextPlayer, selectPreviousPlayer, selectBumperPlayer: SamplePlayer
 
 proc initLevelSelectScreen() =
+  if not backgroundAudioPlayer.isNil:
+    print("initLevelSelectScreen: already initialized")
+    return
+
   backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/level_select/ambience") 
   except:
     playdate.system.error(getCurrentExceptionMsg())
@@ -41,7 +46,9 @@ proc initLevelSelectScreen() =
 
 proc getLevelPaths(): seq[string] =
   try:
-    return playdate.file.listFiles(levelsBasePath).mapIt(levelsBasePath & it)
+    return playdate.file.listFiles(levelsBasePath)
+      .filterIt(it.endsWith(levelFileExtension))
+      .mapIt(levelsBasePath & it)
   except IOError:
     print("ERROR reading level paths", getCurrentExceptionMsg())
     return @[]
@@ -145,10 +152,18 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
   for levelPath in levelPaths:
     # for unknown levels, add them to the list using path as name
     let levelMeta = newLevelMeta(
-      levelPath,
-      levelPath
+      name = levelPath[levelsBasePath.len .. ^1],
+      path = levelPath,
     )
     screen.levelRows.insert(levelMeta.newLevelRow())
+
+proc selectLastOpenedLevel(screen: LevelSelectScreen) =
+  let optLastOpenedLevel = getSaveSlot().lastOpenedLevel
+  if optLastOpenedLevel.isSome:
+    let lastOpenedLevelPath = optLastOpenedLevel.get
+    let (previousRowIdx, _) = screen.levelRows.findFirstIndexed(it => it.levelMeta.path == lastOpenedLevelPath)
+    if previousRowIdx >= 0:
+      screen.selectedIndex = previousRowIdx
 
 method resume*(screen: LevelSelectScreen) =
   screen.upActivatedAt = none(Seconds)
@@ -158,11 +173,11 @@ method resume*(screen: LevelSelectScreen) =
   except IOError:
     print("Error reading level paths")
 
-  print("rows: ")
-  print(repr(screen.levelRows))
-
   initLevelSelectScreen()
   initLevelSelectView()
+
+  selectLastOpenedLevel(screen)
+
   resumeLevelSelectView()
   backgroundAudioPlayer.play(0)
 

@@ -22,6 +22,7 @@ type
     RiderUpperLeg = "images/rider/upper-leg"
     RiderLowerLeg = "images/rider/lower-leg"
     Killer = "images/killer/killer"
+    TallBook = "images/dynamic_objects/tall-book"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
     Gravity = "images/gravity"
@@ -37,6 +38,7 @@ proc frameCount(id: BitmapTableId): int32 =
   of BitmapTableId.Flag: return 46
   of BitmapTableId.Gravity: return 33
   of BitmapTableId.LevelStatus: return 3
+  of BitmapTableId.TallBook: return 240
   
   of BitmapTableId.BikeChassis,
     BitmapTableId.BikeGhostWheel,

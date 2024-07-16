@@ -1,11 +1,12 @@
+import playdate/api
 import chipmunk7
 import common/graphics_utils
 import game_types
 import common/utils
+import cache/bitmap_cache
 
-const
-  coinRadius = 10.0
-  vCoinOffset = v(coinRadius, coinRadius)
+var 
+  coinImage: LCDBitmap
 
 proc addCoins(space: Space, coins: seq[Coin]) =
   for index, coin in coins:
@@ -32,13 +33,25 @@ proc myDeepCopy[T](src: ref T): ref T =
   new(result)
   result[] = src[]
 
-# proc myDeepCopy[T](dst, src: ref T) =
-#   dst[] = src[]
+proc initGameCoin*() =
+  coinImage = getOrLoadBitmap("images/coin")
 
-proc initGameCoins*(state: GameState) =
+proc addGameCoins*(state: GameState) =
   # asssigment by copy
   print "initGameCoins"
   state.remainingCoins = @[]
   for coin in state.level.coins:
     state.remainingCoins.add(myDeepCopy(coin))
   state.space.addCoins(state.remainingCoins)
+
+proc drawCoins*(remainingCoins: seq[Coin], camVertex: Vertex) =
+  let viewport = offsetScreenRect(camVertex)
+  for coin in remainingCoins:
+      if not viewport.intersects(coin.bounds):
+        continue
+      
+      let coinScreenPos = coin.position - camVertex
+      if coin.count < 2:
+        coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+      else:
+        gfx.drawTextAligned($coin.count, coinScreenPos[0] + 10, coinScreenPos[1])

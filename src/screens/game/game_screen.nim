@@ -9,6 +9,7 @@ import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
 import game_terrain
+import game_dynamic_object
 import game_camera
 import sound/game_sound
 import common/shared_types
@@ -16,11 +17,10 @@ import game_types, game_constants
 import input/game_input
 import game_view
 import navigation/[screen, navigator]
+import screens/screen_types
 import screens/game_result/game_result_screen
 import screens/settings/settings_screen
 import screens/hit_stop/hit_stop_screen
-
-type GameScreen* = ref object of Screen
 
 const
   restartLevelLabel = "Restart level"
@@ -101,11 +101,14 @@ let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, 
 
 
 let removeBikeConstraintsPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
-  print("shatterBikePostStepCallback")
+  print("removeBikeConstraintsPostStepCallback")
   # detach wheels
   state.removeBikeConstraints()
-  # and make chassis collidable
-  discard addChassisShape(state)
+
+let addChassisShapePostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
+  print("addChassisShapePostStepCallback")
+  # make chassis collidable
+  addChassisShape(state)
 
 let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var 
@@ -136,7 +139,9 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
     state.setGameResult(GameResultType.GameOver, false)
     pushScreen(buildHitStopScreen(state, shapeB))
   if state.bikeConstraints.len > 0:
-    discard space.addPostStepCallback(removeBikeConstraintsPostStepCallback, nil, nil)
+    discard space.addPostStepCallback(removeBikeConstraintsPostStepCallback, removeBikeConstraintsPostStepCallback, nil)
+  if state.chassisShape.isNil:
+    discard space.addPostStepCallback(addChassisShapePostStepCallback, addChassisShapePostStepCallback, nil)
   return true # we still want to collide
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
@@ -152,11 +157,14 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
   state.setGameResult(GameResultType.LevelComplete)
   playFinishSound()
 
+  # make chassis collidable
+  discard space.addPostStepCallback(addChassisShapePostStepCallback, addChassisShapePostStepCallback, nil)
+
   return false # don't process the collision further
 
 proc createSpace(level: Level): Space {.raises: [].} =
   let space = newSpace()
-  space.gravity = v(0.0, 100.0)
+  space.gravity = v(0.0, GRAVITY_MAGNITUDE)
 
   var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Wheel)
   handler.beginFunc = coinBeginFunc
@@ -187,7 +195,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
   space.addGravityZones(level.gravityZones)
   if(level.starPosition.isSome):
     space.addStar(level.starPosition.get)
-  space.addFinish(level.finishPosition)
+  space.addFinish(level.finish)
       
   return space
 
@@ -207,8 +215,10 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initGameRider(state, riderPosition)
   
-  initGameCoins(state)
+  addGameCoins(state)
   initGameStar(state)
+  state.adddynamicObjects()
+
   if background.isNil:
     initGameBackground(state)
 
@@ -249,17 +259,17 @@ proc updateTimers(state: GameState) =
     print("blinker timeout")
 
 proc initGame*(levelPath: string) {.raises: [].} =
-  state = newGameState(loadLevel(levelPath))
   initGameSound()
   initGameView()
-
-proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
-  initGame(levelPath)
-  return GameScreen(screenType: ScreenType.Game)
+  state = newGameState(loadLevel(levelPath))
 
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
+  if not gameScreen.isInitialized:
+    initGame(gameScreen.levelPath)
+    gameScreen.isInitialized = true
+  
   discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
   )
@@ -269,6 +279,8 @@ method resume*(gameScreen: GameScreen) =
   discard playdate.system.addMenuItem(restartLevelLabel, proc(menuItem: PDMenuItemButton) =
     onResetGame()
   )
+
+  resumeGameView()
 
   resetGameInput(state)
 
@@ -291,6 +303,7 @@ method update*(gameScreen: GameScreen): int =
   if state.isGameStarted:
     updateAttitudeAdjust(state)
     state.space.step(timeStepSeconds64)
+    
     state.ghostRecording.addPose(state)
 
     if not state.isBikeInLevelBounds():

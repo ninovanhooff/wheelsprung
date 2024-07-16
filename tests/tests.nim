@@ -1,10 +1,14 @@
+import chipmunk7
 import math
 import sugar
+import common/shared_types
 import common/utils
 import common/graphics_utils
+import common/level_utils
 import options
 import screens/game/game_types
 import screens/game/game_coin
+import screens/game/game_level_loader
 import playdate/api
 
 import strformat, strutils, macros
@@ -47,6 +51,7 @@ proc runTests*() =
   assert @[1, 2, 3].findFirst(it => it == 2).get == 2
   assert @[1, 2, 3].findFirst(it => it mod 2 == 1).get == 1 # should return first match if multiple
   assert @[1, 2, 3].findFirst(it => it == 2).get == 2
+  assert @[1, 2, 3].findFirstIndexed(it => it == 2) == (1, some(2))
   assert @[1, 2, 3].findFirst(it => it == 5).isNone
 
   let coins: seq[Coin] = @[]
@@ -87,6 +92,7 @@ proc runTests*() =
 
   let expectPolygon = Polygon(
     vertices: @[newVertex(0, 0), newVertex(100, 0), newVertex(100, 100), newVertex(0, 100)],
+    normals: @[newVertex(0, -100), newVertex(100, 0), newVertex(0, 100)],
     bounds: LCDRect(left: 0, top: 0, right: 100, bottom: 100),
     edgeIndices: @[false, false, false, false],
     fill: nil
@@ -98,8 +104,24 @@ proc runTests*() =
   )
   
   check(expectPolygon, actualPolygon)
+  check(actualPolygon.bounds, LCDRect(left: 0, top: 0, right: 100, bottom: 100))
+  check(actualPolygon.vertices, @[newVertex(0, 0), newVertex(100, 0), newVertex(100, 100), newVertex(0, 100)])
+  check(actualPolygon.normals, expectPolygon.normals)
   check(actualPolygon.edgeIndices, @[false, false, false, false])
   check(actualPolygon.edgeIndices[0], false)
+
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 0), v(50, 50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 45).toVertex, newVertex(0, 71))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, -45).toVertex, newVertex(71, 0))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 90).toVertex, newVertex(-50, 50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 180).toVertex, newVertex(-50, -50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 270).toVertex, newVertex(50, -50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, -90).toVertex, newVertex(50, -50))
+  check(tiledRectPosToCenterPos(0, 0, 100, 100, 360).toVertex, newVertex(50, 50))
+
+  check("levels/tutorial_brake.wmj".nextLevelPath(), some("levels/tutorial_leaning.wmj"))
+  check("nonExisting.wmj".nextLevelPath(), none(Path))
+  check("levels/level3.wmj".nextLevelPath(), none(Path))
 
 
   print "======== Test: Tests Completed ========="

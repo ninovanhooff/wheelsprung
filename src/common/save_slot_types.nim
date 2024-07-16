@@ -11,6 +11,7 @@ type
   
   SaveSlot* = ref object of RootObj
     progress*: Table[Path, LevelProgress]
+    lastOpenedLevel*: Option[string]
     modelVersion*: int
 
 ## Entities
@@ -23,16 +24,26 @@ type
   SaveSlotEntity* = ref object of RootObj
     # Because of trouble serializing Tables, we use a sequence.
     # Since the table keys are the paths, the table can be reconstructed
+    # Note that this problem might have been resolved in the meantime
     progress*: seq[LevelProgressEntity]
+    lastOpenedLevel*: Option[string]
     modelVersion*: int
 
 proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
-  result = SaveSlotEntity(progress: @[], modelVersion: slot.modelVersion)
+  result = SaveSlotEntity(
+    progress: @[],
+    lastOpenedLevel: slot.lastOpenedLevel, 
+    modelVersion: slot.modelVersion
+  )
   for level in slot.progress.values:
     result.progress.add(LevelProgressEntity(levelId: level.levelId, bestTime: level.bestTime, hasCollectedStar: level.hasCollectedStar))
 
 proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
-  var slot = SaveSlot(progress: initTable[Path, LevelProgress](), modelVersion: entity.modelVersion)
+  var slot = SaveSlot(
+    progress: initTable[Path, LevelProgress](),
+    lastOpenedLevel: entity.lastOpenedLevel,
+    modelVersion: entity.modelVersion
+  )
   for level in entity.progress:
     slot.progress[level.levelId] = LevelProgress(levelId: level.levelId, bestTime: level.bestTime, hasCollectedStar: level.hasCollectedStar)
   result = slot
