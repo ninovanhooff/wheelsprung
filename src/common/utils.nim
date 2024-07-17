@@ -1,6 +1,7 @@
 import std/[math, options]
 import std/[strutils, setutils]
 import std/tables
+import std/sugar
 import playdate/api
 import common/shared_types
 
@@ -42,6 +43,29 @@ proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): boo
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
+
+proc logFatalError*(messagePrefix: string) {.raises: [].} =
+  let exception = getCurrentException()
+  var message: string = ""
+  try: 
+    message = fmt"{messagePrefix}\n{getCurrentExceptionMsg()}\n{exception.getStackTrace()}"
+    # replace line number notation from (90) to :90, which is more common and can be picked up as source link
+    message = message.replace('(', ':')
+    message = message.replace(")", "")
+  except:
+    message = getCurrentExceptionMsg() & exception.getStackTrace()
+
+  for line in message.splitLines():
+    # Log the error to the console, total stack trace might be too long for single call
+    playdate.system.logToConsole(line)
+
+  playdate.system.error("FATAL:" & getCurrentExceptionMsg())
+
+proc runCatching*(fun: () -> (void), messagePrefix: string=""): void {.raises: [].} =
+  try:
+    fun()
+  except:
+    logFatalError(messagePrefix)
 
 ### Bench / trace / profile
 

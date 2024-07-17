@@ -1,3 +1,5 @@
+{.push raises: [], warning[LockLevel]:off.}
+
 import playdate/api
 import level_select_types
 import math

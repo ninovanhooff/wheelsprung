@@ -38,7 +38,6 @@ var
   gravityImageTable: AnnotatedBitmapTable
   starImage: LCDBitmap
   gridImage: LCDBitmap
-  debugBGImage: LCDBitmap
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect

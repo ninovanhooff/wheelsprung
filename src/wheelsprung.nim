@@ -1,7 +1,4 @@
-import sugar
 import options
-import std/strutils
-import strformat
 import ../tests/tests
 import common/utils
 import globals
@@ -12,6 +9,7 @@ import navigation/[navigator, screen]
 import playdate/api
 import screens/screen_types
 import screens/game/game_screen
+import screens/cutscene/cutscene_screen
 import screens/level_select/level_select_screen
 import screens/settings/settings_screen
 
@@ -39,8 +37,8 @@ proc init() {.raises: [].} =
   
   initNavigator(initialScreenProvider)
   let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
-  if false:
-    pushScreen(newLevelSelectScreen())
+  if false: # can be set to true for debugging-convenience
+    pushScreen(newCutSceneScreen())
   elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
     pushScreen(newGameScreen(lastOpenedLevelPath.get()))
   else:
@@ -48,27 +46,7 @@ proc init() {.raises: [].} =
 
 proc update() {.raises: [].} =
   discard updateNavigator()
-  playdate.system.drawFPS(0, 0)  
-
-proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
-  try:
-    fun()
-  except:
-    let exception = getCurrentException()
-    var message: string = ""
-    try: 
-      message = &"{messagePrefix}\n{getCurrentExceptionMsg()}\n{exception.getStackTrace()}"
-      # replace line number notation from (90) to :90, which is more common and can be picked up as source link
-      message = message.replace('(', ':')
-      message = message.replace(")", "")
-    except:
-      message = getCurrentExceptionMsg() & exception.getStackTrace()
-
-    for line in message.splitLines():
-      # Log the error to the console, total stack trace might be too long for single call
-      playdate.system.logToConsole(line)
-
-    playdate.system.error("FATAL:" & getCurrentExceptionMsg())
+  playdate.system.drawFPS(0, 0)
 
 proc catchingUpdate(): int {.raises: [].} = 
   runCatching(update)
@@ -77,6 +55,8 @@ proc catchingUpdate(): int {.raises: [].} =
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   if event == kEventInit:
+    return # Do nothing, we want a Lua env for Panels
+  elif event == kEventInitLua:
     runCatching(init)
     
     # Set the update callback
