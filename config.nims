@@ -19,3 +19,5 @@ switch("passL", "-lchipmunk")
 
 const levelSalt = getEnv("WHEELSPRUNG_LEVEL_SALT")
 switch("define", "levelSalt=" & levelSalt)
+const gameResultSalt = getEnv("WHEELSPRUNG_GAME_RESULT_SALT")
+switch("define", "gameResultSalt=" & gameResultSalt)
