@@ -76,7 +76,7 @@ proc persistGameResult(gameResult: GameResult) =
 
 method resume*(self: GameResultScreen) =
 
-  self.isNextEnabled = self.gameResult.isNewPersonalBest
+  self.isNextEnabled = self.gameResult.isNewPersonalBest and self.nextLevelPath.isSome
 
 
   drawGameResult(self) # once in resume is enough, static screen
