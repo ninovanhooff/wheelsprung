@@ -15,6 +15,7 @@ type
 
   GameResult* = ref object of RootObj
     levelId*: Path
+    levelHash*: string
     resultType*: GameResultType
     time*: Milliseconds
     starCollected*: bool

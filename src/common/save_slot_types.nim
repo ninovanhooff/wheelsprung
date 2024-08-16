@@ -8,6 +8,7 @@ type
     levelId*: Path
     bestTime*: Option[Milliseconds]
     hasCollectedStar*: bool
+    signature*: Option[string]
   
   SaveSlot* = ref object of RootObj
     progress*: Table[Path, LevelProgress]
@@ -20,6 +21,7 @@ type
     levelId*: Path
     bestTime*: Option[Milliseconds]
     hasCollectedStar*: bool
+    signature*: Option[string]
   
   SaveSlotEntity* = ref object of RootObj
     # Because of trouble serializing Tables, we use a sequence.
@@ -36,7 +38,12 @@ proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
     modelVersion: slot.modelVersion
   )
   for level in slot.progress.values:
-    result.progress.add(LevelProgressEntity(levelId: level.levelId, bestTime: level.bestTime, hasCollectedStar: level.hasCollectedStar))
+    result.progress.add(LevelProgressEntity(
+      levelId: level.levelId, 
+      bestTime: level.bestTime, 
+      hasCollectedStar: level.hasCollectedStar,
+      signature: level.signature
+    ))
 
 proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
   var slot = SaveSlot(
@@ -45,5 +52,10 @@ proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
     modelVersion: entity.modelVersion
   )
   for level in entity.progress:
-    slot.progress[level.levelId] = LevelProgress(levelId: level.levelId, bestTime: level.bestTime, hasCollectedStar: level.hasCollectedStar)
+    slot.progress[level.levelId] = LevelProgress(
+      levelId: level.levelId, 
+      bestTime: level.bestTime, 
+      hasCollectedStar: level.hasCollectedStar,
+      signature: level.signature
+    )
   result = slot

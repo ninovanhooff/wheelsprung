@@ -36,6 +36,7 @@ proc onResetGame() {.raises: [].}
 proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
   result = GameResult(
     levelId: state.level.id,
+    levelHash: state.level.contentHash,
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.starEnabled and state.level.starPosition.isSome,

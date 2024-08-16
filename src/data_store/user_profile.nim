@@ -6,7 +6,9 @@ import std/strutils
 import common/shared_types
 import common/data_utils
 import common/utils
+import common/integrity
 import common/save_slot_types
+import level_meta/level_data
 
 const 
   saveSlotVersion = 1
@@ -18,7 +20,10 @@ var saveSlot: SaveSlot
 proc getLevelProgress*(id: Path): LevelProgress =
   try:
     result = saveSlot.progress[id]
-  except KeyError:
+    if result.verify(id) == false:
+      print ("Integrity check failed for level progress", id)
+      raise newException(CatchableError, "Integrity check failed for level progress")
+  except CatchableError:
     print ("Creating new progress for level", id)
     result = LevelProgress(levelId: id)
     saveSlot.progress[id] = result
@@ -47,6 +52,10 @@ proc updateLevelProgress*(gameResult: GameResult) =
     progress.hasCollectedStar = true
 
   print ("Saving progress for level", id, repr(progress))
+  let levelMeta = officialLevels.getOrDefault(id, nil)
+  # only official levels need a content hash
+  if levelMeta == nil or levelMeta.contentHash == gameResult.levelHash:
+    progress.sign()
   saveSlot.progress[id] = progress
 
 proc setLastOpenedLevel*(levelPath: string) =
