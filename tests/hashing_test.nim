@@ -10,9 +10,8 @@ proc testPath(path: string) =
   try:
     let jsonString = playdate.file.open(path, kFileRead).readString()
     let oneLinerResult = getSHA3(jsonString)
-    print fmt"Hash for {path} is: {oneLinerResult}"
     let expectedHash = officialLevels[path].contentHash
-    check expectedHash, oneLinerResult
+    check(expected = expectedHash, actual = oneLinerResult, failureMsg = fmt"{path} FAILED")
   except:
     print "Failed to load file", getCurrentExceptionMsg()
 

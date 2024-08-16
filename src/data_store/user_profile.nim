@@ -21,10 +21,9 @@ proc getLevelProgress*(id: Path): LevelProgress =
   try:
     result = saveSlot.progress[id]
     if result.verify(id) == false:
-      print ("Integrity check failed for level progress", id)
       raise newException(CatchableError, "Integrity check failed for level progress")
   except CatchableError:
-    print ("Creating new progress for level", id)
+    # print (getCurrentExceptionMsg(), id)
     result = LevelProgress(levelId: id)
     saveSlot.progress[id] = result
 
