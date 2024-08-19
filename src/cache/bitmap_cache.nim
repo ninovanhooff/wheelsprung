@@ -12,7 +12,10 @@ let bitmapCache = BitmapCache()
 
 proc getOrLoadBitmap*(path: string): LCDBitmap =
   try:
-    return bitmapCache.mgetOrPut(path, gfx.newBitmap(path))
-  except IOError:
+    if not bitmapCache.hasKey(path):
+      bitmapCache[path] = gfx.newBitmap(path)
+    
+    return bitmapCache[path]
+  except Exception:
     playdate.system.error("FATAL: " & getCurrentExceptionMsg())
 

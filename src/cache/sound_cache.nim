@@ -14,8 +14,11 @@ let sampleplayerCache = SamplePlayerCache()
 
 proc getOrLoadSample(path: string): AudioSample =
   try:
-    return sampleplayerCache.mgetOrPut(path, snd.newAudioSample(path))
-  except IOError:
+    if not sampleplayerCache.hasKey(path):
+      sampleplayerCache[path] = snd.newAudioSample(path)
+    
+    return sampleplayerCache[path]
+  except Exception:
     playdate.system.error("FATAL: " & getCurrentExceptionMsg())
 
 proc getOrLoadSamplePlayer*(path: string): SamplePlayer =

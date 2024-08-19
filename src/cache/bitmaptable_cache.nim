@@ -68,7 +68,10 @@ proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
 
 proc getOrLoadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
   try:
-    return bitmapTableCache.mgetOrPut(id, loadBitmapTable(id))
-  except IOError:
+    if not bitmapTableCache.hasKey(id):
+      bitmapTableCache[id] = loadBitmapTable(id)
+    
+    return bitmapTableCache[id]
+  except Exception:
     print getCurrentExceptionMsg()
 
