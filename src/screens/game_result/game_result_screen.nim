@@ -63,7 +63,7 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
   )
 
 proc isNewPersonalBest(gameResult: GameResult, previousProgress: LevelProgress): bool =
-  
+  return true
   return gameResult.resultType == GameResultType.LevelComplete and 
     (previousProgress.bestTime.isNone or previousProgress.bestTime.get > gameResult.time)
 
@@ -76,19 +76,26 @@ proc comparisonTimeString(gameResult: GameResult, previousProgress: LevelProgres
 proc navigateToGameResult*(result: GameResult) =
   newGameResultScreen(result).pushScreen()
 
+proc drawButtons(self: GameResultScreen) =
+  gfx.setFont(buttonFont)
+  gfx.drawTextAligned(self.availableActionLabels[self.currentActionIndex], 100, 210)
+
 proc drawGameOverResult(self: GameResultScreen) =
   let gameResult = self.gameResult
   let timeString = formatTime(gameResult.time)
   gfx.setFont(timeFont)
   gfx.drawTextAligned(timeString, 100, 168)
 
-  gfx.setFont(buttonFont)
-  gfx.drawTextAligned(self.availableActionLabels[self.currentActionIndex], 100, 210)
+  drawButtons(self)
 
 proc drawLevelCompleteResult(self: GameResultScreen) =
   let gameResult = self.gameResult
   if gameResult.isNewPersonalBest(self.previousProgress):
-    newPersonalBestImage.draw(9, 142, kBitmapUnflipped)
+    newPersonalBestImage.draw(10, 145, kBitmapUnflipped)
+
+  if gameResult.starCollected:
+    let starImage = getOrLoadBitmap("images/game_result/acorn")
+    starImage.draw(174, 92, kBitmapUnflipped)
     
   gfx.setDrawMode(kDrawModeFillWhite)
   let timeString = formatTime(gameResult.time)
@@ -96,6 +103,8 @@ proc drawLevelCompleteResult(self: GameResultScreen) =
   gfx.drawTextAligned(timeString, 135, 110, kTextAlignmentRight)
   let comparisonTimeString = comparisonTimeString(gameResult, self.previousProgress)
   gfx.drawTextAligned(comparisonTimeString, 135, 135, kTextAlignmentRight)
+
+  drawButtons(self)
 
 proc drawGameResult(self: GameResultScreen) =
   self.backgroundImage.draw(0, 0, kBitmapUnflipped)
