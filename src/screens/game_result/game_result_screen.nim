@@ -6,6 +6,7 @@ import common/graphics_types
 import common/shared_types
 import common/utils
 import common/level_utils
+import common/save_slot_types
 import screens/settings/settings_screen
 import screens/screen_types
 import data_store/user_profile
@@ -16,81 +17,92 @@ type
   GameResultAction {.pure.} = enum
     LevelSelect, Restart, Next
   GameResultScreen = ref object of Screen
+    previousProgress: LevelProgress
     gameResult: GameResult
     nextLevelPath: Option[Path]
     availableActions: seq[GameResultAction]
     availableActionLabels: seq[string]
+    backgroundImage: LCDBitmap
     currentActionIndex: int
     hasPersistedResult: bool
 
 var
   timeFont: LCDFont
   buttonFont: LCDFont
-  gameOverBG: LCDBitmap
+  newPersonalBestImage: LCDBitmap
 
 proc initGameResultScreen() =
   if not buttonFont.isNil:
     return # already initialized
   timeFont = getOrLoadFont("fonts/Nontendo-Bold-2x")
   buttonFont = getOrLoadFont("fonts/Nontendo-Bold-2x")
-  gameOverBG = getOrLoadBitmap("images/game_result/game-over-bg")
+  newPersonalBestImage = getOrLoadBitmap("images/game_result/new-personal-best.png")
 
 
 proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
+  let resultType = gameResult.resultType
+  let previousProgress = getLevelProgress(gameResult.levelId).copy()
   let availableActions = @[GameResultAction.LevelSelect, GameResultAction.Restart, GameResultAction.Next]
-  let nextLabel = if gameResult.resultType == GameResultType.LevelComplete: "Next" else: "Skip"
-  let retryLabel = if gameResult.resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
+  let nextLabel = if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
+  let retryLabel = if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
   let availableActionLabels = @["LVL SELECT", retryLabel, nextLabel]
+  let backgroundImageName = if resultType == GameResultType.GameOver: "game-over-bg" else: "level-complete-bg"
+  let backgroundImage = getOrLoadBitmap("images/game_result/" & backgroundImageName)
+
+  print "previousProgress", repr(previousProgress)
+    
 
   return GameResultScreen(
     gameResult: gameResult,
+    previousProgress: previousProgress,
     availableActions: availableActions,
     availableActionLabels: availableActionLabels,
     nextLevelPath: nextLevelPath(gameResult.levelId),
+    backgroundImage: backgroundImage,
     screenType: ScreenType.GameResult
   )
 
-proc isNewPersonalBest(gameResult: GameResult): bool =
-  let levelProgress = getLevelProgress(gameResult.levelId)
+proc isNewPersonalBest(gameResult: GameResult, previousProgress: LevelProgress): bool =
+  
   return gameResult.resultType == GameResultType.LevelComplete and 
-    (levelProgress.bestTime.isNone or levelProgress.bestTime.get > gameResult.time)
+    (previousProgress.bestTime.isNone or previousProgress.bestTime.get > gameResult.time)
+
+proc comparisonTimeString(gameResult: GameResult, previousProgress: LevelProgress): string =
+  if gameResult.resultType == GameResultType.GAME_OVER or previousProgress.bestTime.isNone:
+    return ""
+  let bestTime = previousProgress.bestTime.get
+  return fmt"{formatTime(gameResult.time - bestTime, signed = true)}"
 
 proc navigateToGameResult*(result: GameResult) =
   newGameResultScreen(result).pushScreen()
 
-proc comparisonTimeString(gameResult: GameResult): string =
-  let levelProgress = getLevelProgress(gameResult.levelId)
-  if gameResult.resultType == GameResultType.GAME_OVER or levelProgress.bestTime.isNone:
-    return ""
-  let bestTime = levelProgress.bestTime.get
-  return fmt"({formatTime(gameResult.time - bestTime, signed = true)})"
+proc drawGameOverResult(self: GameResultScreen) =
+  let gameResult = self.gameResult
+  let timeString = formatTime(gameResult.time)
+  gfx.setFont(timeFont)
+  gfx.drawTextAligned(timeString, 100, 168)
 
-proc unlockText(gameResult: GameResult): string =
-  let levelProgress = getLevelProgress(gameResult.levelId)
-  if gameResult.resultType == GameResultType.LevelComplete:
-    if levelProgress.bestTime.isNone:
-      result = "Star unlocked!"
-    elif gameResult.isNewPersonalBest:
-      result = "New Personal best!"
-    elif gameResult.starCollected and not levelProgress.hasCollectedStar:
-      result = "Star collected!"
+  gfx.setFont(buttonFont)
+  gfx.drawTextAligned(self.availableActionLabels[self.currentActionIndex], 100, 210)
 
-proc displayText(gameResultType: GameResultType): string {.raises: [], tags: [].} =
-  case gameResultType
-  of GameResultType.GameOver:
-    return "Game Over"
-  of GameResultType.LevelComplete:
-    return "Level Complete"
+proc drawLevelCompleteResult(self: GameResultScreen) =
+  let gameResult = self.gameResult
+  if gameResult.isNewPersonalBest(self.previousProgress):
+    newPersonalBestImage.draw(9, 142, kBitmapUnflipped)
+    
+  gfx.setDrawMode(kDrawModeFillWhite)
+  let timeString = formatTime(gameResult.time)
+  gfx.setFont(timeFont)
+  gfx.drawTextAligned(timeString, 135, 110, kTextAlignmentRight)
+  let comparisonTimeString = comparisonTimeString(gameResult, self.previousProgress)
+  gfx.drawTextAligned(comparisonTimeString, 135, 135, kTextAlignmentRight)
 
 proc drawGameResult(self: GameResultScreen) =
-  gameOverBG.draw(0, 0, kBitmapUnflipped)
-  let gameResult = self.gameResult
-  gfx.drawTextAligned(gameResult.resultType.displayText, 200, 80)
-  let timeString = fmt"Your time: {formatTime(gameResult.time)} {comparisonTimeString(gameResult)}"
-  gfx.drawTextAligned(timeString, 200, 120)
-  gfx.drawTextAligned(gameResult.unlockText, 200, 140)
-
-  gfx.drawTextAligned(self.availableActionLabels[self.currentActionIndex], 100, 210)
+  self.backgroundImage.draw(0, 0, kBitmapUnflipped)
+  if self.gameResult.resultType == GameResultType.GameOver:
+    drawGameOverResult(self)
+  elif self.gameResult.resultType == GameResultType.LevelComplete:
+    drawLevelCompleteResult(self)
   
 
 proc persistGameResult(gameResult: GameResult) =
@@ -129,7 +141,7 @@ proc executeAction(self: GameResultScreen, action: GameResultAction) =
       popToScreenType(ScreenType.LevelSelect)
       pushScreen(newGameScreen(self.nextLevelPath.get))
     else:
-      print "next not enabled", self.gameResult.resultType == GameResultType.LevelComplete, self.nextLevelPath.isSome, self.gameResult.isNewPersonalBest
+      print "next not enabled"
       popScreen()
 
 method update*(self: GameResultScreen): int =

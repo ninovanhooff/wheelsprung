@@ -20,7 +20,7 @@ proc getLevelProgress*(id: Path): LevelProgress =
     result = saveSlot.progress[id]
   except KeyError:
     print ("Creating new progress for level", id)
-    result = LevelProgress(levelId: id)
+    result = newLevelProgress(levelId = id, bestTime = none(Milliseconds), hasCollectedStar = false)
     saveSlot.progress[id] = result
 
 proc isStarEnabled*(id: Path): bool =

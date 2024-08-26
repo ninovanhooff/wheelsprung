@@ -29,6 +29,10 @@ type
     lastOpenedLevel*: Option[string]
     modelVersion*: int
 
+
+proc newLevelProgress*(levelId: Path, bestTime: Option[Milliseconds], hasCollectedStar: bool): LevelProgress =
+  return LevelProgress(levelId: levelId, bestTime: bestTime, hasCollectedStar: hasCollectedStar)
+
 proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
   result = SaveSlotEntity(
     progress: @[],
@@ -45,5 +49,8 @@ proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
     modelVersion: entity.modelVersion
   )
   for level in entity.progress:
-    slot.progress[level.levelId] = LevelProgress(levelId: level.levelId, bestTime: level.bestTime, hasCollectedStar: level.hasCollectedStar)
+    slot.progress[level.levelId] = newLevelProgress(levelId = level.levelId, bestTime = level.bestTime, hasCollectedStar = level.hasCollectedStar)
   result = slot
+
+proc copy*(progress: LevelProgress): LevelProgress =
+  return newLevelProgress(levelId = progress.levelId, bestTime = progress.bestTime, hasCollectedStar = progress.hasCollectedStar)

@@ -2,6 +2,7 @@
 import tables
 import playdate/api
 import common/graphics_types
+import common/utils
 
 type 
   # a table mapping image path to LCDBitmap
@@ -17,5 +18,7 @@ proc getOrLoadBitmap*(path: string): LCDBitmap =
     
     return bitmapCache[path]
   except Exception:
-    playdate.system.error("FATAL: " & getCurrentExceptionMsg())
-
+    if defined(debug):
+      print("Failed to load bitmap: " & getCurrentExceptionMsg())
+    else:
+      playdate.system.error("FATAL: " & getCurrentExceptionMsg())
