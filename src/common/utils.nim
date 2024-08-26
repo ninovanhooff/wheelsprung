@@ -20,7 +20,7 @@ proc formatTime*(time: Milliseconds, signed: bool = false): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"
   
   let absTime = abs(time)
-  let minutes = absTime div 360_000
+  let minutes = absTime div 60_000
   let seconds = absTime mod 60_000 div 1000
   let hundredths = absTime mod 1000 div 10
   let signString = 
