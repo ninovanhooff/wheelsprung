@@ -90,7 +90,7 @@ proc drawGameResult(self: GameResultScreen) =
   gfx.drawTextAligned(timeString, 200, 120)
   gfx.drawTextAligned(gameResult.unlockText, 200, 140)
 
-  gfx.drawText(self.availableActionLabels[self.currentActionIndex], 30, 216)
+  gfx.drawTextAligned(self.availableActionLabels[self.currentActionIndex], 100, 210)
   
 
 proc persistGameResult(gameResult: GameResult) =
