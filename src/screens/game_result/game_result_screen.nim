@@ -2,6 +2,8 @@
 import playdate/api
 import navigation/[screen, navigator]
 import std/options
+import std/sugar
+import std/sequtils
 import common/graphics_types
 import common/shared_types
 import common/utils
@@ -21,7 +23,6 @@ type
     gameResult: GameResult
     nextLevelPath: Option[Path]
     availableActions: seq[GameResultAction]
-    availableActionLabels: seq[string]
     backgroundImage: LCDBitmap
     currentActionIndex: int
     hasPersistedResult: bool
@@ -42,10 +43,9 @@ proc initGameResultScreen() =
 proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
   let resultType = gameResult.resultType
   let previousProgress = getLevelProgress(gameResult.levelId).copy()
-  let availableActions = @[GameResultAction.LevelSelect, GameResultAction.Restart, GameResultAction.Next]
   let nextLabel = if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
   let retryLabel = if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
-  let availableActionLabels = @["LVL SELECT", retryLabel, nextLabel]
+  let availableActions = @[GameResultAction.LevelSelect, GameResultAction.Restart, GameResultAction.Next]
   let backgroundImageName = if resultType == GameResultType.GameOver: "game-over-bg" else: "level-complete-bg"
   let backgroundImage = getOrLoadBitmap("images/game_result/" & backgroundImageName)
 
@@ -56,7 +56,6 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     gameResult: gameResult,
     previousProgress: previousProgress,
     availableActions: availableActions,
-    availableActionLabels: availableActionLabels,
     nextLevelPath: nextLevelPath(gameResult.levelId),
     backgroundImage: backgroundImage,
     screenType: ScreenType.GameResult
@@ -76,9 +75,18 @@ proc comparisonTimeString(gameResult: GameResult, previousProgress: LevelProgres
 proc navigateToGameResult*(result: GameResult) =
   newGameResultScreen(result).pushScreen()
 
+proc label(resultType: GameResultType, gameResultAction: GameResultAction): string =
+  case gameResultAction
+  of GameResultAction.LevelSelect: return "Level Select"
+  of GameResultAction.Restart: return if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
+  of GameResultAction.Next: return if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
+
 proc drawButtons(self: GameResultScreen) =
+  let resultType = self.gameResult.resultType
+  let availableActionLabels: seq[string] = self.availableActions.mapIt(resultType.label(it))
+  
   gfx.setFont(buttonFont)
-  gfx.drawTextAligned(self.availableActionLabels[self.currentActionIndex], 100, 210)
+  gfx.drawTextAligned(availableActionLabels[self.currentActionIndex], 100, 210)
 
 proc drawGameOverResult(self: GameResultScreen) =
   let gameResult = self.gameResult
