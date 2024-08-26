@@ -4,6 +4,7 @@ import std/strutils
 import strformat
 import ../tests/tests
 import common/utils
+import common/shared_types
 import globals
 import data_store/user_profile
 import navigation/[navigator, screen]
@@ -14,6 +15,7 @@ import screens/screen_types
 import screens/game/game_screen
 import screens/level_select/level_select_screen
 import screens/settings/settings_screen
+import screens/game_result/game_result_screen
 
 const FONT_PATH = "fonts/Roobert-11-Medium.pft"
 
@@ -39,15 +41,15 @@ proc init() {.raises: [].} =
   
   initNavigator(initialScreenProvider)
   let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
-  if false:
+  if true:
     pushScreen(newLevelSelectScreen())
-    # let gameResult = GameResult(
-    #   levelId: "levels/level1.wmj",
-    #   resultType: GameResultType.GameOver,
-    #   time: 13370,
-    #   starCollected: false,
-    # )
-    # pushScreen(newGameResultScreen(gameResult))
+    let gameResult = GameResult(
+      levelId: "levels/level1.wmj",
+      resultType: GameResultType.LevelComplete,
+      time: 1840,
+      starCollected: true,
+    )
+    pushScreen(newGameResultScreen(gameResult))
   elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
     pushScreen(newGameScreen(lastOpenedLevelPath.get()))
   else:

@@ -2,7 +2,7 @@
 import playdate/api
 import navigation/[screen, navigator]
 import std/options
-import std/sugar
+import std/math
 import std/sequtils
 import common/graphics_types
 import common/shared_types
@@ -91,9 +91,11 @@ proc drawButtons(self: GameResultScreen) =
   let buttonState = playdate.system.getButtonState()
   let leftIdx: int32 = if kButtonLeft in buttonState.pushed: 1 else: 0
   let rightIdx: int32 = if kButtonRight in buttonState.pushed: 3 else: 2
+
+  let xOffset = (5 * sin(currentTimeMilliseconds().toFloat * 0.01f)).int32
     
-  actionArrowsImageTable.getBitmap(leftIdx).draw(5, 210, kBitmapUnflipped)
-  actionArrowsImageTable.getBitmap(rightIdx).draw(172, 210, kBitmapUnflipped)
+  actionArrowsImageTable.getBitmap(leftIdx).draw(5 + xOffset, 210, kBitmapUnflipped)
+  actionArrowsImageTable.getBitmap(rightIdx).draw(172 - xOffset, 210, kBitmapUnflipped)
 
 proc drawGameOverResult(self: GameResultScreen) =
   let gameResult = self.gameResult
