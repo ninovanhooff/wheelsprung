@@ -131,6 +131,10 @@ proc lerp*(initial, target, factor: float32): float32 =
   # result = min(max(result, initial), target)
   result = initial + (target - initial) * clamp(factor, 0f, 1f)
 
+proc rem*(n: int, m: int): int =
+  ## remainder function that always returns a positive result
+  ((n mod m) + m) mod m
+
 ### Sequences
 
 proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =

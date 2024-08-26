@@ -123,5 +123,10 @@ proc runTests*() =
   check("nonExisting.wmj".nextLevelPath(), none(Path))
   check("levels/level3.wmj".nextLevelPath(), none(Path))
 
+  check rem(1, -4) == -3
+  check rem(-1, 4) == 3
+  check rem(-1, -4) == -1
+  check rem(1, 4) == 1
+
 
   print "======== Test: Tests Completed ========="

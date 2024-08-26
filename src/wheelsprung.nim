@@ -41,6 +41,13 @@ proc init() {.raises: [].} =
   let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
   if false:
     pushScreen(newLevelSelectScreen())
+    # let gameResult = GameResult(
+    #   levelId: "levels/level1.wmj",
+    #   resultType: GameResultType.GameOver,
+    #   time: 13370,
+    #   starCollected: false,
+    # )
+    # pushScreen(newGameResultScreen(gameResult))
   elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
     pushScreen(newGameScreen(lastOpenedLevelPath.get()))
   else:
