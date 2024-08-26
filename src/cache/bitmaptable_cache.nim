@@ -27,6 +27,7 @@ type
     Flag = "images/flag/flag"
     Gravity = "images/gravity"
     LevelStatus = "images/level_select/level-status"
+    GameResultActionArrows = "images/game_result/action-arrows"
   BitmapTableCache = TableRef[BitmapTableId, AnnotatedBitmapTable]
 
 # global singleton
@@ -38,6 +39,7 @@ proc frameCount(id: BitmapTableId): int32 =
   of BitmapTableId.Flag: return 46
   of BitmapTableId.Gravity: return 33
   of BitmapTableId.LevelStatus: return 3
+  of BitmapTableId.GameResultActionArrows: return 4
   of BitmapTableId.TallBook: return 240
   
   of BitmapTableId.BikeChassis,

@@ -14,6 +14,7 @@ import screens/screen_types
 import data_store/user_profile
 import cache/font_cache
 import cache/bitmap_cache
+import cache/bitmaptable_cache
 
 type 
   GameResultAction {.pure.} = enum
@@ -31,6 +32,7 @@ var
   timeFont: LCDFont
   buttonFont: LCDFont
   newPersonalBestImage: LCDBitmap
+  actionArrowsImageTable: AnnotatedBitmapTable
 
 proc initGameResultScreen() =
   if not buttonFont.isNil:
@@ -38,13 +40,12 @@ proc initGameResultScreen() =
   timeFont = getOrLoadFont("fonts/Nontendo-Bold-2x")
   buttonFont = getOrLoadFont("fonts/Nontendo-Bold-2x")
   newPersonalBestImage = getOrLoadBitmap("images/game_result/new-personal-best.png")
+  actionArrowsImageTable = getOrLoadBitmapTable(BitmapTableId.GameResultActionArrows)
 
 
 proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
   let resultType = gameResult.resultType
   let previousProgress = getLevelProgress(gameResult.levelId).copy()
-  let nextLabel = if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
-  let retryLabel = if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
   let availableActions = @[GameResultAction.LevelSelect, GameResultAction.Restart, GameResultAction.Next]
   let backgroundImageName = if resultType == GameResultType.GameOver: "game-over-bg" else: "level-complete-bg"
   let backgroundImage = getOrLoadBitmap("images/game_result/" & backgroundImageName)
@@ -62,7 +63,6 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
   )
 
 proc isNewPersonalBest(gameResult: GameResult, previousProgress: LevelProgress): bool =
-  return true
   return gameResult.resultType == GameResultType.LevelComplete and 
     (previousProgress.bestTime.isNone or previousProgress.bestTime.get > gameResult.time)
 
@@ -88,6 +88,13 @@ proc drawButtons(self: GameResultScreen) =
   gfx.setFont(buttonFont)
   gfx.drawTextAligned(availableActionLabels[self.currentActionIndex], 100, 210)
 
+  let buttonState = playdate.system.getButtonState()
+  let leftIdx: int32 = if kButtonLeft in buttonState.pushed: 1 else: 0
+  let rightIdx: int32 = if kButtonRight in buttonState.pushed: 3 else: 2
+    
+  actionArrowsImageTable.getBitmap(leftIdx).draw(5, 210, kBitmapUnflipped)
+  actionArrowsImageTable.getBitmap(rightIdx).draw(172, 210, kBitmapUnflipped)
+
 proc drawGameOverResult(self: GameResultScreen) =
   let gameResult = self.gameResult
   let timeString = formatTime(gameResult.time)
@@ -105,7 +112,7 @@ proc drawLevelCompleteResult(self: GameResultScreen) =
     let starImage = getOrLoadBitmap("images/game_result/acorn")
     starImage.draw(174, 92, kBitmapUnflipped)
     
-  gfx.setDrawMode(kDrawModeFillWhite)
+  gfx.setDrawMode(kDrawModeInverted)
   let timeString = formatTime(gameResult.time)
   gfx.setFont(timeFont)
   gfx.drawTextAligned(timeString, 135, 110, kTextAlignmentRight)
