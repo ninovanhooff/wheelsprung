@@ -19,4 +19,5 @@ proc addTerrain*(space: Space, terrainSegments: seq[Polygon | Polyline]) =
       shape.filter = GameShapeFilters.Terrain
       shape.collisionType = GameCollisionTypes.Terrain
       shape.friction = terrainFriction
+      shape.elasticity=1.0
       discard space.addShape(shape)

@@ -12,6 +12,9 @@ let fontCache = FontCache()
 
 proc getOrLoadFont*(path: string): LCDFont =
   try:
-    return fontCache.mgetOrPut(path, gfx.newFont(path))
-  except IOError:
+    if not fontCache.hasKey(path):
+      fontCache[path] = gfx.newFont(path)
+    
+    return fontCache[path]
+  except Exception:
     playdate.system.error("FATAL: " & getCurrentExceptionMsg())

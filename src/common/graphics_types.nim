@@ -96,7 +96,8 @@ proc newTexture*(image: LCDBitmap, position: Vertex, flip: LCDBitmapFlip): Textu
     image: image,
     position: position,
     bounds: LCDRect(
-      left: position.x, right: position.y + image.width.int32, 
+      left: position.x, 
+      right: position.x + image.width.int32, 
       top: position.y,
       bottom: position.y + image.height.int32,
     ),

@@ -58,6 +58,7 @@ proc runTests*() =
   check(1234.formatTime, "00:01.23")
   check(-1234.formatTime(signed = true), "-00:01.23")
   check(1234.formatTime(signed = true), "+00:01.23")
+  check(123484.formatTime(signed = true), "+00:01.23")
 
   var testBounds = LCDRect(left: 0, top: 0, right: 100, bottom: 100)
   check(testBounds.contains(newVertex(0, 0)))
@@ -114,6 +115,11 @@ proc runTests*() =
   check("levels/tutorial_brake.wmj".nextLevelPath(), some("levels/tutorial_leaning.wmj"))
   check("nonExisting.wmj".nextLevelPath(), none(Path))
   check("levels/level3.wmj".nextLevelPath(), none(Path))
+
+  check rem(1, -4) == -3
+  check rem(-1, 4) == 3
+  check rem(-1, -4) == -1
+  check rem(1, 4) == 1
 
   testHashing()
 

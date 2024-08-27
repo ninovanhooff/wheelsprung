@@ -9,7 +9,7 @@ type
     bestTime*: Option[Milliseconds]
     hasCollectedStar*: bool
     signature*: Option[string]
-  
+
   SaveSlot* = ref object of RootObj
     progress*: Table[Path, LevelProgress]
     lastOpenedLevel*: Option[string]
@@ -22,7 +22,7 @@ type
     bestTime*: Option[Milliseconds]
     hasCollectedStar*: bool
     signature*: Option[string]
-  
+
   SaveSlotEntity* = ref object of RootObj
     # Because of trouble serializing Tables, we use a sequence.
     # Since the table keys are the paths, the table can be reconstructed
@@ -30,6 +30,10 @@ type
     progress*: seq[LevelProgressEntity]
     lastOpenedLevel*: Option[string]
     modelVersion*: int
+
+
+proc newLevelProgress*(levelId: Path, bestTime: Option[Milliseconds], hasCollectedStar: bool): LevelProgress =
+  return LevelProgress(levelId: levelId, bestTime: bestTime, hasCollectedStar: hasCollectedStar)
 
 proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
   result = SaveSlotEntity(
@@ -39,8 +43,8 @@ proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
   )
   for level in slot.progress.values:
     result.progress.add(LevelProgressEntity(
-      levelId: level.levelId, 
-      bestTime: level.bestTime, 
+      levelId: level.levelId,
+      bestTime: level.bestTime,
       hasCollectedStar: level.hasCollectedStar,
       signature: level.signature
     ))
@@ -52,10 +56,13 @@ proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
     modelVersion: entity.modelVersion
   )
   for level in entity.progress:
-    slot.progress[level.levelId] = LevelProgress(
-      levelId: level.levelId, 
-      bestTime: level.bestTime, 
-      hasCollectedStar: level.hasCollectedStar,
+    slot.progress[level.levelId] = newLevelProgress(
+      levelId = level.levelId,
+      bestTime = level.bestTime,
+      hasCollectedStar = level.hasCollectedStar,
       signature: level.signature
     )
   result = slot
+
+proc copy*(progress: LevelProgress): LevelProgress =
+  return newLevelProgress(levelId = progress.levelId, bestTime = progress.bestTime, hasCollectedStar = progress.hasCollectedStar)

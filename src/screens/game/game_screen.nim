@@ -16,7 +16,7 @@ import common/shared_types
 import game_types, game_constants
 import input/game_input
 import game_view
-import navigation/[screen, navigator]
+import navigation/navigator
 import screens/screen_types
 import screens/game_result/game_result_screen
 import screens/settings/settings_screen
@@ -106,10 +106,12 @@ let removeBikeConstraintsPostStepCallback: PostStepFunc = proc(space: Space, unu
   # detach wheels
   state.removeBikeConstraints()
 
-let addChassisShapePostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
-  print("addChassisShapePostStepCallback")
+let gameEndedPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
+  print("gameEndedPostStepCallback")
   # make chassis collidable
   addChassisShape(state)
+  # Make bike parts bouncy for comec effect
+  makeBikeElastic(state)
 
 let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var 
@@ -142,7 +144,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
   if state.bikeConstraints.len > 0:
     discard space.addPostStepCallback(removeBikeConstraintsPostStepCallback, removeBikeConstraintsPostStepCallback, nil)
   if state.chassisShape.isNil:
-    discard space.addPostStepCallback(addChassisShapePostStepCallback, addChassisShapePostStepCallback, nil)
+    discard space.addPostStepCallback(gameEndedPostStepCallback, gameEndedPostStepCallback, nil)
   return true # we still want to collide
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
@@ -159,7 +161,7 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
   playFinishSound()
 
   # make chassis collidable
-  discard space.addPostStepCallback(addChassisShapePostStepCallback, addChassisShapePostStepCallback, nil)
+  discard space.addPostStepCallback(gameEndedPostStepCallback, gameEndedPostStepCallback, nil)
 
   return false # don't process the collision further
 

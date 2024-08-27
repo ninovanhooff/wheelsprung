@@ -16,4 +16,9 @@ support/editor/wheelsprung_template.tiled-session
 # Simulator outputs
 stderr.txt
 stdout.txt
+
+# secrets
 release.env
+
+# IDE
+.idea/other.xml

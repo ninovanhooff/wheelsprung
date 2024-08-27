@@ -19,7 +19,7 @@ import screens/screen_types
 import screens/settings/settings_screen
 
 const
-  initialUnlockedLevels = 3
+  initialUnlockedLevels = 20
   pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
 
