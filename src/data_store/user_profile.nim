@@ -50,11 +50,11 @@ proc updateLevelProgress*(gameResult: GameResult) =
     print ("Collected star for level", id)
     progress.hasCollectedStar = true
 
-  print ("Saving progress for level", id, repr(progress))
   let levelMeta = officialLevels.getOrDefault(id, nil)
   # only official levels need a content hash
   if levelMeta == nil or levelMeta.contentHash == gameResult.levelHash:
     progress.sign()
+  print ("Saving progress for level", id, repr(progress))
   saveSlot.progress[id] = progress
 
 proc setLastOpenedLevel*(levelPath: string) =
