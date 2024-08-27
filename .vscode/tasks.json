@@ -16,7 +16,7 @@
             },
             "type": "shell",
             "hide": true,
-            "command": "nimble simulator",
+            "command": ". ./scripts/set_release_env.sh && nimble simulator",
         },
         {
             "label": "Build Device PDX",
@@ -25,7 +25,7 @@
             "presentation": {
                 "clear": true,
             },
-            "command": "nimble device"
+            "command": ". ./scripts/set_release_env.sh && nimble device"
         },
         {
             "label": "Build & Run Simulator PDX",

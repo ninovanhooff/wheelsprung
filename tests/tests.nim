@@ -9,21 +9,13 @@ import options
 import screens/game/game_types
 import screens/game/game_coin
 import screens/game/game_level_loader
+
+import minitest
+import hashing_test
+
 import playdate/api
 
 import strformat, strutils, macros
-
-## Inspired by https://github.com/xmonader/nim-minitest
-template check*(exp:untyped, expected: untyped = true, failureMsg:string="FAILED", indent:uint=0): void =
-  let indentationStr = repeat(' ', indent)
-  let expStr: string = astToStr(exp)
-  var msg: string
-  if exp != expected:
-    msg = indentationStr & expStr & " .. " & failureMsg & "\n (expected: " & astToStr(expected) & ", actual: " & $exp & ")"
-  else:
-    msg = indentationStr & expStr & " .. passed"
-
-  print(msg) # replace this by your print function
 
 proc runTests*() =
   print "======== Test: Running tests ========="
@@ -66,7 +58,7 @@ proc runTests*() =
   check(1234.formatTime, "00:01.23")
   check(-1234.formatTime(signed = true), "-00:01.23")
   check(1234.formatTime(signed = true), "+00:01.23")
-  check(123484.formatTime(signed = true), "+00:01.23")
+  check(123484.formatTime(signed = true), "+02:03.48")
 
   var testBounds = LCDRect(left: 0, top: 0, right: 100, bottom: 100)
   check(testBounds.contains(newVertex(0, 0)))
@@ -128,6 +120,8 @@ proc runTests*() =
   check rem(-1, 4) == 3
   check rem(-1, -4) == -1
   check rem(1, 4) == 1
+
+  testHashing()
 
 
   print "======== Test: Tests Completed ========="

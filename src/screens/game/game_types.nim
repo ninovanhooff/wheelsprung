@@ -150,6 +150,7 @@ const D8_FALLBACK* = D8_UP
 
 type Level* = ref object of RootObj
   id*: Path
+  contentHash*: string
   background*: Option[LCDBitmap]
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]

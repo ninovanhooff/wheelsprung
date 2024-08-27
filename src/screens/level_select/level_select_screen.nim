@@ -154,6 +154,7 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
     let levelMeta = newLevelMeta(
       name = levelPath[levelsBasePath.len .. ^1],
       path = levelPath,
+      hash = "no hash: user level"
     )
     screen.levelRows.insert(levelMeta.newLevelRow())
 

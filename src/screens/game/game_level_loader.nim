@@ -1,5 +1,6 @@
 import chipmunk7
 import chipmunk_utils
+import sha3
 import options
 import common/utils
 import sugar
@@ -160,14 +161,15 @@ proc readDataFileContents(path: string): string {.raises: [].} =
     print(getCurrentExceptionMsg())
     return ""
 
-proc parseLevel(path: string): LevelEntity {.raises: [].} =
+proc parseLevel(path: string): (LevelEntity, string) {.raises: [].} =
   let jsonString = readDataFileContents(path)
   try:
-    return parseJson(jsonString).to(LevelEntity)
+    let contentHash = getSHA3(jsonString)
+    return (parseJson(jsonString).to(LevelEntity), contentHash)
   except:
     print("Level parse failed:")
     print(getCurrentExceptionMsg())
-    return nil
+    return (nil, "")
 
 proc toVertex(obj: LevelVertexEntity): Vertex =
   return (obj.x, obj.y)
@@ -425,7 +427,9 @@ proc loadLevel*(path: string): Level =
     initialDriveDirection: DD_RIGHT,
   )
   
-  let levelEntity = parseLevel(path)
+  let (levelEntity, contentHash) = parseLevel(path)
+  level.contentHash = contentHash
+
   let size: Size = (levelEntity.width * levelEntity.tilewidth, levelEntity.height * levelEntity.tileheight)
   level.size = size
   # BB uses a y-axis that points up

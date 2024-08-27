@@ -134,6 +134,7 @@ proc drawGameResult(self: GameResultScreen) =
 proc persistGameResult(gameResult: GameResult) =
   try:
     updateLevelProgress(gameResult)
+    saveSaveSlot()
   except:
     print("Failed to persist game result", getCurrentExceptionMsg())
 
