@@ -53,7 +53,7 @@ method resume*(screen: HitStopScreen) =
 method update*(screen: HitStopScreen): int =
   let buttonState = playdate.system.getButtonState()
 
-  if buttonState.pushed.anyButton:
+  if kButtonA in buttonState.pushed:
     popScreen()
     screen.onCanceled()
     return 0
