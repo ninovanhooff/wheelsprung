@@ -41,7 +41,7 @@ proc init() {.raises: [].} =
   
   initNavigator(initialScreenProvider)
   let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
-  if true:
+  if false:
     pushScreen(newLevelSelectScreen())
     let gameResult = GameResult(
       levelId: "levels/level1.wmj",

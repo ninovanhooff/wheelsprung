@@ -5,7 +5,6 @@ import chipmunk7
 import chipmunk_utils
 import common/utils
 import common/graphics_utils
-import cache/bitmaptable_cache
 import game_types
 
 proc adddynamicObjects*(state: GameState) =
