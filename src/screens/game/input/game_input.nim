@@ -151,7 +151,7 @@ proc handleInput*(state: GameState) =
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,
     # but any button can be pressed to navigate to the result screen
-    if buttonState.pushed.anyButton:
+    if kButtonA in buttonState.pushed:
       state.resetGameOnResume = true
       navigateToGameResult(state.gameResult.get)
     return
