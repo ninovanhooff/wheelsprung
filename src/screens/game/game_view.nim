@@ -38,7 +38,10 @@ var
   gravityImageTable: AnnotatedBitmapTable
   starImage: LCDBitmap
   gridImage: LCDBitmap
-  debugBGImage: LCDBitmap
+
+  smallFont: LCDFont
+  largeFont: LCDFont
+  
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -57,6 +60,8 @@ proc initGameView*() =
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
   gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
+  smallFont = getOrLoadFont("fonts/Roobert-10-Bold")
+  largeFont = getOrLoadFont("fonts/Roobert-11-Medium")
   initGameCoin()
   initGameKiller()
   initGameFinish()
@@ -96,7 +101,7 @@ proc initGeometryBackground(state: GameState)=
       if radius > 0:
         fillCircle(vertex.x, vertex.y, radius)
 
-  gfx.setFont(getOrLoadFont("fonts/Roobert-10-Bold"))
+  gfx.setFont(smallFont)
   for text in level.texts:
     gfx.drawTextAligned(text.value, text.position.x, text.position.y, text.alignment)
 
@@ -250,7 +255,14 @@ proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
   )
 
 proc resumeGameView*() =
-  gfx.setFont(getOrLoadFont("fonts/Roobert-11-Medium"))
+  gfx.setFont(largeFont)
+
+proc message(gameResult: GameResult): string =
+  case gameResult.resultType
+  of GameResultType.LevelComplete:
+    return "Level Complete"
+  of GameResultType.GameOver:
+    return "Game Over"
 
 method getBitmap(asset: Asset, frameCounter: int32): LCDBitmap {.base.} =
   print("getImage not implemented for: ", repr(asset))
@@ -374,11 +386,19 @@ proc drawGame*(statePtr: ptr GameState) =
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
   if state.time < 500.Milliseconds:
+    gfx.setFont(largeFont)
     let messageY = (state.riderHead.position.y - camera.y - 26.0).int32
     if not state.isGameStarted:
       gfx.drawTextAligned("Ready?", 200, messageY)
     else:
       gfx.drawTextAligned("Go!", 200, messageY)
+
+  # Game ended message
+  if state.gameResult.isSome:
+    gfx.setFont(smallFont)
+    gfx.setDrawMode(kDrawModeNXOR)
+    let gameResult = state.gameResult.get
+    gfx.drawTextAligned("Ⓐ " & gameResult.message, 200, 220)
   
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
