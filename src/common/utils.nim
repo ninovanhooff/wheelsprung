@@ -20,7 +20,7 @@ proc formatTime*(time: Milliseconds, signed: bool = false): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"
   
   let absTime = abs(time)
-  let minutes = absTime div 360_000
+  let minutes = absTime div 60_000
   let seconds = absTime mod 60_000 div 1000
   let hundredths = absTime mod 1000 div 10
   let signString = 
@@ -130,6 +130,10 @@ proc lerp*(initial, target, factor: float32): float32 =
   # result = (initial * (1.0f - factor)) + (target * factor)
   # result = min(max(result, initial), target)
   result = initial + (target - initial) * clamp(factor, 0f, 1f)
+
+proc rem*(n: int, m: int): int =
+  ## remainder function that always returns a positive result
+  ((n mod m) + m) mod m
 
 ### Sequences
 

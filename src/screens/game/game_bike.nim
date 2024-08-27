@@ -43,6 +43,7 @@ proc addWheel(state: GameState, chassisOffset: Vect): Body =
   let shape = space.addShape(newCircleShape(body, radius, vzero))
   shape.filter = GameShapeFilters.Player
   shape.collision_type = GameCollisionTypes.Wheel
+  shape.elasticity=0.5
   shape.friction = wheelFriction
   state.bikeShapes.add(shape)
 
@@ -68,6 +69,13 @@ proc addChassisShape*(state: GameState) =
   shape.friction = chassisFriction
   state.bikeShapes.add(shape)
   state.chassisShape = shape
+
+proc makeBikeElastic*(state: GameState) =
+  for shape in state.bikeShapes:
+    if shape.collision_type == GameCollisionTypes.Wheel:
+      shape.elasticity = 0.5
+    else:
+      shape.elasticity = 0.2
 
 proc addSwingArm(state: GameState, chassisOffset: Vect): Body =
   let space = state.space
