@@ -166,6 +166,11 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
 
 proc createSpace(level: Level): Space {.raises: [].} =
   let space = newSpace()
+  # todo test. At iterations = 4 and sleepTimeThreshold 0.5, I managed to crash the game
+  space.iterations = 8
+  space.sleepTimeThreshold = 0.5
+  # space.collisionSlop = 0.4 # default is 0.1. But since our units are pixels, less that 0.5 pixels should not be noticeable
+  # space.idleSpeedThreshold=
   space.gravity = v(0.0, GRAVITY_MAGNITUDE)
 
   var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Wheel)
