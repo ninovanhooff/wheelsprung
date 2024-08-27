@@ -3,5 +3,9 @@
     "lldb.displayFormat": "auto",
     "lldb.showDisassembly": "auto",
     "lldb.dereferencePointers": true,
-    "lldb.consoleMode": "commands"
+    "lldb.consoleMode": "commands",
+    "search.exclude": {
+        "**/stderr.txt": true,
+        "**/stdout.txt": true
+    }
 }
