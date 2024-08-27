@@ -24,7 +24,7 @@ proc getLevelProgress*(id: Path): LevelProgress =
       raise newException(CatchableError, "Integrity check failed for level progress")
   except CatchableError:
     # print (getCurrentExceptionMsg(), id)
-    result = newLevelProgress(levelId = id, bestTime = none(Milliseconds), hasCollectedStar = false)
+    result = newLevelProgress(levelId = id, bestTime = none(Milliseconds), hasCollectedStar = false, signature = none(string))
     saveSlot.progress[id] = result
 
 proc isStarEnabled*(id: Path): bool =

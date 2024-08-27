@@ -3,7 +3,6 @@ import options
 import common/save_slot_types
 import common/shared_types
 
-const LevelSalt* {.strdefine.}: string = "NO_SALT"
 const GameResultSalt* {.strdefine.}: string = "NO_SALT"
 
 

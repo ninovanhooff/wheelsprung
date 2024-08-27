@@ -32,8 +32,8 @@ type
     modelVersion*: int
 
 
-proc newLevelProgress*(levelId: Path, bestTime: Option[Milliseconds], hasCollectedStar: bool): LevelProgress =
-  return LevelProgress(levelId: levelId, bestTime: bestTime, hasCollectedStar: hasCollectedStar)
+proc newLevelProgress*(levelId: Path, bestTime: Option[Milliseconds], hasCollectedStar: bool, signature: Option[string]): LevelProgress =
+  return LevelProgress(levelId: levelId, bestTime: bestTime, hasCollectedStar: hasCollectedStar, signature: signature)
 
 proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
   result = SaveSlotEntity(
@@ -60,9 +60,9 @@ proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
       levelId = level.levelId,
       bestTime = level.bestTime,
       hasCollectedStar = level.hasCollectedStar,
-      signature: level.signature
+      signature = level.signature
     )
   result = slot
 
 proc copy*(progress: LevelProgress): LevelProgress =
-  return newLevelProgress(levelId = progress.levelId, bestTime = progress.bestTime, hasCollectedStar = progress.hasCollectedStar)
+  return newLevelProgress(levelId = progress.levelId, bestTime = progress.bestTime, hasCollectedStar = progress.hasCollectedStar, signature = progress.signature)
