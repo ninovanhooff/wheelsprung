@@ -2,6 +2,7 @@
 import tables
 import playdate/api
 import common/graphics_types
+import common/utils
 
 type 
   # a table mapping font path to LCDFont
@@ -17,4 +18,7 @@ proc getOrLoadFont*(path: string): LCDFont =
     
     return fontCache[path]
   except Exception:
-    playdate.system.error("FATAL: " & getCurrentExceptionMsg())
+    if defined(debug):
+      print(getCurrentExceptionMsg())
+    else:
+      playdate.system.error("FATAL: " & getCurrentExceptionMsg())
