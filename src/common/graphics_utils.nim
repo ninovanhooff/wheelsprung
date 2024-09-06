@@ -49,20 +49,30 @@ proc fallbackBitmap*(): LCDBitmap =
   let errorPattern = makeLCDOpaquePattern(0x0, 0x3C, 0x5A, 0x66, 0x66, 0x5A, 0x3C, 0x0)
   gfx.newBitmap(8,8, errorPattern)
 
-proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitmapFlip, randomStartOffset: bool): Animation =
-  let annotatedTable = getOrLoadBitmapTable(bitmapTableId)
+proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32): Animation =
+  let firstFrame = bitmapTable.getBitmap(0)
+  let frameCount: int32 = bitmapTable.getBitmapTableInfo().count.int32
   return Animation(
-    bitmapTable: annotatedTable.bitmapTable, 
-    frameCount: annotatedTable.frameCount,
+    bitmapTable: bitmapTable, 
+    frameCount: frameCount,
     position: position,
     bounds: LCDRect(
       left: position.x, 
-      right: position.x + annotatedTable.frameWidth, 
+      right: position.x + firstFrame.width.int32, 
       top: position.y, 
-      bottom: position.y + annotatedTable.frameHeight
+      bottom: position.y + firstFrame.height.int32
     ),
     flip: flip,
-    startOffset: if randomStartOffset: rand(annotatedTable.frameCount).int32 else: 0'i32,
+    startOffset: startOffset,
+  )
+
+proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitmapFlip, randomStartOffset: bool): Animation =
+  let annotatedTable = getOrLoadBitmapTable(bitmapTableId)
+  return newAnimation(
+    bitmapTable = annotatedTable.bitmapTable, 
+    position = position,
+    flip = flip,
+    startOffset = if randomStartOffset: rand(annotatedTable.frameCount).int32 else: 0'i32,
   )
 
 proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidColor) =

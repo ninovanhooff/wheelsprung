@@ -45,6 +45,7 @@ type
   LayerEntity = ref object of RootObj
     objects: Option[seq[LevelObjectEntity]]
     image: Option[string]
+    offsetx, offsety: Option[int32]
     `type`: string
   
   LevelEntity = ref object of RootObj
@@ -63,6 +64,8 @@ const
   GID_UNUSED_FLIP_MASK: uint32 = 1 shl 28
   GID_FLIP_MASK: uint32 = GID_HFLIP_MASK or GID_VFLIP_MASK or GID_DIAG_FLIP_MASK or GID_UNUSED_FLIP_MASK
   GID_CLASS_MASK: uint32 = not GID_FLIP_MASK
+
+  BITMAP_TABLE_SUFFIX: string = "-table-1" # suffix for bitmap table animations in the level editor
 
   ## offset of Chassis position (center Vect) from Player object top-left position
   vPlayerChassisOffset: Vect = v(30.0, 36.0)
@@ -401,13 +404,30 @@ proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
 proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   if layer.image.isNone: return
 
+  let position: Vertex = (layer.offsetx.get, layer.offsety.get)
+
   var imageName = layer.image.get
   imageName = imageName.rsplit('/', maxsplit=1)[^1] # remove path
   imageName = imageName.rsplit('.', maxsplit=1)[0] # remove extension
-  let imagePath = levelsBasePath & imageName
-  print(imagePath)
-  let bitmap = getOrLoadBitmap(imagePath)
-  level.background = some(bitmap)
+  if imageName.endswith(BITMAP_TABLE_SUFFIX):
+    # bitmap table animation
+    try:
+      imageName.removeSuffix(BITMAP_TABLE_SUFFIX) # in-place
+      let bitmapTable = gfx.newBitmapTable(levelsBasePath & imageName)
+      level.assets.add(newAnimation(
+        bitmapTable = bitmapTable,
+        position = position,
+        flip = kBitmapUnflipped,
+        startOffset = 0,
+      ))
+    except IOError:
+      print("Could not load bitmap table: " & $imageName)
+  else:
+    # background image
+    let imagePath = levelsBasePath & imageName
+    print(imagePath)
+    let bitmap = getOrLoadBitmap(imagePath)
+    level.background = some(bitmap)
 
 proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
   case layer.`type`:

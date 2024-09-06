@@ -266,7 +266,6 @@ proc resetRiderAttitudePosition*(state: GameState) =
     setAttitudeAdjustBackward(state, dirV)
 
   state.riderAttitudePosition = RiderAttitudePosition.Neutral
-  print("resetRiderAttitudePosition: ", state.riderAttitudePosition)
 
 proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float) =
   if direction > 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Forward:
@@ -289,7 +288,6 @@ proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float) =
     setAttitudeAdjustBackward(state, dirV)
     state.riderAttitudePosition = RiderAttitudePosition.Backward
 
-  print("setRiderAttitudeAdjustPosition: ", state.riderAttitudePosition)
 
 proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.assPivot.flip()
