@@ -41,7 +41,7 @@ const
     lowerLegRotationOffset = degToRad(35f)
 
 proc resetRiderConstraintForces*(state: GameState) =
-  print("resetRiderConstraintForces")
+  echo("resetRiderConstraintForces")
   state.shoulderPivot.maxForce=900.0
   state.chassisKneePivot.maxForce=0.0
   state.elbowRotaryLimit.maxForce=2_000.0

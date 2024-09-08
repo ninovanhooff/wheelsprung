@@ -48,7 +48,7 @@ proc newPolygon*(vertices: seq[Vertex], bounds: LCDRect, fill: LCDPattern = nil,
 when defined(DEBUG):
   proc `=copy`(dest: var Polygon; src: Polygon) =
     # Echo some message when Foo is copied
-    print "Polygon is copied:", src.bounds
+    echo "Polygon is copied:", src.bounds
     dest = newPolygon(
       vertices = src.vertices,
       bounds = src.bounds,

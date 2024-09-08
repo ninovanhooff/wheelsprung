@@ -118,7 +118,7 @@ proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
 
 proc onFlipDirection(state: GameState) =
   if state.attitudeAdjust.isSome:
-    print("attitude adjust in progress, reset attitude adjust force before flipping")
+    echo("attitude adjust in progress, reset attitude adjust force before flipping")
     # reset animation to neutral
     state.resetRiderAttitudePosition()
     state.attitudeAdjust = none(AttitudeAdjust)
@@ -136,7 +136,7 @@ proc applyConfig*(state: GameState) =
   state.isAccelerometerEnabled = config.getTiltAttitudeAdjustEnabled()
 
 proc resetGameInput*(state: GameState) =
-  print("resetGameInput")
+  echo("resetGameInput")
   state.isThrottlePressed = false
   state.applyConfig()
 
@@ -173,5 +173,5 @@ proc handleInput*(state: GameState) =
       state.onButtonAttitudeAdjust(0.0)
 
   if actionFlipDirection in buttonState.pushed:
-    print("Flip direction pressed")
+    echo("Flip direction pressed")
     state.onFlipDirection()
