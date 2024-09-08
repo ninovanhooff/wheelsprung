@@ -108,7 +108,7 @@ proc drawGameOverResult(self: GameResultScreen) =
 proc drawLevelCompleteResult(self: GameResultScreen) =
   let gameResult = self.gameResult
   if gameResult.isNewPersonalBest(self.previousProgress):
-    newPersonalBestImage.draw(10, 145, kBitmapUnflipped)
+    newPersonalBestImage.draw(20, 152, kBitmapUnflipped)
 
   if gameResult.starCollected:
     let starImage = getOrLoadBitmap("images/game_result/acorn")
@@ -119,7 +119,7 @@ proc drawLevelCompleteResult(self: GameResultScreen) =
   gfx.setFont(timeFont)
   gfx.drawTextAligned(timeString, 135, 110, kTextAlignmentRight)
   let comparisonTimeString = comparisonTimeString(gameResult, self.previousProgress)
-  gfx.drawTextAligned(comparisonTimeString, 135, 135, kTextAlignmentRight)
+  gfx.drawTextAligned(comparisonTimeString, 135, 140, kTextAlignmentRight)
 
   drawButtons(self)
 
