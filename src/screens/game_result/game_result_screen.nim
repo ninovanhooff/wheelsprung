@@ -42,11 +42,21 @@ proc initGameResultScreen() =
   newPersonalBestImage = getOrLoadBitmap("images/game_result/new-personal-best.png")
   actionArrowsImageTable = getOrLoadBitmapTable(BitmapTableId.GameResultActionArrows)
 
+proc isNewPersonalBest(gameResult: GameResult, previousProgress: LevelProgress): bool =
+  return gameResult.resultType == GameResultType.LevelComplete and
+    (previousProgress.bestTime.isNone or previousProgress.bestTime.get > gameResult.time)
 
 proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
   let resultType = gameResult.resultType
   let previousProgress = getLevelProgress(gameResult.levelId).copy()
-  let availableActions = @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.LevelSelect]
+  let nextPath = nextLevelPath(gameResult.levelId)
+  let availableActions = if nextPath.isSome:
+    @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.LevelSelect]
+  else:
+    @[GameResultAction.Restart, GameResultAction.LevelSelect]
+
+  let currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default
+
   let backgroundImageName = if resultType == GameResultType.GameOver: "game-over-bg" else: "level-complete-bg"
   let backgroundImage = getOrLoadBitmap("images/game_result/" & backgroundImageName)
 
@@ -57,14 +67,11 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     gameResult: gameResult,
     previousProgress: previousProgress,
     availableActions: availableActions,
-    nextLevelPath: nextLevelPath(gameResult.levelId),
+    nextLevelPath: nextPath,
     backgroundImage: backgroundImage,
+    currentActionIndex: currentActionIndex,
     screenType: ScreenType.GameResult
   )
-
-proc isNewPersonalBest(gameResult: GameResult, previousProgress: LevelProgress): bool =
-  return gameResult.resultType == GameResultType.LevelComplete and 
-    (previousProgress.bestTime.isNone or previousProgress.bestTime.get > gameResult.time)
 
 proc comparisonTimeString(gameResult: GameResult, previousProgress: LevelProgress): string =
   if gameResult.resultType == GameResultType.GAME_OVER or previousProgress.bestTime.isNone:
