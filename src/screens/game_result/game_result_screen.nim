@@ -88,12 +88,16 @@ proc label(resultType: GameResultType, gameResultAction: GameResultAction): stri
   of GameResultAction.Restart: return if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
   of GameResultAction.Next: return if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
 
+const buttonTextCenterX = 100
+
 proc drawButtons(self: GameResultScreen) =
   let resultType = self.gameResult.resultType
   let availableActionLabels: seq[string] = self.availableActions.mapIt(resultType.label(it))
+  let buttonText = availableActionLabels[self.currentActionIndex]
   
   gfx.setFont(buttonFont)
-  gfx.drawTextAligned(availableActionLabels[self.currentActionIndex], 100, 210)
+  gfx.drawTextAligned(buttonText, buttonTextCenterX, 210)
+  let textSizeOffset = (buttonFont.getTextWidth(buttonText) / 2).int32 + 10
 
   let buttonState = playdate.system.getButtonState()
   let pushedOrCurrent = buttonState.pushed + buttonState.current
@@ -102,8 +106,8 @@ proc drawButtons(self: GameResultScreen) =
 
   let xOffset = (4 * sin(currentTimeMilliseconds().float32 * 0.008f)).int32
     
-  actionArrowsImageTable.getBitmap(leftIdx).draw(12 + xOffset, 210, kBitmapUnflipped)
-  actionArrowsImageTable.getBitmap(rightIdx).draw(178 - xOffset, 210, kBitmapUnflipped)
+  actionArrowsImageTable.getBitmap(leftIdx).draw(buttonTextCenterX - textSizeOffset - 10 - xOffset, 210, kBitmapUnflipped) # extra -10: sprite width
+  actionArrowsImageTable.getBitmap(rightIdx).draw(buttonTextCenterX + textSizeOffset + xOffset, 210, kBitmapUnflipped)
 
 proc drawGameOverResult(self: GameResultScreen) =
   let gameResult = self.gameResult
