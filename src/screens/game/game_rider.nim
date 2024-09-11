@@ -1,5 +1,4 @@
 import chipmunk7
-import common/utils
 import chipmunk_utils
 import std/math
 import game_types
@@ -41,7 +40,7 @@ const
     lowerLegRotationOffset = degToRad(35f)
 
 proc resetRiderConstraintForces*(state: GameState) =
-  print("resetRiderConstraintForces")
+  echo("resetRiderConstraintForces")
   state.shoulderPivot.maxForce=900.0
   state.chassisKneePivot.maxForce=0.0
   state.elbowRotaryLimit.maxForce=2_000.0
@@ -266,7 +265,6 @@ proc resetRiderAttitudePosition*(state: GameState) =
     setAttitudeAdjustBackward(state, dirV)
 
   state.riderAttitudePosition = RiderAttitudePosition.Neutral
-  print("resetRiderAttitudePosition: ", state.riderAttitudePosition)
 
 proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float) =
   if direction > 0.0 and state.riderAttitudePosition == RiderAttitudePosition.Forward:
@@ -289,7 +287,6 @@ proc setRiderAttitudeAdjustPosition*(state: GameState, direction: float) =
     setAttitudeAdjustBackward(state, dirV)
     state.riderAttitudePosition = RiderAttitudePosition.Backward
 
-  print("setRiderAttitudeAdjustPosition: ", state.riderAttitudePosition)
 
 proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.assPivot.flip()

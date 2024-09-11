@@ -13,7 +13,7 @@ copy nul "%SCRIPT_DIR%temp.lua" >nul
 
 echo Converting assets...
 
-pdc -k -m temp.lua "%SCRIPT_DIR%\"
+pdc -v -k -m temp.lua "%SCRIPT_DIR%\"
 
 REM Remove the temp.lua file
 del "%SCRIPT_DIR%temp.lua"

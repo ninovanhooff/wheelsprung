@@ -4,11 +4,6 @@ import playdate/api
 import common/graphics_types
 import common/utils
 
-const
-  ## Amount of rotation images (angle steps) for sprites which sjhould be freely rotatable
-  ## e.g. bike chassis, rider parts, killer, etc.
-  imageRotations: int32 = 64'i32
-
 type
   BitmapTableId* {.pure.} = enum
     BikeChassis = "images/bike-chassis"
@@ -33,33 +28,12 @@ type
 # global singleton
 let bitmapTableCache = BitmapTableCache()
 
-proc frameCount(id: BitmapTableId): int32 =
-  case id
-  of BitmapTableId.Trophy: return 2
-  of BitmapTableId.Flag: return 46
-  of BitmapTableId.Gravity: return 33
-  of BitmapTableId.LevelStatus: return 3
-  of BitmapTableId.GameResultActionArrows: return 4
-  of BitmapTableId.TallBook: return 240
-  
-  of BitmapTableId.BikeChassis,
-    BitmapTableId.BikeGhostWheel,
-    BitmapTableId.BikeWheel,
-    BitmapTableId.RiderTorso,
-    BitmapTableId.RiderGhostHead,
-    BitmapTableId.RiderHead,
-    BitmapTableId.RiderUpperArm,
-    BitmapTableId.RiderLowerArm,
-    BitmapTableId.RiderUpperLeg,
-    BitmapTableId.RiderLowerLeg,
-    BitmapTableId.Killer: return imageRotations
-  
-
 proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
   try:
+    let bitmapTable = gfx.newBitmapTable($id)
     return newAnnotatedBitmapTable(
-      bitmapTable = gfx.newBitmapTable($id),
-      frameCount = id.frameCount,
+      bitmapTable = bitmapTable,
+      frameCount = bitmapTable.getBitmapTableInfo().count.int32,
     )
   except KeyError:
     playdate.system.error("BitmapTableId or FrameCount not found for: " & $id)

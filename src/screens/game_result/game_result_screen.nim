@@ -42,11 +42,21 @@ proc initGameResultScreen() =
   newPersonalBestImage = getOrLoadBitmap("images/game_result/new-personal-best.png")
   actionArrowsImageTable = getOrLoadBitmapTable(BitmapTableId.GameResultActionArrows)
 
+proc isNewPersonalBest(gameResult: GameResult, previousProgress: LevelProgress): bool =
+  return gameResult.resultType == GameResultType.LevelComplete and
+    (previousProgress.bestTime.isNone or previousProgress.bestTime.get > gameResult.time)
 
 proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: [].} =
   let resultType = gameResult.resultType
   let previousProgress = getLevelProgress(gameResult.levelId).copy()
-  let availableActions = @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.LevelSelect]
+  let nextPath = nextLevelPath(gameResult.levelId)
+  let availableActions = if nextPath.isSome:
+    @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.LevelSelect]
+  else:
+    @[GameResultAction.Restart, GameResultAction.LevelSelect]
+
+  let currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default
+
   let backgroundImageName = if resultType == GameResultType.GameOver: "game-over-bg" else: "level-complete-bg"
   let backgroundImage = getOrLoadBitmap("images/game_result/" & backgroundImageName)
 
@@ -57,14 +67,11 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     gameResult: gameResult,
     previousProgress: previousProgress,
     availableActions: availableActions,
-    nextLevelPath: nextLevelPath(gameResult.levelId),
+    nextLevelPath: nextPath,
     backgroundImage: backgroundImage,
+    currentActionIndex: currentActionIndex,
     screenType: ScreenType.GameResult
   )
-
-proc isNewPersonalBest(gameResult: GameResult, previousProgress: LevelProgress): bool =
-  return gameResult.resultType == GameResultType.LevelComplete and 
-    (previousProgress.bestTime.isNone or previousProgress.bestTime.get > gameResult.time)
 
 proc comparisonTimeString(gameResult: GameResult, previousProgress: LevelProgress): string =
   if gameResult.resultType == GameResultType.GAME_OVER or previousProgress.bestTime.isNone:
@@ -81,21 +88,25 @@ proc label(resultType: GameResultType, gameResultAction: GameResultAction): stri
   of GameResultAction.Restart: return if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
   of GameResultAction.Next: return if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
 
+const buttonTextCenterX = 100
+
 proc drawButtons(self: GameResultScreen) =
   let resultType = self.gameResult.resultType
   let availableActionLabels: seq[string] = self.availableActions.mapIt(resultType.label(it))
-  
+  let buttonText = availableActionLabels[self.currentActionIndex]
+
   gfx.setFont(buttonFont)
-  gfx.drawTextAligned(availableActionLabels[self.currentActionIndex], 100, 210)
+  gfx.drawTextAligned(buttonText, buttonTextCenterX, 210)
 
   let buttonState = playdate.system.getButtonState()
-  let leftIdx: int32 = if kButtonLeft in buttonState.pushed: 1 else: 0
-  let rightIdx: int32 = if kButtonRight in buttonState.pushed: 3 else: 2
+  let pushedOrCurrent = buttonState.pushed + buttonState.current
+  let leftIdx: int32 = if kButtonLeft in pushedOrCurrent: 1 else: 0
+  let rightIdx: int32 = if kButtonRight in pushedOrCurrent: 1 else: 0
 
-  let xOffset = (5 * sin(currentTimeMilliseconds().float32 * 0.01f)).int32
+  let xOffset = (4 * sin(currentTimeMilliseconds().float32 * 0.008f)).int32
     
-  actionArrowsImageTable.getBitmap(leftIdx).draw(2 + xOffset, 207, kBitmapUnflipped)
-  actionArrowsImageTable.getBitmap(rightIdx).draw(178 - xOffset, 207, kBitmapUnflipped)
+  actionArrowsImageTable.getBitmap(leftIdx).draw(12 + xOffset, 210, kBitmapUnflipped)
+  actionArrowsImageTable.getBitmap(rightIdx).draw(178 - xOffset, 210, kBitmapFlippedX)
 
 proc drawGameOverResult(self: GameResultScreen) =
   let gameResult = self.gameResult
@@ -108,7 +119,7 @@ proc drawGameOverResult(self: GameResultScreen) =
 proc drawLevelCompleteResult(self: GameResultScreen) =
   let gameResult = self.gameResult
   if gameResult.isNewPersonalBest(self.previousProgress):
-    newPersonalBestImage.draw(10, 145, kBitmapUnflipped)
+    newPersonalBestImage.draw(20, 152, kBitmapUnflipped)
 
   if gameResult.starCollected:
     let starImage = getOrLoadBitmap("images/game_result/acorn")
@@ -119,7 +130,7 @@ proc drawLevelCompleteResult(self: GameResultScreen) =
   gfx.setFont(timeFont)
   gfx.drawTextAligned(timeString, 135, 110, kTextAlignmentRight)
   let comparisonTimeString = comparisonTimeString(gameResult, self.previousProgress)
-  gfx.drawTextAligned(comparisonTimeString, 135, 135, kTextAlignmentRight)
+  gfx.drawTextAligned(comparisonTimeString, 135, 140, kTextAlignmentRight)
 
   drawButtons(self)
 

@@ -62,9 +62,7 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
   return screen
 
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
-  print("coin post step callback")
   let shape = cast[Shape](coinShape)
-  print("shape data:" & repr(shape))
   var coin = cast[Coin](shape.userData)
   if state.time < coin.activeFrom:
     print("coin activates at: " & repr(coin.activeFrom) & " current time: " & repr(state.time))
@@ -93,7 +91,6 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
 let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
   print("star post step callback")
   let shape = cast[Shape](starShape)
-  print("shape data:" & repr(shape))
   space.removeShape(shape)
   state.remainingStar = none[Star]()
   state.updateGameResult()
@@ -260,11 +257,11 @@ proc updateTimers(state: GameState) =
     state.chassis.torque = state.driveDirection * -15_500.0
 
     if state.finishFlipDirectionAt.expire(currentTime):
-      print("flip direction timeout")
+      echo("flip direction timeout")
       state.resetRiderConstraintForces()
 
   if state.finishTrophyBlinkerAt.expire(currentTime):
-    print("blinker timeout")
+    echo("blinker timeout")
 
 proc initGame*(levelPath: string) {.raises: [].} =
   initGameSound()
