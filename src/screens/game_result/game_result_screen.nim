@@ -102,12 +102,12 @@ proc drawButtons(self: GameResultScreen) =
   let buttonState = playdate.system.getButtonState()
   let pushedOrCurrent = buttonState.pushed + buttonState.current
   let leftIdx: int32 = if kButtonLeft in pushedOrCurrent: 1 else: 0
-  let rightIdx: int32 = if kButtonRight in pushedOrCurrent: 3 else: 2
+  let rightIdx: int32 = if kButtonRight in pushedOrCurrent: 1 else: 0
 
   let xOffset = (4 * sin(currentTimeMilliseconds().float32 * 0.008f)).int32
     
   actionArrowsImageTable.getBitmap(leftIdx).draw(12 + xOffset, 210, kBitmapUnflipped)
-  actionArrowsImageTable.getBitmap(rightIdx).draw(178 - xOffset, 210, kBitmapUnflipped)
+  actionArrowsImageTable.getBitmap(rightIdx).draw(178 - xOffset, 210, kBitmapFlippedX)
 
 proc drawGameOverResult(self: GameResultScreen) =
   let gameResult = self.gameResult
