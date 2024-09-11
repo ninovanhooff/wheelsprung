@@ -15,7 +15,7 @@ import hashing_test
 
 import playdate/api
 
-import strformat, strutils, macros
+import strutils
 
 proc runTests*() =
   print "======== Test: Running tests ========="

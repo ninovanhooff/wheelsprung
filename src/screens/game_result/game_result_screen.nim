@@ -97,7 +97,6 @@ proc drawButtons(self: GameResultScreen) =
 
   gfx.setFont(buttonFont)
   gfx.drawTextAligned(buttonText, buttonTextCenterX, 210)
-  let textSizeOffset = (buttonFont.getTextWidth(buttonText) / 2).int32 + 10
 
   let buttonState = playdate.system.getButtonState()
   let pushedOrCurrent = buttonState.pushed + buttonState.current

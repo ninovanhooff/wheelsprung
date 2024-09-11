@@ -4,11 +4,6 @@ import playdate/api
 import common/graphics_types
 import common/utils
 
-const
-  ## Amount of rotation images (angle steps) for sprites which sjhould be freely rotatable
-  ## e.g. bike chassis, rider parts, killer, etc.
-  imageRotations: int32 = 64'i32
-
 type
   BitmapTableId* {.pure.} = enum
     BikeChassis = "images/bike-chassis"
