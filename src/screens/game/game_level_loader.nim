@@ -424,7 +424,7 @@ proc loadObjectLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
 proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   if layer.image.isNone: return
 
-  let position: Vertex = (layer.offsetx.get, layer.offsety.get)
+  let position: Vertex = (layer.offsetx.get(0), layer.offsety.get(0))
 
   var imageName = layer.image.get
   imageName = imageName.rsplit('/', maxsplit=1)[^1] # remove path
