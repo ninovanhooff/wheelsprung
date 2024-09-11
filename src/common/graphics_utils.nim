@@ -49,7 +49,7 @@ proc fallbackBitmap*(): LCDBitmap =
   let errorPattern = makeLCDOpaquePattern(0x0, 0x3C, 0x5A, 0x66, 0x66, 0x5A, 0x3C, 0x0)
   gfx.newBitmap(8,8, errorPattern)
 
-proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32): Animation =
+proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32, frameRepeat: int32): Animation =
   let firstFrame = bitmapTable.getBitmap(0)
   let frameCount: int32 = bitmapTable.getBitmapTableInfo().count.int32
   return Animation(
@@ -64,6 +64,7 @@ proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitma
     ),
     flip: flip,
     startOffset: startOffset,
+    frameRepeat: frameRepeat,
   )
 
 proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitmapFlip, randomStartOffset: bool): Animation =
@@ -73,6 +74,7 @@ proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitm
     position = position,
     flip = flip,
     startOffset = if randomStartOffset: rand(annotatedTable.frameCount).int32 else: 0'i32,
+    frameRepeat = 2
   )
 
 proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidColor) =

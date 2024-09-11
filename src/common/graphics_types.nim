@@ -39,6 +39,7 @@ type
     bitmapTable*: LCDBitmapTable
     frameCount*: int32
     startOffset*: int32
+    frameRepeat*: int32
 
 const LCD_RECT_ZERO* = makeLCDRect(0, 0, 0, 0)
 

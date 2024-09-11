@@ -9,6 +9,7 @@ import std/json
 import std/sequtils
 import std/strutils
 import std/tables
+import std/random
 import playdate/api
 import game_types
 import common/graphics_types
@@ -42,16 +43,25 @@ type
     ellipse: Option[bool]
     `type`: string
   
-  LayerEntity = ref object of RootObj
+  LevelLayerEntity = ref object of RootObj
     objects: Option[seq[LevelObjectEntity]]
     image: Option[string]
     offsetx, offsety: Option[int32]
+    frameRepeat: Option[int32]
+      ## inverse of frame rate, e.g. 2 means 50/2 = 25 fps, 3 means 50/3 = 16.67 fps.
+      ## <1 means no animation, 1 means 50 fps
+      ## default is 1
+    startFrame: Option[int32]
+      ## 1-based index of the first frame to show
+      ## -1 means random start frame
+      ## 0 and 1 mean the first frame
+      ## default is 1
     `type`: string
   
   LevelEntity = ref object of RootObj
     width, height: int32
     tilewidth, tileheight: int32
-    layers: seq[LayerEntity]
+    layers: seq[LevelLayerEntity]
 
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
@@ -385,7 +395,7 @@ proc loadText(level: var Level, obj: LevelObjectEntity): bool =
   ))
   return true
 
-proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+proc loadObjectLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
@@ -401,7 +411,7 @@ proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
     # rect must be last because it is not specifically marked as such
     level.loadRectangle(obj)
 
-proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   if layer.image.isNone: return
 
   let position: Vertex = (layer.offsetx.get, layer.offsety.get)
@@ -414,11 +424,19 @@ proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
     try:
       imageName.removeSuffix(BITMAP_TABLE_SUFFIX) # in-place
       let bitmapTable = gfx.newBitmapTable(levelsBasePath & imageName)
+      let frameCount = bitmapTable.getBitmapTableInfo().count
+      var startOffset: int32 = layer.startFrame.get(0)
+      case startOffset:
+        of 0 .. 1: startOffset = 0
+        # of (int.low .. -1): startOffset = rand(0 .. (frameCount - 1))
+        else: discard # keep the value
+
       level.assets.add(newAnimation(
         bitmapTable = bitmapTable,
         position = position,
         flip = kBitmapUnflipped,
-        startOffset = 0,
+        startOffset = startOffset,
+        frameRepeat = layer.frameRepeat.get(1),
       ))
     except IOError:
       print("Could not load bitmap table: " & $imageName)
@@ -429,7 +447,7 @@ proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
     let bitmap = getOrLoadBitmap(imagePath)
     level.background = some(bitmap)
 
-proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+proc loadLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   case layer.`type`:
     of "objectgroup":
       level.loadObjectLayer(layer)
