@@ -30,32 +30,23 @@ type
   LevelVertexEntity {.bycopy.} = object
     x*: int32
     y*: int32
-  LevelObjectEntity = ref object of RootObj
+  LevelPropertiesHolder = ref object of RootObj
+    properties: Option[seq[LevelPropertiesEntity]]
+  LevelObjectEntity = ref object of LevelPropertiesHolder
     id: int32 # unique object id
     gid: Option[uint32] # tile id including flip flags
     x, y: int32
     width*, height*: int32
     rotation: float32
     polygon: Option[seq[LevelVertexEntity]]
-    properties: Option[seq[LevelPropertiesEntity]]
     polyline: Option[seq[LevelVertexEntity]]
     text: Option[LevelTextEntity]
     ellipse: Option[bool]
     `type`: string
-  
-  LevelLayerEntity = ref object of RootObj
+  LevelLayerEntity = ref object of LevelPropertiesHolder
     objects: Option[seq[LevelObjectEntity]]
     image: Option[string]
     offsetx, offsety: Option[int32]
-    frameRepeat: Option[int32]
-      ## inverse of frame rate, e.g. 2 means 50/2 = 25 fps, 3 means 50/3 = 16.67 fps.
-      ## <1 means no animation, 1 means 50 fps
-      ## default is 1
-    startFrame: Option[int32]
-      ## 1-based index of the first frame to show
-      ## -1 means random start frame
-      ## 0 and 1 mean the first frame
-      ## default is 1
     `type`: string
   
   LevelEntity = ref object of RootObj
@@ -113,7 +104,7 @@ proc toGravity(d8: Direction8): Vect =
     of D8_DOWN_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
     of D8_DOWN_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
 
-proc getProp[T](obj: LevelObjectEntity, name: string, mapper: JsonNode -> T, fallback: T): T =
+proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T =
   if obj.properties.isSome:
       let fillProp = obj.properties.get.findFirst(it => it.name == name)
       if fillProp.isSome:
@@ -161,6 +152,25 @@ proc friction(obj: LevelObjectEntity): float32 =
     name = "friction",
     mapper = (node => node.getFloat.float32),
     fallback = 1.0f
+  )
+
+proc startOffset(obj: LevelLayerEntity, frameCount: int32): int32 =
+  result = obj.getProp(
+    name = "startFrame",
+    mapper = (node => node.getInt.int32),
+    fallback = 0'i32
+  )
+
+  case result:
+    of int32.low .. -1'i32: result = rand(frameCount).int32
+    of 0 .. 1: result = 0
+    else: discard # keep the value
+
+proc frameRepeat(obj: LevelLayerEntity): int32 =
+  return obj.getProp(
+    name = "frameRepeat",
+    mapper = (node => node.getInt.int32),
+    fallback = 2'i32
   )
 
 
@@ -424,19 +434,14 @@ proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
     try:
       imageName.removeSuffix(BITMAP_TABLE_SUFFIX) # in-place
       let bitmapTable = gfx.newBitmapTable(levelsBasePath & imageName)
-      let frameCount = bitmapTable.getBitmapTableInfo().count
-      var startOffset: int32 = layer.startFrame.get(0)
-      case startOffset:
-        of 0 .. 1: startOffset = 0
-        # of (int.low .. -1): startOffset = rand(0 .. (frameCount - 1))
-        else: discard # keep the value
+      let frameCount = bitmapTable.getBitmapTableInfo().count.int32
 
       level.assets.add(newAnimation(
         bitmapTable = bitmapTable,
         position = position,
         flip = kBitmapUnflipped,
-        startOffset = startOffset,
-        frameRepeat = layer.frameRepeat.get(1),
+        startOffset = layer.startOffset(frameCount),
+        frameRepeat = layer.frameRepeat,
       ))
     except IOError:
       print("Could not load bitmap table: " & $imageName)

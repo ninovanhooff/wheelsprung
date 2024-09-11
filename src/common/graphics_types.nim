@@ -40,6 +40,7 @@ type
     frameCount*: int32
     startOffset*: int32
     frameRepeat*: int32
+      ## divisor of the frame rate
 
 const LCD_RECT_ZERO* = makeLCDRect(0, 0, 0, 0)
 

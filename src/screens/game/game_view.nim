@@ -272,7 +272,11 @@ method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
   return asset.image
 
 method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
-  return asset.bitmapTable.getBitmap((frameCounter div 2'i32) mod asset.frameCount)
+  if asset.frameRepeat < 1:
+    ## no animation
+    return asset.bitmapTable.getBitmap(asset.startOffset)
+  let frameIdx = (asset.startOffset + frameCounter div asset.frameRepeat) mod asset.frameCount
+  return asset.bitmapTable.getBitmap(frameIdx)
 
 proc drawPlayer(state: GameState) =
   let chassis = state.chassis
