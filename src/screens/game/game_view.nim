@@ -321,8 +321,8 @@ proc drawPlayer(state: GameState) =
     chassisTorqueDegrees
   )
 
-  riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
+  riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
   riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
