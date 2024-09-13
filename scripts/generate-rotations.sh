@@ -15,11 +15,11 @@ spriterot -v -r 64 --width 22 --height 22 -o "$SOURCE_IMAGES_DIR/bike-ghost-whee
 spriterot -v --width 48 --height 48 -k -r 64 -o "$SOURCE_IMAGES_DIR/bike-chassis-table-48-48.png" "$SUPPORT_IMAGES_DIR/bike-chassis.png"
 
 spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/upper-arm-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/upper-arm.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/lower-arm-table-12-12.png" "$SUPPORT_IMAGES_DIR/rider/lower-arm.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/upper-leg-table-18-18.png" "$SUPPORT_IMAGES_DIR/rider/upper-leg.png"
+spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/lower-arm-table-16-16.png" "$SUPPORT_IMAGES_DIR/rider/lower-arm.png"
+spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/upper-leg-table-16-16.png" "$SUPPORT_IMAGES_DIR/rider/upper-leg.png"
 spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/lower-leg-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/lower-leg.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/torso-table-18-18.png" "$SUPPORT_IMAGES_DIR/rider/torso.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/head-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/head.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/ghost-head-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/ghost-head.png"
+spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/torso-table-20-20.png" "$SUPPORT_IMAGES_DIR/rider/torso.png"
+spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/head-table-22-22.png" "$SUPPORT_IMAGES_DIR/rider/head.png"
+spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/ghost-head-table-20-20.png" "$SUPPORT_IMAGES_DIR/rider/ghost-head.png"
 
-spriterot -v -r 240 -o "$SOURCE_IMAGES_DIR/dynamic_objects/tall-book-table-88-88.png" "$SUPPORT_IMAGES_DIR/dynamic_objects/tall-book.png"
+spriterot -r 240 -o "$SOURCE_IMAGES_DIR/dynamic_objects/tall-book-table-88-88.png" "$SUPPORT_IMAGES_DIR/dynamic_objects/tall-book.png"
