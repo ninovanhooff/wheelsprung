@@ -22,3 +22,4 @@ release.env
 
 # IDE
 .idea/other.xml
+.sentry-native/*
