@@ -303,6 +303,8 @@ proc drawPlayer(state: GameState) =
 
   # rider
 
+  riderTailImageTable.drawRotated(state.riderTail, state)
+
   let riderHead = state.riderHead
   let riderHeadScreenPos = riderHead.position - camera
   if state.finishFlipDirectionAt.isSome:
@@ -322,8 +324,6 @@ proc drawPlayer(state: GameState) =
     riderHeadScreenPos.toVertex,
     chassisTorqueDegrees
   )
-
-  riderTailImageTable.drawRotated(state.riderTail, state)
 
   riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
   riderTorsoImageTable.drawRotated(state.riderTorso, state)
