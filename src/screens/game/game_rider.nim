@@ -11,7 +11,7 @@ const
     # offset from torso, align top of head with top of torso
     headRadius = 6f
     headMass = 0.1f
-    headOffset = v(-3.0, -12.0)
+    headOffset = v(-2.0, -15.0)
     headRotationOffset = degToRad(-35.0)
     
     # offset from torso, align top of arm with top of torso
