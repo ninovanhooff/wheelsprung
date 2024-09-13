@@ -72,7 +72,7 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
     let riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)[0]
     state.riderTorso = riderTorso
 
-    let tailPosition = localToWorld(riderTorso, tailOffset)
+    let tailPosition = localToWorld(riderTorso, tailOffset.transform(dd))
     let tailAngle = torsoAngle + tailRotationOffset * dd
     state.riderTail = space.addBox(tailPosition, tailSize, tailMass, tailAngle)[0]
 
