@@ -13,6 +13,9 @@ SOURCE_IMAGES_DIR="$SCRIPT_DIR/../source/images"
 
 function call_spriterot {
   local size="$2"
+  local subdirectory
+  subdirectory="$(dirname "$1")"
+  find "$SOURCE_IMAGES_DIR/$subdirectory/" -name "$(basename "$1")-table-*" -exec rm {} \;
   local output_file="$SOURCE_IMAGES_DIR/$1-table-$size-$size.png"
   local input_file="$SUPPORT_IMAGES_DIR/$1.png"
   local rotation="$3"
