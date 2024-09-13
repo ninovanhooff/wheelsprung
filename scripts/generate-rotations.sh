@@ -27,6 +27,7 @@ call_spriterot "rider/upper-arm" 14 64
 call_spriterot "rider/lower-arm" 11 64
 call_spriterot "rider/upper-leg" 16 64
 call_spriterot "rider/lower-leg" 14 64
+call_spriterot "rider/tail" 25 64
 call_spriterot "rider/torso" 21 64
 call_spriterot "rider/head" 22 64
 call_spriterot "rider/ghost-head" 20 64

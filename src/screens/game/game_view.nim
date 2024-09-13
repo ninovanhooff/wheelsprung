@@ -31,6 +31,7 @@ var
 
   riderTorsoImageTable: AnnotatedBitmapTable
   riderHeadImageTable: AnnotatedBitmapTable
+  riderTailImageTable: AnnotatedBitmapTable
   riderUpperArmImageTable: AnnotatedBitmapTable
   riderLowerArmImageTable: AnnotatedBitmapTable
   riderUpperLegImageTable: AnnotatedBitmapTable
@@ -55,6 +56,7 @@ proc initGameView*() =
   bikeWheelImageTable = getOrLoadBitmapTable(BitmapTableId.BikeWheel)
   riderTorsoImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTorso)
   riderHeadImageTable = getOrLoadBitmapTable(BitmapTableId.RiderHead)
+  riderTailImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTail)
   riderUpperArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperArm)
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
@@ -320,6 +322,8 @@ proc drawPlayer(state: GameState) =
     riderHeadScreenPos.toVertex,
     chassisTorqueDegrees
   )
+
+  riderTailImageTable.drawRotated(state.riderTail, state)
 
   riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
   riderTorsoImageTable.drawRotated(state.riderTorso, state)

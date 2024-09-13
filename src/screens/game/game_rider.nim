@@ -13,6 +13,12 @@ const
     headMass = 0.1f
     headOffset = v(-2.0, -15.0)
     headRotationOffset = degToRad(-35.0)
+
+    # offset from torso, align bottom of tail with bottom of torso
+    tailOffset = v(-10.0, 7.0)
+    tailMass = 0.1f
+    tailSize = v(19, 25)
+    tailRotationOffset = -torsoRotation
     
     # offset from torso, align top of arm with top of torso
     upperArmSize = v(4.0, 13.0)
@@ -48,6 +54,7 @@ proc resetRiderConstraintForces*(state: GameState) =
 
 proc flip(joint: PivotJoint) =
   joint.anchorA = joint.anchorA.flip()
+  joint.anchorB = joint.anchorB.flip()
 
 proc flip(joint: RotaryLimitJoint) =
   let temp = joint.min
@@ -64,6 +71,10 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
     let torsoAngle = state.chassis.angle + torsoRotation * dd
     let riderTorso = space.addBox(torsoPosition, torsoSize, torsoMass, torsoAngle)[0]
     state.riderTorso = riderTorso
+
+    let tailPosition = localToWorld(riderTorso, tailOffset)
+    let tailAngle = torsoAngle + tailRotationOffset * dd
+    state.riderTail = space.addBox(tailPosition, tailSize, tailMass, tailAngle)[0]
 
     let headPosition = localToWorld(riderTorso, headOffset.transform(dd))
     let headAngle = torsoAngle + headRotationOffset * dd
@@ -92,6 +103,7 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
 
 proc setRiderConstraints(state: GameState) =
   let space = state.space
+  let chassis = state.chassis
   let riderTorso = state.riderTorso
   let dd = state.driveDirection
 
@@ -100,7 +112,7 @@ proc setRiderConstraints(state: GameState) =
   # pivot torso around ass, and joint ass to bike chassis
   let riderAssLocalPosition = v(0, torsoSize.y/2f)
   let riderAssWorldPosition = localToWorld(riderTorso, riderAssLocalPosition)
-  state.assPivot = state.chassis.newPivotJoint(
+  state.assPivot = chassis.newPivotJoint(
       riderTorso,
       riderAssWorldPosition
     )
@@ -147,6 +159,23 @@ proc setRiderConstraints(state: GameState) =
     state.headRotarySpring  
   ))
 
+  # tail pivot
+  let riderTailLocalPosition = v(tailSize.x / 2f, tailSize.y / 2f - 6f)
+  let riderTailWorldPosition = localToWorld(state.riderTail, riderTailLocalPosition)
+  state.tailPivot = chassis.newPivotJoint(
+      state.riderTail,
+      riderTailWorldPosition
+    )
+  riderConstraints.add(space.addConstraint(
+    state.tailPivot
+  ))
+
+  # tail rotary spring
+  state.tailRotarySpring = state.riderTail.newDampedRotarySpring(riderTorso, tailRotationOffset * dd, 1_000.0, 100.0)
+  riderConstraints.add(space.addConstraint(
+    state.tailRotarySpring
+  ))
+
   # Elbow pivot
   let riderLowerArmElbowLocalPosition = v(0f, -lowerArmSize.y/2f + lowerArmSize.x/2f)
   let riderElbowWorldPosition = localToWorld(state.riderLowerArm, riderLowerArmElbowLocalPosition)
@@ -170,7 +199,7 @@ proc setRiderConstraints(state: GameState) =
   ))
 
   # Pivot Elbow to chassis
-  state.elbowPivot = state.chassis.newPivotJoint(
+  state.elbowPivot = chassis.newPivotJoint(
       state.riderLowerArm,
       riderElbowWorldPosition
     )
@@ -180,7 +209,7 @@ proc setRiderConstraints(state: GameState) =
   # Pivot hand to handlebars
   let riderLowerArmHandLocalPosition = v(0.0, lowerArmSize.y/2)
   let riderHandWorldPosition = localToWorld(state.riderLowerArm, riderLowerArmHandLocalPosition)
-  state.handPivot = state.chassis.newPivotJoint(
+  state.handPivot = chassis.newPivotJoint(
       state.riderLowerArm,
       riderHandWorldPosition
     )
@@ -192,7 +221,7 @@ proc setRiderConstraints(state: GameState) =
   # Pivot upper leg
   let riderUpperLegHipLocalPosition = v(0f, -upperLegSize.y/2f + upperLegSize.x/2f)
   let riderHipWorldPosition = localToWorld(state.riderUpperLeg, riderUpperLegHipLocalPosition)
-  state.hipPivot = state.chassis.newPivotJoint(
+  state.hipPivot = chassis.newPivotJoint(
       state.riderUpperLeg,
       riderHipWorldPosition
     )
@@ -210,7 +239,7 @@ proc setRiderConstraints(state: GameState) =
     )
   ))
 
-  state.chassisKneePivot = state.chassis.newPivotJoint(
+  state.chassisKneePivot = chassis.newPivotJoint(
       state.riderLowerLeg,
       riderKneeWorldPosition
     )
@@ -222,7 +251,7 @@ proc setRiderConstraints(state: GameState) =
   # Pivot foot to pedal
   let riderLowerLegFootLocalPosition = v(0.0, lowerLegSize.y/2)
   let riderFootWorldPosition = localToWorld(state.riderLowerLeg, riderLowerLegFootLocalPosition)
-  state.footPivot = state.chassis.newPivotJoint(
+  state.footPivot = chassis.newPivotJoint(
       state.riderLowerLeg,
       riderFootWorldPosition
     )
@@ -304,3 +333,5 @@ proc flipRiderDirection*(state: GameState, riderPosition: Vect) =
   state.handPivot.flip()
   state.headPivot.flip()
   state.headRotarySpring.restAngle = -state.headRotarySpring.restAngle
+  state.tailPivot.flip()
+  state.tailRotarySpring.restAngle = -state.tailRotarySpring.restAngle
