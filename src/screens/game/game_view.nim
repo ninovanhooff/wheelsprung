@@ -324,8 +324,8 @@ proc drawPlayer(state: GameState) =
   riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
   riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
-  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
 
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
