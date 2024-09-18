@@ -191,7 +191,7 @@ type GameState* = ref object of RootObj
   # Input
   isThrottlePressed*: bool
   isAccelerometerEnabled*: bool
-  lastTorque*: Float # only used to display attitude indicator
+  lastTorque*: Float # torque applied by attitude adjust in last frame
 
   # Navigation state
   resetGameOnResume*: bool
@@ -241,6 +241,7 @@ type GameState* = ref object of RootObj
   # rider bodies
   riderHead*: Body
   riderTorso*: Body
+  riderTail*: Body
   riderUpperArm*: Body
   riderLowerArm*: Body
   riderUpperLeg*: Body
@@ -250,7 +251,10 @@ type GameState* = ref object of RootObj
   # Rider Constraints
   riderConstraints*: seq[Constraint] # todo remove if unused
   headRotarySpring*: DampedRotarySpring
+  tailRotarySpring*: DampedRotarySpring
   assPivot*: PivotJoint
+  # tail to chassis
+  tailPivot*: PivotJoint
   # shoulder to chassis
   shoulderPivot*: PivotJoint
   # upper arm to torso

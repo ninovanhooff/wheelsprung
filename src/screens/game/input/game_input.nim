@@ -1,5 +1,5 @@
 {.push raises: [].}
-import std/[options, sugar]
+import std/[options, sugar, math]
 import playdate/api
 import chipmunk7, chipmunk_utils
 import common/utils
@@ -90,6 +90,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
 proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let optAdjust = state.attitudeAdjust
   if optAdjust.isNone:
+    state.lastTorque = 0.0
     return
   let adjust = optAdjust.get
 
@@ -115,6 +116,12 @@ proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
     else:
       state.applyButtonAttitudeAdjust()
 
+    let targetRestAngle = degToRad(-30.0 * state.driveDirection) + state.lastTorque / -20_000f
+    state.tailRotarySpring.restAngle= lerp(
+      state.tailRotarySpring.restAngle,
+      targetRestAngle,
+      0.2
+    )
 
 proc onFlipDirection(state: GameState) =
   if state.attitudeAdjust.isSome:

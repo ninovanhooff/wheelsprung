@@ -12,6 +12,7 @@ type
     RiderTorso = "images/rider/torso"
     RiderGhostHead = "images/rider/ghost-head"
     RiderHead = "images/rider/head"
+    RiderTail = "images/rider/tail"
     RiderUpperArm = "images/rider/upper-arm"
     RiderLowerArm = "images/rider/lower-arm"
     RiderUpperLeg = "images/rider/upper-leg"

@@ -31,6 +31,7 @@ var
 
   riderTorsoImageTable: AnnotatedBitmapTable
   riderHeadImageTable: AnnotatedBitmapTable
+  riderTailImageTable: AnnotatedBitmapTable
   riderUpperArmImageTable: AnnotatedBitmapTable
   riderLowerArmImageTable: AnnotatedBitmapTable
   riderUpperLegImageTable: AnnotatedBitmapTable
@@ -55,6 +56,7 @@ proc initGameView*() =
   bikeWheelImageTable = getOrLoadBitmapTable(BitmapTableId.BikeWheel)
   riderTorsoImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTorso)
   riderHeadImageTable = getOrLoadBitmapTable(BitmapTableId.RiderHead)
+  riderTailImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTail)
   riderUpperArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperArm)
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
@@ -301,6 +303,8 @@ proc drawPlayer(state: GameState) =
 
   # rider
 
+  riderTailImageTable.drawRotated(state.riderTail, state)
+
   let riderHead = state.riderHead
   let riderHeadScreenPos = riderHead.position - camera
   if state.finishFlipDirectionAt.isSome:
@@ -311,21 +315,17 @@ proc drawPlayer(state: GameState) =
   else:
     riderHeadImageTable.drawRotated(riderHead, state)
 
-  var chassisTorque = 0.0
-  if state.attitudeAdjust.isSome:
-    chassisTorque = state.lastTorque
-
-  let chassisTorqueDegrees = chassisTorque / 1_000f
+  let chassisTorqueDegrees = state.lastTorque / 1_000f
   drawRotationForceIndicator(
     riderHeadScreenPos.toVertex,
     chassisTorqueDegrees
   )
 
-  riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
+  riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
-  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
 
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
