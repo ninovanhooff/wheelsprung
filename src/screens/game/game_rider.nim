@@ -15,7 +15,7 @@ const
     headRotationOffset = degToRad(-35.0)
 
     # offset from torso, align bottom of tail with bottom of torso
-    tailOffset = v(-10.0, 7.0)
+    tailOffset = v(-12.0, 6.0)
     tailMass = 0.1f
     tailSize = v(19, 25)
     tailRotationOffset = -torsoRotation
@@ -160,7 +160,7 @@ proc setRiderConstraints(state: GameState) =
   ))
 
   # tail pivot
-  let riderTailLocalPosition = v(tailSize.x / 2f, tailSize.y / 2f - 6f)
+  let riderTailLocalPosition = v(tailSize.x / 2f - 2f, tailSize.y / 2f - 6f)
   let riderTailWorldPosition = localToWorld(state.riderTail, riderTailLocalPosition)
   state.tailPivot = chassis.newPivotJoint(
       state.riderTail,
@@ -171,7 +171,7 @@ proc setRiderConstraints(state: GameState) =
   ))
 
   # tail rotary spring
-  state.tailRotarySpring = state.riderTail.newDampedRotarySpring(riderTorso, tailRotationOffset * dd, 1_000.0, 100.0)
+  state.tailRotarySpring = state.riderTail.newDampedRotarySpring(riderTorso, tailRotationOffset * dd, 500.0, 200.0)
   riderConstraints.add(space.addConstraint(
     state.tailRotarySpring
   ))

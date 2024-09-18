@@ -34,6 +34,7 @@ var
 proc onResetGame() {.raises: [].}
 
 proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
+  state.tailRotarySpring.restAngle = 0f
   result = GameResult(
     levelId: state.level.id,
     levelHash: state.level.contentHash,

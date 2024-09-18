@@ -191,7 +191,7 @@ type GameState* = ref object of RootObj
   # Input
   isThrottlePressed*: bool
   isAccelerometerEnabled*: bool
-  lastTorque*: Float # only used to display attitude indicator
+  lastTorque*: Float # torque applied by attitude adjust in last frame
 
   # Navigation state
   resetGameOnResume*: bool

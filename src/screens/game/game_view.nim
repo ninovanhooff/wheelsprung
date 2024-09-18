@@ -315,11 +315,7 @@ proc drawPlayer(state: GameState) =
   else:
     riderHeadImageTable.drawRotated(riderHead, state)
 
-  var chassisTorque = 0.0
-  if state.attitudeAdjust.isSome:
-    chassisTorque = state.lastTorque
-
-  let chassisTorqueDegrees = chassisTorque / 1_000f
+  let chassisTorqueDegrees = state.lastTorque / 1_000f
   drawRotationForceIndicator(
     riderHeadScreenPos.toVertex,
     chassisTorqueDegrees
