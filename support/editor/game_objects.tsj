@@ -10,8 +10,8 @@
  "objectalignment":"topleft",
  "spacing":0,
  "tilecount":9,
- "tiledversion":"1.10.2",
- "tileheight":86,
+ "tiledversion":"1.11.0",
+ "tileheight":72,
  "tiles":[
         {
          "id":0,
@@ -77,11 +77,15 @@
          "type":"Gravity"
         }, 
         {
+         "height":140,
          "id":8,
          "image":"tall_book.png",
-         "imageheight":86,
-         "imagewidth":9,
-         "type":"DynamicObject"
+         "imageheight":140,
+         "imagewidth":10,
+         "type":"DynamicObject",
+         "width":10,
+         "x":0,
+         "y":0
         }],
  "tilewidth":66,
  "type":"tileset",

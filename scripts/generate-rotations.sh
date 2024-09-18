@@ -18,9 +18,9 @@ function call_spriterot {
   find "$SOURCE_IMAGES_DIR/$subdirectory/" -name "$(basename "$1")-table-*" -exec rm {} \;
   local output_file="$SOURCE_IMAGES_DIR/$1-table-$size-$size.png"
   local input_file="$SUPPORT_IMAGES_DIR/$1.png"
-  local rotation="$3"
+  local rotations="$3"
 
-  spriterot -r "$rotation" --width "$size" --height "$size" -o "$output_file" "$input_file"
+  spriterot -r "$rotations" --width "$size" --height "$size" -o "$output_file" "$input_file"
 }
 
 call_spriterot "bike-wheel" 22 64
@@ -34,4 +34,4 @@ call_spriterot "rider/tail" 27 64
 call_spriterot "rider/torso" 21 64
 call_spriterot "rider/head" 22 64
 call_spriterot "rider/ghost-head" 20 64
-call_spriterot "dynamic_objects/tall-book" 88 240
+call_spriterot "dynamic_objects/tall-book" 140 240
