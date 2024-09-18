@@ -22,4 +22,5 @@ release.env
 
 # IDE
 .idea/other.xml
+.idea/caches/deviceStreaming.xml
 .sentry-native/*
