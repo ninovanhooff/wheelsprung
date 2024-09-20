@@ -21,6 +21,7 @@ type
     TallBook = "images/dynamic_objects/tall-book"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
+    Nuts = "images/nuts"
     Gravity = "images/gravity"
     LevelStatus = "images/level_select/level-status"
     GameResultActionArrows = "images/game_result/action-arrows"

@@ -3,10 +3,10 @@ import chipmunk7
 import common/graphics_utils
 import game_types
 import common/utils
-import cache/bitmap_cache
+import cache/bitmaptable_cache
 
 var 
-  coinImage: LCDBitmap
+  coinsImageTable: AnnotatedBitmapTable
 
 proc addCoins(space: Space, coins: seq[Coin]) =
   for index, coin in coins:
@@ -33,7 +33,7 @@ proc myDeepCopy[T](src: ref T): ref T =
   result[] = src[]
 
 proc initGameCoin*() =
-  coinImage = getOrLoadBitmap("images/coin")
+  coinsImageTable = getOrLoadBitmapTable(BitmapTableId.Nuts)
 
 proc addGameCoins*(state: GameState) =
   # asssigment by copy
@@ -50,7 +50,6 @@ proc drawCoins*(remainingCoins: seq[Coin], camVertex: Vertex) =
         continue
       
       let coinScreenPos = coin.position - camVertex
-      if coin.count < 2:
-        coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
-      else:
-        gfx.drawTextAligned($coin.count, coinScreenPos[0] + 10, coinScreenPos[1])
+      let coinIndex = (coin.count - 1) mod coinsImageTable.frameCount
+      let coinBitmap = coinsImageTable.getBitmap(coinIndex)
+      coinBitmap.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
