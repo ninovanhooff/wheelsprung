@@ -276,7 +276,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"..\/..\/support\/editor\/game_objects.tsj"
+         "source":"..\/..\/editor\/game_objects.tsj"
         }],
  "tilewidth":20,
  "type":"map",
