@@ -35,4 +35,6 @@ call_spriterot "rider/tail" 27 64
 call_spriterot "rider/torso" 21 64
 call_spriterot "rider/head" 22 64
 call_spriterot "rider/ghost-head" 20 64
+call_spriterot "killer/killer" 20 64
 call_spriterot "dynamic_objects/tall-book" 140 240
+
