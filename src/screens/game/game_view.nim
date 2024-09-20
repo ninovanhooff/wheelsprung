@@ -70,7 +70,7 @@ proc initGameView*() =
   initGameGhost()
 
   try:
-    starImage = gfx.newBitmap("images/star")
+    starImage = gfx.newBitmap("images/acorn")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
     print "Image load failed:", getCurrentExceptionMsg()
