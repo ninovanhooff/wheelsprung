@@ -88,6 +88,21 @@
             "valuesAsFlags": false
         },
         {
+            "id": 10,
+            "name": "NutType",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "Random",
+                "Peanut",
+                "Almond",
+                "Pistachio",
+                "Walnut",
+                "Hazel"
+            ],
+            "valuesAsFlags": false
+        },
+        {
             "color": "#ffff9300",
             "drawFill": true,
             "id": 4,

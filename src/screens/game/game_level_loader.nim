@@ -126,6 +126,13 @@ proc count(obj: LevelObjectEntity): int32 =
     fallback = 1'i32
   )
 
+proc nutType(obj: LevelObjectEntity): int32 =
+  return obj.getProp(
+    name = "nutType",
+    mapper = (node => node.getInt.int32 - 1'i32), # 0 is random, but we want 0 to be the first nut
+    fallback = -1'i32
+  )
+
 proc direction8(obj: LevelObjectEntity): Direction8 =
   return obj.getProp(
     name = "direction",
@@ -301,7 +308,10 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         level.initialDriveDirection = DD_RIGHT
         
     of ClassIds.Coin:
-      level.coins.add(newCoin(position = position, count = obj.count))
+      let nutType = obj.nutType
+      let coinIndex: int32 = if nutType == -1: level.coins.len.int32 else: nutType
+
+      level.coins.add(newCoin(position = position, count = obj.count, coinIndex = coinIndex))
     of ClassIds.Killer:
       level.killers.add(newKiller(position = position))
     of ClassIds.Finish:

@@ -11,7 +11,7 @@
  "spacing":0,
  "tilecount":9,
  "tiledversion":"1.11.0",
- "tileheight":72,
+ "tileheight":140,
  "tiles":[
         {
          "id":0,
@@ -25,6 +25,13 @@
          "image":"coin_object.png",
          "imageheight":20,
          "imagewidth":20,
+         "properties":[
+                {
+                 "name":"nutType",
+                 "propertytype":"NutType",
+                 "type":"int",
+                 "value":0
+                }],
          "type":"Coin"
         }, 
         {
