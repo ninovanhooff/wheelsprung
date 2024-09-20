@@ -43,7 +43,7 @@
         }, 
         {
          "id":4,
-         "image":"star.png",
+         "image":"acorn_object.png",
          "imageheight":20,
          "imagewidth":20,
          "type":"Star"
@@ -77,15 +77,11 @@
          "type":"Gravity"
         }, 
         {
-         "height":140,
          "id":8,
          "image":"tall_book.png",
          "imageheight":140,
          "imagewidth":10,
-         "type":"DynamicObject",
-         "width":10,
-         "x":0,
-         "y":0
+         "type":"DynamicObject"
         }],
  "tilewidth":66,
  "type":"tileset",
