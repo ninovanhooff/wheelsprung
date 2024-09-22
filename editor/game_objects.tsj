@@ -43,7 +43,7 @@
         }, 
         {
          "id":3,
-         "image":"trophy.png",
+         "image":"trophy_object.png",
          "imageheight":38,
          "imagewidth":38,
          "type":"Finish"
