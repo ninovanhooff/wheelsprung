@@ -69,7 +69,7 @@ const
   BITMAP_TABLE_SUFFIX: string = "-table-1" # suffix for bitmap table animations in the level editor
 
   ## offset of Chassis position (center Vect) from Player object top-left position
-  vPlayerChassisOffset: Vect = v(30.0, 36.0)
+  vPlayerChassisOffset: Vect = v(40.0, 56.0)
   ## The amount of pixels the chassis center can be outside the level bounds before the game over
   chassisLevelBoundsSlop: Float = 50.Float
 

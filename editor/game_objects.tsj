@@ -16,8 +16,8 @@
         {
          "id":0,
          "image":"player_object.png",
-         "imageheight":60,
-         "imagewidth":66,
+         "imageheight":80,
+         "imagewidth":80,
          "type":"Player"
         }, 
         {
