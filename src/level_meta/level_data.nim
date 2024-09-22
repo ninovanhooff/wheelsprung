@@ -24,7 +24,7 @@ let officialLevels*:  OrderedTable[Path, level_data.LevelMeta] = @[
   newLevelMeta(name= "Tutorial: Turn Around", path="levels/tutorial_turn_around.wmj", hash="8ae54214fef1696a6c3937a7effca5ec"),
   newLevelMeta(name= "Globe of Death", path="levels/globe_of_death.wmj", hash="20d68a3282a4098143271b72791c8db8"),
   newLevelMeta(name= "Looping", path="levels/looping.wmj", hash="eabf87e393d16a0ada15b1e65c13543c"),
-  newLevelMeta(name= "Half Pipe", path="levels/king_of_the_hill.wmj", hash="34bcc332e2046249dc08e84a7ad7edc6"),
+  newLevelMeta(name= "Half Pipe", path="levels/halfpipe.wmj", hash="34bcc332e2046249dc08e84a7ad7edc6"),
   newLevelMeta(name= "Hills", path="levels/hills.wmj", hash="4475fd63968fa4afd7d814015fc91be6"),
   newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.wmj", hash="96997bda344bcbdeedb8917b18df23ca"),
   newLevelMeta(name= "Tutorial: Gravity", path="levels/tutorial_gravity.wmj", hash="f365140dc92ec4a0cb9183a59f5e31c0"),
