@@ -232,30 +232,6 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
-const
-  rotationIndicatorRadius = 16'i32
-  rotationIndicatorSize = rotationIndicatorRadius * 2'i32
-  rotationIndicatorWidthDegrees = 6f
-
-proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
-  let
-    x = center[0] - rotationIndicatorRadius
-    y = center[1] - rotationIndicatorSize
-  # total rotation range indicator
-  gfx.drawEllipse(
-    x, y, rotationIndicatorSize, rotationIndicatorSize, 
-    3, 
-    315, 45, 
-    kColorBlack
-  )
-  # current rotation indicator
-  gfx.drawEllipse(
-    x,y - 3'i32,rotationIndicatorSize,rotationIndicatorSize,
-    9, 
-    forceDegrees - rotationIndicatorWidthDegrees, forceDegrees + rotationIndicatorWidthDegrees, 
-    kColorXOR
-  )
-
 proc resumeGameView*() =
   gfx.setFont(largeFont)
 
@@ -314,12 +290,6 @@ proc drawPlayer(state: GameState) =
     riderHeadImageTable.drawRotated(riderHeadScreenPos, riderHead.angle, flipDirection)
   else:
     riderHeadImageTable.drawRotated(riderHead, state)
-
-  let chassisTorqueDegrees = state.lastTorque / 1_000f
-  drawRotationForceIndicator(
-    riderHeadScreenPos.toVertex,
-    chassisTorqueDegrees
-  )
 
   riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
   riderTorsoImageTable.drawRotated(state.riderTorso, state)
