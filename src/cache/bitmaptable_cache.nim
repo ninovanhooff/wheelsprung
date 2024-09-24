@@ -32,7 +32,10 @@ let bitmapTableCache = BitmapTableCache()
 
 proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
   try:
+    let startTime = playdate.system.getElapsedTime
     let bitmapTable = gfx.newBitmapTable($id)
+    let endTime = playdate.system.getElapsedTime
+    print("LOAD BitmapTable: ", $id, " took ", (endTime - startTime) * 1000f, "ms")
     return newAnnotatedBitmapTable(
       bitmapTable = bitmapTable,
       frameCount = bitmapTable.getBitmapTableInfo().count.int32,
