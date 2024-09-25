@@ -104,6 +104,42 @@ proc toGravity(d8: Direction8): Vect =
     of D8_DOWN_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
     of D8_DOWN_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
 
+proc toGravityAnimation(d8: Direction8, position: Vertex): Animation =
+  var flip = kBitmapUnflipped
+  var bitmmapTableId: BitmapTableId
+  case d8
+    of D8_UP: 
+      bitmmapTableId = BitmapTableId.GravityUp
+      flip = kBitmapUnflipped
+    of D8_DOWN:
+      bitmmapTableId = BitmapTableId.GravityUp
+      flip = kBitmapFlippedY
+    of D8_LEFT:
+      bitmmapTableId = BitmapTableId.GravityRight
+      flip = kBitmapFlippedX
+    of D8_RIGHT:
+      bitmmapTableId = BitmapTableId.GravityRight
+      flip = kBitmapUnflipped
+    of D8_UP_LEFT:
+      bitmmapTableId = BitmapTableId.GravityUpRight
+      flip = kBitmapFlippedX
+    of D8_UP_RIGHT:
+      bitmmapTableId = BitmapTableId.GravityUpRight
+      flip = kBitmapUnflipped
+    of D8_DOWN_LEFT:
+      bitmmapTableId = BitmapTableId.GravityUpRight
+      flip = kBitmapFlippedXY
+    of D8_DOWN_RIGHT:
+      bitmmapTableId = BitmapTableId.GravityUpRight
+      flip = kBitmapFlippedY
+
+  return newAnimation(
+    bitmapTableId = bitmmapTableId,
+    position = position,
+    flip = flip,
+    randomStartOffset = true
+  )
+
 proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T =
   if obj.properties.isSome:
       let fillProp = obj.properties.get.findFirst(it => it.name == name)
@@ -333,15 +369,11 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         randomStartOffset = true
       ))
     of ClassIds.Gravity:
-      level.assets.add(newAnimation(
-        bitmapTableId = BitmapTableId.Gravity,
-        position = position,
-        flip = gid.lcdBitmapFlip,
-        randomStartOffset = true
-      ))
+      let direction8 = obj.direction8
+      level.assets.add(direction8.toGravityAnimation(position))
       let gravityZone = newGravityZone(
         position = position,
-        gravity = obj.direction8().toGravity(),
+        gravity = direction8.toGravity(),
       )
       level.gravityZones.add(gravityZone)
     of ClassIds.TallBook:

@@ -22,7 +22,9 @@ type
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
     Nuts = "images/nuts"
-    Gravity = "images/gravity"
+    GravityUp = "images/gravity/gravity-up"
+    GravityUpRight = "images/gravity/gravity-up-right"
+    GravityRight = "images/gravity/gravity-right"
     LevelStatus = "images/level_select/level-status"
     GameResultActionArrows = "images/game_result/action-arrows"
   BitmapTableCache = TableRef[BitmapTableId, AnnotatedBitmapTable]

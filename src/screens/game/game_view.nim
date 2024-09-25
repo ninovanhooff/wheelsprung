@@ -36,7 +36,6 @@ var
   riderLowerArmImageTable: AnnotatedBitmapTable
   riderUpperLegImageTable: AnnotatedBitmapTable
   riderLowerLegImageTable: AnnotatedBitmapTable
-  gravityImageTable: AnnotatedBitmapTable
   starImage: LCDBitmap
   gridImage: LCDBitmap
 
@@ -61,7 +60,6 @@ proc initGameView*() =
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
-  gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
   smallFont = getOrLoadFont("fonts/Roobert-10-Bold")
   largeFont = getOrLoadFont("fonts/Roobert-11-Medium")
   initGameCoin()
