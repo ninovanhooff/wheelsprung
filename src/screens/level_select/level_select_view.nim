@@ -8,6 +8,8 @@ import options
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import cache/font_cache
+import level_meta/level_data
+import std/tables
 
 const 
   borderInset = 7
@@ -19,19 +21,28 @@ let
   levelDrawRegion = Rect(x: 30,y: 70, width: 342, height:110)
 
 var 
-  backgroundBitmap: LCDBitmap
   levelStatusImages: AnnotatedBitmapTable
   levelFont: LCDFont
+  activeLevelTheme: LevelTheme
 
 proc initLevelSelectView*() =
-  if not backgroundBitmap.isNil: return # already initialized
+  if not levelStatusImages.isNil: return # already initialized
     
-  backgroundBitmap = getOrLoadBitmap("images/level_select/select-bg")
   levelStatusImages = getOrLoadBitmapTable(BitmapTableId.LevelStatus)
   levelFont = getOrLoadFont("fonts/m6x11-12.pft")
 
-proc drawBackground() =
-  backgroundBitmap.draw(0, 0, kBitmapUnflipped)
+proc getBackground(levelTheme: LevelTheme): LCDBitmap =
+  case levelTheme
+  of LevelTheme.Kitchen: return getOrLoadBitmap(LevelSelectBgKitchen)
+  of LevelTheme.Bath: return getOrLoadBitmap(LevelSelectBgBath)
+  of LevelTheme.Bookshelf: return getOrLoadBitmap(LevelSelectBgBookshelf)
+  of LevelTheme.Desk: return getOrLoadBitmap(LevelSelectBgDesk)
+  of LevelTheme.Space: return getOrLoadBitmap(LevelSelectBgSpace)
+  of LevelTheme.Plants: return getOrLoadBitmap(LevelSelectBgPlants)
+
+proc drawBackground(levelTheme: LevelTheme) =
+  levelTheme.getBackground().draw(0, 0, kBitmapUnflipped)
+  activeLevelTheme = levelTheme
 
 proc getLevelStatusImage(progress: LevelProgress): LCDBitmap =
   if progress.bestTime.isNone:
@@ -103,6 +114,9 @@ proc prepareDrawRegion(screen: LevelSelectScreen) =
     gfx.drawLine(x, levelDrawRegion.y, x, levelDrawRegion.y + levelDrawRegion.height, 2, kColorBlack)
 
 proc draw*(screen: LevelSelectScreen) =
+  if activeLevelTheme != screen.levelTheme:
+    drawBackground(screen.levelTheme)
+    
   gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
 
   prepareDrawRegion(screen)
@@ -114,6 +128,6 @@ proc draw*(screen: LevelSelectScreen) =
   gfx.clearClipRect()
 
 
-proc resumeLevelSelectView*() =
+proc resumeLevelSelectView*(screen: LevelSelectScreen) =
   gfx.setFont(levelFont)
-  drawBackground()
+  drawBackground(screen.levelTheme)
