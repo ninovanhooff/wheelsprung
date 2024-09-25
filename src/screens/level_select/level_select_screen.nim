@@ -19,7 +19,7 @@ import screens/screen_types
 import screens/settings/settings_screen
 
 const
-  initialUnlockedLevels = 20
+  initialUnlockedLevels = 30
   pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
 
@@ -77,7 +77,6 @@ proc selectRow(screen: LevelSelectScreen, idx: int) =
   elif screen.selectedIndex > screen.levelRows.high:
     screen.selectedIndex = 0
 
-  print "selected row: ", screen.selectedIndex, " ", screen.levelRows.high
   screen.levelTheme = screen.levelRows[screen.selectedIndex].levelMeta.theme
 
 proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =

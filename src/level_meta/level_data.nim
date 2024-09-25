@@ -53,7 +53,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
 
   newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.wmj", theme= Desk, hash="abcdef0123456789abcdef0123456789"),
   newLevelMeta(name= "Leg Up", path="levels/leg_up.wmj", theme= Desk, hash="8451a6de4bdcd0dfd70bb4386c1c11c9"),
-  newLevelMeta(name= "Balancing Act", path="levels/ballancing_act.wmj", theme= Desk, hash="1234567890abcdef1234567890abcdef"),
+  newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.wmj", theme= Desk, hash="1234567890abcdef1234567890abcdef"),
   newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.wmj", theme= Desk, hash="fedcba0987654321fedcba0987654321")
 ]
   .map(meta => (meta.path, meta)) # use path as key
