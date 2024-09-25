@@ -52,7 +52,6 @@ proc fallbackBitmap*(): LCDBitmap =
 proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32, frameRepeat: int32): Animation =
   let firstFrame = bitmapTable.getBitmap(0)
   let frameCount: int32 = bitmapTable.getBitmapTableInfo().count.int32
-  print "newAnim", frameRepeat
   return Animation(
     bitmapTable: bitmapTable, 
     frameCount: frameCount,
