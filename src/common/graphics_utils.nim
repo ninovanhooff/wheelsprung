@@ -67,14 +67,14 @@ proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitma
     frameRepeat: frameRepeat,
   )
 
-proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitmapFlip, randomStartOffset: bool): Animation =
+proc newAnimation*(bitmapTableId: BitmapTableId, position: Vertex, flip: LCDBitmapFlip, frameRepeat = 2'i32, randomStartOffset: bool): Animation =
   let annotatedTable = getOrLoadBitmapTable(bitmapTableId)
   return newAnimation(
     bitmapTable = annotatedTable.bitmapTable, 
     position = position,
     flip = flip,
     startOffset = if randomStartOffset: rand(annotatedTable.frameCount).int32 else: 0'i32,
-    frameRepeat = 2
+    frameRepeat = frameRepeat
   )
 
 proc drawLineOutlined*(v0: Vect, v1: Vect, width: int32, innerColor: LCDSolidColor) =

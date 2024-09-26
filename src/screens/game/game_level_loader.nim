@@ -137,6 +137,7 @@ proc toGravityAnimation(d8: Direction8, position: Vertex): Animation =
     bitmapTableId = bitmmapTableId,
     position = position,
     flip = flip,
+    frameRepeat = 3,
     randomStartOffset = true
   )
 
