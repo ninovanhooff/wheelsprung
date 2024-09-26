@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Load relese env variables
-# set a
-# source release.env set
-# set +a
+# Load release env variables
 set -o allexport
 source release.env set
-# +o allexport
