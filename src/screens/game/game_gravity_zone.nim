@@ -87,16 +87,20 @@ proc addGravityZones*(state: GameState) =
   print "state.gravityZones: " & repr(state.gravityZones)
   state.space.addGravityZones(state.gravityZones)
 
-proc drawGravityZones*(gravityZones: seq[GravityZone], camState: CameraState) =
+proc drawGravityZones*(gravityZones: seq[GravityZone], activeDirection: Direction8, camState: CameraState) =
   for gravityZone in gravityZones:
+    let stencilPatternId = if gravityZone.direction == activeDirection: none(LCDPatternId) else: some(Gray)
+    gravityZone.animation.stencilPatternId = stencilPatternId
     gravityZone.animation.drawAsset(camState)
 
 let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityShape: pointer, unused: pointer) {.cdecl raises: [].} =
   let gravityShape = cast[Shape](gravityShape)
   let gravityZone = cast[GravityZone](gravityShape.userData)
   echo "hit gravity zone:" & repr(gravityZone)
+
+  let state = cast[GameState](space.userData)
+  state.gravityDirection = gravityZone.direction
   let newGravity = gravityZone.direction.toVect
-  gravityZone.animation.stencilPatternId = none(LCDPatternId)
   space.gravity = newGravity
 
 let gravityZoneBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =

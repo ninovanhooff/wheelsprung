@@ -207,6 +207,7 @@ type GameState* = ref object of RootObj
 
   # Physics
   space*: Space
+  gravityDirection*: Direction8
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect

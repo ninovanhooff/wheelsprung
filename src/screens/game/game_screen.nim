@@ -210,12 +210,14 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
     level: level, 
     background: background,
     space: space,
+    gravityDirection: Direction8.D8_DOWN,
     ghostRecording: newGhost(),
     ghostPlayback: ghostPlayBack.get(newGhost()),
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
     starEnabled: level.id.isStarEnabled,
   )
+  space.userData= cast[DataPointer](state) # Caution: cyclic reference: space -> state -> space
   initGameBike(state)
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initGameRider(state, riderPosition)

@@ -313,7 +313,7 @@ proc drawGame*(statePtr: ptr GameState) =
       drawAsset(asset, cameraState)
 
     # gravity zones
-    drawGravityZones(state.gravityZones, cameraState)
+    drawGravityZones(state.gravityZones, state.gravityDirection, cameraState)
 
     # coins
     drawCoins(state.remainingCoins, camVertex)
