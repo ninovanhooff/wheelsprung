@@ -184,8 +184,13 @@ proc readDataFileContents(path: string): string {.raises: [].} =
 proc parseLevel(path: string): (LevelEntity, string) {.raises: [].} =
   let jsonString = readDataFileContents(path)
   try:
+    markStartTime()
     let contentHash = getSHA3(jsonString)
-    return (parseJson(jsonString).to(LevelEntity), contentHash)
+    printT("Level hashed")
+    markStartTime()
+    let levelEntity = jsonString.parseJson().to(LevelEntity)
+    printT("Level parsed")
+    return (levelEntity, contentHash)
   except:
     print("Level parse failed:")
     print(getCurrentExceptionMsg())
@@ -454,6 +459,7 @@ proc loadLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
       return
 
 proc loadLevel*(path: string): Level =
+  print "Loading level: " & $path
   var level = Level(
     id: path,
     terrainPolygons: @[],

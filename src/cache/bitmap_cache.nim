@@ -22,7 +22,9 @@ let bitmapCache = BitmapCache()
 proc getOrLoadBitmap*(path: string): LCDBitmap =
   try:
     if not bitmapCache.hasKey(path):
+      markStartTime()
       bitmapCache[path] = gfx.newBitmap(path)
+      printT("LOAD Bitmap: ", path)
     
     return bitmapCache[path]
   except Exception:

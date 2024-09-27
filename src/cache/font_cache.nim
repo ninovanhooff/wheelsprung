@@ -14,7 +14,9 @@ let fontCache = FontCache()
 proc getOrLoadFont*(path: string): LCDFont =
   try:
     if not fontCache.hasKey(path):
+      markStartTime()
       fontCache[path] = gfx.newFont(path)
+      printT("LOAD Font: ", path)
     
     return fontCache[path]
   except Exception:
