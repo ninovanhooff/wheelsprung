@@ -1,5 +1,6 @@
 import std/options
 import playdate/api
+import chipmunk7
 {. warning[UnusedImport]:off .}
 import common/utils
 template gfx*: untyped = playdate.graphics
@@ -49,6 +50,13 @@ type
     startOffset*: int32
     frameRepeat*: int32
       ## divisor of the frame rate
+  
+  Camera* = Vect
+  CameraState* = object
+    camera*: Camera
+    camVertex*: Vertex
+    viewport*: LCDRect
+    frameCounter*: int32
 
 const LCD_RECT_ZERO* = makeLCDRect(0, 0, 0, 0)
 

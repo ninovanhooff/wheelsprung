@@ -7,7 +7,7 @@ import std/sequtils
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
-import game_bike, game_finish, game_ghost, game_killer, game_coin
+import game_bike, game_finish, game_ghost, game_killer, game_coin, game_gravity_zone
 import game_dynamic_object
 import common/graphics_utils
 import common/lcd_patterns
@@ -240,20 +240,6 @@ proc message(gameResult: GameResult): string =
   of GameResultType.GameOver:
     return "Game Over"
 
-method getBitmap(asset: Asset, frameCounter: int32): LCDBitmap {.base.} =
-  print("getImage not implemented for: ", repr(asset))
-  return fallbackBitmap()
-
-method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
-  return asset.image
-
-method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
-  if asset.frameRepeat < 1:
-    ## no animation
-    return asset.bitmapTable.getBitmap(asset.startOffset)
-  let frameIdx = (asset.startOffset + frameCounter div asset.frameRepeat) mod asset.frameCount
-  return asset.bitmapTable.getBitmap(frameIdx)
-
 proc drawPlayer(state: GameState) =
   let chassis = state.chassis
   let camera = state.camera
@@ -295,24 +281,13 @@ proc drawPlayer(state: GameState) =
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
   riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
 
-proc drawAssets(level: Level, camVertex: Vertex, viewport: LCDRect, frameCounter: int32) =
-  for asset in level.assets:
-    if asset.stencilPatternId.isSome:
-      setStencil(asset.stencilPatternId.get)
-
-    if asset.bounds.intersects(viewport):
-      let assetScreenPos = asset.position - camVertex
-      asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
-
-    if asset.stencilPatternId.isSome:
-      gfx.setStencil(nil)
-
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
   let camera = state.camera
   let camVertex = camera.toVertex()
   let viewport: LCDRect = offsetScreenRect(camVertex)
+  let cameraState = newCameraState(camera, camVertex, viewport, state.frameCounter)
   let frameCounter: int32 = state.frameCounter
 
 
@@ -334,11 +309,11 @@ proc drawGame*(statePtr: ptr GameState) =
 
   if debugDrawTextures:
     # assets
-    bench(proc() =
-      drawAssets(level, camVertex, viewport, frameCounter),
-      "drawAssets",
-      50
-    )
+    for asset in level.assets:
+      drawAsset(asset, cameraState)
+
+    # gravity zones
+    drawGravityZones(state.gravityZones, cameraState)
 
     # coins
     drawCoins(state.remainingCoins, camVertex)

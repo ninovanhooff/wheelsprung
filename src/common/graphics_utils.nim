@@ -1,3 +1,5 @@
+{.push raises: [].}
+
 import playdate/api
 import chipmunk7
 import std/math
@@ -32,6 +34,36 @@ proc dotVertex*(v1: Vertex, v2: Vertex): int32 {.inline.} =
   ## 2D Dot product of two vectors
   return v1.x * v2.x + v1.y * v2.y
 
+proc fallbackBitmap*(): LCDBitmap = 
+  let errorPattern = makeLCDOpaquePattern(0x0, 0x3C, 0x5A, 0x66, 0x66, 0x5A, 0x3C, 0x0)
+  gfx.newBitmap(8,8, errorPattern)
+
+# LCDRect
+
+proc encapsulate*(lcdRect: var LCDRect, vertex: Vertex) =
+  ## Stretch the lcdRect to include the vertex
+  lcdRect.left = min(lcdRect.left, vertex.x)
+  lcdRect.right = max(lcdRect.right, vertex.x)
+  lcdRect.top = min(lcdRect.top, vertex.y)
+  lcdRect.bottom = max(lcdRect.bottom, vertex.y)
+
+proc contains*(lcdRect: LCDRect, vertex: Vertex): bool =
+  return vertex.x >= lcdRect.left and vertex.x <= lcdRect.right and vertex.y >= lcdRect.top and vertex.y <= lcdRect.bottom
+
+proc intersects*(lcdRect: LCDRect, other: LCDRect): bool =
+  return lcdRect.left <= other.right and lcdRect.right >= other.left and lcdRect.top <= other.bottom and lcdRect.bottom >= other.top
+
+proc offsetBy*(lcdRect: LCDRect, offset: Vertex): LCDRect =
+  return LCDRect(
+    left: lcdRect.left + offset.x,
+    right: lcdRect.right + offset.x,
+    top: lcdRect.top + offset.y,
+    bottom: lcdRect.bottom + offset.y
+  )
+
+proc offsetScreenRect*(vertex: Vertex): LCDRect {.inline.} =
+  return LCD_SCREEN_RECT.offsetBy(vertex)
+
 proc drawRotated*(annotatedT: AnnotatedBitmapTable, center: Vect, angle: float32, flip: LCDBitmapFlip = kBitmapUnflipped) {.inline.} =
   ## angle is in radians
   let frameCount = annotatedT.frameCount
@@ -47,12 +79,33 @@ proc drawRotated*(annotatedT: AnnotatedBitmapTable, center: Vect, angle: float32
   let y: int32 = (center.y.float32 - annotatedT.halfFrameHeight).round.int32
   bitmap.draw(x, y, flip)
 
-proc fallbackBitmap*(): LCDBitmap = 
-  let errorPattern = makeLCDOpaquePattern(0x0, 0x3C, 0x5A, 0x66, 0x66, 0x5A, 0x3C, 0x0)
-  gfx.newBitmap(8,8, errorPattern)
+method getBitmap(asset: Asset, frameCounter: int32): LCDBitmap {.base.} =
+  print("getImage not implemented for: ", repr(asset))
+  return fallbackBitmap()
+
+method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
+  return asset.image
+
+method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
+  if asset.frameRepeat < 1:
+    ## no animation
+    return asset.bitmapTable.getBitmap(asset.startOffset)
+  let frameIdx = (asset.startOffset + frameCounter div asset.frameRepeat) mod asset.frameCount
+  return asset.bitmapTable.getBitmap(frameIdx)
 
 proc setStencil*(patternId: LCDPatternId) {.inline.} =
   gfx.setStencilImage(patternId.getOrCreateBitmap(), true)
+
+proc drawAsset*(asset: Asset, camState: CameraState) =
+  if asset.stencilPatternId.isSome:
+    setStencil(asset.stencilPatternId.get)
+
+  if asset.bounds.intersects(camState.viewport):
+    let assetScreenPos = asset.position - camState.camVertex
+    asset.getBitmap(camState.frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
+
+  if asset.stencilPatternId.isSome:
+    gfx.setStencil(nil)
 
 proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32, frameRepeat: int32, stencilPattern: Option[LCDPatternId] = none(LCDPatternId)): Animation =
   let firstFrame = bitmapTable.getBitmap(0)
@@ -150,29 +203,3 @@ proc inset*(rect: Rect, size: int32): Rect =
     width: rect.width - size * 2, 
     height: rect.height - size * 2
   )
-
-# LCDRect
-
-proc encapsulate*(lcdRect: var LCDRect, vertex: Vertex) =
-  ## Stretch the lcdRect to include the vertex
-  lcdRect.left = min(lcdRect.left, vertex.x)
-  lcdRect.right = max(lcdRect.right, vertex.x)
-  lcdRect.top = min(lcdRect.top, vertex.y)
-  lcdRect.bottom = max(lcdRect.bottom, vertex.y)
-
-proc contains*(lcdRect: LCDRect, vertex: Vertex): bool =
-  return vertex.x >= lcdRect.left and vertex.x <= lcdRect.right and vertex.y >= lcdRect.top and vertex.y <= lcdRect.bottom
-
-proc intersects*(lcdRect: LCDRect, other: LCDRect): bool =
-  return lcdRect.left <= other.right and lcdRect.right >= other.left and lcdRect.top <= other.bottom and lcdRect.bottom >= other.top
-
-proc offsetBy*(lcdRect: LCDRect, offset: Vertex): LCDRect =
-  return LCDRect(
-    left: lcdRect.left + offset.x,
-    right: lcdRect.right + offset.x,
-    top: lcdRect.top + offset.y,
-    bottom: lcdRect.bottom + offset.y
-  )
-
-proc offsetScreenRect*(vertex: Vertex): LCDRect {.inline.} =
-  return LCD_SCREEN_RECT.offsetBy(vertex)

@@ -94,44 +94,6 @@ proc toDirection8(str: string): Direction8 =
       print("Unknown direction: " & $str)
       return D8_FALLBACK
 
-proc toGravityAnimation(d8: Direction8, position: Vertex): Animation =
-  var flip = kBitmapUnflipped
-  var bitmmapTableId: BitmapTableId
-  case d8
-    of D8_UP: 
-      bitmmapTableId = BitmapTableId.GravityUp
-      flip = kBitmapUnflipped
-    of D8_DOWN:
-      bitmmapTableId = BitmapTableId.GravityUp
-      flip = kBitmapFlippedY
-    of D8_LEFT:
-      bitmmapTableId = BitmapTableId.GravityRight
-      flip = kBitmapFlippedX
-    of D8_RIGHT:
-      bitmmapTableId = BitmapTableId.GravityRight
-      flip = kBitmapUnflipped
-    of D8_UP_LEFT:
-      bitmmapTableId = BitmapTableId.GravityUpRight
-      flip = kBitmapFlippedX
-    of D8_UP_RIGHT:
-      bitmmapTableId = BitmapTableId.GravityUpRight
-      flip = kBitmapUnflipped
-    of D8_DOWN_LEFT:
-      bitmmapTableId = BitmapTableId.GravityUpRight
-      flip = kBitmapFlippedXY
-    of D8_DOWN_RIGHT:
-      bitmmapTableId = BitmapTableId.GravityUpRight
-      flip = kBitmapFlippedY
-
-  return newAnimation(
-    bitmapTableId = bitmmapTableId,
-    position = position,
-    flip = flip,
-    frameRepeat = 3,
-    randomStartOffset = true,
-    stencilPattern = some(Gray)
-  )
-
 proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T =
   if obj.properties.isSome:
       let fillProp = obj.properties.get.findFirst(it => it.name == name)
@@ -361,13 +323,8 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         randomStartOffset = true
       ))
     of ClassIds.Gravity:
-      let direction8 = obj.direction8
-      level.assets.add(direction8.toGravityAnimation(position))
-      let gravityZone = newGravityZone(
-        position = position,
-        direction = direction8,
-      )
-      level.gravityZones.add(gravityZone)
+      let spec = newGravityZoneSpec(position, obj.direction8)
+      level.gravityZones.add(spec)
     of ClassIds.TallBook:
       # todo: should a default mass be set?
       return loadAsDynamicObject(level, obj, some(BitmapTableId.TallBook))

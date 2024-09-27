@@ -10,7 +10,6 @@ import game_constants
 export game_constants
 
 type 
-  Camera* = Vect
   DriveDirection* = Float
   RotationDirection* = DriveDirection
 
@@ -32,6 +31,10 @@ type
     position*: Vertex
     flip*: LCDBitmapFlip
   GravityZone* = ref object
+    position*: Vertex
+    direction*: Direction8
+    animation*: Animation
+  GravityZoneSpec* = ref object
     position*: Vertex
     direction*: Direction8
   GameCollisionType* = CollisionType
@@ -156,7 +159,7 @@ type Level* = ref object of RootObj
   dynamicCircles*: seq[DynamicCircleSpec]
   coins*: seq[Coin]
   killers*: seq[Killer]
-  gravityZones*: seq[GravityZone]
+  gravityZones*: seq[GravityZoneSpec]
   texts*: seq[Text]
   finish*: Finish
   starPosition*: Option[Vertex]
@@ -184,6 +187,7 @@ type GameState* = ref object of RootObj
   starEnabled*: bool
     ## If the star is enabled, the player can collect it. Stars are enabled by finishing the level at least once.
   killers*: seq[Killer]
+  gravityZones*: seq[GravityZone]
   gameResult*: Option[GameResult]
 
   # Input
@@ -291,8 +295,11 @@ proc newKiller*(position: Vertex): Killer =
 proc newKiller*(bounds: LCDRect, body: Body): Killer =
   result = Killer(bounds: bounds, body: body)
 
-proc newGravityZone*(position: Vertex, direction: Direction8): GravityZone =
-  result = GravityZone(position: position, direction: direction)
+proc newGravityZone*(position: Vertex, direction: Direction8, animation: Animation): GravityZone =
+  result = GravityZone(position: position, direction: direction, animation: animation)
+
+proc newGravityZoneSpec*(position: Vertex, direction: Direction8): GravityZoneSpec =
+  result = GravityZoneSpec(position: position, direction: direction)
 
 proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
   result = Finish(position: position, flip: flip)
@@ -316,6 +323,14 @@ proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
     value: value,
     position: position,
     alignment: alignment,
+  )
+
+proc newCameraState*(camera: Camera, camVertex: Vertex, viewport: LCDRect, frameCounter: int32): CameraState =
+  result = CameraState(
+    camera: camera,
+    camVertex: camVertex,
+    viewport: viewport,
+    frameCounter: frameCounter,
   )
 
 proc getRiderBodies*(state: GameState): seq[Body] =
