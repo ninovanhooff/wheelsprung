@@ -39,9 +39,21 @@ proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): boo
   return false
 
 ### Logging
+var printTStartTime: Seconds = -1f
+
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
+
+proc printT*(things: varargs[string, `$`]) =
+  let duration = playdate.system.getElapsedTime - printTStartTime
+  printTStartTime = -1f
+  ## Print any type by calling $ on it to convert it to string
+  playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t") & " in ms:" & $(duration * 1000f))
+
+proc markStartTime*() =
+  ## Mark the start time for the printT function
+  printTStartTime = playdate.system.getElapsedTime
 
 ### Bench / trace / profile
 
