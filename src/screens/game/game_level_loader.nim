@@ -68,6 +68,8 @@ const
 
   BITMAP_TABLE_SUFFIX: string = "-table-1" # suffix for bitmap table animations in the level editor
 
+  D8_FALLBACK* = D8_UP
+
   ## offset of Chassis position (center Vect) from Player object top-left position
   vPlayerChassisOffset: Vect = v(40.0, 56.0)
   ## The amount of pixels the chassis center can be outside the level bounds before the game over
@@ -91,18 +93,6 @@ proc toDirection8(str: string): Direction8 =
     else:
       print("Unknown direction: " & $str)
       return D8_FALLBACK
-
-const DIAGONAL_GRAVVITY_MAGNITUDE: float32 = 0.70710678118 * GRAVITY_MAGNITUDE
-proc toGravity(d8: Direction8): Vect =
-  return case d8
-    of D8_UP: v(0.0, -GRAVITY_MAGNITUDE)
-    of D8_DOWN: v(0.0, GRAVITY_MAGNITUDE)
-    of D8_LEFT: v(-GRAVITY_MAGNITUDE, 0.0)
-    of D8_RIGHT: v(GRAVITY_MAGNITUDE, 0.0)
-    of D8_UP_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
-    of D8_UP_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
-    of D8_DOWN_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
-    of D8_DOWN_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
 
 proc toGravityAnimation(d8: Direction8, position: Vertex): Animation =
   var flip = kBitmapUnflipped
@@ -138,7 +128,8 @@ proc toGravityAnimation(d8: Direction8, position: Vertex): Animation =
     position = position,
     flip = flip,
     frameRepeat = 3,
-    randomStartOffset = true
+    randomStartOffset = true,
+    stencilPattern = some(Gray)
   )
 
 proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T =
@@ -374,7 +365,7 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.assets.add(direction8.toGravityAnimation(position))
       let gravityZone = newGravityZone(
         position = position,
-        gravity = direction8.toGravity(),
+        direction = direction8,
       )
       level.gravityZones.add(gravityZone)
     of ClassIds.TallBook:

@@ -1,3 +1,4 @@
+import std/options
 import playdate/api
 {. warning[UnusedImport]:off .}
 import common/utils
@@ -21,6 +22,12 @@ type
   Rect* {.requiresInit.} = object of RootObj
     x*, y*, width*, height*: int32
 
+  LCDPatternId* {.pure.} = enum
+    Dot1
+    Grid4
+    Gray
+    GrayTransparent
+
   AnnotatedBitmapTable* = ref object of RootObj
     bitmapTable*: LCDBitmapTable
     frameCount*: int32
@@ -33,6 +40,7 @@ type
     position*: Vertex
     bounds*: LCDRect
     flip*: LCDBitmapFlip
+    stencilPatternId*: Option[LCDPatternId]
   Texture* = ref object of Asset
     image*: LCDBitmap
   Animation* = ref object of Asset

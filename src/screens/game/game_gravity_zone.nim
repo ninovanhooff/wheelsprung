@@ -5,6 +5,19 @@ import game_types
 const 
   gravityZoneRadius = 20.0.Float
   vGravityZoneCenterOffset = v(gravityZoneRadius, gravityZoneRadius)
+  DIAGONAL_GRAVVITY_MAGNITUDE: float32 = 0.70710678118 * GRAVITY_MAGNITUDE
+
+
+proc toVect(d8: Direction8): Vect =
+  return case d8
+    of D8_UP: v(0.0, -GRAVITY_MAGNITUDE)
+    of D8_DOWN: v(0.0, GRAVITY_MAGNITUDE)
+    of D8_LEFT: v(-GRAVITY_MAGNITUDE, 0.0)
+    of D8_RIGHT: v(GRAVITY_MAGNITUDE, 0.0)
+    of D8_UP_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_UP_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_DOWN_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
+    of D8_DOWN_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
 
 proc addGravityZones*(space: Space, gravityZones: seq[GravityZone]) =
   for gravityZone in gravityZones:
@@ -19,7 +32,7 @@ let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityShape:
   let gravityShape = cast[Shape](gravityShape)
   let gravityZone = cast[GravityZone](gravityShape.userData)
   echo "hit gravity zone:" & repr(gravityZone)
-  let newGravity = gravityZone.gravity
+  let newGravity = gravityZone.direction.toVect
   space.gravity = newGravity
 
 let gravityZoneBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =

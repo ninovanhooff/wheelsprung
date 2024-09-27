@@ -14,6 +14,10 @@ type
   DriveDirection* = Float
   RotationDirection* = DriveDirection
 
+  Direction8* = enum
+    ## 4 horizontal and 4 diagonal directions
+    D8_UP, D8_UP_RIGHT, D8_RIGHT, D8_DOWN_RIGHT, D8_DOWN, D8_DOWN_LEFT, D8_LEFT, D8_UP_LEFT
+
   Coin* = ref object
     position*: Vertex
     bounds*: LCDRect
@@ -29,7 +33,7 @@ type
     flip*: LCDBitmapFlip
   GravityZone* = ref object
     position*: Vertex
-    gravity*: Vect
+    direction*: Direction8
   GameCollisionType* = CollisionType
 
   RiderAttitudePosition* {.pure.} = enum
@@ -78,8 +82,8 @@ type
     position*: Vertex
     alignment*: TextAlignment
 
-const GRAVITY_MAGNITUDE*: Float = 90.0
-
+const 
+  GRAVITY_MAGNITUDE*: Float = 90.0
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
@@ -141,13 +145,6 @@ const GameShapeFilters* = (
   ),
   # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
-
-
-type Direction8* = enum
-  ## 4 horizontal and 4 diagonal directions
-  D8_UP, D8_UP_RIGHT, D8_RIGHT, D8_DOWN_RIGHT, D8_DOWN, D8_DOWN_LEFT, D8_LEFT, D8_UP_LEFT
-
-const D8_FALLBACK* = D8_UP
 
 type Level* = ref object of RootObj
   id*: Path
@@ -294,8 +291,8 @@ proc newKiller*(position: Vertex): Killer =
 proc newKiller*(bounds: LCDRect, body: Body): Killer =
   result = Killer(bounds: bounds, body: body)
 
-proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
-  result = GravityZone(position: position, gravity: gravity)
+proc newGravityZone*(position: Vertex, direction: Direction8): GravityZone =
+  result = GravityZone(position: position, direction: direction)
 
 proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
   result = Finish(position: position, flip: flip)

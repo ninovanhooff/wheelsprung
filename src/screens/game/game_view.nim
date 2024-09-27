@@ -295,6 +295,18 @@ proc drawPlayer(state: GameState) =
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
   riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
 
+proc drawAssets(level: Level, camVertex: Vertex, viewport: LCDRect, frameCounter: int32) =
+  for asset in level.assets:
+    if asset.stencilPatternId.isSome:
+      setStencil(asset.stencilPatternId.get)
+
+    if asset.bounds.intersects(viewport):
+      let assetScreenPos = asset.position - camVertex
+      asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
+
+    if asset.stencilPatternId.isSome:
+      gfx.setStencil(nil)
+
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
@@ -322,10 +334,11 @@ proc drawGame*(statePtr: ptr GameState) =
 
   if debugDrawTextures:
     # assets
-    for asset in level.assets:
-      if asset.bounds.intersects(viewport):
-        let assetScreenPos = asset.position - camVertex
-        asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
+    bench(proc() =
+      drawAssets(level, camVertex, viewport, frameCounter),
+      "drawAssets",
+      50
+    )
 
     # coins
     drawCoins(state.remainingCoins, camVertex)
