@@ -10,7 +10,7 @@ import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
 import game_terrain
 import game_dynamic_object
-import game_camera
+import game_camera_pid
 import sound/game_sound
 import common/shared_types
 import game_types, game_constants
@@ -241,6 +241,7 @@ proc onResetGame() {.raises: [].} =
     background = state.background,
     ghostPlayback = some(pickBestGhost(state.ghostRecording, state.ghostPlayback))
   )
+
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =
@@ -303,6 +304,7 @@ method resume*(gameScreen: GameScreen) =
 
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
+
 
 method update*(gameScreen: GameScreen): int =
   handleInput(state)
