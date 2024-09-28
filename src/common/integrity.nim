@@ -1,10 +1,18 @@
-import sha3
 import options
+import strutils
 import common/save_slot_types
 import common/shared_types
+import murmurhash
 
-const GameResultSalt* {.strdefine.}: string = "NO_SALT"
+const LevelSalt {.strdefine.}: string = "NO_LEVEL_SALT" # Replaced by actual value in config.nims
+const GameResultSalt {.strdefine.}: string = "NO_GAME_RESULT_SALT"
 
+proc murmurHash(s: string): string =
+  let arr = MurmurHash3_x64_128(s)
+  return arr[1].toHex & arr[0].toHex
+
+proc levelContentHash*(levelContent:string): string =
+  return murmurHash(levelContent & LevelSalt)
 
 proc calculateHash(progress: LevelProgress): string =
   if progress.bestTime.isNone:
@@ -12,7 +20,7 @@ proc calculateHash(progress: LevelProgress): string =
 
   let bestTime = $progress.bestTime.get()
   let hasCollectedStar = $progress.hasCollectedStar
-  return getSHA3(
+  return murmurHash(
     progress.levelId & bestTime & hasCollectedStar & GameResultSalt
   )
 

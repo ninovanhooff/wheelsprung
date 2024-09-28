@@ -1,7 +1,7 @@
 import chipmunk7
 import chipmunk_utils
-import sha3
 import options
+import common/integrity
 import common/utils
 import sugar
 import std/math
@@ -187,11 +187,11 @@ proc parseLevel(path: string): (LevelEntity, string) {.raises: [].} =
   let jsonString = readDataFileContents(path)
   try:
     markStartTime()
-    let contentHash = getSHA3(jsonString)
-    printT("Level hashed")
-    markStartTime()
     let levelEntity = jsonString.parseJson().to(LevelEntity)
     printT("Level parsed")
+    markStartTime()
+    let contentHash = jsonString.levelContentHash()
+    printT("Level hashed", contentHash)
     return (levelEntity, contentHash)
   except:
     print("Level parse failed:")
