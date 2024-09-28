@@ -28,13 +28,13 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.wmj", theme= Bath, hash="71584fd5114a1ecafa63111a5a4f7354"),
   newLevelMeta(name= "King of the Hill", path="levels/king_of_the_hill.wmj", theme= Bath, hash="b1"),
-  newLevelMeta(name= "Hills", path="levels/hills.wmj", theme= Bath, hash="4475fd63968fa4afd7d814015fc91be6"),
+  newLevelMeta(name= "Hills", path="levels/hills.wmj", theme= Bath, hash="EE9CE18CF99447145C813C6F52417B9A"),
   newLevelMeta(name= "Globe of Death", path="levels/globe_of_death.wmj", theme= Bath, hash="20d68a3282a4098143271b72791c8db8"),
   
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.wmj", theme= Plants, hash="a1b2c3d4e5f67890123456789abcdef0"),
   newLevelMeta(name= "Globe of Death 2", path="levels/globe_of_death_2.wmj", theme= Plants, hash="722c2e6152072f982b81b61a9caa88f0"),
 
-  newLevelMeta(name= "Looping", path="levels/looping.wmj", theme= Bookshelf, hash="eabf87e393d16a0ada15b1e65c13543c"),
+  newLevelMeta(name= "Looping", path="levels/looping.wmj", theme= Bookshelf, hash="3CA32D0CC0BF5F5E7B19EEAED8DB948C"),
   newLevelMeta(name= "Hooked", path="levels/hooked.wmj", theme= Bookshelf, hash="ed66b93c85b997aaa67bd4541473fca1"),
   newLevelMeta(name= "Upside Down Hook", path="levels/upside_down_hook.wmj", theme= Bookshelf, hash="0fedcba9876543210fedcba987654321"),
   newLevelMeta(name= "Backflip", path="levels/backflip.wmj", theme= Bookshelf, hash="1ef254c88f933e227f01333030ebb1f3"),
