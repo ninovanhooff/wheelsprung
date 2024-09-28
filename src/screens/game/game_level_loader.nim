@@ -45,6 +45,8 @@ type
     `type`: string
   LevelLayerEntity = ref object of LevelPropertiesHolder
     objects: Option[seq[LevelObjectEntity]]
+    name: Option[string]
+    visible: bool
     image: Option[string]
     offsetx, offsety: Option[int32]
     `type`: string
@@ -449,6 +451,10 @@ proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
     level.background = some(bitmap)
 
 proc loadLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
+  if layer.visible == false:
+    print "Skipping invisible layer " & $layer.name
+    return
+
   case layer.`type`:
     of "objectgroup":
       level.loadObjectLayer(layer)
