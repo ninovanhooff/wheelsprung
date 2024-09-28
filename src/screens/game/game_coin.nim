@@ -50,5 +50,6 @@ proc drawCoins*(remainingCoins: seq[Coin], camVertex: Vertex) =
         continue
       
       let coinScreenPos = coin.position - camVertex
-      let coinBitmap = coinsImageTable.getBitmap(coin.coinIndex mod coinsImageTable.frameCount)
+      let coinIndex = (coin.coinIndex + coin.count) mod coinsImageTable.frameCount
+      let coinBitmap = coinsImageTable.getBitmap(coinIndex)
       coinBitmap.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
