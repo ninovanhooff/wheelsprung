@@ -78,3 +78,11 @@ proc toggleTiltAttitudeAdjustEnabled*(config: Config) =
   config.tiltAttitudeAdjustEnabled = some(
     not config.getTiltAttitudeAdjustEnabled()
   )
+
+proc getClassicCameraEnabled*(self: Config): bool =
+  return config.classicCameraEnabled.get(false)
+
+proc toggleClassicCameraEnabled*(config: Config) =
+  config.classicCameraEnabled = some(
+    not config.classicCameraEnabled.get(false)
+  )

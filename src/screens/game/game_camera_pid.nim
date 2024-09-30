@@ -33,7 +33,7 @@ proc resetCameraControllers*(target: Vect) =
   camXController.resetPID(target.x)
   camYController.resetPID(target.y)
 
-proc updateCamera*(state: GameState, snapToTarget: bool = false) =
+proc updateCameraPid*(state: GameState, snapToTarget: bool = false) =
   chassisVelocity = state.chassis.velocity
   targetCameraOffset = v(
     state.driveDirection * cameraDirectionOffsetX + chassisVelocity.x * cameraVelocityOffsetFactorX,
@@ -57,7 +57,6 @@ proc updateCamera*(state: GameState, snapToTarget: bool = false) =
     let controlY = camYController.updatePID(state.camera.y)
     let newX = moveCamera(state.camera.x, controlX)
     let newY = moveCamera(state.camera.y, controlY)
-    print "xStep: ", $(newX - state.camera.x), "yStep: ", $(newY - state.camera.y)
     state.camera = state.level.cameraBounds.clampVect(
       v(newX, newY)
     ).round()

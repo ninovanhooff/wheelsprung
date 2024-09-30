@@ -6,6 +6,7 @@ import playdate/api
 import navigation/[navigator, screen]
 import data_store/[configuration_types, configuration]
 import common/[graphics_types, graphics_utils]
+import cache/font_cache
 import editor, preview
 
 const 
@@ -26,6 +27,13 @@ let tiltAttitudeAdjustEnabledEditor: Editor = Editor(
   incrementor: (config: Config) => config.toggleTiltAttitudeAdjustEnabled,
   decrementor: (config: Config) => config.toggleTiltAttitudeAdjustEnabled,
   value: (config: Config) => (if config.getTiltAttitudeAdjustEnabled: "Device tilt" else: "d-pad")
+)
+
+let classicCameraEnabledEditor: Editor = Editor(
+  label: "Classic Camera",
+  incrementor: (config: Config) => config.toggleClassicCameraEnabled,
+  decrementor: (config: Config) => config.toggleClassicCameraEnabled,
+  value: (config: Config) => config.getClassicCameraEnabled.displayName
 )
 
 let inputTypeEditor: Editor = Editor(
@@ -98,6 +106,7 @@ proc draw*(screen: SettingsScreen) =
 
 proc init(screen: SettingsScreen) =
   screen.editors = @[
+    classicCameraEnabledEditor,
     tiltAttitudeAdjustEnabledEditor,
     inputTypeEditor, 
     inputMultiplierEditor
@@ -113,6 +122,7 @@ method pause*(screen: SettingsScreen) =
 method resume*(screen: SettingsScreen) =
   if not screen.isInitialized:
     screen.init()
+  gfx.setFont(getOrLoadFont("fonts/Roobert-11-Medium"))
   screen.config = getConfig()
   draw(screen)
 

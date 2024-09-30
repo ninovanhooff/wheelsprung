@@ -3,6 +3,7 @@ import common/shared_types
 
 type Config* = ref object of RootObj
   tiltAttitudeAdjustEnabled*: Option[bool]
+  classicCameraEnabled*: Option[bool]
   dPadInputType*: Option[DPadInputType]
   dPadInputMultiplier*: Option[float]
 

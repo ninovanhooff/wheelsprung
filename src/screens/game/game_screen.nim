@@ -5,11 +5,13 @@ import chipmunk_utils
 import playdate/api
 import common/utils
 import data_store/user_profile
+import data_store/configuration
 import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
 import game_terrain
 import game_dynamic_object
+import game_camera
 import game_camera_pid
 import sound/game_sound
 import common/shared_types
@@ -298,7 +300,10 @@ method resume*(gameScreen: GameScreen) =
     state.resetGameOnResume = false
 
   if not state.isGameStarted:
-    state.updateCamera(snapToTarget = true)
+    if getConfig().getClassicCameraEnabled():
+      state.updateCamera(snapToTarget = true)
+    else:
+      state.updateCameraPid(snapToTarget = true)
     # the update loop won't draw the game
     drawGame(addr state)
 
@@ -326,7 +331,10 @@ method update*(gameScreen: GameScreen): int =
     state.updateTimers() # increment for next frame
 
 
-  state.updateCamera()
+  if getConfig().getClassicCameraEnabled():
+    state.updateCamera()
+  else:
+    state.updateCameraPid()
   drawGame(addr state) # todo pass as object?
   return 1
 
