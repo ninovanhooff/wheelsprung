@@ -34,7 +34,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.wmj", theme= Plants, hash="8794DC01BABFDA156334585A86EF000B"),
   newLevelMeta(name= "Globe of Death 2", path="levels/globe_of_death_2.wmj", theme= Plants, hash="FB0A20BF3B27A8E41F154773C5323EF4"),
 
-  newLevelMeta(name= "Looping", path="levels/looping.wmj", theme= Bookshelf, hash="4637D1FBBF1EEA1B0965086F556AABCE"),
+  newLevelMeta(name= "Looping", path="levels/looping.wmj", theme= Bookshelf, hash="3CA32D0CC0BF5F5E7B19EEAED8DB948C"),
   newLevelMeta(name= "Hooked", path="levels/hooked.wmj", theme= Bookshelf, hash="A19C795ACD4E767DB78059B362FAE50C"),
   newLevelMeta(name= "Upside Down Hook", path="levels/upside_down_hook.wmj", theme= Bookshelf, hash="07E579B5F483454DA8317F2F1277E9F0"),
   newLevelMeta(name= "Backflip", path="levels/backflip.wmj", theme= Bookshelf, hash="BEFEAFDE2090C77399C2115F8BACA82C"),
@@ -47,7 +47,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Killveyor", path="levels/killveyor.wmj", theme= Space, hash="01F13539BF2C80BA51C6493C8EBE7D3E"),
   newLevelMeta(name= "Return to sender", path="levels/return_to_sender.wmj", theme= Space, hash="38786445A7556330267493A3984ED90E"),
 
-  newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.wmj", theme= Plants, hash="6C2F198E9F13954B832ECC78D605BCBC"),
+  newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.wmj", theme= Plants, hash="2CAC7F8FBC4BF2E90101602C9DFA012C"),
   newLevelMeta(name= "Half Pipe", path="levels/halfpipe.wmj", theme= Plants, hash="052A6854A05D68DC806296A6E5C64F70"),
   newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.wmj", theme= Plants, hash="DC16167AB074178813D718F340A11E53"),
 
