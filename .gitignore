@@ -17,6 +17,9 @@ editor/wheelsprung_template.tiled-session
 stderr.txt
 stdout.txt
 
+# binary build output
+/scripts/level_hash_updater/update_level_hashes
+
 # secrets
 release.env
 
