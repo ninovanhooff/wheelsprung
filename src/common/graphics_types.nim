@@ -1,4 +1,6 @@
+import std/options
 import playdate/api
+import chipmunk7
 {. warning[UnusedImport]:off .}
 import common/utils
 template gfx*: untyped = playdate.graphics
@@ -21,6 +23,12 @@ type
   Rect* {.requiresInit.} = object of RootObj
     x*, y*, width*, height*: int32
 
+  LCDPatternId* {.pure.} = enum
+    Dot1
+    Grid4
+    Gray
+    GrayTransparent
+
   AnnotatedBitmapTable* = ref object of RootObj
     bitmapTable*: LCDBitmapTable
     frameCount*: int32
@@ -33,12 +41,22 @@ type
     position*: Vertex
     bounds*: LCDRect
     flip*: LCDBitmapFlip
+    stencilPatternId*: Option[LCDPatternId]
   Texture* = ref object of Asset
     image*: LCDBitmap
   Animation* = ref object of Asset
     bitmapTable*: LCDBitmapTable
     frameCount*: int32
     startOffset*: int32
+    frameRepeat*: int32
+      ## divisor of the frame rate
+  
+  Camera* = Vect
+  CameraState* = object
+    camera*: Camera
+    camVertex*: Vertex
+    viewport*: LCDRect
+    frameCounter*: int32
 
 const LCD_RECT_ZERO* = makeLCDRect(0, 0, 0, 0)
 
@@ -48,7 +66,7 @@ proc newPolygon*(vertices: seq[Vertex], bounds: LCDRect, fill: LCDPattern = nil,
 when defined(DEBUG):
   proc `=copy`(dest: var Polygon; src: Polygon) =
     # Echo some message when Foo is copied
-    print "Polygon is copied:", src.bounds
+    echo "Polygon is copied:", src.bounds
     dest = newPolygon(
       vertices = src.vertices,
       bounds = src.bounds,
@@ -96,7 +114,8 @@ proc newTexture*(image: LCDBitmap, position: Vertex, flip: LCDBitmapFlip): Textu
     image: image,
     position: position,
     bounds: LCDRect(
-      left: position.x, right: position.y + image.width.int32, 
+      left: position.x, 
+      right: position.x + image.width.int32, 
       top: position.y,
       bottom: position.y + image.height.int32,
     ),

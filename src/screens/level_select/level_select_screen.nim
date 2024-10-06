@@ -20,7 +20,7 @@ import screens/cutscene/cutscene_screen
 import screens/settings/settings_screen
 
 const
-  initialUnlockedLevels = 3
+  initialUnlockedLevels = 30
   pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
 
@@ -70,6 +70,16 @@ proc updateScrollPosition(screen: LevelSelectScreen) =
     0.2
   )
 
+proc selectRow(screen: LevelSelectScreen, idx: int) =
+  screen.selectedIndex = idx
+  # wrap around
+  if screen.selectedIndex < 0:
+    screen.selectedIndex = screen.levelRows.high
+  elif screen.selectedIndex > screen.levelRows.high:
+    screen.selectedIndex = 0
+
+  screen.levelTheme = screen.levelRows[screen.selectedIndex].levelMeta.theme
+
 proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
   if screen.selectedIndex <= 0 and screen.firstLockedRowIdx.get(screen.levelRows.len) < screen.levelRows.len:
     if immediately: 
@@ -79,9 +89,7 @@ proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
   screen.downActivatedAt = none(Seconds)
   if immediately or currentTimeSeconds() > screen.upActivatedAt.get(0):
     selectPreviousPlayer.play()
-    screen.selectedIndex -= 1
-    if screen.selectedIndex < 0:
-      screen.selectedIndex = screen.levelRows.len - 1
+    screen.selectRow(screen.selectedIndex - 1)
     let timeout: Seconds = if screen.upActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
     screen.upActivatedAt = some(currentTimeSeconds() + timeout)
 
@@ -95,9 +103,7 @@ proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
   screen.upActivatedAt = none(Seconds)
   if immediately or currentTimeSeconds() > screen.downActivatedAt.get(0):
     selectNextPlayer.play()
-    screen.selectedIndex += 1
-    if screen.selectedIndex >= screen.levelRows.len:
-      screen.selectedIndex = 0
+    screen.selectRow(screen.selectedIndex + 1)
     let timeout: Seconds = if screen.downActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
     screen.downActivatedAt = some(currentTimeSeconds() + timeout)
 
@@ -155,16 +161,19 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
     let levelMeta = newLevelMeta(
       name = levelPath[levelsBasePath.len .. ^1],
       path = levelPath,
+      hash = "no hash: user level",
+      theme = LevelTheme.Space
     )
     screen.levelRows.insert(levelMeta.newLevelRow())
 
-proc selectLastOpenedLevel(screen: LevelSelectScreen) =
+proc getInitialRowIdx(screen: LevelSelectScreen): int =
   let optLastOpenedLevel = getSaveSlot().lastOpenedLevel
   if optLastOpenedLevel.isSome:
     let lastOpenedLevelPath = optLastOpenedLevel.get
     let (previousRowIdx, _) = screen.levelRows.findFirstIndexed(it => it.levelMeta.path == lastOpenedLevelPath)
     if previousRowIdx >= 0:
-      screen.selectedIndex = previousRowIdx
+      return previousRowIdx
+  return 0
 
 proc addMenuItemWorkaround(title: string, callback: proc(state: LuaStatePtr): cint {.cdecl, raises: [].}): PDMenuItemButton =
   # This is a workaround for a bug in the SDK where a crash occurs when the menu item is selected
@@ -189,9 +198,9 @@ method resume*(screen: LevelSelectScreen) =
   initLevelSelectScreen()
   initLevelSelectView()
 
-  selectLastOpenedLevel(screen)
+  screen.selectRow(getInitialRowIdx(screen))
 
-  resumeLevelSelectView()
+  resumeLevelSelectView(screen)
   backgroundAudioPlayer.play(0)
 
   discard playdate.system.addMenuItem("Panels Test", proc(menuItem: PDMenuItemButton) =

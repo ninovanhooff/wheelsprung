@@ -7,7 +7,7 @@ import std/sequtils
 import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
-import game_bike, game_finish, game_ghost, game_killer, game_coin
+import game_bike, game_finish, game_ghost, game_killer, game_coin, game_gravity_zone
 import game_dynamic_object
 import common/graphics_utils
 import common/lcd_patterns
@@ -31,13 +31,17 @@ var
 
   riderTorsoImageTable: AnnotatedBitmapTable
   riderHeadImageTable: AnnotatedBitmapTable
+  riderTailImageTable: AnnotatedBitmapTable
   riderUpperArmImageTable: AnnotatedBitmapTable
   riderLowerArmImageTable: AnnotatedBitmapTable
   riderUpperLegImageTable: AnnotatedBitmapTable
   riderLowerLegImageTable: AnnotatedBitmapTable
-  gravityImageTable: AnnotatedBitmapTable
   starImage: LCDBitmap
   gridImage: LCDBitmap
+
+  smallFont: LCDFont
+  largeFont: LCDFont
+
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -51,18 +55,20 @@ proc initGameView*() =
   bikeWheelImageTable = getOrLoadBitmapTable(BitmapTableId.BikeWheel)
   riderTorsoImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTorso)
   riderHeadImageTable = getOrLoadBitmapTable(BitmapTableId.RiderHead)
+  riderTailImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTail)
   riderUpperArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperArm)
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
-  gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
+  smallFont = getOrLoadFont("fonts/Roobert-10-Bold")
+  largeFont = getOrLoadFont("fonts/Roobert-11-Medium")
   initGameCoin()
   initGameKiller()
   initGameFinish()
   initGameGhost()
 
   try:
-    starImage = gfx.newBitmap("images/star")
+    starImage = gfx.newBitmap("images/acorn")
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
     print "Image load failed:", getCurrentExceptionMsg()
@@ -95,7 +101,7 @@ proc initGeometryBackground(state: GameState)=
       if radius > 0:
         fillCircle(vertex.x, vertex.y, radius)
 
-  gfx.setFont(getOrLoadFont("fonts/Roobert-10-Bold"))
+  gfx.setFont(smallFont)
   for text in level.texts:
     gfx.drawTextAligned(text.value, text.position.x, text.position.y, text.alignment)
 
@@ -224,42 +230,15 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
-const
-  rotationIndicatorRadius = 16'i32
-  rotationIndicatorSize = rotationIndicatorRadius * 2'i32
-  rotationIndicatorWidthDegrees = 6f
-
-proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
-  let
-    x = center[0] - rotationIndicatorRadius
-    y = center[1] - rotationIndicatorSize
-  # total rotation range indicator
-  gfx.drawEllipse(
-    x, y, rotationIndicatorSize, rotationIndicatorSize, 
-    3, 
-    315, 45, 
-    kColorBlack
-  )
-  # current rotation indicator
-  gfx.drawEllipse(
-    x,y - 3'i32,rotationIndicatorSize,rotationIndicatorSize,
-    9, 
-    forceDegrees - rotationIndicatorWidthDegrees, forceDegrees + rotationIndicatorWidthDegrees, 
-    kColorXOR
-  )
-
 proc resumeGameView*() =
-  gfx.setFont(getOrLoadFont("fonts/Roobert-11-Medium"))
+  gfx.setFont(largeFont)
 
-method getBitmap(asset: Asset, frameCounter: int32): LCDBitmap {.base.} =
-  print("getImage not implemented for: ", repr(asset))
-  return fallbackBitmap()
-
-method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
-  return asset.image
-
-method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
-  return asset.bitmapTable.getBitmap((frameCounter div 2'i32) mod asset.frameCount)
+proc message(gameResult: GameResult): string =
+  case gameResult.resultType
+  of GameResultType.LevelComplete:
+    return "Level Complete"
+  of GameResultType.GameOver:
+    return "Game Over"
 
 proc drawPlayer(state: GameState) =
   let chassis = state.chassis
@@ -284,6 +263,8 @@ proc drawPlayer(state: GameState) =
 
   # rider
 
+  riderTailImageTable.drawRotated(state.riderTail, state)
+
   let riderHead = state.riderHead
   let riderHeadScreenPos = riderHead.position - camera
   if state.finishFlipDirectionAt.isSome:
@@ -294,21 +275,11 @@ proc drawPlayer(state: GameState) =
   else:
     riderHeadImageTable.drawRotated(riderHead, state)
 
-  var chassisTorque = 0.0
-  if state.attitudeAdjust.isSome:
-    chassisTorque = state.lastTorque
-
-  let chassisTorqueDegrees = chassisTorque / 1_000f
-  drawRotationForceIndicator(
-    riderHeadScreenPos.toVertex,
-    chassisTorqueDegrees
-  )
-
-  riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
+  riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
-  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
 
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
@@ -316,6 +287,7 @@ proc drawGame*(statePtr: ptr GameState) =
   let camera = state.camera
   let camVertex = camera.toVertex()
   let viewport: LCDRect = offsetScreenRect(camVertex)
+  let cameraState = newCameraState(camera, camVertex, viewport, state.frameCounter)
   let frameCounter: int32 = state.frameCounter
 
 
@@ -338,9 +310,10 @@ proc drawGame*(statePtr: ptr GameState) =
   if debugDrawTextures:
     # assets
     for asset in level.assets:
-      if asset.bounds.intersects(viewport):
-        let assetScreenPos = asset.position - camVertex
-        asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
+      drawAsset(asset, cameraState)
+
+    # gravity zones
+    drawGravityZones(state.gravityZones, state.gravityDirection, cameraState)
 
     # coins
     drawCoins(state.remainingCoins, camVertex)
@@ -373,12 +346,20 @@ proc drawGame*(statePtr: ptr GameState) =
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
   if state.time < 500.Milliseconds:
+    gfx.setFont(largeFont)
     let messageY = (state.riderHead.position.y - camera.y - 26.0).int32
     if not state.isGameStarted:
       gfx.drawTextAligned("Ready?", 200, messageY)
     else:
       gfx.drawTextAligned("Go!", 200, messageY)
-  
+
+  # Game ended message
+  if state.gameResult.isSome:
+    gfx.setFont(smallFont)
+    gfx.setDrawMode(kDrawModeNXOR)
+    let gameResult = state.gameResult.get
+    gfx.drawTextAligned("Ⓐ " & gameResult.message, 200, 220)
+
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
   drawGame(unsafeAddr state)

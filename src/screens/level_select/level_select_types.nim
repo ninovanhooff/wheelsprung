@@ -1,3 +1,5 @@
+import playdate/api
+
 import level_meta/level_data
 import navigation/screen
 import std/options
@@ -19,6 +21,7 @@ type
     selectedIndex*: int
     scrollPosition*: float32
     scrollTarget*: float32
+    levelTheme*: LevelTheme
     firstLockedRowIdx*: Option[int]
     upActivatedAt*: Option[Seconds]
     downActivatedAt*: Option[Seconds]

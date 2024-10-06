@@ -1,6 +1,7 @@
 import chipmunk7
 import chipmunk_utils
 import options
+import common/integrity
 import common/utils
 import sugar
 import std/math
@@ -8,6 +9,7 @@ import std/json
 import std/sequtils
 import std/strutils
 import std/tables
+import std/random
 import playdate/api
 import game_types
 import common/graphics_types
@@ -28,28 +30,31 @@ type
   LevelVertexEntity {.bycopy.} = object
     x*: int32
     y*: int32
-  LevelObjectEntity = ref object of RootObj
+  LevelPropertiesHolder = ref object of RootObj
+    properties: Option[seq[LevelPropertiesEntity]]
+  LevelObjectEntity = ref object of LevelPropertiesHolder
     id: int32 # unique object id
     gid: Option[uint32] # tile id including flip flags
     x, y: int32
     width*, height*: int32
     rotation: float32
     polygon: Option[seq[LevelVertexEntity]]
-    properties: Option[seq[LevelPropertiesEntity]]
     polyline: Option[seq[LevelVertexEntity]]
     text: Option[LevelTextEntity]
     ellipse: Option[bool]
     `type`: string
-  
-  LayerEntity = ref object of RootObj
+  LevelLayerEntity = ref object of LevelPropertiesHolder
     objects: Option[seq[LevelObjectEntity]]
+    name: Option[string]
+    visible: bool
     image: Option[string]
+    offsetx, offsety: Option[int32]
     `type`: string
   
   LevelEntity = ref object of RootObj
     width, height: int32
     tilewidth, tileheight: int32
-    layers: seq[LayerEntity]
+    layers: seq[LevelLayerEntity]
 
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
@@ -63,8 +68,12 @@ const
   GID_FLIP_MASK: uint32 = GID_HFLIP_MASK or GID_VFLIP_MASK or GID_DIAG_FLIP_MASK or GID_UNUSED_FLIP_MASK
   GID_CLASS_MASK: uint32 = not GID_FLIP_MASK
 
+  BITMAP_TABLE_SUFFIX: string = "-table-1" # suffix for bitmap table animations in the level editor
+
+  D8_FALLBACK* = D8_UP
+
   ## offset of Chassis position (center Vect) from Player object top-left position
-  vPlayerChassisOffset: Vect = v(30.0, 36.0)
+  vPlayerChassisOffset: Vect = v(40.0, 56.0)
   ## The amount of pixels the chassis center can be outside the level bounds before the game over
   chassisLevelBoundsSlop: Float = 50.Float
 
@@ -87,19 +96,7 @@ proc toDirection8(str: string): Direction8 =
       print("Unknown direction: " & $str)
       return D8_FALLBACK
 
-const DIAGONAL_GRAVVITY_MAGNITUDE: float32 = 0.70710678118 * GRAVITY_MAGNITUDE
-proc toGravity(d8: Direction8): Vect =
-  return case d8
-    of D8_UP: v(0.0, -GRAVITY_MAGNITUDE)
-    of D8_DOWN: v(0.0, GRAVITY_MAGNITUDE)
-    of D8_LEFT: v(-GRAVITY_MAGNITUDE, 0.0)
-    of D8_RIGHT: v(GRAVITY_MAGNITUDE, 0.0)
-    of D8_UP_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
-    of D8_UP_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, -DIAGONAL_GRAVVITY_MAGNITUDE)
-    of D8_DOWN_LEFT: v(-DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
-    of D8_DOWN_RIGHT: v(DIAGONAL_GRAVVITY_MAGNITUDE, DIAGONAL_GRAVVITY_MAGNITUDE)
-
-proc getProp[T](obj: LevelObjectEntity, name: string, mapper: JsonNode -> T, fallback: T): T =
+proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T =
   if obj.properties.isSome:
       let fillProp = obj.properties.get.findFirst(it => it.name == name)
       if fillProp.isSome:
@@ -119,6 +116,13 @@ proc count(obj: LevelObjectEntity): int32 =
     name = "count",
     mapper = (node => node.getInt.int32),
     fallback = 1'i32
+  )
+
+proc nutType(obj: LevelObjectEntity): int32 =
+  return obj.getProp(
+    name = "nutType",
+    mapper = (node => node.getInt.int32 - 1'i32), # 0 is random, but we want 0 to be the first nut
+    fallback = -1'i32
   )
 
 proc direction8(obj: LevelObjectEntity): Direction8 =
@@ -149,6 +153,25 @@ proc friction(obj: LevelObjectEntity): float32 =
     fallback = 1.0f
   )
 
+proc startOffset(obj: LevelLayerEntity, frameCount: int32): int32 =
+  result = obj.getProp(
+    name = "startFrame",
+    mapper = (node => node.getInt.int32),
+    fallback = 0'i32
+  )
+
+  case result:
+    of int32.low .. -1'i32: result = rand(frameCount).int32
+    of 0 .. 1: result = 0
+    else: discard # keep the value
+
+proc frameRepeat(obj: LevelLayerEntity): int32 =
+  return obj.getProp(
+    name = "frameRepeat",
+    mapper = (node => node.getInt.int32),
+    fallback = 2'i32
+  )
+
 
 proc readDataFileContents(path: string): string {.raises: [].} =
   try:
@@ -160,14 +183,20 @@ proc readDataFileContents(path: string): string {.raises: [].} =
     print(getCurrentExceptionMsg())
     return ""
 
-proc parseLevel(path: string): LevelEntity {.raises: [].} =
+proc parseLevel(path: string): (LevelEntity, string) {.raises: [].} =
   let jsonString = readDataFileContents(path)
   try:
-    return parseJson(jsonString).to(LevelEntity)
+    markStartTime()
+    let levelEntity = jsonString.parseJson().to(LevelEntity)
+    printT("Level parsed")
+    markStartTime()
+    let contentHash = jsonString.levelContentHash()
+    printT("Level hashed", contentHash)
+    return (levelEntity, contentHash)
   except:
     print("Level parse failed:")
     print(getCurrentExceptionMsg())
-    return nil
+    return (nil, "")
 
 proc toVertex(obj: LevelVertexEntity): Vertex =
   return (obj.x, obj.y)
@@ -276,7 +305,10 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         level.initialDriveDirection = DD_RIGHT
         
     of ClassIds.Coin:
-      level.coins.add(newCoin(position = position, count = obj.count))
+      let nutType = obj.nutType
+      let coinIndex: int32 = if nutType == -1: level.coins.len.int32 else: nutType
+
+      level.coins.add(newCoin(position = position, count = obj.count, coinIndex = coinIndex))
     of ClassIds.Killer:
       level.killers.add(newKiller(position = position))
     of ClassIds.Finish:
@@ -298,17 +330,8 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
         randomStartOffset = true
       ))
     of ClassIds.Gravity:
-      level.assets.add(newAnimation(
-        bitmapTableId = BitmapTableId.Gravity,
-        position = position,
-        flip = gid.lcdBitmapFlip,
-        randomStartOffset = true
-      ))
-      let gravityZone = newGravityZone(
-        position = position,
-        gravity = obj.direction8().toGravity(),
-      )
-      level.gravityZones.add(gravityZone)
+      let spec = newGravityZoneSpec(position, obj.direction8)
+      level.gravityZones.add(spec)
     of ClassIds.TallBook:
       # todo: should a default mass be set?
       return loadAsDynamicObject(level, obj, some(BitmapTableId.TallBook))
@@ -380,7 +403,7 @@ proc loadText(level: var Level, obj: LevelObjectEntity): bool =
   ))
   return true
 
-proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+proc loadObjectLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   if layer.objects.isNone: return
 
   for obj in layer.objects.get:
@@ -396,18 +419,42 @@ proc loadObjectLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
     # rect must be last because it is not specifically marked as such
     level.loadRectangle(obj)
 
-proc loadImageLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   if layer.image.isNone: return
+
+  let position: Vertex = (layer.offsetx.get(0), layer.offsety.get(0))
 
   var imageName = layer.image.get
   imageName = imageName.rsplit('/', maxsplit=1)[^1] # remove path
   imageName = imageName.rsplit('.', maxsplit=1)[0] # remove extension
-  let imagePath = levelsBasePath & imageName
-  print(imagePath)
-  let bitmap = getOrLoadBitmap(imagePath)
-  level.background = some(bitmap)
+  if imageName.endswith(BITMAP_TABLE_SUFFIX):
+    # bitmap table animation
+    try:
+      imageName.removeSuffix(BITMAP_TABLE_SUFFIX) # in-place
+      let bitmapTable = gfx.newBitmapTable(levelsBasePath & imageName)
+      let frameCount = bitmapTable.getBitmapTableInfo().count.int32
 
-proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
+      level.assets.add(newAnimation(
+        bitmapTable = bitmapTable,
+        position = position,
+        flip = kBitmapUnflipped,
+        startOffset = layer.startOffset(frameCount),
+        frameRepeat = layer.frameRepeat,
+      ))
+    except IOError:
+      print("Could not load bitmap table: " & $imageName)
+  else:
+    # background image
+    let imagePath = levelsBasePath & imageName
+    print(imagePath)
+    let bitmap = getOrLoadBitmap(imagePath)
+    level.background = some(bitmap)
+
+proc loadLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
+  if layer.visible == false:
+    print "Skipping invisible layer " & $layer.name
+    return
+
   case layer.`type`:
     of "objectgroup":
       level.loadObjectLayer(layer)
@@ -418,6 +465,7 @@ proc loadLayer(level: var Level, layer: LayerEntity) {.raises: [].} =
       return
 
 proc loadLevel*(path: string): Level =
+  print "Loading level: " & $path
   var level = Level(
     id: path,
     terrainPolygons: @[],
@@ -425,7 +473,9 @@ proc loadLevel*(path: string): Level =
     initialDriveDirection: DD_RIGHT,
   )
   
-  let levelEntity = parseLevel(path)
+  let (levelEntity, contentHash) = parseLevel(path)
+  level.contentHash = contentHash
+
   let size: Size = (levelEntity.width * levelEntity.tilewidth, levelEntity.height * levelEntity.tileheight)
   level.size = size
   # BB uses a y-axis that points up

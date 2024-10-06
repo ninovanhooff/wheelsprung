@@ -10,14 +10,18 @@ import game_constants
 export game_constants
 
 type 
-  Camera* = Vect
   DriveDirection* = Float
   RotationDirection* = DriveDirection
+
+  Direction8* = enum
+    ## 4 horizontal and 4 diagonal directions
+    D8_UP, D8_UP_RIGHT, D8_RIGHT, D8_DOWN_RIGHT, D8_DOWN, D8_DOWN_LEFT, D8_LEFT, D8_UP_LEFT
 
   Coin* = ref object
     position*: Vertex
     bounds*: LCDRect
     count*: int32
+    coinIndex*: int32 ## index of the coin in the coin image table
     activeFrom*: Milliseconds
   Star* = Vertex
   Killer* = object
@@ -28,7 +32,11 @@ type
     flip*: LCDBitmapFlip
   GravityZone* = ref object
     position*: Vertex
-    gravity*: Vect
+    direction*: Direction8
+    animation*: Animation
+  GravityZoneSpec* = ref object
+    position*: Vertex
+    direction*: Direction8
   GameCollisionType* = CollisionType
 
   RiderAttitudePosition* {.pure.} = enum
@@ -77,8 +85,8 @@ type
     position*: Vertex
     alignment*: TextAlignment
 
-const GRAVITY_MAGNITUDE*: Float = 90.0
-
+const 
+  GRAVITY_MAGNITUDE*: Float = 90.0
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
@@ -141,15 +149,9 @@ const GameShapeFilters* = (
   # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
 
-
-type Direction8* = enum
-  ## 4 horizontal and 4 diagonal directions
-  D8_UP, D8_UP_RIGHT, D8_RIGHT, D8_DOWN_RIGHT, D8_DOWN, D8_DOWN_LEFT, D8_LEFT, D8_UP_LEFT
-
-const D8_FALLBACK* = D8_UP
-
 type Level* = ref object of RootObj
   id*: Path
+  contentHash*: string
   background*: Option[LCDBitmap]
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
@@ -157,7 +159,7 @@ type Level* = ref object of RootObj
   dynamicCircles*: seq[DynamicCircleSpec]
   coins*: seq[Coin]
   killers*: seq[Killer]
-  gravityZones*: seq[GravityZone]
+  gravityZones*: seq[GravityZoneSpec]
   texts*: seq[Text]
   finish*: Finish
   starPosition*: Option[Vertex]
@@ -185,12 +187,13 @@ type GameState* = ref object of RootObj
   starEnabled*: bool
     ## If the star is enabled, the player can collect it. Stars are enabled by finishing the level at least once.
   killers*: seq[Killer]
+  gravityZones*: seq[GravityZone]
   gameResult*: Option[GameResult]
 
   # Input
   isThrottlePressed*: bool
   isAccelerometerEnabled*: bool
-  lastTorque*: Float # only used to display attitude indicator
+  lastTorque*: Float # torque applied by attitude adjust in last frame
 
   # Navigation state
   resetGameOnResume*: bool
@@ -204,6 +207,7 @@ type GameState* = ref object of RootObj
 
   # Physics
   space*: Space
+  gravityDirection*: Direction8
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect
@@ -240,6 +244,7 @@ type GameState* = ref object of RootObj
   # rider bodies
   riderHead*: Body
   riderTorso*: Body
+  riderTail*: Body
   riderUpperArm*: Body
   riderLowerArm*: Body
   riderUpperLeg*: Body
@@ -249,7 +254,10 @@ type GameState* = ref object of RootObj
   # Rider Constraints
   riderConstraints*: seq[Constraint] # todo remove if unused
   headRotarySpring*: DampedRotarySpring
+  tailRotarySpring*: DampedRotarySpring
   assPivot*: PivotJoint
+  # tail to chassis
+  tailPivot*: PivotJoint
   # shoulder to chassis
   shoulderPivot*: PivotJoint
   # upper arm to torso
@@ -262,7 +270,7 @@ type GameState* = ref object of RootObj
   handPivot*: PivotJoint
   headPivot*: PivotJoint
 
-proc newCoin*(position: Vertex, count: int32 = 1): Coin =
+proc newCoin*(position: Vertex, count: int32 = 1, coinIndex: int32 = 0): Coin =
   result = Coin(
     position: position,
     bounds: LCDRect(
@@ -271,7 +279,8 @@ proc newCoin*(position: Vertex, count: int32 = 1): Coin =
       top: position.y,
       bottom: position.y + coinSize,
     ),
-    count: count
+    count: count,
+    coinIndex: coinIndex,
   )
 
 proc newKiller*(position: Vertex): Killer =
@@ -287,8 +296,11 @@ proc newKiller*(position: Vertex): Killer =
 proc newKiller*(bounds: LCDRect, body: Body): Killer =
   result = Killer(bounds: bounds, body: body)
 
-proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
-  result = GravityZone(position: position, gravity: gravity)
+proc newGravityZone*(position: Vertex, direction: Direction8, animation: Animation): GravityZone =
+  result = GravityZone(position: position, direction: direction, animation: animation)
+
+proc newGravityZoneSpec*(position: Vertex, direction: Direction8): GravityZoneSpec =
+  result = GravityZoneSpec(position: position, direction: direction)
 
 proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
   result = Finish(position: position, flip: flip)
@@ -312,6 +324,14 @@ proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
     value: value,
     position: position,
     alignment: alignment,
+  )
+
+proc newCameraState*(camera: Camera, camVertex: Vertex, viewport: LCDRect, frameCounter: int32): CameraState =
+  result = CameraState(
+    camera: camera,
+    camVertex: camVertex,
+    viewport: viewport,
+    frameCounter: frameCounter,
   )
 
 proc getRiderBodies*(state: GameState): seq[Body] =

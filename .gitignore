@@ -10,9 +10,20 @@ game.map
 **.blend[0-9]
 
 # editor
-support/editor/extensions/node_modules/*
-support/editor/wheelsprung_template.tiled-session
+editor/extensions/node_modules/*
+editor/wheelsprung_template.tiled-session
 
 # Simulator outputs
 stderr.txt
 stdout.txt
+
+# binary build output
+/scripts/level_hash_updater/update_level_hashes
+
+# secrets
+release.env
+
+# IDE
+.idea/other.xml
+.idea/caches/deviceStreaming.xml
+.sentry-native/*

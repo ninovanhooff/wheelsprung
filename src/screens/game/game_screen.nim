@@ -5,12 +5,14 @@ import chipmunk_utils
 import playdate/api
 import common/utils
 import data_store/user_profile
+import data_store/configuration
 import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
 import game_terrain
 import game_dynamic_object
 import game_camera
+import game_camera_pid
 import sound/game_sound
 import common/shared_types
 import game_types, game_constants
@@ -34,8 +36,10 @@ var
 proc onResetGame() {.raises: [].}
 
 proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
+  state.tailRotarySpring.restAngle = 0f
   result = GameResult(
     levelId: state.level.id,
+    levelHash: state.level.contentHash,
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.starEnabled and state.level.starPosition.isSome,
@@ -61,9 +65,7 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
   return screen
 
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
-  print("coin post step callback")
   let shape = cast[Shape](coinShape)
-  print("shape data:" & repr(shape))
   var coin = cast[Coin](shape.userData)
   if state.time < coin.activeFrom:
     print("coin activates at: " & repr(coin.activeFrom) & " current time: " & repr(state.time))
@@ -92,7 +94,6 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
 let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
   print("star post step callback")
   let shape = cast[Shape](starShape)
-  print("shape data:" & repr(shape))
   space.removeShape(shape)
   state.remainingStar = none[Star]()
   state.updateGameResult()
@@ -105,10 +106,12 @@ let removeBikeConstraintsPostStepCallback: PostStepFunc = proc(space: Space, unu
   # detach wheels
   state.removeBikeConstraints()
 
-let addChassisShapePostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
-  print("addChassisShapePostStepCallback")
+let gameEndedPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
+  print("gameEndedPostStepCallback")
   # make chassis collidable
   addChassisShape(state)
+  # Make bike parts bouncy for comec effect
+  makeBikeElastic(state)
 
 let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var 
@@ -141,7 +144,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
   if state.bikeConstraints.len > 0:
     discard space.addPostStepCallback(removeBikeConstraintsPostStepCallback, removeBikeConstraintsPostStepCallback, nil)
   if state.chassisShape.isNil:
-    discard space.addPostStepCallback(addChassisShapePostStepCallback, addChassisShapePostStepCallback, nil)
+    discard space.addPostStepCallback(gameEndedPostStepCallback, gameEndedPostStepCallback, nil)
   return true # we still want to collide
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
@@ -158,12 +161,17 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
   playFinishSound()
 
   # make chassis collidable
-  discard space.addPostStepCallback(addChassisShapePostStepCallback, addChassisShapePostStepCallback, nil)
+  discard space.addPostStepCallback(gameEndedPostStepCallback, gameEndedPostStepCallback, nil)
 
   return false # don't process the collision further
 
 proc createSpace(level: Level): Space {.raises: [].} =
   let space = newSpace()
+  # todo test. At iterations = 4 and sleepTimeThreshold 0.5, I managed to crash the game
+  space.iterations = 8
+  space.sleepTimeThreshold = 0.5
+  # space.collisionSlop = 0.4 # default is 0.1. But since our units are pixels, less that 0.5 pixels should not be noticeable
+  # space.idleSpeedThreshold=
   space.gravity = v(0.0, GRAVITY_MAGNITUDE)
 
   var handler = space.addCollisionHandler(GameCollisionTypes.Coin, GameCollisionTypes.Wheel)
@@ -192,7 +200,6 @@ proc createSpace(level: Level): Space {.raises: [].} =
   space.addTerrain(level.terrainPolygons)
   space.addTerrain(level.terrainPolylines)
   # cannot add coins here because they are mutable and thus are part of the state, not the level
-  space.addGravityZones(level.gravityZones)
   if(level.starPosition.isSome):
     space.addStar(level.starPosition.get)
   space.addFinish(level.finish)
@@ -205,17 +212,20 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
     level: level, 
     background: background,
     space: space,
+    gravityDirection: Direction8.D8_DOWN,
     ghostRecording: newGhost(),
     ghostPlayback: ghostPlayBack.get(newGhost()),
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
     starEnabled: level.id.isStarEnabled,
   )
+  space.userData= cast[DataPointer](state) # Caution: cyclic reference: space -> state -> space
   initGameBike(state)
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initGameRider(state, riderPosition)
   
   addGameCoins(state)
+  addGravityZones(state)
   initGameStar(state)
   state.adddynamicObjects()
 
@@ -233,6 +243,7 @@ proc onResetGame() {.raises: [].} =
     background = state.background,
     ghostPlayback = some(pickBestGhost(state.ghostRecording, state.ghostPlayback))
   )
+
   resetGameInput(state)
 
 proc updateTimers(state: GameState) =
@@ -252,11 +263,11 @@ proc updateTimers(state: GameState) =
     state.chassis.torque = state.driveDirection * -15_500.0
 
     if state.finishFlipDirectionAt.expire(currentTime):
-      print("flip direction timeout")
+      echo("flip direction timeout")
       state.resetRiderConstraintForces()
 
   if state.finishTrophyBlinkerAt.expire(currentTime):
-    print("blinker timeout")
+    echo("blinker timeout")
 
 proc initGame*(levelPath: string) {.raises: [].} =
   initGameSound()
@@ -289,12 +300,16 @@ method resume*(gameScreen: GameScreen) =
     state.resetGameOnResume = false
 
   if not state.isGameStarted:
-    state.updateCamera(snapToTarget = true)
+    if getConfig().getClassicCameraEnabled():
+      state.updateCamera(snapToTarget = true)
+    else:
+      state.updateCameraPid(snapToTarget = true)
     # the update loop won't draw the game
     drawGame(addr state)
 
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
+
 
 method update*(gameScreen: GameScreen): int =
   handleInput(state)
@@ -316,7 +331,10 @@ method update*(gameScreen: GameScreen): int =
     state.updateTimers() # increment for next frame
 
 
-  state.updateCamera()
+  if getConfig().getClassicCameraEnabled():
+    state.updateCamera()
+  else:
+    state.updateCameraPid()
   drawGame(addr state) # todo pass as object?
   return 1
 

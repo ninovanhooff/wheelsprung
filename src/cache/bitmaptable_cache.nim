@@ -4,11 +4,6 @@ import playdate/api
 import common/graphics_types
 import common/utils
 
-const
-  ## Amount of rotation images (angle steps) for sprites which sjhould be freely rotatable
-  ## e.g. bike chassis, rider parts, killer, etc.
-  imageRotations: int32 = 64'i32
-
 type
   BitmapTableId* {.pure.} = enum
     BikeChassis = "images/bike-chassis"
@@ -17,6 +12,7 @@ type
     RiderTorso = "images/rider/torso"
     RiderGhostHead = "images/rider/ghost-head"
     RiderHead = "images/rider/head"
+    RiderTail = "images/rider/tail"
     RiderUpperArm = "images/rider/upper-arm"
     RiderLowerArm = "images/rider/lower-arm"
     RiderUpperLeg = "images/rider/upper-leg"
@@ -25,39 +21,25 @@ type
     TallBook = "images/dynamic_objects/tall-book"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
-    Gravity = "images/gravity"
+    Nuts = "images/nuts"
+    GravityUp = "images/gravity/gravity-up"
+    GravityUpRight = "images/gravity/gravity-up-right"
+    GravityRight = "images/gravity/gravity-right"
     LevelStatus = "images/level_select/level-status"
+    GameResultActionArrows = "images/game_result/action-arrows"
   BitmapTableCache = TableRef[BitmapTableId, AnnotatedBitmapTable]
 
 # global singleton
 let bitmapTableCache = BitmapTableCache()
 
-proc frameCount(id: BitmapTableId): int32 =
-  case id
-  of BitmapTableId.Trophy: return 2
-  of BitmapTableId.Flag: return 46
-  of BitmapTableId.Gravity: return 33
-  of BitmapTableId.LevelStatus: return 3
-  of BitmapTableId.TallBook: return 240
-  
-  of BitmapTableId.BikeChassis,
-    BitmapTableId.BikeGhostWheel,
-    BitmapTableId.BikeWheel,
-    BitmapTableId.RiderTorso,
-    BitmapTableId.RiderGhostHead,
-    BitmapTableId.RiderHead,
-    BitmapTableId.RiderUpperArm,
-    BitmapTableId.RiderLowerArm,
-    BitmapTableId.RiderUpperLeg,
-    BitmapTableId.RiderLowerLeg,
-    BitmapTableId.Killer: return imageRotations
-  
-
 proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
   try:
+    markStartTime()
+    let bitmapTable = gfx.newBitmapTable($id)
+    printT("LOAD BitmapTable: ", $id)
     return newAnnotatedBitmapTable(
-      bitmapTable = gfx.newBitmapTable($id),
-      frameCount = id.frameCount,
+      bitmapTable = bitmapTable,
+      frameCount = bitmapTable.getBitmapTableInfo().count.int32,
     )
   except KeyError:
     playdate.system.error("BitmapTableId or FrameCount not found for: " & $id)
@@ -68,7 +50,10 @@ proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
 
 proc getOrLoadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
   try:
-    return bitmapTableCache.mgetOrPut(id, loadBitmapTable(id))
-  except IOError:
+    if not bitmapTableCache.hasKey(id):
+      bitmapTableCache[id] = loadBitmapTable(id)
+    
+    return bitmapTableCache[id]
+  except Exception:
     print getCurrentExceptionMsg()
 

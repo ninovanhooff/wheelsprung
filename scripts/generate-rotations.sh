@@ -10,16 +10,31 @@
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 SUPPORT_IMAGES_DIR="$SCRIPT_DIR/../support/images"
 SOURCE_IMAGES_DIR="$SCRIPT_DIR/../source/images"
-spriterot -v -r 64 --width 22 --height 22 -o "$SOURCE_IMAGES_DIR/bike-wheel-table-22-22.png" "$SUPPORT_IMAGES_DIR/wheel.png"
-spriterot -v -r 64 --width 22 --height 22 -o "$SOURCE_IMAGES_DIR/bike-ghost-wheel-table-22-22.png" "$SUPPORT_IMAGES_DIR/ghost-wheel.png"
-spriterot -v --width 48 --height 48 -k -r 64 -o "$SOURCE_IMAGES_DIR/bike-chassis-table-48-48.png" "$SUPPORT_IMAGES_DIR/bike-chassis.png"
 
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/upper-arm-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/upper-arm.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/lower-arm-table-12-12.png" "$SUPPORT_IMAGES_DIR/rider/lower-arm.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/upper-leg-table-18-18.png" "$SUPPORT_IMAGES_DIR/rider/upper-leg.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/lower-leg-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/lower-leg.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/torso-table-18-18.png" "$SUPPORT_IMAGES_DIR/rider/torso.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/head-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/head.png"
-spriterot -v -r 64 -o "$SOURCE_IMAGES_DIR/rider/ghost-head-table-14-14.png" "$SUPPORT_IMAGES_DIR/rider/ghost-head.png"
+function call_spriterot {
+  local size="$2"
+  local subdirectory
+  subdirectory="$(dirname "$1")"
+  find "$SOURCE_IMAGES_DIR/$subdirectory/" -name "$(basename "$1")-table-*" -exec rm {} \;
+  local output_file="$SOURCE_IMAGES_DIR/$1-table-$size-$size.png"
+  local input_file="$SUPPORT_IMAGES_DIR/$1.png"
+  local rotations="$3"
+  local algorithm="${4:-rotsprite}"
 
-spriterot -v -r 240 -o "$SOURCE_IMAGES_DIR/dynamic_objects/tall-book-table-88-88.png" "$SUPPORT_IMAGES_DIR/dynamic_objects/tall-book.png"
+  spriterot -a "$algorithm" -r "$rotations" --width "$size" --height "$size" -o "$output_file" "$input_file"
+}
+
+call_spriterot "bike-wheel" 22 64
+call_spriterot "bike-ghost-wheel" 22 64
+call_spriterot "bike-chassis" 48 64
+call_spriterot "rider/upper-arm" 14 64
+call_spriterot "rider/lower-arm" 11 64 linear
+call_spriterot "rider/upper-leg" 16 64
+call_spriterot "rider/lower-leg" 14 64
+call_spriterot "rider/tail" 27 64
+call_spriterot "rider/torso" 21 64
+call_spriterot "rider/head" 22 64
+call_spriterot "rider/ghost-head" 20 64
+call_spriterot "killer/killer" 20 64
+call_spriterot "dynamic_objects/tall-book" 140 240
+

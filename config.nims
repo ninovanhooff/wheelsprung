@@ -16,3 +16,9 @@ else:
     echo "Platform not supported!"
 # Link the chipmunk library.
 switch("passL", "-lchipmunk")
+
+const gameResultSalt = getEnv("WHEELSPRUNG_GAME_RESULT_SALT")
+switch("define", "gameResultSalt=" & gameResultSalt)
+
+const levelSalt = getEnv("WHEELSPRUNG_LEVEL_SALT")
+switch("define", "levelSalt=" & levelSalt)

@@ -1,6 +1,7 @@
 {.push raises: [].}
 import tables
 import playdate/api
+import common/utils
 
 template snd*: untyped = playdate.sound
 
@@ -14,8 +15,13 @@ let sampleplayerCache = SamplePlayerCache()
 
 proc getOrLoadSample(path: string): AudioSample =
   try:
-    return sampleplayerCache.mgetOrPut(path, snd.newAudioSample(path))
-  except IOError:
+    if not sampleplayerCache.hasKey(path):
+      markStartTime()
+      sampleplayerCache[path] = snd.newAudioSample(path)
+      printT("LOAD Sample: ", path)
+    
+    return sampleplayerCache[path]
+  except Exception:
     playdate.system.error("FATAL: " & getCurrentExceptionMsg())
 
 proc getOrLoadSamplePlayer*(path: string): SamplePlayer =

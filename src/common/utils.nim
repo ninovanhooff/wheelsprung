@@ -21,7 +21,7 @@ proc formatTime*(time: Milliseconds, signed: bool = false): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"
   
   let absTime = abs(time)
-  let minutes = absTime div 360_000
+  let minutes = absTime div 60_000
   let seconds = absTime mod 60_000 div 1000
   let hundredths = absTime mod 1000 div 10
   let signString = 
@@ -40,32 +40,21 @@ proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): boo
   return false
 
 ### Logging
+var printTStartTime: Seconds = -1f
+
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
 
-proc logFatalError*(messagePrefix: string) {.raises: [].} =
-  let exception = getCurrentException()
-  var message: string = ""
-  try: 
-    message = fmt"{messagePrefix}\n{getCurrentExceptionMsg()}\n{exception.getStackTrace()}"
-    # replace line number notation from (90) to :90, which is more common and can be picked up as source link
-    message = message.replace('(', ':')
-    message = message.replace(")", "")
-  except:
-    message = getCurrentExceptionMsg() & exception.getStackTrace()
+proc printT*(things: varargs[string, `$`]) =
+  let duration = playdate.system.getElapsedTime - printTStartTime
+  printTStartTime = -1f
+  ## Print any type by calling $ on it to convert it to string
+  playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t") & " in ms:" & $(duration * 1000f))
 
-  for line in message.splitLines():
-    # Log the error to the console, total stack trace might be too long for single call
-    playdate.system.logToConsole(line)
-
-  playdate.system.error("FATAL:" & getCurrentExceptionMsg())
-
-proc runCatching*(fun: () -> (void), messagePrefix: string=""): void {.raises: [].} =
-  try:
-    fun()
-  except:
-    logFatalError(messagePrefix)
+proc markStartTime*() =
+  ## Mark the start time for the printT function
+  printTStartTime = playdate.system.getElapsedTime
 
 ### Bench / trace / profile
 
@@ -154,6 +143,10 @@ proc lerp*(initial, target, factor: float32): float32 =
   # result = (initial * (1.0f - factor)) + (target * factor)
   # result = min(max(result, initial), target)
   result = initial + (target - initial) * clamp(factor, 0f, 1f)
+
+proc rem*(n: int, m: int): int =
+  ## remainder function that always returns a positive result
+  ((n mod m) + m) mod m
 
 ### Sequences
 

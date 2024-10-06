@@ -1,5 +1,5 @@
 {.push raises: [].}
-import std/[options, sugar]
+import std/[options, sugar, math]
 import playdate/api
 import chipmunk7, chipmunk_utils
 import common/utils
@@ -90,6 +90,7 @@ proc onButtonAttitudeAdjust(state: GameState, direction: Float) =
 proc applyButtonAttitudeAdjust(state: GameState) {.raises: [].} =
   let optAdjust = state.attitudeAdjust
   if optAdjust.isNone:
+    state.lastTorque = 0.0
     return
   let adjust = optAdjust.get
 
@@ -115,10 +116,16 @@ proc updateAttitudeAdjust*(state: GameState) {.raises: [].} =
     else:
       state.applyButtonAttitudeAdjust()
 
+    let targetRestAngle = degToRad(-30.0 * state.driveDirection) + state.lastTorque / -20_000f
+    state.tailRotarySpring.restAngle= lerp(
+      state.tailRotarySpring.restAngle,
+      targetRestAngle,
+      0.2
+    )
 
 proc onFlipDirection(state: GameState) =
   if state.attitudeAdjust.isSome:
-    print("attitude adjust in progress, reset attitude adjust force before flipping")
+    echo("attitude adjust in progress, reset attitude adjust force before flipping")
     # reset animation to neutral
     state.resetRiderAttitudePosition()
     state.attitudeAdjust = none(AttitudeAdjust)
@@ -136,7 +143,7 @@ proc applyConfig*(state: GameState) =
   state.isAccelerometerEnabled = config.getTiltAttitudeAdjustEnabled()
 
 proc resetGameInput*(state: GameState) =
-  print("resetGameInput")
+  echo("resetGameInput")
   state.isThrottlePressed = false
   state.applyConfig()
 
@@ -151,7 +158,7 @@ proc handleInput*(state: GameState) =
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,
     # but any button can be pressed to navigate to the result screen
-    if buttonState.pushed.anyButton:
+    if kButtonA in buttonState.pushed:
       state.resetGameOnResume = true
       navigateToGameResult(state.gameResult.get)
     return
@@ -173,5 +180,5 @@ proc handleInput*(state: GameState) =
       state.onButtonAttitudeAdjust(0.0)
 
   if actionFlipDirection in buttonState.pushed:
-    print("Flip direction pressed")
+    echo("Flip direction pressed")
     state.onFlipDirection()

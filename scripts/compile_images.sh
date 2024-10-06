@@ -1,7 +1,7 @@
 #!/bin/bash
 
-## A script to process all png images in the source directory and add them as pdi or pdt to
-## the PDX file in the destination directory
+## A script to process all assets (images, audio, video) in source directory and add them as pdi
+# pda, or pdt to the PDX file in the destination directory
 
 # Get the absolute path of the directory containing the current file
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
