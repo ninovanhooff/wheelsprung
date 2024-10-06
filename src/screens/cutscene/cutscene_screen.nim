@@ -45,7 +45,7 @@ proc init(screen: CutSceneScreen) =
     playdate.lua.callFunction("StartPanelsExample", 1) # pass 1 arg: finishCallback
     screen.isInitialized = true
   except:
-    logFatalError("Error initializing cutscene")
+    print "Error initializing cutscene"
 
 method resume*(screen: CutSceneScreen) =
   playdate.display.setRefreshRate(30)
@@ -58,6 +58,6 @@ method update*(screen: CutSceneScreen): int =
   try:
     playdate.lua.callFunction("UpdatePanels", 0)
   except:
-    logFatalError("Error updating cutscene")
+    print "Error updating cutscene"
   
   return 1

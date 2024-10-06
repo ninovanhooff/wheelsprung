@@ -183,7 +183,7 @@ proc addMenuItemWorkaround(title: string, callback: proc(state: LuaStatePtr): ci
     playdate.lua.pushFunction(callback)
     playdate.lua.callFunction("LuaAddMenuItemWorkaround", 2)
   except:
-    logFatalError("Error adding menu item")
+    print "Error adding menu item"
   
   return nil
 
