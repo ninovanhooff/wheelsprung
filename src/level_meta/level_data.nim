@@ -34,7 +34,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.wmj", theme= Plants, hash="8794DC01BABFDA156334585A86EF000B"),
   newLevelMeta(name= "Globe of Death 2", path="levels/globe_of_death_2.wmj", theme= Plants, hash="FB0A20BF3B27A8E41F154773C5323EF4"),
 
-  newLevelMeta(name= "Looping", path="levels/looping.wmj", theme= Bookshelf, hash="4D1C4F8808A02E810D4409A8E6B045E8"),
+  newLevelMeta(name= "Looping", path="levels/looping.wmj", theme= Bookshelf, hash="2743FA7197CD73C1853AA551D2927785"),
   newLevelMeta(name= "Hooked", path="levels/hooked.wmj", theme= Bookshelf, hash="A19C795ACD4E767DB78059B362FAE50C"),
   newLevelMeta(name= "Upside Down Hook", path="levels/upside_down_hook.wmj", theme= Bookshelf, hash="07E579B5F483454DA8317F2F1277E9F0"),
   newLevelMeta(name= "Backflip", path="levels/backflip.wmj", theme= Bookshelf, hash="BEFEAFDE2090C77399C2115F8BACA82C"),
