@@ -93,12 +93,12 @@ method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
   let frameIdx = (asset.startOffset + frameCounter div asset.frameRepeat) mod asset.frameCount
   return asset.bitmapTable.getBitmap(frameIdx)
 
-proc setStencil*(patternId: LCDPatternId) {.inline.} =
+proc setStencilPattern*(patternId: LCDPatternId) {.inline.} =
   gfx.setStencilImage(patternId.getOrCreateBitmap(), true)
 
 proc drawAsset*(asset: Asset, camState: CameraState) =
   if asset.stencilPatternId.isSome:
-    setStencil(asset.stencilPatternId.get)
+    setStencilPattern(asset.stencilPatternId.get)
 
   if asset.bounds.intersects(camState.viewport):
     let assetScreenPos = asset.position - camState.camVertex
