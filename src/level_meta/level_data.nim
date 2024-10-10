@@ -29,7 +29,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.wmj", theme= Bath, hash="FAF07A1B8B14F20E349AAD05F0FC7A8D"),
   newLevelMeta(name= "King of the Hill", path="levels/king_of_the_hill.wmj", theme= Bath, hash="4F3971882971A1296E8B85BFA3C6EC61"),
   newLevelMeta(name= "Hills", path="levels/hills.wmj", theme= Bath, hash="EE9CE18CF99447145C813C6F52417B9A"),
-  newLevelMeta(name= "Globe of Death", path="levels/globe_of_death.wmj", theme= Bath, hash="D52B0303CF760CEF45C307B055780AB3"),
+  newLevelMeta(name= "Globe of Death", path="levels/globe_of_death.wmj", theme= Bath, hash="56FC52E55FAFF1A1D762B9B529ABC0AB"),
   
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.wmj", theme= Plants, hash="8794DC01BABFDA156334585A86EF000B"),
   newLevelMeta(name= "Globe of Death 2", path="levels/globe_of_death_2.wmj", theme= Plants, hash="FB0A20BF3B27A8E41F154773C5323EF4"),
