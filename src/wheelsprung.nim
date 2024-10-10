@@ -1,6 +1,6 @@
-import sugar
 import options
 import std/strutils
+import std/sugar
 import strformat
 import ../tests/tests
 import common/utils
@@ -13,6 +13,7 @@ import navigation/[navigator, screen]
 import playdate/api
 import screens/screen_types
 import screens/game/game_screen
+import screens/cutscene/cutscene_screen
 import screens/level_select/level_select_screen
 import screens/settings/settings_screen
 import screens/game_result/game_result_screen
@@ -41,8 +42,8 @@ proc init() {.raises: [].} =
   
   initNavigator(initialScreenProvider)
   let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
-  if false:
-    # pushScreen(newLevelSelectScreen())
+  if false: # can be set to true for debugging-convenience
+    # pushScreen(newCutSceneScreen())
     let gameResult = GameResult(
       levelId: "levels/level1.wmj",
       resultType: GameResultType.LevelComplete,
@@ -57,15 +58,15 @@ proc init() {.raises: [].} =
 
 proc update() {.raises: [].} =
   discard updateNavigator()
-  playdate.system.drawFPS(0, 0)  
+  playdate.system.drawFPS(0, 0)
 
-proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
+proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
   try:
     fun()
   except:
     let exception = getCurrentException()
     var message: string = ""
-    try: 
+    try:
       message = &"{messagePrefix}\n{getCurrentExceptionMsg()}\n{exception.getStackTrace()}"
       # replace line number notation from (90) to :90, which is more common and can be picked up as source link
       message = message.replace('(', ':')
@@ -79,13 +80,15 @@ proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
 
     playdate.system.error("FATAL:" & getCurrentExceptionMsg())
 
-proc catchingUpdate(): int {.raises: [].} = 
+proc catchingUpdate(): int {.raises: [].} =
   runCatching(update)
   return 1 ## 1: update display
 
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   if event == kEventInit:
+    return # Do nothing, we want a Lua env for Panels
+  elif event == kEventInitLua:
     runCatching(init)
     
     # Set the update callback

@@ -16,6 +16,7 @@ import level_meta/level_data
 import level_select_types
 import level_select_view
 import screens/screen_types
+import screens/cutscene/cutscene_screen
 import screens/settings/settings_screen
 
 const
@@ -174,6 +175,18 @@ proc getInitialRowIdx(screen: LevelSelectScreen): int =
       return previousRowIdx
   return 0
 
+proc addMenuItemWorkaround(title: string, callback: proc(state: LuaStatePtr): cint {.cdecl, raises: [].}): PDMenuItemButton =
+  # This is a workaround for a bug in the SDK where a crash occurs when the menu item is selected
+  
+  try:
+    playdate.lua.pushString(title)
+    playdate.lua.pushFunction(callback)
+    playdate.lua.callFunction("LuaAddMenuItemWorkaround", 2)
+  except:
+    print "Error adding menu item"
+  
+  return nil
+
 method resume*(screen: LevelSelectScreen) =
   screen.upActivatedAt = none(Seconds)
   screen.downActivatedAt = none(Seconds)
@@ -190,9 +203,17 @@ method resume*(screen: LevelSelectScreen) =
   resumeLevelSelectView(screen)
   backgroundAudioPlayer.play(0)
 
-  discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
+  discard playdate.system.addMenuItem("Panels Test", proc(menuItem: PDMenuItemButton) =
+    pushScreen(newCutSceneScreen())
+  )
+
+  # todo move to utils and use everywhere where menu items are added
+  discard addMenuItemWorkaround("Settings", proc(state: LuaStatePtr): cint {.cdecl, raises: [].} =
+    let argCount = playdate.lua.getArgCount()
+    print(fmt"Nim callback with {argCount} argument(s)")
     pushScreen(newSettingsScreen())
   )
+
 
 method pause*(screen: LevelSelectScreen) =
   backgroundAudioPlayer.stop()
