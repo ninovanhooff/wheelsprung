@@ -9,7 +9,6 @@ import cache/bitmap_cache
 import cache/bitmaptable_cache
 import cache/font_cache
 import level_meta/level_data
-import std/tables
 
 const 
   borderInset = 7

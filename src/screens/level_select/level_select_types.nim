@@ -1,5 +1,3 @@
-import playdate/api
-
 import level_meta/level_data
 import navigation/screen
 import std/options
