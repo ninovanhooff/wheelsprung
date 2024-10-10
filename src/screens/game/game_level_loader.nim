@@ -96,7 +96,7 @@ proc toDirection8(str: string): Direction8 =
       print("Unknown direction: " & $str)
       return D8_FALLBACK
 
-proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T =
+proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T {.raises: [], effectsOf: mapper.} =
   if obj.properties.isSome:
       let fillProp = obj.properties.get.findFirst(it => it.name == name)
       if fillProp.isSome:
@@ -132,7 +132,7 @@ proc direction8(obj: LevelObjectEntity): Direction8 =
     fallback = D8_UP
   )
 
-proc thickness(obj: LevelObjectEntity): float32 =
+proc thickness(obj: LevelObjectEntity): float32 {.raises: [].} =
   return obj.getProp(
     name = "thickness",
     mapper = (node => node.getFloat.float32),

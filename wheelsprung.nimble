@@ -10,7 +10,7 @@ bin           = @["wheelsprung"]
 
 # Dependencies
 
-requires "nim >= 1.6.10"
+requires "nim >= 2.0.0"
 requires "playdate"
 requires "murmurhash"
 # requires "https://github.com/samdze/playdate-nim#main"

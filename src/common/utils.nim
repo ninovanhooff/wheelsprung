@@ -149,7 +149,7 @@ proc rem*(n: int, m: int): int =
 
 ### Sequences
 
-proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
+proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] {.raises: [], effectsOf: pred.} =
   ## find the first item in the sequence that satisfies the predicate
   result = none(T)  # return none if no item satisfies the predicate
   for i, x in s:
@@ -157,7 +157,7 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
       result = some[T](x)
       break
 
-proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) =
+proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) {.raises: [], effectsOf: pred.} =
   ## find the first item in the sequence that satisfies the predicate
   result = (-1, none(T))  # return none if no item satisfies the predicate
   for i, x in s:
