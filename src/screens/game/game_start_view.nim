@@ -2,12 +2,19 @@ import playdate/api
 import common/graphics_utils
 import game_types
 import cache/font_cache
-import chipmunk7
 
 proc drawGameStart*(state: GameState) =
-  gfx.setFont(getOrLoadFont(FontId.M6X11))
-  let messageY = (state.riderHead.position.y - state.camera.y - 26.0).int32
-  if not state.isGameStarted:
-    gfx.drawTextAligned("Ready?", 200, messageY)
-  else:
-    gfx.drawTextAligned("Go!", 200, messageY)
+  let titleFont = getOrLoadFont(FontId.M6X11)
+  let name = state.level.meta.name
+  let (textW, textH) = titleFont.getTextSize(name)
+  let textRect = Rect(
+    x: 18,
+    y: 216,
+    width: textW.int32,
+    height: textH.int32
+  )
+  textRect.inset(-4,-4).fill(kColorBlack)
+  gfx.setFont(titleFont)
+  gfx.setDrawMode(kDrawModeFillWhite)
+  gfx.drawText(name, textRect.x, textRect.y)
+  gfx.setDrawMode(kDrawModeCopy)

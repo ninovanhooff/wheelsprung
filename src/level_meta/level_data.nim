@@ -1,3 +1,5 @@
+{.push raises: [].}
+
 import tables
 import sugar
 import sequtils
@@ -58,3 +60,18 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
 ]
   .map(meta => (meta.path, meta)) # use path as key
   .toOrderedTable
+
+proc createUserLevelMeta(levelPath: Path): LevelMeta =
+  # for unknown levels, add them to the list using path as name
+  return newLevelMeta(
+    name = levelPath[levelsBasePath.len .. ^1],
+    path = levelPath,
+    hash = "no hash: user level",
+    theme = LevelTheme.Space
+  )
+
+proc getLevelMeta*(path: Path): LevelMeta =
+  try:
+    return officialLevels[path]
+  except KeyError:
+    return createUserLevelMeta(path)

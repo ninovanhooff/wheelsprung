@@ -3,6 +3,7 @@ import chipmunk7
 import options
 import std/sugar
 import common/graphics_types
+import level_meta/level_data
 import common/utils
 import common/shared_types
 import cache/bitmaptable_cache
@@ -151,6 +152,7 @@ const GameShapeFilters* = (
 
 type Level* = ref object of RootObj
   id*: Path
+  meta*: LevelMeta
   contentHash*: string
   background*: Option[LCDBitmap]
   terrainPolygons*: seq[Polygon]

@@ -468,6 +468,7 @@ proc loadLevel*(path: string): Level =
   print "Loading level: " & $path
   var level = Level(
     id: path,
+    meta: getLevelMeta(path),
     terrainPolygons: @[],
     initialChassisPosition: v(80.0, 80.0),
     initialDriveDirection: DD_RIGHT,
