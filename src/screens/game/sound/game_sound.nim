@@ -1,5 +1,6 @@
 import std/random
 import common/[utils, audio_utils]
+import cache/sound_cache
 import playdate/api
 ## Non-bike sounds, such as win and collision sounds
 
