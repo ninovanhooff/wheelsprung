@@ -12,5 +12,5 @@ for file in "$input_dir"/*.wav; do
   filename=$(basename "$file")
   
   # Call the adpcm-xq program with the input and output filenames
-  adpcm-xq "$1" "$file" "$output_dir/$filename"
+  adpcm-xq -e "$1" "$file" "$output_dir/$filename"
 done
