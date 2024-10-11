@@ -7,20 +7,20 @@ template snd*: untyped = playdate.sound
 
 
 type 
-  # a table mapping image path to SamplePlayer
-  SamplePlayerCache = TableRef[string, AudioSample]
+  # a table mapping sound path to AudioSample
+  AudioSampleCache = TableRef[string, AudioSample]
 
 # global singleton
-let sampleplayerCache = SamplePlayerCache()
+let audioSampleCache = AudioSampleCache()
 
 proc getOrLoadSample(path: string): AudioSample =
   try:
-    if not sampleplayerCache.hasKey(path):
+    if not audioSampleCache.hasKey(path):
       markStartTime()
-      sampleplayerCache[path] = snd.newAudioSample(path)
+      audioSampleCache[path] = snd.newAudioSample(path)
       printT("LOAD Sample: ", path)
     
-    return sampleplayerCache[path]
+    return audioSampleCache[path]
   except Exception:
     playdate.system.error("FATAL: " & getCurrentExceptionMsg())
 
