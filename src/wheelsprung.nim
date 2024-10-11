@@ -126,6 +126,10 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       refreshRate += 5.0f
       playdate.display.setRefreshRate(refreshRate)
       print("refreshRate:" & $refreshRate)
+    elif keycode == 109:
+      print("M")
+      debugSoundIdx += 1
+      print("debugSoundIdx:" & $debugSoundIdx)
     else:
       print("keycode:" & $keycode)
   elif event == kEventKeyPressed:

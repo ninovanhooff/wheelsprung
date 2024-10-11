@@ -324,7 +324,7 @@ method update*(gameScreen: GameScreen): int =
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
-        playScreamSound()
+        playFallSound()
       state.resetGameOnResume = true
       navigateToGameResult(state.gameResult.get)
 

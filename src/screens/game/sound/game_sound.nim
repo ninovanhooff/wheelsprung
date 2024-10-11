@@ -1,49 +1,54 @@
 import std/random
 import common/[utils, audio_utils]
 import playdate/api
+import globals
 ## Non-bike sounds, such as win and collision sounds
 
 var
-  finishPlayer: SamplePlayer
-  coinPlayer: SamplePlayer
-  starPlayer: SamplePlayer
+  finishPlayers: seq[SamplePlayer]
+  starPlayers: seq[SamplePlayer]
   finishUnlockPlayer: SamplePlayer
   collisionPlayers: seq[SamplePlayer]
-  screamPlayers: seq[SamplePlayer]
+  fallPlayers: seq[SamplePlayer]
+  coinPlayers: seq[SamplePlayer]
 
 proc initGameSound*() =
-  if finishPlayer != nil: return # already initialized
+  if finishPlayers.len > 0: return # already initialized
 
   ## Load the sounds
   try:
-    finishPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish")
-    coinPlayer = playdate.sound.newSamplePlayer("/audio/pickup/coin")
-    starPlayer = playdate.sound.newSamplePlayer("/audio/pickup/star")
+    for i in 1..5:
+      finishPlayers.add(playdate.sound.newSamplePlayer("/audio/finish/finish" & $i))
+
     finishUnlockPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish_unlock")
-    for i in 1..9:
-      collisionPlayers.add(playdate.sound.newSamplePlayer("/audio/collision/collision-0" & $i))
-    for i in 1..3:
-      screamPlayers.add(playdate.sound.newSamplePlayer("/audio/scream/wilhelm_scream-0" & $i))
+    for i in 1..6:
+      collisionPlayers.add(playdate.sound.newSamplePlayer("/audio/collision/collision" & $i))
+    for i in 1..4:
+      fallPlayers.add(playdate.sound.newSamplePlayer("/audio/fall/fall" & $i))
+    for i in 1..6:
+      coinPlayers.add(playdate.sound.newSamplePlayer("/audio/pickup/pickup" & $i))
+    for i in 1..2:
+      starPlayers.add(playdate.sound.newSamplePlayer("/audio/pickup/acorn" & $i))
 
   except:
     quit(getCurrentExceptionMsg(), 1)
 
 proc playFinishSound*() =
-  finishPlayer.playVariation()
+  finishPlayers[debugSoundIdx mod finishPlayers.len].playVariation()
 
 proc playCoinSound*(coinProgress: float32) =
   ## coinProgress the fraction of coins collected
   if coinProgress < 1.0f:
-    coinPlayer.play(1, lerp(0.9, 1.1, coinProgress))
+    coinPlayers[debugSoundIdx mod coinPlayers.len].play(1, lerp(0.9, 1.1, coinProgress))
   else:
     finishUnlockPlayer.playVariation()
 
 proc playStarSound*() =
-  starPlayer.playVariation()
+  starPlayers[debugSoundIdx mod starPlayers.len].playVariation()
 
 
 proc playCollisionSound*() =
-  collisionPlayers[rand(collisionPlayers.high)].playVariation()
+  collisionPlayers[debugSoundIdx mod collisionPlayers.len].playVariation()
 
-proc playScreamSound*() =
-  screamPlayers[rand(screamPlayers.high)].playVariation()
+proc playFallSound*() =
+  fallPlayers[debugSoundIdx mod fallPlayers.len].playVariation()

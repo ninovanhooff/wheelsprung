@@ -7,3 +7,4 @@ var
   debugDrawTextures* = true
   debugDrawPlayer* = true
   debugDrawConstraints* = false
+  debugSoundIdx* = 0

@@ -74,6 +74,21 @@
             }
         },
         {
+            "label": "Process Sounds",
+            "type": "shell",
+            "command": "./scripts/process_sound.sh -y",
+            "problemMatcher": [],
+            "presentation": {
+                "clear": true,
+                "echo": true,
+                "reveal": "never",
+                "showReuseMessage": false,
+            },
+            "group": {
+                "kind": "none",
+            }
+        },
+        {
             "label": "Build & Run Device PDX",
             "type": "shell",
             "dependsOn": [
