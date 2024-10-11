@@ -3,7 +3,9 @@ import playdate/api
 import chipmunk7
 import common/utils
 import common/graphics_utils
+import common/audio_utils
 import cache/bitmaptable_cache
+import cache/sound_cache
 import game_types
 
 const 
@@ -63,6 +65,22 @@ proc toGravityAnimation(spec: GravityZoneSpec): Animation =
     stencilPattern = some(Gray)
   )
 
+var gravityDownPlayer: SamplePlayer = nil
+var gravityUpPlayer: SamplePlayer = nil
+
+proc playSoundForGravity(newGravity: Vect) =
+# play sound
+  if newGravity.y > 0:
+    if gravityDownPlayer.isNil:
+      gravityDownPlayer = getOrLoadSamplePlayer("/audio/gravity/gravity_down")
+    if not gravityDownPlayer.isPlaying:
+      gravityDownPlayer.playVariation()
+  else:
+    if gravityUpPlayer.isNil:
+      gravityUpPlayer = getOrLoadSamplePlayer("/audio/gravity/gravity_up")
+    if not gravityUpPlayer.isPlaying:
+      gravityUpPlayer.playVariation()
+
 proc addGravityZones(space: Space, gravityZones: seq[GravityZone]) =
   for gravityZone in gravityZones:
     let vCenter = gravityZone.position.toVect + vGravityZoneCenterOffset
@@ -102,7 +120,8 @@ let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityShape:
   state.gravityDirection = gravityZone.direction
   let newGravity = gravityZone.direction.toVect
   space.gravity = newGravity
-
+  playSoundForGravity(newGravity)
+    
 let gravityZoneBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   print "gravityZoneBeginFunc"
   var shapeA, shapeB: Shape

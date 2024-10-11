@@ -1,5 +1,6 @@
 import std/random
 import common/[utils, audio_utils]
+import cache/sound_cache
 import playdate/api
 import globals
 ## Non-bike sounds, such as win and collision sounds
@@ -18,17 +19,17 @@ proc initGameSound*() =
   ## Load the sounds
   try:
     for i in 1..5:
-      finishPlayers.add(playdate.sound.newSamplePlayer("/audio/finish/finish" & $i))
+      finishPlayers.add(getOrLoadSamplePlayer("/audio/finish/finish" & $i))
 
-    finishUnlockPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish_unlock")
+    finishUnlockPlayer = getOrLoadSamplePlayer("/audio/finish/finish_unlock")
     for i in 1..6:
-      collisionPlayers.add(playdate.sound.newSamplePlayer("/audio/collision/collision" & $i))
+      collisionPlayers.add(getOrLoadSamplePlayer("/audio/collision/collision" & $i))
     for i in 1..4:
-      fallPlayers.add(playdate.sound.newSamplePlayer("/audio/fall/fall" & $i))
+      fallPlayers.add(getOrLoadSamplePlayer("/audio/fall/fall" & $i))
     for i in 1..6:
-      coinPlayers.add(playdate.sound.newSamplePlayer("/audio/pickup/pickup" & $i))
+      coinPlayers.add(getOrLoadSamplePlayer("/audio/pickup/pickup" & $i))
     for i in 1..2:
-      starPlayers.add(playdate.sound.newSamplePlayer("/audio/pickup/acorn" & $i))
+      starPlayers.add(getOrLoadSamplePlayer("/audio/pickup/acorn" & $i))
 
   except:
     quit(getCurrentExceptionMsg(), 1)
