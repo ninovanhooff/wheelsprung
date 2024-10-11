@@ -33,7 +33,7 @@ proc initLevelSelectScreen() =
     print("initLevelSelectScreen: already initialized")
     return
 
-  backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/level_select/ambience") 
+  backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/music/soundtrack") 
   except:
     playdate.system.error(getCurrentExceptionMsg())
     nil
