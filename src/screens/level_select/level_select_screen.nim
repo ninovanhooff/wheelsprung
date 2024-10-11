@@ -118,6 +118,10 @@ proc updateInput(screen: LevelSelectScreen) =
     # the ganme screen loaded successfully, save as last opened level
     confirmPlayer.playVariation
     setLastOpenedLevel(levelPath)
+    # if on device, saving would delay the screen transition
+    if not defined(device): 
+      # running in simulator.
+      saveSaveSlot()
     pushScreen(gameScreen)
   elif kButtonUp in buttonState.current:
     selectPreviousRow(screen, kbuttonUp in buttonState.pushed)
