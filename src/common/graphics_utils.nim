@@ -172,11 +172,13 @@ proc fillCircle*(x, y: int32, radius: int32, color: LCDColor = kColorBlack ) {.i
 proc drawRoundRect*(x, y, width, height, radius, lineWidth: int32, color: LCDSolidColor) {.inline.} =
   let r2 = radius * 2
 
+  # lines
   gfx.fillRect(x + radius, y, width - r2, lineWidth, color)
   gfx.fillRect(x + width - lineWidth, y + radius, lineWidth, height - r2, color)
   gfx.fillRect(x + radius, y + height - lineWidth, width - r2, lineWidth, color)
   gfx.fillRect(x, y + radius, lineWidth, height - r2, color)
 
+  # corners
   gfx.drawEllipse(x, y, r2, r2, lineWidth, -90'f, 0'f, color)
   gfx.drawEllipse(x + width - r2, y, r2, r2, lineWidth, 0'f, 90'f, color)
   gfx.drawEllipse(x + width - r2, y + height - r2, r2, r2, lineWidth, 90'f, 180'f, color)
@@ -187,11 +189,13 @@ proc fillRoundRect*(x, y, width, height, radius: int32, color: LCDSolidColor) {.
 
   gfx.fillRect(x + radius, y + radius, width - r2, height - r2, color) #center
 
-  gfx.fillRect(x + radius, y, width - r2, r2, color)
-  gfx.fillRect(x + width - radius, y + radius, radius, height - r2, color)
-  gfx.fillRect(x + radius, y + height - radius, width - r2, radius, color)
-  gfx.fillRect(x, y + radius, radius, height - r2, color)
+  # body as a cross between the four corners
+  # vertical body beam
+  gfx.fillRect(x + radius, y, width - r2, height, color)
+  # horizontal body beam
+  gfx.fillRect(x, y + radius, width, height - r2, color)
 
+  # corners
   gfx.fillEllipse(x, y, r2, r2, 270 ,0, color) # top left
   gfx.fillEllipse(x + width - r2, y, r2, r2, 0, 90, color) # top right
   gfx.fillEllipse(x + width - r2, y + height - r2, r2, r2, 90, 180, color) # bottom right
