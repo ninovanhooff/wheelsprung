@@ -41,8 +41,6 @@ var
   gridImage: LCDBitmap
 
   smallFont: LCDFont
-  largeFont: LCDFont
-  
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -62,7 +60,6 @@ proc initGameView*() =
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
   smallFont = getOrLoadFont(FontId.Roobert10Bold)
-  largeFont = getOrLoadFont(FontId.Roobert11Medium)
   initGameCoin()
   initGameKiller()
   initGameFinish()
@@ -231,9 +228,6 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
-proc resumeGameView*() =
-  gfx.setFont(largeFont)
-
 proc message(gameResult: GameResult): string =
   case gameResult.resultType
   of GameResultType.LevelComplete:
@@ -352,10 +346,23 @@ proc drawGame*(statePtr: ptr GameState) =
   # Game ended message
   if state.gameResult.isSome:
     gfx.setFont(smallFont)
-    gfx.setDrawMode(kDrawModeNXOR)
-    let gameResult = state.gameResult.get
-    gfx.drawTextAligned("Ⓐ " & gameResult.message, 200, 220)
-  
+    gfx.setDrawMode(kDrawModeFillWhite)
+    let message = "Ⓐ " & state.gameResult.get.message
+    let (textW, textH) = smallFont.getTextSize(message)
+    let textRect = Rect(
+      x: LCD_COLUMNS div 2 - textW.int32 div 2,
+      y: 216,
+      width: textW.int32,
+      height: textH.int32
+    )
+    textRect.inset(-3,-3, -3, -2).fillRoundRect(
+      radius=4,
+      color=kColorBlack
+    )
+    gfx.setDrawMode(kDrawModeFillWhite)
+    gfx.drawText(message, textRect.x, textRect.y)
+    gfx.setDrawMode(kDrawModeCopy)
+
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
   drawGame(unsafeAddr state)
