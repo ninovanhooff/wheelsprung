@@ -105,7 +105,7 @@ proc drawAsset*(asset: Asset, camState: CameraState) =
     asset.getBitmap(camState.frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
 
   if asset.stencilPatternId.isSome:
-    gfx.setStencil(nil)
+    gfx.setStencilImage(nil)
 
 proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32, frameRepeat: int32, stencilPattern: Option[LCDPatternId] = none(LCDPatternId)): Animation =
   let firstFrame = bitmapTable.getBitmap(0)
