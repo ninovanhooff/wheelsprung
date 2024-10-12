@@ -22,6 +22,7 @@ type
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
     Nuts = "images/nuts"
+    ReadyGo = "images/ready-go"
     GravityUp = "images/gravity/gravity-up"
     GravityUpRight = "images/gravity/gravity-up-right"
     GravityRight = "images/gravity/gravity-right"

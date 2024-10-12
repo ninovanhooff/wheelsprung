@@ -4,7 +4,12 @@ import playdate/api
 import common/graphics_types
 import common/utils
 
-type 
+type
+  FontId* {.pure.} = enum
+    NontendoBold = "fonts/Nontendo-Bold-2x"
+    M6X11 = "fonts/m6x11-12"
+    Roobert10Bold = "fonts/Roobert-10-Bold"
+    Roobert11Medium = "fonts/Roobert-11-Medium"
   # a table mapping font path to LCDFont
   FontCache = TableRef[string, LCDFont]
 
@@ -24,3 +29,6 @@ proc getOrLoadFont*(path: string): LCDFont =
       print(getCurrentExceptionMsg())
     else:
       playdate.system.error("FATAL: " & getCurrentExceptionMsg())
+
+proc getOrLoadFont*(id: FontId): LCDFont =
+  return getOrLoadFont($id)

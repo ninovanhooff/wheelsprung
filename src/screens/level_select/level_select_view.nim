@@ -28,7 +28,7 @@ proc initLevelSelectView*() =
   if not levelStatusImages.isNil: return # already initialized
     
   levelStatusImages = getOrLoadBitmapTable(BitmapTableId.LevelStatus)
-  levelFont = getOrLoadFont("fonts/m6x11-12.pft")
+  levelFont = getOrLoadFont(FontId.M6X11)
 
 proc getBackground(levelTheme: LevelTheme): LCDBitmap =
   case levelTheme

@@ -40,15 +40,16 @@
                 "isDefault": true
             }
         },
-        {
-            "label": "Update level content hashes",
-            "presentation": {
-                "clear": true,
-            },
-            "type": "shell",
-            "problemMatcher": [],
-            "command": ". ./scripts/set_release_env.sh && ./scripts/run_level_updater.sh"
-        },
+        // included in the Level Sync Watcher task
+        // {
+        //     "label": "Update level content hashes",
+        //     "presentation": {
+        //         "clear": true,
+        //     },
+        //     "type": "shell",
+        //     "problemMatcher": [],
+        //     "command": ". ./scripts/set_release_env.sh && ./scripts/run_level_updater.sh"
+        // },
         {
             "label": "Reboot Device to Data disk",
             "type": "shell",

@@ -9,6 +9,7 @@ import data_store/configuration
 import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
+import game_start_overlay
 import game_terrain
 import game_dynamic_object
 import game_camera
@@ -210,6 +211,10 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
   let space = level.createSpace()
   state = GameState(
     level: level, 
+    gameStartState: some(GameStartState(
+      readyGoFrame: 0,
+      levelName: level.meta.name
+    )),
     background: background,
     space: space,
     gravityDirection: Direction8.D8_DOWN,
@@ -291,8 +296,6 @@ method resume*(gameScreen: GameScreen) =
     onResetGame()
   )
 
-  resumeGameView()
-
   resetGameInput(state)
 
   if state.resetGameOnResume:
@@ -304,8 +307,6 @@ method resume*(gameScreen: GameScreen) =
       state.updateCamera(snapToTarget = true)
     else:
       state.updateCameraPid(snapToTarget = true)
-    # the update loop won't draw the game
-    drawGame(addr state)
 
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
@@ -314,6 +315,8 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 method update*(gameScreen: GameScreen): int =
   handleInput(state)
   updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
+  if state.gameStartState.isSome:
+    updateGameStart(state)
 
   if state.isGameStarted:
     updateAttitudeAdjust(state)

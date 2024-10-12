@@ -8,6 +8,7 @@ import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
 import game_bike, game_finish, game_ghost, game_killer, game_coin, game_gravity_zone
+import game_start_overlay
 import game_dynamic_object
 import common/graphics_utils
 import common/lcd_patterns
@@ -40,8 +41,6 @@ var
   gridImage: LCDBitmap
 
   smallFont: LCDFont
-  largeFont: LCDFont
-  
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -60,8 +59,7 @@ proc initGameView*() =
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
-  smallFont = getOrLoadFont("fonts/Roobert-10-Bold")
-  largeFont = getOrLoadFont("fonts/Roobert-11-Medium")
+  smallFont = getOrLoadFont(FontId.Roobert10Bold)
   initGameCoin()
   initGameKiller()
   initGameFinish()
@@ -230,9 +228,6 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
-proc resumeGameView*() =
-  gfx.setFont(largeFont)
-
 proc message(gameResult: GameResult): string =
   case gameResult.resultType
   of GameResultType.LevelComplete:
@@ -345,21 +340,29 @@ proc drawGame*(statePtr: ptr GameState) =
     let forkImpulse: int32 = state.forkArmSpring.impulse.int32
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
-  if state.time < 500.Milliseconds:
-    gfx.setFont(largeFont)
-    let messageY = (state.riderHead.position.y - camera.y - 26.0).int32
-    if not state.isGameStarted:
-      gfx.drawTextAligned("Ready?", 200, messageY)
-    else:
-      gfx.drawTextAligned("Go!", 200, messageY)
+  if state.gameStartState.isSome:
+    drawGameStart(state.gameStartState.get)
 
   # Game ended message
   if state.gameResult.isSome:
     gfx.setFont(smallFont)
-    gfx.setDrawMode(kDrawModeNXOR)
-    let gameResult = state.gameResult.get
-    gfx.drawTextAligned("Ⓐ " & gameResult.message, 200, 220)
-  
+    gfx.setDrawMode(kDrawModeFillWhite)
+    let message = "Ⓐ " & state.gameResult.get.message
+    let (textW, textH) = smallFont.getTextSize(message)
+    let textRect = Rect(
+      x: LCD_COLUMNS div 2 - textW.int32 div 2,
+      y: 216,
+      width: textW.int32,
+      height: textH.int32
+    )
+    textRect.inset(-3,-3, -3, -2).fillRoundRect(
+      radius=4,
+      color=kColorBlack
+    )
+    gfx.setDrawMode(kDrawModeFillWhite)
+    gfx.drawText(message, textRect.x, textRect.y)
+    gfx.setDrawMode(kDrawModeCopy)
+
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
   drawGame(unsafeAddr state)
