@@ -43,8 +43,8 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
 
   newLevelMeta(name= "Tutorial: Gravity", path="levels/tutorial_gravity.wmj", theme= Space, hash="D515B80D7961D381F24784F95FE566D9"),
   newLevelMeta(name= "Wall Rider", path="levels/wall_rider.wmj", theme= Space, hash="289CE0F59B13B17C6C24E11366ED99C0"),
-  newLevelMeta(name= "Gravity Vault", path="levels/gravity_vault.wmj", theme= Space, hash="B94D1B805D492033CD17456BC2DE11CA"),
-  newLevelMeta(name= "Marble Vault", path="levels/marble_vault.wmj", theme= Space, hash="AC05F0577E2ADC7A22DB3DD0EBBC71DA"),
+  newLevelMeta(name= "Gravity Vault", path="levels/gravity_vault.wmj", theme= Space, hash="B2F2A60C18E62BB71440DE4A52D19D9C"),
+  newLevelMeta(name= "Marble Vault", path="levels/marble_vault.wmj", theme= Space, hash="EDE635525EE24A08A56B6597FB394903"),
   newLevelMeta(name= "Killveyor", path="levels/killveyor.wmj", theme= Space, hash="01F13539BF2C80BA51C6493C8EBE7D3E"),
   newLevelMeta(name= "Return to sender", path="levels/return_to_sender.wmj", theme= Space, hash="38786445A7556330267493A3984ED90E"),
 
@@ -54,7 +54,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.wmj", theme= Plants, hash="DC16167AB074178813D718F340A11E53"),
 
   newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.wmj", theme= Desk, hash="65492135DDF3E619FF3790D8B09727D8"),
-  newLevelMeta(name= "Leg Up", path="levels/leg_up.wmj", theme= Desk, hash="A7C98CE33E9EBE2DF950AE4672CC1D56"),
+  newLevelMeta(name= "Leg Up", path="levels/leg_up.wmj", theme= Desk, hash="0B16E215044C42D19BDFC8F3CEA158F1"),
   newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.wmj", theme= Desk, hash="49CC4A72B29B501B2B3ACCB68E678248"),
   newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.wmj", theme= Desk, hash="8FFCAD8B3D12CA55EEE0A99F1FFCBE37")
 ]
