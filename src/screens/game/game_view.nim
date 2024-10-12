@@ -42,7 +42,7 @@ var
 
   smallFont: LCDFont
   largeFont: LCDFont
-  
+
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -355,7 +355,7 @@ proc drawGame*(statePtr: ptr GameState) =
     gfx.setDrawMode(kDrawModeNXOR)
     let gameResult = state.gameResult.get
     gfx.drawTextAligned("Ⓐ " & gameResult.message, 200, 220)
-  
+
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
   drawGame(unsafeAddr state)
