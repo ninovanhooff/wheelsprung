@@ -2,9 +2,12 @@ import playdate/api
 import common/graphics_utils
 import game_types
 import cache/font_cache
+import cache/bitmaptable_cache
+import common/utils
 
 proc drawGameStart*(state: GameState) =
   let titleFont = getOrLoadFont(FontId.M6X11)
+  let readyGo = getOrLoadBitmapTable(BitmapTableId.ReadyGo)
   let name = state.level.meta.name
   let (textW, textH) = titleFont.getTextSize(name)
   let textRect = Rect(
@@ -18,3 +21,5 @@ proc drawGameStart*(state: GameState) =
   gfx.setDrawMode(kDrawModeFillWhite)
   gfx.drawText(name, textRect.x, textRect.y)
   gfx.setDrawMode(kDrawModeCopy)
+
+  readyGo.getBitmap(0).draw(0, 0, kBitmapUnflipped)
