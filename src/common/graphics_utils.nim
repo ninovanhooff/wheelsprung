@@ -182,6 +182,21 @@ proc drawRoundRect*(x, y, width, height, radius, lineWidth: int32, color: LCDSol
   gfx.drawEllipse(x + width - r2, y + height - r2, r2, r2, lineWidth, 90'f, 180'f, color)
   gfx.drawEllipse(x, y + height - r2, r2, r2, lineWidth, -180'f, -90'f, color)
 
+proc fillRoundRect*(x, y, width, height, radius: int32, color: LCDSolidColor) {.inline.} =
+  let r2 = radius * 2
+
+  gfx.fillRect(x + radius, y + radius, width - r2, height - r2, color) #center
+
+  gfx.fillRect(x + radius, y, width - r2, r2, color)
+  gfx.fillRect(x + width - radius, y + radius, radius, height - r2, color)
+  gfx.fillRect(x + radius, y + height - radius, width - r2, radius, color)
+  gfx.fillRect(x, y + radius, radius, height - r2, color)
+
+  gfx.fillEllipse(x, y, r2, r2, 270 ,0, color) # top left
+  gfx.fillEllipse(x + width - r2, y, r2, r2, 0, 90, color) # top right
+  gfx.fillEllipse(x + width - r2, y + height - r2, r2, r2, 90, 180, color) # bottom right
+  gfx.fillEllipse(x, y + height - r2, r2, r2, 180, 270, color) # bottom left
+  
 # Rect
 
 proc inset*(rect: Rect, left, top, right, bottom: int32): Rect =
@@ -219,11 +234,21 @@ proc setScreenClipRect*(rect: Rect) {.inline.} =
 
 proc drawRoundRect*(rect: Rect, radius: int32, lineWidth: int32, color: LCDSolidColor) {.inline.} =
   drawRoundRect(
-    x = rect.x, 
-    y = rect.y, 
+    x= rect.x, 
+    y= rect.y, 
     width= rect.width, 
     height= rect.height, 
     radius= radius, 
     lineWidth= lineWidth, 
+    color= color
+  )
+
+proc fillRoundRect*(rect: Rect, radius: int32, color: LCDSolidColor) {.inline.} =
+  fillRoundRect(
+    x= rect.x, 
+    y= rect.y, 
+    width= rect.width, 
+    height= rect.height, 
+    radius= radius, 
     color= color
   )
