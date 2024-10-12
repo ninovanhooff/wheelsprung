@@ -169,14 +169,18 @@ proc drawLine*(v0: Vertex, v1: Vertex, color: LCDColor = kColorBlack) {.inline.}
 proc fillCircle*(x, y: int32, radius: int32, color: LCDColor = kColorBlack ) {.inline.} =
   gfx.fillEllipse(x - radius,y - radius,radius * 2'i32, radius * 2'i32, 0f, 0f, color);
 
-proc draw*(rect: Rect, color: LCDColor) {.inline.} =
-  gfx.drawRect(rect.x, rect.y, rect.width, rect.height, color)
+proc drawRoundRect*(x, y, width, height, radius, lineWidth: int32, color: LCDSolidColor) {.inline.} =
+  let r2 = radius * 2
 
-proc fill*(rect: Rect, color: LCDColor) {.inline.} =
-  gfx.fillRect(rect.x, rect.y, rect.width, rect.height, color)
+  gfx.fillRect(x + radius, y, width - r2, lineWidth, color)
+  gfx.fillRect(x + width - lineWidth, y + radius, lineWidth, height - r2, color)
+  gfx.fillRect(x + radius, y + height - lineWidth, width - r2, lineWidth, color)
+  gfx.fillRect(x, y + radius, lineWidth, height - r2, color)
 
-proc setScreenClipRect*(rect: Rect) {.inline.} =
-  gfx.setClipRect(rect.x, rect.y, rect.width, rect.height)
+  gfx.drawEllipse(x, y, r2, r2, lineWidth, -90'f, 0'f, color)
+  gfx.drawEllipse(x + width - r2, y, r2, r2, lineWidth, 0'f, 90'f, color)
+  gfx.drawEllipse(x + width - r2, y + height - r2, r2, r2, lineWidth, 90'f, 180'f, color)
+  gfx.drawEllipse(x, y + height - r2, r2, r2, lineWidth, -180'f, -90'f, color)
 
 # Rect
 
@@ -202,4 +206,24 @@ proc inset*(rect: Rect, size: int32): Rect =
     y: rect.y + size, 
     width: rect.width - size * 2, 
     height: rect.height - size * 2
+  )
+
+proc draw*(rect: Rect, color: LCDColor) {.inline.} =
+  gfx.drawRect(rect.x, rect.y, rect.width, rect.height, color)
+
+proc fill*(rect: Rect, color: LCDColor) {.inline.} =
+  gfx.fillRect(rect.x, rect.y, rect.width, rect.height, color)
+
+proc setScreenClipRect*(rect: Rect) {.inline.} =
+  gfx.setClipRect(rect.x, rect.y, rect.width, rect.height)
+
+proc drawRoundRect*(rect: Rect, radius: int32, lineWidth: int32, color: LCDSolidColor) {.inline.} =
+  drawRoundRect(
+    x = rect.x, 
+    y = rect.y, 
+    width= rect.width, 
+    height= rect.height, 
+    radius= radius, 
+    lineWidth= lineWidth, 
+    color= color
   )

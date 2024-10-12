@@ -16,7 +16,11 @@ proc drawGameStart*(state: GameState) =
     width: textW.int32,
     height: textH.int32
   )
-  textRect.inset(-4,-4).fill(kColorBlack)
+  textRect.inset(-4,-4).drawRoundRect(
+    radius=4,
+    lineWidth=2,
+    color=kColorBlack
+  )
   gfx.setFont(titleFont)
   gfx.setDrawMode(kDrawModeFillWhite)
   gfx.drawText(name, textRect.x, textRect.y)
