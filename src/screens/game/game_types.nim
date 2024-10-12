@@ -177,6 +177,11 @@ type AttitudeAdjust* = ref object
   direction*: Float # 1.0 or -1.0, not necessarily the same as drive direction
   startedAt*: Milliseconds
 
+type GameStartState* = ref object of RootObj
+  levelName*: string
+  readyGoFrame*: int32
+  gameStartFrame*: int32
+
 type GameState* = ref object of RootObj
   level*: Level
 
@@ -202,6 +207,8 @@ type GameState* = ref object of RootObj
 
   # time
   time*: Milliseconds
+  gameStartState*: Option[GameStartState]
+    ## Frame counter for the readyGo start animation
   frameCounter*: int32
   finishFlipDirectionAt*: Option[Milliseconds]
   finishTrophyBlinkerAt*: Option[Milliseconds]

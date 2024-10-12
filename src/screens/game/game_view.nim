@@ -8,7 +8,7 @@ import chipmunk7
 import game_types
 import common/[graphics_types, shared_types]
 import game_bike, game_finish, game_ghost, game_killer, game_coin, game_gravity_zone
-import game_start_view
+import game_start_overlay
 import game_dynamic_object
 import common/graphics_utils
 import common/lcd_patterns
@@ -346,8 +346,8 @@ proc drawGame*(statePtr: ptr GameState) =
     let forkImpulse: int32 = state.forkArmSpring.impulse.int32
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
-  if state.time < 500.Milliseconds:
-    drawGameStart(state)
+  if state.gameStartState.isSome:
+    drawGameStart(state.gameStartState.get)
 
   # Game ended message
   if state.gameResult.isSome:
