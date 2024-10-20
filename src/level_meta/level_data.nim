@@ -24,9 +24,9 @@ proc newLevelMeta*(name: string, path: Path, theme: LevelTheme, hash: string): L
   result = LevelMeta(name: name, path: path, theme: theme, contentHash: hash)
 
 let officialLevels*: OrderedTable[Path, LevelMeta] = @[
-  newLevelMeta(name= "Tutorial: Accelerate", path="levels/dragster.wmj", theme= Kitchen, hash="B9FDE9584DCE48CA66AC6EB840FDB013"),
+  newLevelMeta(name= "Tutorial: Accelerate", path="levels/dragster.wmj", theme= Kitchen, hash="4BCC8CCB3F019586DBD3FC749D76DC50"),
   newLevelMeta(name= "Tutorial: Brake", path="levels/tutorial_brake.wmj", theme= Kitchen, hash="3747BDEF40C513843AEB76CF36FFE750"),
-  newLevelMeta(name= "Tutorial: Turn Around", path="levels/tutorial_turn_around.wmj", theme= Kitchen, hash="5E042997356E1CE2045D2C9734A024FA"),
+  newLevelMeta(name= "Tutorial: Turn Around", path="levels/tutorial_turn_around.wmj", theme= Kitchen, hash="E751FAC8747A40C9B7B81E108B71A73A"),
   
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.wmj", theme= Bath, hash="FAF07A1B8B14F20E349AAD05F0FC7A8D"),
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.wmj", theme= Bath, hash="647A30204555BF33C7CD9BEFE17002E1"),
