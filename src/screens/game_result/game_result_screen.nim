@@ -59,7 +59,7 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
   else:
     @[GameResultAction.Restart, GameResultAction.LevelSelect]
 
-  if gameResult.hintsAvailable:
+  if gameResult.hintsAvailable and resultType == GameResultType.GameOver:
     # if hints are available, show them as the the first option if they have not been dismissed
     let position = if showedHints.hasKey(gameResult.levelId): availableActions.len else: 0
     availableActions.insert(GameResultAction.ShowHints, position)
