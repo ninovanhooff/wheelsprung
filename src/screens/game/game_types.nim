@@ -155,6 +155,7 @@ type Level* = ref object of RootObj
   meta*: LevelMeta
   contentHash*: string
   background*: Option[LCDBitmap]
+  hintsPath*: Option[Path]
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
   dynamicBoxes*: seq[DynamicBoxSpec]
@@ -186,6 +187,7 @@ type GameState* = ref object of RootObj
   level*: Level
 
   background*: LCDBitmap
+  hintsEnabled*: bool
 
   # Game state
   isGameStarted*: bool

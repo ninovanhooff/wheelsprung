@@ -108,7 +108,12 @@ proc initGeometryBackground(state: GameState)=
 proc initGameBackground*(state: GameState) =
   let level = state.level
 
-  if level.background.isSome:
+  if state.hintsEnabled:
+    try:
+      state.background = gfx.newBitmap(state.level.hintsPath.get)
+    except:
+      print "Hints Image load failed:", getCurrentExceptionMsg()
+  elif level.background.isSome:
     state.background = level.background.get
   else:
     state.initGeometryBackground()

@@ -19,6 +19,7 @@ type
     resultType*: GameResultType
     time*: Milliseconds
     starCollected*: bool
+    hintsAvailable*: bool
 
   VoidCallBack* = proc() {.raises:[].}
 

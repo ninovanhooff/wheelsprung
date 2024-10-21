@@ -44,6 +44,7 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.starEnabled and state.level.starPosition.isSome,
+    hintsAvailable: state.level.hintsPath.isSome,
   )
   state.resetGameOnResume = resetGameOnResume
   state.gameResult = some(result)
@@ -51,6 +52,15 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
 proc updateGameResult(state: GameState) {.raises: [].} =
   if state.gameResult.isSome:
     state.setGameResult(state.gameResult.get.resultType)
+
+proc enableHints*(state: var GameState) =
+  if state.level.hintsPath.isNone:
+    print "ERROR: No hints available for this level"
+    return
+    
+  state.background = nil
+  state.hintsEnabled = true
+  state.initGameBackground()
 
 proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen {.raises: [].} =
   var screen = createHitstopScreen(state, collisionShape)
@@ -207,7 +217,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
       
   return space
 
-proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Option[Ghost] = none(Ghost)): GameState {.raises: [].} =
+proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Option[Ghost] = none(Ghost), hintsEnabled: bool = false): GameState {.raises: [].} =
   let space = level.createSpace()
   state = GameState(
     level: level, 
@@ -216,6 +226,7 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
       levelName: level.meta.name
     )),
     background: background,
+    hintsEnabled: hintsEnabled,
     space: space,
     gravityDirection: Direction8.D8_DOWN,
     ghostRecording: newGhost(),
