@@ -44,7 +44,7 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.starEnabled and state.level.starPosition.isSome,
-    hintsAvailable: state.level.hintsPath.isSome,
+    hintsAvailable: (not state.hintsEnabled) and state.level.hintsPath.isSome,
   )
   state.resetGameOnResume = resetGameOnResume
   state.gameResult = some(result)
@@ -257,6 +257,7 @@ proc onResetGame() {.raises: [].} =
   state = newGameState(
     level = state.level,
     background = state.background,
+    hintsenabled = state.hintsEnabled,
     ghostPlayback = some(pickBestGhost(state.ghostRecording, state.ghostPlayback))
   )
 
