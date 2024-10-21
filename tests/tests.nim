@@ -123,5 +123,7 @@ proc runTests*() =
 
   testHashing()
 
+  for i in countdown(5, 10):
+    print "ERROR did not expect any invocation for invalid countdown range", i
 
   print "======== Test: Tests Completed ========="
