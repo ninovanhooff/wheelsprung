@@ -356,5 +356,10 @@ method destroy*(gameScreen: GameScreen) =
   gameScreen.pause()
   state.destroy()
 
+method setResult*(gameScreen: GameScreen, screenResult: ScreenResult) =
+  if screenResult.screenType != gameScreen.screenType: return
+  if screenResult.enableHints:
+    state.enableHints()
+
 method `$`*(gameScreen: GameScreen): string =
   return "GameScreen"

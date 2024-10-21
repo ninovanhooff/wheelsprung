@@ -11,6 +11,7 @@
 .}
 
 import std/sugar
+import std/options
 import screen
 import common/utils
 import playdate/api
@@ -83,6 +84,17 @@ proc clearNavigationStack*() =
     while backStack.len > 0:
       popScreenImmediately()
   )
+
+proc setResult*(screenResult: ScreenResult) =
+  # start searching at screen below current screen on backstack
+  # since returning a result to self does not make sense
+  # not using Option here because that doesn't seem to work well for generic types like Screen
+  print "Processing", screenResult.repr
+  for i in countdown(backStack.high - 1, 0):
+    let targetScreen = backStack[i]
+    if targetScreen.screenType == screenResult.screenType:
+      targetScreen.setResult(screenResult)
+      break
 
 proc executePendingNavigators() =
   if pendingNavigators.len == 0: return

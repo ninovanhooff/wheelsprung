@@ -50,6 +50,7 @@ type
     image: Option[string]
     offsetx, offsety: Option[int32]
     `type`: string
+    `class`: Option[string]
   
   LevelEntity = ref object of RootObj
     width, height: int32
@@ -427,7 +428,9 @@ proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   var imageName = layer.image.get
   imageName = imageName.rsplit('/', maxsplit=1)[^1] # remove path
   imageName = imageName.rsplit('.', maxsplit=1)[0] # remove extension
-  if imageName.endswith(BITMAP_TABLE_SUFFIX):
+  if layer.`class` == some("HintsBackgroundLayer"):
+    level.hintsPath = some(levelsBasePath & imageName)
+  elif imageName.endswith(BITMAP_TABLE_SUFFIX):
     # bitmap table animation
     try:
       imageName.removeSuffix(BITMAP_TABLE_SUFFIX) # in-place

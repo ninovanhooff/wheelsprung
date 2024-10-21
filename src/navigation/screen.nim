@@ -1,16 +1,10 @@
 ## Ported from https://github.com/ninovanhooff/playdate-navigator/blob/a33c2b724dfe7f83d7c406eed3d3aabbb8b550c2/Screen.lua
 {.push base, raises: [].}
 import common/utils
+import screens/screen_types
+export screen_types
 
-type 
-  ScreenType* {.pure.}= enum
-    LevelSelect
-    Game
-    HitStop
-    GameResult
-    Settings
-  Screen* {.requiresInit.} = ref object of RootObj
-    screenType*: ScreenType
+
 
 method `$`*(self: Screen): string = $self.screenType
 
@@ -33,3 +27,7 @@ method update*(self: Screen): int =
   ]##
   print "update not implemented for screen: " & $self
   return 0
+
+method setResult*(self: Screen, result: ScreenResult) =
+  ## Another screen has finished and returned a result for this screen
+  print "ERROR: setResult not implemented for screen: " & $self

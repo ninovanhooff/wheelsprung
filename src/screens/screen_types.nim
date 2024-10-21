@@ -1,4 +1,20 @@
-import navigation/screen
+type
+  ScreenType* {.pure.}= enum
+    LevelSelect
+    Game
+    HitStop
+    GameResult
+    Settings
+  Screen* {.requiresInit.} = ref object of RootObj
+    screenType*: ScreenType
+
+type 
+  ScreenResult* = ref object
+    case screenType*: ScreenType
+    of Game: 
+      enableHints*: bool
+    of LevelSelect, HitStop, GameResult, Settings: 
+      discard # no properties
 
 type GameScreen* = ref object of Screen
   isInitialized*: bool

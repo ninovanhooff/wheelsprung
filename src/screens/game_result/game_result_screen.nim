@@ -18,7 +18,7 @@ import cache/bitmaptable_cache
 
 type 
   GameResultAction {.pure.} = enum
-    LevelSelect, Restart, Next
+    LevelSelect, Restart, Next, ShowHints
   GameResultScreen = ref object of Screen
     previousProgress: LevelProgress
     gameResult: GameResult
@@ -50,10 +50,13 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
   let resultType = gameResult.resultType
   let previousProgress = getLevelProgress(gameResult.levelId).copy()
   let nextPath = nextLevelPath(gameResult.levelId)
-  let availableActions = if nextPath.isSome:
+  var availableActions = if nextPath.isSome:
     @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.LevelSelect]
   else:
     @[GameResultAction.Restart, GameResultAction.LevelSelect]
+
+  if gameResult.hintsAvailable:
+    availableActions.add(GameResultAction.ShowHints)
 
   let currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default
 
@@ -87,6 +90,7 @@ proc label(resultType: GameResultType, gameResultAction: GameResultAction): stri
   of GameResultAction.LevelSelect: return "Level Select"
   of GameResultAction.Restart: return if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
   of GameResultAction.Next: return if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
+  of GameResultAction.ShowHints: "Show hints"
 
 const buttonTextCenterX = 100
 
@@ -181,6 +185,9 @@ proc executeAction(self: GameResultScreen, action: GameResultAction) =
     else:
       print "next not enabled"
       popScreen()
+  of GameResultAction.ShowHints:
+    setResult(ScreenResult(screenType: ScreenType.Game, enableHints: true))
+    popScreen()
 
 method update*(self: GameResultScreen): int =
   # no drawing needed here, we do it in resume
