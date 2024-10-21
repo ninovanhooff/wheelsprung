@@ -3,6 +3,7 @@ import playdate/api
 import navigation/[screen, navigator]
 import std/options
 import std/math
+import std/tables
 import std/sequtils
 import common/graphics_types
 import common/shared_types
@@ -33,6 +34,9 @@ var
   buttonFont: LCDFont
   newPersonalBestImage: LCDBitmap
   actionArrowsImageTable: AnnotatedBitmapTable
+  showedHints: Table[Path, bool] = initTable[Path, bool]()
+    ## key: level path, value if true, hints have been offered
+
 
 proc initGameResultScreen() =
   if not buttonFont.isNil:
@@ -56,7 +60,10 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     @[GameResultAction.Restart, GameResultAction.LevelSelect]
 
   if gameResult.hintsAvailable:
-    availableActions.insert(GameResultAction.ShowHints)
+    # if hints are available, show them as the the first option if they have not been dismissed
+    let position = if showedHints.hasKey(gameResult.levelId): availableActions.len else: 0
+    availableActions.insert(GameResultAction.ShowHints, position)
+    showedHints[gameResult.levelId] = true
 
   let currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default
 
