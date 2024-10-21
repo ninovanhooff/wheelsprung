@@ -29,7 +29,6 @@
             "name": "AnimationLayer",
             "type": "class",
             "useAs": [
-                "property",
                 "layer",
                 "project"
             ]
@@ -86,6 +85,19 @@
                 "black"
             ],
             "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 11,
+            "members": [
+            ],
+            "name": "HintsBackgroundLayer",
+            "type": "class",
+            "useAs": [
+                "layer",
+                "project"
+            ]
         },
         {
             "id": 10,
