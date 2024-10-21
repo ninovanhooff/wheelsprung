@@ -56,7 +56,7 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     @[GameResultAction.Restart, GameResultAction.LevelSelect]
 
   if gameResult.hintsAvailable:
-    availableActions.add(GameResultAction.ShowHints)
+    availableActions.insert(GameResultAction.ShowHints)
 
   let currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default
 
