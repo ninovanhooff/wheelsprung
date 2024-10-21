@@ -29,13 +29,16 @@ type
     currentActionIndex: int
     hasPersistedResult: bool
 
+const 
+  HINT_RETRY_COUNT = 5
+
 var
   timeFont: LCDFont
   buttonFont: LCDFont
   newPersonalBestImage: LCDBitmap
   actionArrowsImageTable: AnnotatedBitmapTable
-  showedHints: Table[Path, bool] = initTable[Path, bool]()
-    ## key: level path, value if true, hints have been offered
+  hintOfferCount: Table[Path, int] = initTable[Path, int]()
+    ## key: level path, value number of times hints have been offered for this level
 
 
 proc initGameResultScreen() =
@@ -61,9 +64,13 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
 
   if gameResult.hintsAvailable and resultType == GameResultType.GameOver:
     # if hints are available, show them as the the first option if they have not been dismissed
-    let position = if showedHints.hasKey(gameResult.levelId): availableActions.len else: 0
+    let timesOffered = hintOfferCount.getOrDefault(gameResult.levelId, 0)
+    let position = if timesOffered != HINT_RETRY_COUNT: 
+      availableActions.len 
+    else: 
+      0
     availableActions.insert(GameResultAction.ShowHints, position)
-    showedHints[gameResult.levelId] = true
+    hintOfferCount[gameResult.levelId] = timesOffered + 1
 
   let currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default
 
