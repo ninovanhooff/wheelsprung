@@ -91,7 +91,8 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)
   elif event == kEventTerminate or event == kEventLowPower:
-    print("Program will terminate")
+    saveSaveSlot()
+    print("Wheelsprung will terminate")
   elif event == kEventKeyReleased:
     if keycode == 116:
       print("T")
