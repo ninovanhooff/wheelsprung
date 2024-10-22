@@ -1,5 +1,8 @@
+import flatty
 import common/integrity
 import level_meta/level_data
+import level_meta/level_entity
+import std/paths
 import std/strutils
 import tables
 
@@ -16,11 +19,17 @@ proc updateHash(oldHash: string, newHash: string) =
 proc testPath(path: string) =
   try:
     let jsonString = readFile(path)
-    let oneLinerResult = jsonString.levelContentHash()
+    let actualHash = jsonString.levelContentHash()
     let expectedHash = officialLevels[path].contentHash
-    if oneLinerResult != expectedHash:
-      echo "updating: ", path, " expected: ", expectedHash, " got: ", oneLinerResult
-      updateHash(expectedHash, oneLinerResult)
+    if actualHash != expectedHash:
+      echo "updating: ", path, " expected: ", expectedHash, " got: ", actualHash
+      updateHash(expectedHash, actualHash)
+
+      # update Flatty file
+      let levelEntity = parseJsonLevelContents(jsonString)
+      let flattyString = levelEntity.toFlatty()
+      let flattyPath = Path(path).changeFileExt("flatty")
+      writeFile(flattyPath.string, flattyString)
     else:
       echo "up to date: ", path
   except:

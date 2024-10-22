@@ -6,7 +6,6 @@ import common/utils
 import common/shared_types
 import common/audio_utils
 import std/sequtils
-import std/strutils
 import std/options
 import std/tables
 import std/sugar
@@ -47,7 +46,7 @@ proc initLevelSelectScreen() =
 proc getLevelPaths(): seq[string] =
   try:
     return playdate.file.listFiles(levelsBasePath)
-      .filterIt(it.endsWith(levelFileExtension))
+      .filterIt(it.isLevelFile)
       .mapIt(levelsBasePath & it)
   except IOError:
     print("ERROR reading level paths", getCurrentExceptionMsg())

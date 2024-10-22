@@ -13,6 +13,7 @@ bin           = @["wheelsprung"]
 requires "nim >= 2.0.0"
 requires "playdate"
 requires "murmurhash"
+requires "flatty"
 # requires "https://github.com/samdze/playdate-nim#main"
 # change to chipmunk7 for local development
 requires "https://github.com/ninovanhooff/nim-chipmunk-playdate"

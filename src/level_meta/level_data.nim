@@ -1,5 +1,6 @@
 {.push raises: [].}
 
+import std/strutils
 import tables
 import sugar
 import sequtils
@@ -7,7 +8,8 @@ import common/shared_types
 
 const 
   levelsBasePath* = "levels/"
-  levelFileExtension* = ".wmj"
+  jsonLevelFileExtension* = ".wmj"
+  flattyLevelFileExtension* = ".flatty"
 
 type
   LevelTheme*  {.pure.} = enum
@@ -19,6 +21,9 @@ type
       ## path is used as id, must be unique (which it is, enforced by the file system)
     contentHash*: string
     theme*: LevelTheme
+
+proc isLevelFile*(path: string): bool =
+  return path.endsWith(jsonLevelFileExtension) or path.endsWith(flattyLevelFileExtension)
 
 proc newLevelMeta*(name: string, path: Path, theme: LevelTheme, hash: string): LevelMeta =
   result = LevelMeta(name: name, path: path, theme: theme, contentHash: hash)

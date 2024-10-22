@@ -74,7 +74,6 @@ proc addGravityZones(space: Space, gravityZones: seq[GravityZone]) =
 
 proc addGravityZones*(state: GameState) =
   # assignment by copy
-  print "initGravityZones"
   state.gravityZones = @[]
   for spec in state.level.gravityZones:
     let animation = spec.toGravityAnimation()
@@ -84,7 +83,6 @@ proc addGravityZones*(state: GameState) =
       animation = animation
     )
     state.gravityZones.add(gravityZone)
-  print "state.gravityZones: " & repr(state.gravityZones)
   state.space.addGravityZones(state.gravityZones)
 
 proc drawGravityZones*(gravityZones: seq[GravityZone], activeDirection: Direction8, camState: CameraState) =

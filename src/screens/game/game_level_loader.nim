@@ -1,4 +1,7 @@
+{.push raises: [].}
+
 import chipmunk7
+import flatty
 import chipmunk_utils
 import options
 import common/integrity
@@ -16,47 +19,12 @@ import common/graphics_types
 import common/graphics_utils
 import common/data_utils
 import level_meta/level_data
+import level_meta/level_entity
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import common/lcd_patterns
 
 type
-  LevelPropertiesEntity = ref object of RootObj
-    name: string
-    value: JsonNode
-  LevelTextEntity = ref object of RootObj
-    halign: Option[string]
-    text: string
-  LevelVertexEntity {.bycopy.} = object
-    x*: int32
-    y*: int32
-  LevelPropertiesHolder = ref object of RootObj
-    properties: Option[seq[LevelPropertiesEntity]]
-  LevelObjectEntity = ref object of LevelPropertiesHolder
-    id: int32 # unique object id
-    gid: Option[uint32] # tile id including flip flags
-    x, y: int32
-    width*, height*: int32
-    rotation: float32
-    polygon: Option[seq[LevelVertexEntity]]
-    polyline: Option[seq[LevelVertexEntity]]
-    text: Option[LevelTextEntity]
-    ellipse: Option[bool]
-    `type`: string
-  LevelLayerEntity = ref object of LevelPropertiesHolder
-    objects: Option[seq[LevelObjectEntity]]
-    name: Option[string]
-    visible: bool
-    image: Option[string]
-    offsetx, offsety: Option[int32]
-    `type`: string
-    `class`: Option[string]
-  
-  LevelEntity = ref object of RootObj
-    width, height: int32
-    tilewidth, tileheight: int32
-    layers: seq[LevelLayerEntity]
-
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
     Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32
@@ -177,25 +145,25 @@ proc frameRepeat(obj: LevelLayerEntity): int32 =
 proc readDataFileContents(path: string): string {.raises: [].} =
   try:
     let playdateFile = playdate.file
-    let jsonString = playdateFile.open(path, kFileReadAny).readString()
-    return jsonString
+    let contentString = playdateFile.open(path, kFileReadAny).readString()
+    return contentString
   except:
     print("Could not read " & $path)
     print(getCurrentExceptionMsg())
     return ""
 
-proc parseLevel(path: string): (LevelEntity, string) {.raises: [].} =
+proc parseJsonLevel(path: string): (LevelEntity, string) {.raises: [].} =
   let jsonString = readDataFileContents(path)
+  return parseJsonLevelContents(jsonString)
+
+proc parseFlattyLevel(path: string): (LevelEntity, string) {.raises: [].} =
+  let flattyString = readDataFileContents(path)
   try:
-    markStartTime()
-    let levelEntity = jsonString.parseJson().to(LevelEntity)
-    printT("Level parsed")
-    markStartTime()
-    let contentHash = jsonString.levelContentHash()
-    printT("Level hashed", contentHash)
+    let levelEntity = flattyString.fromFlatty(LevelEntity)
+    let contentHash = flattyString.levelContentHash()
     return (levelEntity, contentHash)
   except:
-    print("Level parse failed:")
+    print("parse Flatty Level failed:")
     print(getCurrentExceptionMsg())
     return (nil, "")
 
@@ -449,7 +417,6 @@ proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   else:
     # background image
     let imagePath = levelsBasePath & imageName
-    print(imagePath)
     let bitmap = getOrLoadBitmap(imagePath)
     level.background = some(bitmap)
 
@@ -477,7 +444,13 @@ proc loadLevel*(path: string): Level =
     initialDriveDirection: DD_RIGHT,
   )
   
-  let (levelEntity, contentHash) = parseLevel(path)
+  markStartTime()
+  let (levelEntity, contentHash) = if path.endsWith(jsonLevelFileExtension): 
+    parseJsonLevel(path)
+  else: 
+    parseFlattyLevel(path)
+  printT("parsed levelEntity")
+  
   level.contentHash = contentHash
 
   let size: Size = (levelEntity.width * levelEntity.tilewidth, levelEntity.height * levelEntity.tileheight)
@@ -489,7 +462,6 @@ proc loadLevel*(path: string): Level =
     r = (levelEntity.width * levelEntity.tilewidth).Float - displaySize.x,
     t = (levelEntity.height * levelEntity.tileheight).Float - displaySize.y
   )
-  print("cameraBounds: " & $level.cameraBounds)
   level.chassisBounds = newBB(
     l = -chassisLevelBoundsSlop,
     b = -chassisLevelBoundsSlop,
