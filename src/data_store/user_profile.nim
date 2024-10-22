@@ -84,4 +84,5 @@ proc getSaveSlot*(): SaveSlot =
     result = saveSlot
 
 proc saveSaveSlot*() =
+  print ("Saving save slot")
   saveSlotToEntity(saveSlot).saveJson(filePath)
