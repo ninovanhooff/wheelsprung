@@ -7,7 +7,7 @@ import common/utils
 import common/shared_types
 import globals
 import data_store/user_profile
-import navigation/[navigator, screen]
+import navigation/[navigator, screen, backstack_builder]
 import cache/cache_preloader
 
 
@@ -37,7 +37,8 @@ proc init() {.raises: [].} =
     runTests()
   
   initNavigator(initialScreenProvider)
-  let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
+  let restoreState = getRestoreState()
+  print "restoreState:", restoreState.repr
   if false:
     # pushScreen(newLevelSelectScreen())
     let gameResult = GameResult(
@@ -47,8 +48,9 @@ proc init() {.raises: [].} =
       starCollected: true,
     )
     pushScreen(newGameResultScreen(gameResult))
-  elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
-    pushScreen(newGameScreen(lastOpenedLevelPath.get()))
+  elif restoreState.get(@[]).len > 0:
+    let screens = createBackStack(restoreState.get(@[]))
+    replaceBackstack(screens)
   else:
     pushScreen(newLevelSelectScreen())
 

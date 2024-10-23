@@ -74,7 +74,7 @@ proc loadSaveSlot*(): SaveSlot =
   let optSaveSlot = optSaveSlotEntity.map(saveSlotFromEntity)
   if optSaveSlot.isSome:
     saveSlot = optSaveSlot.get
-    print("Loaded save slot", saveSlot.repr)
+    print("Loaded save slot")
   else:
     saveSlot = SaveSlot(
       progress: initTable[Path, LevelProgress](), 

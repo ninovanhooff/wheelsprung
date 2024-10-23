@@ -124,7 +124,13 @@ proc updateNavigator*(): int =
     ## Ensure no graphics state is leaked
     playdate.graphics.popContext()
 
-proc createRestoreState*(): seq[ScreenRestoreState] =
+proc createRestoreState*(): seq[ScreenRestoreState] = 
   result = @[]
   for screen in backStack:
     result.add(screen.getRestoreState())
+
+proc replaceBackstack*(screens: seq[Screen]) =
+  for screen in backStack:
+    screen.destroy()
+  backStack = screens
+  resumeActiveScreen()

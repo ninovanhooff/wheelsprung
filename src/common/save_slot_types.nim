@@ -59,6 +59,7 @@ proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
   var slot = SaveSlot(
     progress: initTable[Path, LevelProgress](),
     lastOpenedLevel: entity.lastOpenedLevel,
+    restoreState: entity.restoreState,
     modelVersion: entity.modelVersion
   )
   for level in entity.progress:
