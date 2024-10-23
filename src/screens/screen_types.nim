@@ -5,6 +5,12 @@ type
     HitStop
     GameResult
     Settings
+  ScreenRestoreState* = object of RootObj
+    case screenType*: ScreenType
+    of Game:
+      levelPath*: string
+    of LevelSelect, HitStop, GameResult, Settings:
+      discard
   Screen* {.requiresInit.} = ref object of RootObj
     screenType*: ScreenType
 

@@ -31,3 +31,7 @@ method update*(self: Screen): int =
 method setResult*(self: Screen, result: ScreenResult) =
   ## Another screen has finished and returned a result for this screen
   print "ERROR: setResult not implemented for screen: " & $self
+
+method getRestoreState*(self: Screen): ScreenRestoreState =
+  ## Necessary info to restore state after the game is restarted
+  return ScreenRestoreState(screenType: self.screenType)

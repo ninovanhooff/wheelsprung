@@ -63,6 +63,12 @@ proc updateLevelProgress*(gameResult: GameResult) =
 proc setLastOpenedLevel*(levelPath: string) =
   saveSlot.lastOpenedLevel = some(levelPath)
 
+proc getRestoreState*(): Option[RestoreState] =
+  return saveSlot.restoreState
+
+proc setRestoreState*(restoreState: RestoreState) =
+  saveSlot.restoreState = some(restoreState)
+
 proc loadSaveSlot*(): SaveSlot =
   let optSaveSlotEntity = loadJson[SaveSlotEntity](filePath)
   let optSaveSlot = optSaveSlotEntity.map(saveSlotFromEntity)

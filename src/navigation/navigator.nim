@@ -11,7 +11,6 @@
 .}
 
 import std/sugar
-import std/options
 import screen
 import common/utils
 import playdate/api
@@ -124,3 +123,8 @@ proc updateNavigator*(): int =
     result = getActiveScreen().update()
     ## Ensure no graphics state is leaked
     playdate.graphics.popContext()
+
+proc createRestoreState*(): seq[ScreenRestoreState] =
+  result = @[]
+  for screen in backStack:
+    result.add(screen.getRestoreState())

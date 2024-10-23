@@ -1,5 +1,6 @@
 import options
 import common/shared_types
+import screens/screen_types
 import tables
 
 ## Models
@@ -9,10 +10,13 @@ type
     bestTime*: Option[Milliseconds]
     hasCollectedStar*: bool
     signature*: Option[string]
+  
+  RestoreState* = seq[ScreenRestoreState]
 
   SaveSlot* = ref object of RootObj
     progress*: Table[Path, LevelProgress]
-    lastOpenedLevel*: Option[string]
+    lastOpenedLevel*: Option[string] # todo remove
+    restoreState*: Option[RestoreState]
     modelVersion*: int
 
 ## Entities
@@ -29,6 +33,7 @@ type
     # Note that this problem might have been resolved in the meantime
     progress*: seq[LevelProgressEntity]
     lastOpenedLevel*: Option[string]
+    restoreState*: Option[RestoreState]
     modelVersion*: int
 
 
@@ -38,7 +43,8 @@ proc newLevelProgress*(levelId: Path, bestTime: Option[Milliseconds], hasCollect
 proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
   result = SaveSlotEntity(
     progress: @[],
-    lastOpenedLevel: slot.lastOpenedLevel, 
+    lastOpenedLevel: slot.lastOpenedLevel,
+    restoreState: slot.restoreState,
     modelVersion: slot.modelVersion
   )
   for level in slot.progress.values:

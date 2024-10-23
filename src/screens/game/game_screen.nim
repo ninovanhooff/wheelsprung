@@ -362,5 +362,12 @@ method setResult*(gameScreen: GameScreen, screenResult: ScreenResult) =
   if screenResult.enableHints:
     state.enableHints()
 
+method getRestoreState(gameScreen: GameScreen): ScreenRestoreState =
+  return ScreenRestoreState(
+    screenType: ScreenType.Game,
+    levelPath: gameScreen.levelPath,
+  )
+  
+
 method `$`*(gameScreen: GameScreen): string =
   return "GameScreen"
