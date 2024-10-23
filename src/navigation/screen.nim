@@ -1,5 +1,6 @@
 ## Ported from https://github.com/ninovanhooff/playdate-navigator/blob/a33c2b724dfe7f83d7c406eed3d3aabbb8b550c2/Screen.lua
 {.push base, raises: [].}
+import std/options
 import common/utils
 import screens/screen_types
 export screen_types
@@ -32,6 +33,7 @@ method setResult*(self: Screen, result: ScreenResult) =
   ## Another screen has finished and returned a result for this screen
   print "ERROR: setResult not implemented for screen: " & $self
 
-method getRestoreState*(self: Screen): ScreenRestoreState =
+method getRestoreState*(self: Screen): Option[ScreenRestoreState] =
   ## Necessary info to restore state after the game is restarted
-  return ScreenRestoreState(screenType: self.screenType)
+  print "getRestoreState not implemented for screen: " & $self
+  return none(ScreenRestoreState)

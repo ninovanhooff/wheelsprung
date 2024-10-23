@@ -11,6 +11,7 @@
 .}
 
 import std/sugar
+import std/options
 import screen
 import common/utils
 import playdate/api
@@ -127,7 +128,9 @@ proc updateNavigator*(): int =
 proc createRestoreState*(): seq[ScreenRestoreState] = 
   result = @[]
   for screen in backStack:
-    result.add(screen.getRestoreState())
+    let screenState = screen.getRestoreState()
+    if screenState.isSome:
+      result.add(screenState.get)
 
 proc replaceBackstack*(screens: seq[Screen]) =
   for screen in backStack:

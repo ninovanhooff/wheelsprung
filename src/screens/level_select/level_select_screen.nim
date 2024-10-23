@@ -202,5 +202,10 @@ method update*(screen: LevelSelectScreen): int =
   draw(screen)
   return 1
 
+method getRestoreState(screen: LevelSelectScreen): Option[ScreenRestoreState] =
+  return some(ScreenRestoreState(
+    screenType: ScreenType.LevelSelect,
+  ))
+
 method `$`*(screen: LevelSelectScreen): string =
   return "LevelSelectScreen"

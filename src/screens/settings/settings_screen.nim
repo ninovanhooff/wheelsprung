@@ -132,5 +132,9 @@ method update*(screen: SettingsScreen): int =
     return 1
   return 0
 
+method getRestoreState*(self: Screen): Option[ScreenRestoreState] =
+  ## This screen could be easily restored, but it might be a bit disorienting
+  return none(ScreenRestoreState)
+
 method `$`*(screen: SettingsScreen): string =
   return "SettingsScreen"

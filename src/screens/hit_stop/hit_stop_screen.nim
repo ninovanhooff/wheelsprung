@@ -1,5 +1,5 @@
 {. push warning[LockLevel]:off.}
-
+import std/options
 import random
 import playdate/api
 import chipmunk7
@@ -75,3 +75,7 @@ method update*(screen: HitStopScreen): int =
   )
 
   return 1
+
+method getRestoreState*(self: Screen): Option[ScreenRestoreState] =
+  # not worth the effort restoring this screen
+  return none(ScreenRestoreState)
