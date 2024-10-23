@@ -23,3 +23,4 @@ type
     firstLockedRowIdx*: Option[int]
     upActivatedAt*: Option[Seconds]
     downActivatedAt*: Option[Seconds]
+    isSelectionDirty*: bool

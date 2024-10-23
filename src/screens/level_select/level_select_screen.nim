@@ -79,6 +79,7 @@ proc selectRow(screen: LevelSelectScreen, idx: int) =
   screen.levelTheme = screen.levelRows[screen.selectedIndex].levelMeta.theme
 
 proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
+  screen.isSelectionDirty = true
   if screen.selectedIndex <= 0 and screen.firstLockedRowIdx.get(screen.levelRows.len) < screen.levelRows.len:
     if immediately: 
       screen.scrollPosition = -1f
@@ -92,6 +93,7 @@ proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
     screen.upActivatedAt = some(currentTimeSeconds() + timeout)
 
 proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
+  screen.isSelectionDirty = true
   if screen.selectedIndex >= screen.firstLockedRowIdx.get(screen.levelRows.len) - 1:
     if immediately: 
       screen.scrollPosition += 1f
@@ -107,6 +109,7 @@ proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
 
 
 proc updateInput(screen: LevelSelectScreen) =
+  screen.isSelectionDirty = false
   let buttonState = playdate.system.getButtonState()
   let rows = screen.levelRows
   let numRows = rows.len

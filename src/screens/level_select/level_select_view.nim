@@ -16,6 +16,8 @@ const
   verticalLines = [199, 219, 279]
     ## x positions of vertical table cell dividers relative to levelDrawRegion.x
   rowHeight = 20
+  scrollEpsilon = 1.0f / rowHeight # 1 pixel of scroll
+    ## how much scroll slop is allowed to stop drawing screen
 
 let 
   levelDrawRegion = Rect(x: 30,y: 70, width: 342, height:110)
@@ -108,6 +110,9 @@ proc drawLevelRows(screen: LevelSelectScreen) =
       break
   if not row.isNil:
     renderLevelRow(rowIdx, row)
+  elif abs(screen.scrollPosition - screen.scrollTarget) < scrollEpsilon and
+    not screen.isSelectionDirty:
+    return
 
   rowsBitmap.draw(levelDrawRegion.x, levelDrawRegion.y - (scrollPosition * rowHeight).int32, kBitmapUnflipped)
 
