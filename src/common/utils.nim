@@ -11,6 +11,7 @@ const
 ### Time
 proc currentTimeMilliseconds*(): int32 {.inline.} = playdate.system.getCurrentTimeMilliseconds.int32
 proc currentTimeSeconds*(): Seconds {.inline.} = (currentTimeMilliseconds() / 1000).Seconds
+proc getElapsedSeconds*(): Seconds {.inline.} = playdate.system.getElapsedTime.Seconds
 
 proc formatTime*(time: Seconds): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"

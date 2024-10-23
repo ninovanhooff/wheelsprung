@@ -23,11 +23,13 @@ let initialScreenProvider: InitialScreenProvider =
     result = newLevelSelectScreen()
 
 var 
-  lastFrameElapsedTime: Seconds = 0.0
+  isFirstFrame = true
+  frameRate* = 50.0f
+  frameTime: Seconds = 1.0f / frameRate
 
 proc init() {.raises: [].} =
   discard getSaveSlot() # preload user profile
-  playdate.display.setRefreshRate(refreshRate)
+  playdate.display.setRefreshRate(frameRate)
   playdate.system.randomize() # seed the random number generator
 
   # The color used when the display is drawn at an offset. See HitStopScreen
@@ -55,10 +57,13 @@ proc init() {.raises: [].} =
     pushScreen(newLevelSelectScreen())
 
 proc update() {.raises: [].} =
+  let frameStartTime = getElapsedSeconds()
   discard updateNavigator()
   playdate.system.drawFPS(0, 0)
-  runPreloader(1.0.Seconds)
-
+  # let preloadBudget = lastFrameElapsedSeconds + frameTime - getElapsedSeconds()
+  let preloadBudget = if isFirstFrame: 0.0f else: frameStartTime + frameTime - getElapsedSeconds()
+  runPreloader(preloadBudget)
+  isFirstFrame = false
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
   try:
@@ -83,6 +88,12 @@ proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
 proc catchingUpdate(): int {.raises: [].} = 
   runCatching(update)
   return 1 ## 1: update display
+
+proc incrementFrameRate(change: float32) =
+  frameRate += change
+  frameTime = 1.0f / frameRate
+  playdate.display.setRefreshRate(frameRate)
+  print("frameRate:" & $frameRate)
 
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
@@ -121,14 +132,10 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("debugDrawConstraints:" & $debugDrawConstraints)
     elif keycode == 106:
       print("J")
-      refreshRate -= 5.0f
-      playdate.display.setRefreshRate(refreshRate)
-      print("refreshRate:" & $refreshRate)
+      incrementFrameRate(-5.0f)
     elif keycode == 108:
       print("L")
-      refreshRate += 5.0f
-      playdate.display.setRefreshRate(refreshRate)
-      print("refreshRate:" & $refreshRate)
+      incrementFrameRate(5.0f)
     else:
       print("keycode:" & $keycode)
   elif event == kEventKeyPressed:
