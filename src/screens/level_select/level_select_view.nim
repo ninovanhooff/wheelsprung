@@ -136,7 +136,6 @@ proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
 
   gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
 
-
   rowsBitmap.draw(levelDrawRegion.x, levelDrawRegion.y - (scrollPosition * rowHeight).int32, kBitmapUnflipped)
 
   # invert the selected row
