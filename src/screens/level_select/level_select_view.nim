@@ -1,7 +1,8 @@
 import playdate/api
 import level_select_types
+import std/tables
 import math
-import common/graphics_types
+import common/graphics_utils
 import common/lcd_patterns
 import common/utils
 import options
@@ -12,8 +13,8 @@ import level_meta/level_data
 
 const 
   borderInset = 7
-  verticalLines = [229, 249, 309]
-    ## x positions of vertical table cell dividers
+  verticalLines = [199, 219, 279]
+    ## x positions of vertical table cell dividers relative to levelDrawRegion.x
   rowHeight = 20
 
 let 
@@ -23,6 +24,8 @@ var
   levelStatusImages: AnnotatedBitmapTable
   levelFont: LCDFont
   activeLevelTheme: LevelTheme
+  rowsBitmap: LCDBitmap
+  rowDrawState = initTable[int32, bool]()
 
 proc initLevelSelectView*() =
   if not levelStatusImages.isNil: return # already initialized
@@ -57,7 +60,37 @@ proc timeText(progress: LevelProgress): string =
   else:
     return progress.bestTime.get.formatTime()
 
+proc initTableRowsImage(screen: LevelSelectScreen) =
+  let requiredHeight = screen.levelRows.len * rowHeight
+  if not rowsBitmap.isNil and rowsBitmap.height == requiredHeight: return
+  
+  rowsBitmap = gfx.newBitmap(levelDrawRegion.width, requiredHeight, kColorWhite)
+  
+  gfx.pushContext(rowsBitmap)
+  for x in verticalLines:
+    gfx.drawLine(x, 0, x, requiredHeight, 2, kColorBlack)
+  gfx.popContext()
+  
+  rowDrawState.clear()
+
+proc renderLevelRow(idx: int32, row: LevelRow) =
+  gfx.pushContext(rowsBitmap)
+  let x = 0
+  let y = idx * rowHeight
+  let levelMeta = row.levelMeta
+  let progress = row.progress
+  let nameText: string = fmt"{idx + 1}. {levelMeta.name}"
+  gfx.drawText(nameText, x + borderInset, y+4)
+
+  let statusImage = getLevelStatusImage(progress)
+  statusImage.draw(x + 200, y + 2, kBitmapUnflipped)
+
+  gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
+  gfx.popContext()
+  rowDrawState[idx] = true
+
 proc drawLevelRows(screen: LevelSelectScreen) =
+  initTableRowsImage(screen)
   let x = levelDrawRegion.x
   let scrollPosition = screen.scrollPosition
   var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).round.int32
@@ -66,26 +99,25 @@ proc drawLevelRows(screen: LevelSelectScreen) =
     0, screen.levelRows.high
   ).int32
 
-  # Draw the selected row background
+  var rowIdx: int32 = -1
+  var row: LevelRow = nil
+  for idx in scrollPosition.int32 .. maxIdx:
+    if not rowDrawState.hasKey(idx):
+      rowIdx = idx
+      row = screen.levelRows[rowIdx]
+      break
+  if not row.isNil:
+    renderLevelRow(rowIdx, row)
+
+  rowsBitmap.draw(levelDrawRegion.x, levelDrawRegion.y - (scrollPosition * rowHeight).int32, kBitmapUnflipped)
+
+  # invert the selected row
   let selectedRowY = y + (screen.selectedIndex - scrollPosition.int32) * rowHeight
   gfx.fillRect(
     levelDrawRegion.x, selectedRowY, 
     levelDrawRegion.width, rowHeight, 
     kColorXOR
   )
-
-  for idx, row in screen.levelRows[scrollPosition.int32 .. maxIdx]:
-    let levelMeta = row.levelMeta
-    let progress = row.progress
-    let displayIdx = idx + scrollPosition.int32 + 1
-    let nameText: string = fmt"{displayIdx}. {levelMeta.name}"
-    gfx.drawText(nameText, x + borderInset, y+4)
-
-    let statusImage = getLevelStatusImage(progress)
-    statusImage.draw(x + 200, y + 2, kBitmapUnflipped)
-
-    gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
-    y += 20
 
 proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
   if screen.firstLockedRowIdx.isNone:
@@ -107,23 +139,13 @@ proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
     2, kColorBlack
   )
 
-proc prepareDrawRegion(screen: LevelSelectScreen) =
-  gfx.clear(kColorWhite)
-  for x in verticalLines:
-    gfx.drawLine(x, levelDrawRegion.y, x, levelDrawRegion.y + levelDrawRegion.height, 2, kColorBlack)
-
 proc draw*(screen: LevelSelectScreen) =
   if activeLevelTheme != screen.levelTheme:
     drawBackground(screen.levelTheme)
-    
-  gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
-
-  prepareDrawRegion(screen)
-  gfx.setDrawMode(kDrawModeNXOR)
-  drawLevelRows(screen)
-  gfx.setDrawMode(kDrawModeCopy)
-  drawLockedLevelsScrim(screen)
   
+  gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
+  drawLevelRows(screen)
+  drawLockedLevelsScrim(screen)
   gfx.clearClipRect()
 
 
