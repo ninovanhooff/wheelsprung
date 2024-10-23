@@ -62,9 +62,12 @@ proc timeText(progress: LevelProgress): string =
   else:
     return progress.bestTime.get.formatTime()
 
-proc initTableRowsImage(screen: LevelSelectScreen) =
+proc initTableRowsImage(screen: LevelSelectScreen, forceRedraw: bool) =
   let requiredHeight = screen.levelRows.len * rowHeight
-  if not rowsBitmap.isNil and rowsBitmap.height == requiredHeight: return
+  if not rowsBitmap.isNil and 
+    rowsBitmap.height == requiredHeight and
+    not forceRedraw: 
+      return
   
   rowsBitmap = gfx.newBitmap(levelDrawRegion.width, requiredHeight, kColorWhite)
   
@@ -112,7 +115,7 @@ proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
   )
 
 proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
-  initTableRowsImage(screen)
+  initTableRowsImage(screen, forceRedraw)
   let scrollPosition = screen.scrollPosition
   var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).round.int32
   let maxIdx = clamp(
