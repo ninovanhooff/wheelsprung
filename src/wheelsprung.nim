@@ -8,6 +8,7 @@ import common/shared_types
 import globals
 import data_store/user_profile
 import navigation/[navigator, screen]
+import cache/cache_preloader
 
 
 import playdate/api
@@ -17,22 +18,18 @@ import screens/level_select/level_select_screen
 import screens/settings/settings_screen
 import screens/game_result/game_result_screen
 
-const FONT_PATH = "fonts/Roobert-11-Medium.pft"
-
 let initialScreenProvider: InitialScreenProvider = 
   proc(): Screen =
     result = newLevelSelectScreen()
 
 var 
-  font: LCDFont
+  lastFrameElapsedTime: Seconds = 0.0
 
 proc init() {.raises: [].} =
   discard getSaveSlot() # preload user profile
   playdate.display.setRefreshRate(refreshRate)
   playdate.system.randomize() # seed the random number generator
 
-  font = try: playdate.graphics.newFont(FONT_PATH) except: nil
-  playdate.graphics.setFont(font)
   # The color used when the display is drawn at an offset. See HitStopScreen
   playdate.graphics.setBackgroundColor(kColorBlack)
 
@@ -57,7 +54,9 @@ proc init() {.raises: [].} =
 
 proc update() {.raises: [].} =
   discard updateNavigator()
-  playdate.system.drawFPS(0, 0)  
+  playdate.system.drawFPS(0, 0)
+  runPreloader(1.0.Seconds)
+
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
   try:
