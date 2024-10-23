@@ -163,7 +163,7 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
 
   for levelPath in levelPaths:
     let levelMeta = getLevelMeta(levelPath)
-    # screen.levelRows.insert(levelMeta.newLevelRow())
+    screen.levelRows.insert(levelMeta.newLevelRow())
 
 proc getInitialRowIdx(screen: LevelSelectScreen): int =
   let optLastOpenedLevel = getSaveSlot().lastOpenedLevel

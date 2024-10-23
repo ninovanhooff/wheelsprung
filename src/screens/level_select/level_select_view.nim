@@ -91,39 +91,6 @@ proc renderLevelRow(idx: int32, row: LevelRow) =
   gfx.popContext()
   rowDrawState[idx] = true
 
-proc drawLevelRows(screen: LevelSelectScreen) =
-  initTableRowsImage(screen)
-  let x = levelDrawRegion.x
-  let scrollPosition = screen.scrollPosition
-  var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).round.int32
-  let maxIdx = clamp(
-    screen.scrollPosition.int + LEVEL_SELECT_VISIBLE_ROWS.ceil.int32, 
-    0, screen.levelRows.high
-  ).int32
-
-  var rowIdx: int32 = -1
-  var row: LevelRow = nil
-  for idx in scrollPosition.int32 .. maxIdx:
-    if not rowDrawState.hasKey(idx):
-      rowIdx = idx
-      row = screen.levelRows[rowIdx]
-      break
-  if not row.isNil:
-    renderLevelRow(rowIdx, row)
-  elif abs(screen.scrollPosition - screen.scrollTarget) < scrollEpsilon and
-    not screen.isSelectionDirty:
-    return
-
-  rowsBitmap.draw(levelDrawRegion.x, levelDrawRegion.y - (scrollPosition * rowHeight).int32, kBitmapUnflipped)
-
-  # invert the selected row
-  let selectedRowY = y + (screen.selectedIndex - scrollPosition.int32) * rowHeight
-  gfx.fillRect(
-    levelDrawRegion.x, selectedRowY, 
-    levelDrawRegion.width, rowHeight, 
-    kColorXOR
-  )
-
 proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
   if screen.firstLockedRowIdx.isNone:
     return
@@ -144,16 +111,52 @@ proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
     2, kColorBlack
   )
 
-proc draw*(screen: LevelSelectScreen) =
-  if activeLevelTheme != screen.levelTheme:
-    drawBackground(screen.levelTheme)
-  
+proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
+  initTableRowsImage(screen)
+  let scrollPosition = screen.scrollPosition
+  var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).round.int32
+  let maxIdx = clamp(
+    screen.scrollPosition.int + LEVEL_SELECT_VISIBLE_ROWS.ceil.int32, 
+    0, screen.levelRows.high
+  ).int32
+
+  var rowIdx: int32 = -1
+  var row: LevelRow = nil
+  for idx in scrollPosition.int32 .. maxIdx:
+    if not rowDrawState.hasKey(idx):
+      rowIdx = idx
+      row = screen.levelRows[rowIdx]
+      break
+  if not row.isNil:
+    renderLevelRow(rowIdx, row)
+  elif abs(screen.scrollPosition - screen.scrollTarget) < scrollEpsilon and
+    not screen.isSelectionDirty and
+    not forceRedraw:
+    return
+
   gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
-  drawLevelRows(screen)
+
+
+  rowsBitmap.draw(levelDrawRegion.x, levelDrawRegion.y - (scrollPosition * rowHeight).int32, kBitmapUnflipped)
+
+  # invert the selected row
+  let selectedRowY = y + (screen.selectedIndex - scrollPosition.int32) * rowHeight
+  gfx.fillRect(
+    levelDrawRegion.x, selectedRowY, 
+    levelDrawRegion.width, rowHeight, 
+    kColorXOR
+  )
+
   drawLockedLevelsScrim(screen)
+
   gfx.clearClipRect()
+
+proc draw*(screen: LevelSelectScreen, forceRedraw: bool = false) =
+  if activeLevelTheme != screen.levelTheme or forceRedraw:
+    drawBackground(screen.levelTheme)
+  drawLevelRows(screen, forceRedraw)
 
 
 proc resumeLevelSelectView*(screen: LevelSelectScreen) =
   gfx.setFont(levelFont)
-  drawBackground(screen.levelTheme)
+  screen.draw(forceRedraw = true)
