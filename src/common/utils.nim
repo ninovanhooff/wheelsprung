@@ -76,7 +76,7 @@ proc addBenchSample(samples: var seq[float32], sample: float32, name: string, nu
       max = s
     mean += s
   mean /= samples.len.float32
-  print(name,"Mean:", mean * 1000, "Min:", min * 1000, "Max:", max * 1000)    
+  print(name,"Mean:", mean * 1000, "Min:", min * 1000, "Max:", max * 1000, "ms")    
   return true    
 
 
