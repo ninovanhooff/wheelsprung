@@ -40,7 +40,6 @@ proc execute(job: PreloadJob) =
     discard getOrLoadBitmapTable(job.bitmapTableId)
 
 proc runPreloader*(seconds: Seconds) =
-  print "Preload budget: ", seconds
   if seconds <= 0.Seconds:
     return
 
