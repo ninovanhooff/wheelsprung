@@ -40,16 +40,24 @@
                 "isDefault": true
             }
         },
-        // included in the Level Sync Watcher task
-        // {
-        //     "label": "Update level content hashes",
-        //     "presentation": {
-        //         "clear": true,
-        //     },
-        //     "type": "shell",
-        //     "problemMatcher": [],
-        //     "command": ". ./scripts/set_release_env.sh && ./scripts/run_level_updater.sh"
-        // },
+        {
+            "label": "Run Device PDX",
+            "type": "shell",
+            "command": "./scripts/run_device.sh",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+            }
+        },
+        {
+            "label": "Reboot Device to Boot disk",
+            "type": "shell",
+            "command": "./scripts/reboot_bootdisk.sh",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+            }
+        }
         {
             "label": "Reboot Device to Data disk",
             "type": "shell",

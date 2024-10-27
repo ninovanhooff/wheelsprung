@@ -12,7 +12,7 @@ proc newLeaderboardsScreen*(initialPageIdx: int32 = 0): LeaderboardsScreen =
 proc updateInput(screen: LeaderboardsScreen) =
   let buttonState = playdate.system.getButtonState()
 
-  if kButtonB in buttonState.pushed:
+  if kButtonB in buttonState.pushed or kButtonLeft in buttonState.pushed:
     popScreen()
 
 method resume*(screen: LeaderboardsScreen) =
