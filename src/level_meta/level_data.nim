@@ -38,7 +38,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.wmj", theme= Bath, hash="647A30204555BF33C7CD9BEFE17002E1"),
   newLevelMeta(name= "Ripple Ride", path="levels/hills.wmj", theme= Bath, hash="EE9CE18CF99447145C813C6F52417B9A"),
   newLevelMeta(name= "Laundry Loop", path="levels/globe_of_death.wmj", theme= Bath, hash="56FC52E55FAFF1A1D762B9B529ABC0AB"),
-  newLevelMeta(name= "Ripcurl Rush", path="levels/looping.wmj", theme= Bath, hash="4EAA4829FCD2AB20D79455849BC69C65"),
+  newLevelMeta(name= "Ripcurl Rush", path="levels/looping.wmj", theme= Bath, hash="4EAA4829FCD2AB20D79455849BC69C65", boardId = "hills"),
 
 
   newLevelMeta(name= "Hooked", path="levels/hooked.wmj", theme= Bookshelf, hash="A19C795ACD4E767DB78059B362FAE50C"),
