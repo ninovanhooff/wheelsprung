@@ -16,6 +16,7 @@ import level_select_types
 import level_select_view
 import screens/screen_types
 import screens/settings/settings_screen
+import screens/leaderboards/leaderboards_screen
 
 const
   initialUnlockedLevels = 30
@@ -133,6 +134,8 @@ proc updateInput(screen: LevelSelectScreen) =
     screen.selectedIndex += 1
     if screen.selectedIndex >= numRows:
       screen.selectedIndex = 0
+  elif kButtonRight in buttonState.pushed:
+    pushScreen(newLeaderboardsScreen())
 
   updateScrollPosition(screen)
 

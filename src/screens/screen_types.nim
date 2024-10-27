@@ -4,11 +4,14 @@ type
     Game
     HitStop
     GameResult
+    Leaderboards
     Settings
   ScreenRestoreState* = object of RootObj
     case screenType*: ScreenType
     of Game:
       levelPath*: string
+    of Leaderboards:
+      currentPageIdx*: int32
     of LevelSelect, HitStop, GameResult, Settings:
       discard
   Screen* {.requiresInit.} = ref object of RootObj
@@ -16,10 +19,12 @@ type
 
 type 
   ScreenResult* = ref object
+    ## Result container that can be given to screens to indicate some other screen returned a result.
+    ## ScreenResult.Gamee will be given to the GameScreen.
     case screenType*: ScreenType
     of Game: 
       enableHints*: bool
-    of LevelSelect, HitStop, GameResult, Settings: 
+    of LevelSelect, HitStop, GameResult, Leaderboards, Settings: 
       discard # no properties
 
 type GameScreen* = ref object of Screen

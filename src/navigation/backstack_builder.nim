@@ -4,7 +4,7 @@ import common/utils
 import screens/screen_types
 import screens/level_select/level_select_screen
 import screens/settings/settings_screen
-import screens/game_result/game_result_screen
+import screens/leaderboards/leaderboards_screen
 
 proc createScreen(screenRestoreState: ScreenRestoreState): Screen =
   case screenRestoreState.screenType
@@ -12,6 +12,8 @@ proc createScreen(screenRestoreState: ScreenRestoreState): Screen =
     return newGameScreen(levelPath = screenRestoreState.levelPath)
   of ScreenType.LevelSelect:
     return newLevelSelectScreen()
+  of ScreenType.Leaderboards:
+    return newLeaderboardsScreen(initialPageIdx = screenRestoreState.currentPageIdx)
   of ScreenType.Settings:
     return newSettingsScreen()
   of ScreenType.GameResult, ScreenType.HitStop:
