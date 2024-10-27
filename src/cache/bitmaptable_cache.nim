@@ -42,9 +42,6 @@ proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
       bitmapTable = bitmapTable,
       frameCount = bitmapTable.getBitmapTableInfo().count.int32,
     )
-  except KeyError:
-    playdate.system.error("BitmapTableId or FrameCount not found for: " & $id)
-    return nil
   except IOError:
     playdate.system.error(getCurrentExceptionMsg())
     return nil

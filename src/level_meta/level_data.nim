@@ -17,6 +17,7 @@ type
     
   LevelMeta* = ref object of RootObj
     name*: string
+    scoreboardId*: string
     path*: string
       ## path is used as id, must be unique (which it is, enforced by the file system)
     contentHash*: string
@@ -25,13 +26,13 @@ type
 proc isLevelFile*(path: string): bool =
   return path.endsWith(jsonLevelFileExtension) or path.endsWith(flattyLevelFileExtension)
 
-proc newLevelMeta*(name: string, path: Path, theme: LevelTheme, hash: string): LevelMeta =
-  result = LevelMeta(name: name, path: path, theme: theme, contentHash: hash)
+proc newLevelMeta*(name: string, path: Path, theme: LevelTheme, hash: string, boardId: string = ""): LevelMeta =
+  result = LevelMeta(name: name, scoreboardId: boardId, path: path, theme: theme, contentHash: hash)
 
 let officialLevels*: OrderedTable[Path, LevelMeta] = @[
-  newLevelMeta(name= "Tutorial: Accelerate", path="levels/dragster.wmj", theme= Kitchen, hash="4BCC8CCB3F019586DBD3FC749D76DC50"),
-  newLevelMeta(name= "Tutorial: Brake", path="levels/tutorial_brake.wmj", theme= Kitchen, hash="3747BDEF40C513843AEB76CF36FFE750"),
-  newLevelMeta(name= "Tutorial: Turn Around", path="levels/tutorial_turn_around.wmj", theme= Kitchen, hash="E751FAC8747A40C9B7B81E108B71A73A"),
+  newLevelMeta(name= "Tutorial: Accelerate", path="levels/dragster.wmj", theme= Kitchen, hash="4BCC8CCB3F019586DBD3FC749D76DC50", boardId = "tutorialaccelerate"),
+  newLevelMeta(name= "Tutorial: Brake", path="levels/tutorial_brake.wmj", theme= Kitchen, hash="3747BDEF40C513843AEB76CF36FFE750", boardId = "tutorialbrake"),
+  newLevelMeta(name= "Tutorial: Turn Around", path="levels/tutorial_turn_around.wmj", theme= Kitchen, hash="E751FAC8747A40C9B7B81E108B71A73A", boardId = "tutorialturnaround"),
   
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.wmj", theme= Bath, hash="FAF07A1B8B14F20E349AAD05F0FC7A8D"),
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.wmj", theme= Bath, hash="647A30204555BF33C7CD9BEFE17002E1"),

@@ -1,5 +1,4 @@
 import std/sugar
-import std/sequtils
 import common/utils
 import screens/screen_types
 import screens/level_select/level_select_screen

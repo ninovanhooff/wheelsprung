@@ -1,6 +1,5 @@
 import cache/bitmaptable_cache
 import common/shared_types
-import common/utils
 
 type
   PreloadJobType {.pure.} = enum
