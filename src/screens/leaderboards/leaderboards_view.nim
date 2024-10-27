@@ -8,13 +8,13 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     return
   let page = screen.pages[screen.currentPageIdx]
   gfx.clear(kColorWhite)
-  gfx.setFont(getOrLoadFont(FontId.Roobert10Bold))
+  gfx.setFont(getOrLoadFont(FontId.NontendoBold))
 
-  var y = 10
+  var y = 30
   for i in 0 ..< page.scores.len:
     let score = page.scores[i]
     gfx.drawText($score.rank, 10, y)
     gfx.drawText(score.player, 30, y)
     gfx.drawText($score.value, 100, y)
-    y += 14
+    y += 24
   
