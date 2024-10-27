@@ -1,3 +1,5 @@
+{.push raises: [].}
+
 import std/seqUtils
 import std/tables
 import std/options
@@ -13,7 +15,7 @@ import common/utils
 var
   validBoardIds: seq[string] = @[]
   boardsLoadingCounts = initTable[string, uint32]()
-  currentPlayerName = none(string)
+  optCurrentPlayerName = none(string)
 
 proc increaseLoadingCount*(boardId: BoardId) =
   boardsLoadingCounts[boardId] = boardsLoadingCounts.getOrDefault(boardId, 0) + 1
@@ -26,6 +28,9 @@ proc getScoreboards*(): seq[PDScoresList] =
     scoreboardsCache.setScoreboards(dummyScoreboards)
     # scoreboardsCache.createScoreboards(validBoardIds)
   return scoreboardsCache.getScoreboards.values.toSeq
+
+proc getScoreBoard*(boardId: BoardId): Option[PDScoresList] =
+  return scoreboardsCache.getScoreboard(boardId)
 
 proc refreshBoard(boardId: BoardId) =
   let resultCode = playdate.scoreboards.getScores(boardId) do (scoresList: PDResult[PDScoresList]) -> void:
@@ -46,6 +51,21 @@ proc calculateScore(gameResult: GameResult): uint32 =
   let score = timeScore + starScore
   return score.uint32
 
+proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
+  let board = getScoreBoard(boardId)
+  if board.isNone:
+    return true
+  if optCurrentPlayerName.isNone:
+    # we don't know the current player name, so we can't compare new score to old scores
+    return true
+  let playerName = optCurrentPlayerName.get
+  let scores = board.get.scores
+  let optOldPlayerScore = scores.findFirst(it => it.player == playerName)
+  if optOldPlayerScore.isNone:
+    # player has no score yet
+    return true
+  return score > optOldPlayerScore.get.value
+
 
 proc submitScore*(gameResult: GameResult) =
   let boardId = getLevelMeta(gameResult.levelId).scoreboardId
@@ -54,12 +74,16 @@ proc submitScore*(gameResult: GameResult) =
     return
 
   let score = gameResult.calculateScore()
+  if not shouldSubmitScore(boardId, score):
+    print "Not submitting gameresult to Scoreboards. Score is not in top 10 or not higher than current score"
+    return
+
   let resultCode = playdate.scoreboards.addScore(boardId, score) do (score: PDResult[PDScore]) -> void:
     boardId.decreaseLoadingCount()
     case score.kind
     of PDResultSuccess:
       print "===== NETWORK addScore OK", score.result.repr
-      currentPlayerName = some(score.result.player)
+      optCurrentPlayerName = some(score.result.player)
       refreshBoard(boardId)
     of PDResultError: 
       print "==== NETWORK addScore ERROR: ", score.message

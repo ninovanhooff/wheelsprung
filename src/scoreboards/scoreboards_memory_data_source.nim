@@ -1,3 +1,5 @@
+{.push raises: [].}
+
 import playdate/api
 import common/utils
 import std/options
@@ -15,9 +17,9 @@ let scoreboardsCache* = ScoreboardsMemoryDataSource(
   ## 
 
 proc getScoreboard*(cache: ScoreboardsMemoryDataSource, boardID: string): Option[PDScoresList] =
-  if cache.scoreboards.hasKey(boardID):
+  try:
     return some(cache.scoreboards[boardID])
-  else:
+  except KeyError:
     return none(PDScoresList)
 
 proc getScoreboards*(cache: ScoreboardsMemoryDataSource): Table[BoardId, PDScoresList] =
