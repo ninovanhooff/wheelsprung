@@ -9,6 +9,7 @@ import common/utils
 import common/integrity
 import common/save_slot_types
 import level_meta/level_data
+import scoreboards/scoreboards_service
 
 const 
   saveSlotVersion = 1
@@ -54,10 +55,12 @@ proc updateLevelProgress*(gameResult: GameResult) =
   # only official levels need a content hash
   if levelMeta == nil or levelMeta.contentHash == gameResult.levelHash:
     progress.sign()
+    submitScore(gameResult)
+
   else:
     print "WARN Level content hash mismatch for level", id
     progress.signature = none(string)
-  print ("Saving progress for level", id, repr(progress))
+  print ("Setting progress for level", id, repr(progress))
   saveSlot.progress[id] = progress
 
 proc setLastOpenedLevel*(levelPath: string) =

@@ -7,15 +7,18 @@ import std/tables
 import std/sequtils
 import common/graphics_types
 import common/shared_types
+import common/integrity
 import common/utils
 import common/level_utils
 import common/save_slot_types
+import level_meta/level_data
 import screens/settings/settings_screen
 import screens/screen_types
 import data_store/user_profile
 import cache/font_cache
 import cache/bitmap_cache
 import cache/bitmaptable_cache
+import scoreboards/scoreboards_service
 
 type 
   GameResultAction {.pure.} = enum
