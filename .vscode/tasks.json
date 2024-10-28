@@ -30,10 +30,10 @@
         {
             "label": "Build & Run Simulator PDX",
             "type": "shell",
-            "dependsOn": [
-                "Build Simulator PDX"
-            ],
-            "command": "open --stdout ./stdout.txt --stderr ./stderr.txt ${workspaceFolder}/${workspaceFolderBasename}.pdx",
+            // "dependsOn": [
+            //     "Build Simulator PDX"
+            // ],
+            "command": "nimble simulate",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
