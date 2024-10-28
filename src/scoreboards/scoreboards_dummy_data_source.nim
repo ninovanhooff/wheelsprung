@@ -30,10 +30,10 @@ let dummyScoreboards* = {
   "leaderboard" : PDScoresList(
     boardID: "leaderboard",
     scores: @[
-      PDScore(player: "Jane", value: 20_000_440, rank: 1),
-      PDScore(player: "John", value: 20_000_240, rank: 2),
-      PDScore(player: "Jill", value: 19_994_998, rank: 3),
-      PDScore(player: "Jack", value: 19_994_997, rank: 4),
+      PDScore(player: "Jane", value: 990_000, rank: 1),
+      PDScore(player: "John", value: 899_240, rank: 2),
+      PDScore(player: "Jill", value: 898_998, rank: 3),
+      PDScore(player: "Jack", value: 897_997, rank: 4),
     ]
   ),
 }.toTable
