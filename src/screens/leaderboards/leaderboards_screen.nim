@@ -58,6 +58,7 @@ proc updateInput(screen: LeaderboardsScreen) =
     popScreen()
 
 method resume*(screen: LeaderboardsScreen) =
+  fetchAllLeaderboards()
   refreshLeaderboards(screen)
   if screen.initialBoardId.len > 0:
     let (idx, _) = screen.pages.findFirstIndexed(it => it.boardId == screen.initialBoardId)

@@ -17,6 +17,7 @@ var
   validBoardIds: seq[string] = @[]
   boardsLoadingCounts = initTable[string, uint32]()
   optCurrentPlayerName = none(string)
+  fetchAllInProgress = false
 
 proc increaseLoadingCount*(boardId: BoardId) =
   boardsLoadingCounts[boardId] = boardsLoadingCounts.getOrDefault(boardId, 0) + 1
@@ -42,7 +43,8 @@ proc getGlobalBest*(boardId: BoardId): Option[uint32] =
     return none(uint32)
   return some(scores[0].value)
 
-proc refreshBoard(boardId: BoardId) =
+let emptyResultHandler = proc(result: PDResult[PDScoresList]) = discard
+proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> void = emptyResultHandler) =
   let resultCode = playdate.scoreboards.getScores(boardId) do (scoresList: PDResult[PDScoresList]) -> void:
     boardId.decreaseLoadingCount()
     case scoresList.kind
@@ -51,6 +53,8 @@ proc refreshBoard(boardId: BoardId) =
       scoreboardsCache.setScoreboard(scoresList.result)
     of PDResultError: 
       print "===== NETWORK Scores ERROR", scoresList.message
+
+    resultHandler(scoresList)
 
   boardId.increaseLoadingCount()
   print "===== NETWORK Scores START", boardId, $resultCode
@@ -101,5 +105,31 @@ proc initScoreboardsService() =
     for levelMeta in officialLevels.values:
       if levelMeta.scoreboardId != "":
         levelMeta.scoreboardId
+  validBoardIds.add(LEADERBOARD_BOARD_ID)
+
+proc updateNextOutdatedBoard*() =
+  for boardId in validBoardIds:
+    let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - 3600
+    if getScoreBoard(boardId).get(default(PDScoresList)).lastUpdated > timeThresholdSeconds:
+      continue  
+    refreshBoard(boardId, proc (result: PDResult[PDScoresList]) =
+      if result.kind == PDResultSuccess:
+        updateNextOutdatedBoard()
+      else:
+        print "Sequential scoreboard update aborted due to failure"
+        fetchAllInProgress = false
+    )
+    return
+
+  # all boards are up to date
+  print "All boards are up to date"
+  fetchAllInProgress = false
+
+proc fetchAllLeaderboards*() =
+  if fetchAllInProgress:
+    print "fetchAllLeaderboards: already in progress"
+    return
+  fetchAllInProgress = true
+  updateNextOutdatedBoard()
 
 initScoreboardsService()
