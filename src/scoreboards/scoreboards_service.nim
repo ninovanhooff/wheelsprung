@@ -88,15 +88,19 @@ proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
   return score > optOldPlayerScore.get.value
 
 
-proc submitScore*(gameResult: GameResult) =
-  let boardId = getLevelMeta(gameResult.levelId).scoreboardId
-  if not validBoardIds.contains(boardId):
-    print "Not submitting gameresult to Scoreboards.'", boardId, "'is not a valid board id"
+proc submitScore*(levelProgress: LevelProgress) =
+  if levelProgress.signature.isNone:
+    print "Not submitting levelprogress to Scoreboards. Signature is None"
     return
 
-  let score = gameResult.calculateScore()
+  let boardId = getLevelMeta(levelProgress.levelId).scoreboardId
+  if not validBoardIds.contains(boardId):
+    print "Not submitting levelprogress to Scoreboards.'" & boardId.repr &  "'is not a valid board id"
+    return
+
+  let score = levelProgress.calculateScore()
   if not shouldSubmitScore(boardId, score):
-    print "Not submitting gameresult to Scoreboards. Score is not in top 10 or not higher than current score"
+    print "Not submitting levelprogress to Scoreboards. Score is not in top 10 or not higher than current score"
     return
 
   let resultCode = playdate.scoreboards.addScore(boardId, score) do (score: PDResult[PDScore]) -> void:

@@ -1,6 +1,5 @@
 import options
 import strutils
-import common/save_slot_types
 import common/shared_types
 import murmurhash
 

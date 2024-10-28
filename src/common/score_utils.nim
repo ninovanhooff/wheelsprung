@@ -1,3 +1,4 @@
+import std/options
 import common/shared_types
 import common/utils
 
@@ -8,9 +9,13 @@ const
 # Of the remaing 19 values, 16 ( 0 .. 15) can be used as a 
 # raw value or bitmask to store additional information like stars collected
 
-proc calculateScore*(gameResult: GameResult): uint32 =
-  let timeScore = SCOREBOARDS_MAX_SCORE - gameResult.time
-  let starScore = if gameResult.starCollected: 1 else: 0
+proc calculateScore*(levelProgress: LevelProgress): uint32 =
+  if levelProgress.bestTime.isNone:
+    print "calculateScore: bestTime is None"
+    return 0
+    
+  let timeScore = SCOREBOARDS_MAX_SCORE - levelProgress.bestTime.get()
+  let starScore = if levelProgress.hasCollectedStar: 1 else: 0
   let score = timeScore + starScore
   return score.uint32
 

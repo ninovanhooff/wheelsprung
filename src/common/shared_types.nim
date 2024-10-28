@@ -1,4 +1,5 @@
 import chipmunk7
+import std/options
 
 type
   Seconds* = Float
@@ -12,6 +13,12 @@ type
   GameResultType* {.pure.} = enum
     ## Keep in order bad to good, used to rank the results.
     GameOver, LevelComplete
+
+  LevelProgress* = ref object of RootObj
+    levelId*: Path
+    bestTime*: Option[Milliseconds]
+    hasCollectedStar*: bool
+    signature*: Option[string]
 
   GameResult* = ref object of RootObj
     levelId*: Path

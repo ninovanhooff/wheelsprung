@@ -2,11 +2,12 @@ import playdate/api
 import level_select_types
 import std/tables
 import math
+import common/shared_types
 import common/graphics_utils
 import common/lcd_patterns
 import common/utils
 import common/score_utils
-import options
+import std/options
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import cache/font_cache

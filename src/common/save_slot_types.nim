@@ -5,12 +5,6 @@ import tables
 
 ## Models
 type 
-  LevelProgress* = ref object of RootObj
-    levelId*: Path
-    bestTime*: Option[Milliseconds]
-    hasCollectedStar*: bool
-    signature*: Option[string]
-  
   RestoreState* = seq[ScreenRestoreState]
 
   SaveSlot* = ref object of RootObj
