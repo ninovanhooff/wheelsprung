@@ -6,6 +6,7 @@ import std/options
 import std/sugar
 import playdate/api
 import scoreboards_types
+export scoreboards_types
 import level_meta/level_data
 import scoreboards_dummy_data_source
 import scoreboards_memory_data_source

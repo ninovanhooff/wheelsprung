@@ -23,6 +23,7 @@ const
   initialUnlockedLevels = 30
   pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
+  LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY = "LevelSelectScreenScoreboardsUpdatedCallbackKey"
 
 var
   backgroundAudioPlayer: FilePlayer
@@ -199,9 +200,19 @@ method resume*(screen: LevelSelectScreen) =
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
   )
+  addScoreboardChangedCallback(
+    LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY,
+    proc(boardId: BoardId) = 
+      screen.refreshLevelRows()
+      screen.draw(forceRedraw = true)
+  )
 
 method pause*(screen: LevelSelectScreen) =
   backgroundAudioPlayer.pause()
+  removeScoreboardChangedCallback(LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY)
+
+method destroy*(screen: LevelSelectScreen) =
+  pause(screen)
 
 method update*(screen: LevelSelectScreen): int =
   updateInput(screen)
