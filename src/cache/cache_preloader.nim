@@ -1,9 +1,11 @@
 import cache/bitmaptable_cache
 import common/shared_types
+import scoreboards/scoreboards_service
 
 type
   PreloadJobType {.pure.} = enum
     BitmapTable
+    Scoreboards
     # Font
     # Bitmap
   PreloadJob* = ref object
@@ -11,9 +13,11 @@ type
     case jobType*: PreloadJobType
     of BitmapTable:
       bitmapTableId*: BitmapTableId
+    of Scoreboards:
+      discard
 
 var jobs: seq[PreloadJob] = @[
-  # order items from highest to low timeCost
+  # order items lowest to highest prio since we will pop from the end
   PreloadJob(timeCost: 0.024.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeChassis),
   PreloadJob(timeCost: 0.018.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderTail),
   PreloadJob(timeCost: 0.014.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderHead),
@@ -31,12 +35,15 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.GravityRight),
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.GravityUpRight),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.Nuts),
+  PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.Scoreboards),
 ]
 
 proc execute(job: PreloadJob) =
   case job.jobType
   of PreloadJobType.BitmapTable:
     discard getOrLoadBitmapTable(job.bitmapTableId)
+  of PreloadJobType.Scoreboards:
+    fetchAllScoreboards()
 
 proc runPreloader*(seconds: Seconds) =
   if seconds <= 0.Seconds:

@@ -37,7 +37,7 @@ proc init() {.raises: [].} =
 
   if defined(debug):
     runTests()
-  
+
   initNavigator(initialScreenProvider)
   let restoreState = getRestoreState()
   print "restoreState:", restoreState.repr
@@ -55,6 +55,8 @@ proc init() {.raises: [].} =
     replaceBackstack(screens)
   else:
     pushScreen(newLevelSelectScreen())
+  
+
 
 proc update() {.raises: [].} =
   let frameStartTime = getElapsedSeconds()

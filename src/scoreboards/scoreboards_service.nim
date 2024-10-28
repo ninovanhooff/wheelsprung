@@ -137,9 +137,9 @@ proc updateNextOutdatedBoard*() =
   print "All boards are up to date"
   fetchAllInProgress = false
 
-proc fetchAllLeaderboards*() =
+proc fetchAllScoreboards*() =
   if fetchAllInProgress:
-    print "fetchAllLeaderboards: already in progress"
+    print "fetchAllScoreboards: already in progress"
     return
   fetchAllInProgress = true
   updateNextOutdatedBoard()
