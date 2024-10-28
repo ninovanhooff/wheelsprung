@@ -46,7 +46,17 @@ proc refreshLeaderboards*(screen: LeaderboardsScreen) =
 proc updateInput(screen: LeaderboardsScreen) =
   let buttonState = playdate.system.getButtonState()
 
-  if kButtonB in buttonState.pushed or kButtonLeft in buttonState.pushed:
+  if kButtonUp in buttonState.pushed:
+    screen.currentPageIdx -= 1
+    if screen.currentPageIdx < 0:
+      screen.currentPageIdx = screen.pages.high
+    screen.draw()
+  elif kButtonDown in buttonState.pushed:
+    screen.currentPageIdx += 1
+    if screen.currentPageIdx > screen.pages.high:
+      screen.currentPageIdx = 0
+    screen.draw()
+  elif kButtonB in buttonState.pushed or kButtonLeft in buttonState.pushed:
     popScreen()
 
 method resume*(screen: LeaderboardsScreen) =
