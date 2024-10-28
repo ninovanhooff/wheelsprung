@@ -2,6 +2,7 @@ import playdate/api
 import level_select_types
 import std/tables
 import math
+import common/shared_types
 import common/graphics_utils
 import common/lcd_patterns
 import common/utils
@@ -16,6 +17,7 @@ const
   verticalLines = [199, 219, 279]
     ## x positions of vertical table cell dividers relative to levelDrawRegion.x
   rowHeight = 20
+  emptyTimeText = "--:--.--"
   scrollEpsilon = 1.0f / rowHeight # 1 pixel of scroll
     ## how much scroll slop is allowed to stop drawing screen
 
@@ -58,9 +60,15 @@ proc getLevelStatusImage(progress: LevelProgress): LCDBitmap =
 
 proc timeText(progress: LevelProgress): string =
   if progress.bestTime.isNone:
-    return "--:--.--"
+    return emptyTimeText
   else:
     return progress.bestTime.get.formatTime()
+
+proc timeText(optTime: Option[uint32]): string =
+  if optTime.isNone:
+    return emptyTimeText
+  else:
+    return optTime.get.Milliseconds.formatTime()
 
 proc initTableRowsImage(screen: LevelSelectScreen, forceRedraw: bool) =
   let requiredHeight = screen.levelRows.len * rowHeight
@@ -91,6 +99,7 @@ proc renderLevelRow(idx: int32, row: LevelRow) =
   statusImage.draw(x + 200, y + 2, kBitmapUnflipped)
 
   gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
+  gfx.drawText(row.optLeaderScore.timeText, verticalLines[2] + 6, y+4)
   gfx.popContext()
   rowDrawState[idx] = true
 

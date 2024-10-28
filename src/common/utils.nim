@@ -18,7 +18,7 @@ proc formatTime*(time: Seconds): string =
   return formatTime(time * 1000)
 
 proc formatTime*(time: Milliseconds, signed: bool = false): string =
-  ## Format time in seconds to a string in the format "MM:SS.ff"
+  ## Format time in miliseconds to a string in the format "MM:SS.ff"
   
   let absTime = abs(time)
   let minutes = absTime div 60_000

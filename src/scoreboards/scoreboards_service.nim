@@ -11,6 +11,7 @@ import scoreboards_dummy_data_source
 import scoreboards_memory_data_source
 import common/shared_types
 import common/utils
+import common/score_utils
 
 var
   validBoardIds: seq[string] = @[]
@@ -32,6 +33,15 @@ proc getScoreboards*(): seq[PDScoresList] =
 proc getScoreBoard*(boardId: BoardId): Option[PDScoresList] =
   return scoreboardsCache.getScoreboard(boardId)
 
+proc getGlobalBest*(boardId: BoardId): Option[uint32] =
+  let board = getScoreBoard(boardId)
+  if board.isNone:
+    return none(uint32)
+  let scores = board.get.scores
+  if scores.len == 0:
+    return none(uint32)
+  return some(scores[0].value)
+
 proc refreshBoard(boardId: BoardId) =
   let resultCode = playdate.scoreboards.getScores(boardId) do (scoresList: PDResult[PDScoresList]) -> void:
     boardId.decreaseLoadingCount()
@@ -44,12 +54,6 @@ proc refreshBoard(boardId: BoardId) =
 
   boardId.increaseLoadingCount()
   print "===== NETWORK Scores START", boardId, $resultCode
-
-proc calculateScore(gameResult: GameResult): uint32 =
-  let timeScore = 1_000_000 - gameResult.time
-  let starScore = if gameResult.starCollected: 1 else: 0
-  let score = timeScore + starScore
-  return score.uint32
 
 proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
   let board = getScoreBoard(boardId)

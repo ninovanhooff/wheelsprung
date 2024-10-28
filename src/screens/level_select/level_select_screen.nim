@@ -5,6 +5,7 @@ import navigation/[screen, navigator]
 import common/utils
 import common/shared_types
 import common/audio_utils
+import common/score_utils
 import std/sequtils
 import std/options
 import std/tables
@@ -17,6 +18,7 @@ import level_select_view
 import screens/screen_types
 import screens/settings/settings_screen
 import screens/leaderboards/leaderboards_screen
+import scoreboards/scoreboards_service
 
 const
   initialUnlockedLevels = 30
@@ -143,7 +145,8 @@ proc updateInput(screen: LevelSelectScreen) =
 proc newLevelRow(levelMeta: LevelMeta): LevelRow =
   return LevelRow(
     levelMeta: levelMeta,
-    progress: getLevelProgress(levelMeta.path)
+    progress: getLevelProgress(levelMeta.path),
+    optLeaderScore: getGlobalBest(levelMeta.scoreboardId)
   )
 
 

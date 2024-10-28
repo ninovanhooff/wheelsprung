@@ -13,6 +13,7 @@ type
   LevelRow* = ref object
     levelMeta*: LevelMeta
     progress*: LevelProgress
+    optLeaderScore*: Option[uint32]
     
   LevelSelectScreen* = ref object of Screen
     levelRows*: seq[LevelRow]
