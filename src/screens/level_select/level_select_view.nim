@@ -128,21 +128,21 @@ proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
   initTableRowsImage(screen, forceRedraw)
   let scrollPosition = screen.scrollPosition
   var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).round.int32
-  let maxIdx = clamp(
+  let maxRenderIdx = clamp(
     screen.scrollPosition.int + LEVEL_SELECT_VISIBLE_ROWS.ceil.int32, 
     0, screen.levelRows.high
   ).int32
 
   var rowIdx: int32 = -1
   var row: LevelRow = nil
-  for idx in scrollPosition.int32 .. maxIdx:
+  for idx in scrollPosition.int32 .. maxRenderIdx:
     if not rowDrawState.hasKey(idx):
       rowIdx = idx
       row = screen.levelRows[rowIdx]
-      break
-  if not row.isNil:
-    renderLevelRow(rowIdx, row)
-  elif abs(screen.scrollPosition - screen.scrollTarget) < scrollEpsilon and
+      renderLevelRow(rowIdx, row)
+  
+  if rowIdx == -1 and abs(screen.scrollPosition - screen.scrollTarget) < scrollEpsilon and
+    # rowIdx == -1: no rows where updated
     not screen.isSelectionDirty and
     not forceRedraw:
     return
