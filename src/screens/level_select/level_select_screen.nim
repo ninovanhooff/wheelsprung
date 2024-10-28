@@ -202,7 +202,7 @@ method resume*(screen: LevelSelectScreen) =
   )
 
 method pause*(screen: LevelSelectScreen) =
-  backgroundAudioPlayer.stop()
+  backgroundAudioPlayer.pause()
 
 method update*(screen: LevelSelectScreen): int =
   updateInput(screen)
