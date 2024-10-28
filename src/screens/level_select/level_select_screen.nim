@@ -182,6 +182,7 @@ proc getInitialRowIdx(screen: LevelSelectScreen): int =
   return 0
 
 method resume*(screen: LevelSelectScreen) =
+  fetchAllLeaderboards()
   screen.upActivatedAt = none(Seconds)
   screen.downActivatedAt = none(Seconds)
   try:

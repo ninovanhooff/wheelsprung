@@ -27,8 +27,8 @@ proc decreaseLoadingCount*(boardId: BoardId) =
 
 proc getScoreboards*(): seq[PDScoresList] =
   if scoreboardsCache.getScoreboards.len == 0:
-    scoreboardsCache.setScoreboards(dummyScoreboards)
-    # scoreboardsCache.createScoreboards(validBoardIds)
+    # scoreboardsCache.setScoreboards(dummyScoreboards)
+    scoreboardsCache.createScoreboards(validBoardIds)
   return scoreboardsCache.getScoreboards.values.toSeq
 
 proc getScoreBoard*(boardId: BoardId): Option[PDScoresList] =
@@ -108,11 +108,11 @@ proc initScoreboardsService() =
   validBoardIds.add(LEADERBOARD_BOARD_ID)
 
 proc updateNextOutdatedBoard*() =
-  for boardId in validBoardIds:
-    let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - 3600
-    if getScoreBoard(boardId).get(default(PDScoresList)).lastUpdated > timeThresholdSeconds:
+  let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - 3600
+  for board in getScoreboards():
+    if board.lastUpdated > timeThresholdSeconds:
       continue  
-    refreshBoard(boardId, proc (result: PDResult[PDScoresList]) =
+    refreshBoard(board.boardId, proc (result: PDResult[PDScoresList]) =
       if result.kind == PDResultSuccess:
         updateNextOutdatedBoard()
       else:
