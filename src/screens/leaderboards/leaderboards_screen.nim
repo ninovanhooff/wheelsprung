@@ -11,8 +11,6 @@ import scoreboards/scoreboards_types
 import scoreboards/scoreboards_service
 import common/utils
 
-const LEADERBOARD_BOARD_ID = "leaderboard"
-
 proc newLeaderboardsScreen*(initialPageIdx: int = 0, initialBoardId: BoardId = ""): LeaderboardsScreen =
   LeaderboardsScreen(
     screenType: ScreenType.Leaderboards,
