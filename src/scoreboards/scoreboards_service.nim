@@ -18,11 +18,12 @@ var
   boardsLoadingCounts = initTable[string, uint32]()
   optCurrentPlayerName = none(string)
   fetchAllInProgress = false
+  scoreboardChangedCallbacks: Table[string, ScoreboardChangedCallback] = initTable[string, ScoreboardChangedCallback]()
 
-proc increaseLoadingCount*(boardId: BoardId) =
+proc increaseLoadingCount(boardId: BoardId) =
   boardsLoadingCounts[boardId] = boardsLoadingCounts.getOrDefault(boardId, 0) + 1
 
-proc decreaseLoadingCount*(boardId: BoardId) =
+proc decreaseLoadingCount(boardId: BoardId) =
   boardsLoadingCounts[boardId] = boardsLoadingCounts.getOrDefault(boardId, 0) - 1
 
 proc getScoreboards*(): seq[PDScoresList] =
@@ -43,6 +44,15 @@ proc getGlobalBest*(boardId: BoardId): Option[uint32] =
     return none(uint32)
   return some(scores[0].value)
 
+proc addScoreboardChangedCallback*(key: string, callback: ScoreboardChangedCallback) =
+  scoreboardChangedCallbacks[key] = callback
+
+proc removeScoreboardChangedCallback*(key: string) =
+  if not scoreboardChangedCallbacks.hasKey(key):
+    print "removeScoreboardChangedCallback: callback not found:", key
+    return
+  scoreboardChangedCallbacks.del(key)
+
 let emptyResultHandler = proc(result: PDResult[PDScoresList]) = discard
 proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> void = emptyResultHandler) =
   let resultCode = playdate.scoreboards.getScores(boardId) do (scoresList: PDResult[PDScoresList]) -> void:
@@ -51,6 +61,8 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
     of PDResultSuccess: 
       print "===== NETWORK Scores OK", $scoresList.result
       scoreboardsCache.setScoreboard(scoresList.result)
+      for callback in scoreboardChangedCallbacks.values:
+        callback(boardId)
     of PDResultError: 
       print "===== NETWORK Scores ERROR", scoresList.message
 

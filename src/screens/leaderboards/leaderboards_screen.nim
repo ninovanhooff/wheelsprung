@@ -11,6 +11,9 @@ import scoreboards/scoreboards_types
 import scoreboards/scoreboards_service
 import common/utils
 
+const 
+  LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY = "LeaderboardsScreenScoreboardUpdatedCallbackKey"
+
 proc newLeaderboardsScreen*(initialPageIdx: int = 0, initialBoardId: BoardId = ""): LeaderboardsScreen =
   LeaderboardsScreen(
     screenType: ScreenType.Leaderboards,
@@ -70,6 +73,16 @@ method resume*(screen: LeaderboardsScreen) =
       screen.currentPageIdx = screen.pages.high # leaderboard is at end
 
   screen.draw(forceRedraw = true)
+  addScoreboardChangedCallback(
+    LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY,
+    proc(boardId: BoardId) = screen.refreshLeaderboards)
+
+method pause*(screen: LeaderboardsScreen) =
+  removeScoreboardChangedCallback(LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY)
+
+method destroy*(screen: LeaderboardsScreen) =
+  pause(screen)
+  
 
 method update*(screen: LeaderboardsScreen): int =
   updateInput(screen)
