@@ -7,6 +7,8 @@ import common/shared_types
 const
   Pi32*: float32 = PI
   TwoPi*: float32 = 2 * PI
+  NOMINAL_FRAME_RATE*: float32 = 50.0f
+  NOMINAL_FRAME_TIME_MILLIS*: uint32 = (1000.0f / NOMINAL_FRAME_RATE).uint32
 
 ### Time
 proc currentTimeMilliseconds*(): int32 {.inline.} = playdate.system.getCurrentTimeMilliseconds.int32

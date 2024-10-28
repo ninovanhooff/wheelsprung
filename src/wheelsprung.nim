@@ -24,7 +24,7 @@ let initialScreenProvider: InitialScreenProvider =
 
 var 
   isFirstFrame = true
-  frameRate* = 50.0f
+  frameRate* = NOMINAL_FRAME_RATE
   frameTime: Seconds = 1.0f / frameRate
 
 proc init() {.raises: [].} =
