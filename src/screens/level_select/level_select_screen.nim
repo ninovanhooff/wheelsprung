@@ -114,9 +114,10 @@ proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonState()
   let rows = screen.levelRows
   let numRows = rows.len
+  let selectedLevelMeta = rows[screen.selectedIndex].levelMeta
 
   if kButtonA in buttonState.pushed:
-    let levelPath = rows[screen.selectedIndex].levelMeta.path
+    let levelPath = selectedLevelMeta.path
     let gameScreen = newGameScreen(levelPath)
     # the ganme screen loaded successfully, save as last opened level
     confirmPlayer.playVariation
@@ -135,7 +136,7 @@ proc updateInput(screen: LevelSelectScreen) =
     if screen.selectedIndex >= numRows:
       screen.selectedIndex = 0
   elif kButtonRight in buttonState.pushed:
-    pushScreen(newLeaderboardsScreen())
+    pushScreen(newLeaderboardsScreen(initialBoardId = selectedLevelMeta.scoreboardId))
 
   updateScrollPosition(screen)
 

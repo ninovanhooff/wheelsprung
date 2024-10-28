@@ -10,7 +10,9 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
   gfx.clear(kColorWhite)
   gfx.setFont(getOrLoadFont(FontId.NontendoBold))
 
-  var y = 30
+  gfx.drawTextAligned(page.boardName, 200, 10)
+
+  var y = 50
   for i in 0 ..< page.scores.len:
     let score = page.scores[i]
     gfx.drawText($score.rank, 10, y)

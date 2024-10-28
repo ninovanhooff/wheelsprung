@@ -11,7 +11,7 @@ type
     of Game:
       levelPath*: string
     of Leaderboards:
-      currentPageIdx*: int32
+      currentPageIdx*: int
     of LevelSelect, HitStop, GameResult, Settings:
       discard
   Screen* {.requiresInit.} = ref object of RootObj

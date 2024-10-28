@@ -1,10 +1,12 @@
 {.push raises: [].}
 
 import std/strutils
-import tables
-import sugar
-import sequtils
+import std/tables
+import std/sugar
+import std/sequtils
+import std/options
 import common/shared_types
+import common/utils
 
 const 
   levelsBasePath* = "levels/"
@@ -81,3 +83,6 @@ proc getLevelMeta*(path: Path): LevelMeta =
     return officialLevels[path]
   except KeyError:
     return createUserLevelMeta(path)
+
+proc getMetaByBoardId*(boardId: string): Option[LevelMeta] =
+  return officialLevels.values.toSeq.findFirst(it => it.scoreboardId == boardId)
