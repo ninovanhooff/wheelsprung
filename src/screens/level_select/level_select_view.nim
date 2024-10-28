@@ -2,7 +2,6 @@ import playdate/api
 import level_select_types
 import std/tables
 import math
-import common/shared_types
 import common/graphics_utils
 import common/lcd_patterns
 import common/utils
