@@ -13,6 +13,10 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
 
   gfx.drawTextAligned(page.boardName, 200, 10)
 
+  if page.scores.len == 0:
+    gfx.drawTextAligned("Loading...", 200, 110)
+    return
+
   var y = 50
   for i in 0 ..< page.scores.len:
     let score = page.scores[i]
