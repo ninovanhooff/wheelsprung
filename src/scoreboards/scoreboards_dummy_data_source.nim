@@ -16,7 +16,8 @@ let dummyScoreboards* = {
       PDScore(player: "Jasmine", value: 994_992, rank: 9),
       PDScore(player: "Jordan", value: 994_991, rank: 10),
       PDScore(player: "Jerry", value: 994_990, rank: 11)
-    ]
+    ],
+    lastUpdated: 783437075
   ),
   "hills" : PDScoresList(
     boardID: "hills",
