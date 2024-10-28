@@ -6,6 +6,7 @@ import common/shared_types
 import common/graphics_utils
 import common/lcd_patterns
 import common/utils
+import common/score_utils
 import options
 import cache/bitmap_cache
 import cache/bitmaptable_cache
@@ -68,7 +69,7 @@ proc timeText(optTime: Option[uint32]): string =
   if optTime.isNone:
     return emptyTimeText
   else:
-    return optTime.get.Milliseconds.formatTime()
+    return optTime.get.uint32.scoreToTimeString()
 
 proc initTableRowsImage(screen: LevelSelectScreen, forceRedraw: bool) =
   let requiredHeight = screen.levelRows.len * rowHeight
