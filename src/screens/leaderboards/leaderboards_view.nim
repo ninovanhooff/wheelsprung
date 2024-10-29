@@ -4,22 +4,22 @@ import common/graphics_utils
 import cache/font_cache
 
 proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
-  if screen.pages.len == 0:
+  if screen.leaderboards.len == 0:
     return
-  let page = screen.pages[screen.currentPageIdx]
+  let leaderboard = screen.leaderboards[screen.currentLeaderboardIdx]
   gfx.clear(kColorWhite)
   gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
 
-  gfx.drawTextAligned(page.boardName, 200, 10)
+  gfx.drawTextAligned(leaderboard.boardName, 200, 10)
 
-  if page.scores.len == 0:
+  if leaderboard.scores.len == 0:
     gfx.drawTextAligned("Loading...", 200, 110)
     return
 
   var y = 50'i32
   gfx.setDrawMode(kDrawModeNXOR)
-  for i in 0 ..< page.scores.len:
-    let score = page.scores[i]
+  for i in 0 ..< leaderboard.scores.len:
+    let score = leaderboard.scores[i]
     if score.isCurrentPlayer:
       fillRoundRect(5, y - 2, LCD_COLUMNS - 10, 24, 4, kColorBlack)
     gfx.drawTextAligned($score.rank, 65, y, kTextAlignmentRight)

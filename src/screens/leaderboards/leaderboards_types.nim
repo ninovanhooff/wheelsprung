@@ -6,12 +6,12 @@ type
     player*: string
     timeString*: string
     isCurrentPlayer*: bool
-  LeaderboardPage* = ref object of RootObj
+  Leaderboard* = ref object of RootObj
     boardId*: string
     boardName*: string
     scores*: seq[LeaderboardScore]
   #   lastUpdated*: uint32
   LeaderboardsScreen* = ref object of Screen
-    pages*: seq[LeaderboardPage]
-    currentPageIdx*: int
+    leaderboards*: seq[Leaderboard]
+    currentLeaderboardIdx*: int
     initialBoardId*: string

@@ -17,20 +17,20 @@ import data_store/user_profile
 const 
   LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY = "LeaderboardsScreenScoreboardUpdatedCallbackKey"
 
-proc newLeaderboardsScreen*(initialPageIdx: int = 0, initialBoardId: BoardId = ""): LeaderboardsScreen =
+proc newLeaderboardsScreen*(initialLeaderboardIdx: int = 0, initialBoardId: BoardId = ""): LeaderboardsScreen =
   LeaderboardsScreen(
     screenType: ScreenType.Leaderboards,
-    currentPageIdx: initialPageIdx,
+    currentLeaderboardIdx: initialLeaderboardIdx,
     initialBoardId: initialBoardId,
   )
 
-proc toLeaderboardPage*(scoreboard: PDScoresList): LeaderboardPage =
+proc toLeaderboard*(scoreboard: PDScoresList): Leaderboard =
   let optLevelMeta = getMetaByBoardId(scoreboard.boardID)
   let boardName = if scoreboard.boardId == LEADERBOARD_BOARD_ID:
     "Leaderboard"
   elif optLevelMeta.isNone:
     print "ERROR: Could not find level meta for boardID: ", scoreboard.boardID
-    return default(LeaderboardPage)
+    return default(Leaderboard)
   else:
     optLevelMeta.get.name
 
@@ -42,7 +42,7 @@ proc toLeaderboardPage*(scoreboard: PDScoresList): LeaderboardPage =
 
   let playerName = getPlayerName()
 
-  LeaderboardPage(
+  Leaderboard(
     boardID: scoreboard.boardID,
     boardName: boardName,
     scores: scoreboard.scores.mapIt(
@@ -57,22 +57,22 @@ proc toLeaderboardPage*(scoreboard: PDScoresList): LeaderboardPage =
 
 proc refreshLeaderboards*(screen: LeaderboardsScreen) =
   let scoreboards = getScoreboards()
-  screen.pages = scoreboards.mapIt(it.toLeaderboardPage())
-  if screen.currentPageIdx > screen.pages.high:
-    screen.currentPageIdx = screen.pages.high
+  screen.leaderboards = scoreboards.mapIt(it.toLeaderboard())
+  if screen.currentLeaderboardIdx > screen.leaderboards.high:
+    screen.currentLeaderboardIdx = screen.leaderboards.high
 
 proc updateInput(screen: LeaderboardsScreen) =
   let buttonState = playdate.system.getButtonState()
 
   if kButtonUp in buttonState.pushed:
-    screen.currentPageIdx -= 1
-    if screen.currentPageIdx < 0:
-      screen.currentPageIdx = screen.pages.high
+    screen.currentLeaderboardIdx -= 1
+    if screen.currentLeaderboardIdx < 0:
+      screen.currentLeaderboardIdx = screen.leaderboards.high
     screen.draw()
   elif kButtonDown in buttonState.pushed:
-    screen.currentPageIdx += 1
-    if screen.currentPageIdx > screen.pages.high:
-      screen.currentPageIdx = 0
+    screen.currentLeaderboardIdx += 1
+    if screen.currentLeaderboardIdx > screen.leaderboards.high:
+      screen.currentLeaderboardIdx = 0
     screen.draw()
   elif kButtonB in buttonState.pushed or kButtonLeft in buttonState.pushed:
     popScreen()
@@ -80,13 +80,13 @@ proc updateInput(screen: LeaderboardsScreen) =
 method resume*(screen: LeaderboardsScreen) =
   refreshLeaderboards(screen)
   if screen.initialBoardId.len > 0:
-    let (idx, _) = screen.pages.findFirstIndexed(it => it.boardId == screen.initialBoardId)
+    let (idx, _) = screen.leaderboards.findFirstIndexed(it => it.boardId == screen.initialBoardId)
     if idx >= 0:
-      screen.currentPageIdx = idx
+      screen.currentLeaderboardIdx = idx
       screen.initialBoardId = "" # clear it, don't re-select on future resumes
     else:
       print "ERROR: Could not find initial boardId: ", screen.initialBoardId
-      screen.currentPageIdx = screen.pages.high # leaderboard is at end
+      screen.currentLeaderboardIdx = screen.leaderboards.high # leaderboard is at end
 
   screen.draw(forceRedraw = true)
   addScoreboardChangedCallback(
@@ -108,5 +108,5 @@ method update*(screen: LeaderboardsScreen): int =
 method getRestoreState*(screen: LeaderboardsScreen): Option[ScreenRestoreState] =
   return some(ScreenRestoreState(
     screenType: ScreenType.Leaderboards,
-    currentPageIdx: screen.currentPageIdx,
+    currentLeaderboardIdx: screen.currentLeaderboardIdx,
   ))
