@@ -1,3 +1,4 @@
+import cache/bitmap_cache
 import cache/bitmaptable_cache
 import cache/font_cache
 import common/shared_types
@@ -7,13 +8,15 @@ type
   PreloadJobType {.pure.} = enum
     BitmapTable
     Font
+    Bitmap
     Scoreboards
-    # Bitmap
   PreloadJob* = ref object
     timeCost: Seconds
     case jobType*: PreloadJobType
     of BitmapTable:
       bitmapTableId*: BitmapTableId
+    of Bitmap:
+      bitmapId*: BitmapId
     of Font:
       fontId*: FontId
     of Scoreboards:
@@ -21,6 +24,7 @@ type
 
 var jobs: seq[PreloadJob] = @[
   # order items lowest to highest prio since we will pop from the end
+  PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.Bitmap, bitmapId: BitmapId.Acorn),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeGhostWheel),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeWheel),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderTorso),
@@ -46,6 +50,8 @@ var jobs: seq[PreloadJob] = @[
 
 proc execute(job: PreloadJob) =
   case job.jobType
+  of PreloadJobType.Bitmap:
+    discard getOrLoadBitmap(job.bitmapId)
   of PreloadJobType.BitmapTable:
     discard getOrLoadBitmapTable(job.bitmapTableId)
   of PreloadJobType.Font:

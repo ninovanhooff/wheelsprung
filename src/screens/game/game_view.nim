@@ -17,6 +17,7 @@ import chipmunk_utils
 import common/utils
 import globals
 import cache/bitmaptable_cache
+import cache/bitmap_cache
 import cache/font_cache
 import screens/hit_stop/hit_stop_screen
 
@@ -66,7 +67,7 @@ proc initGameView*() =
   initGameGhost()
 
   try:
-    starImage = gfx.newBitmap("images/acorn")
+    starImage = getOrLoadBitmap(BitmapId.Acorn)
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
     print "Image load failed:", getCurrentExceptionMsg()
