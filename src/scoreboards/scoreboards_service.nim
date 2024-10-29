@@ -14,16 +14,16 @@ import common/utils
 
 var
   validBoardIds: seq[string] = @[]
-  boardsLoadingCounts = initTable[string, uint32]()
+  boardLoadingCounts = initTable[string, uint32]()
   optCurrentPlayerName = none(string)
-  fetchAllInProgress = false
+  fetchAllQueue: seq[BoardId] = @[]
   scoreboardChangedCallbacks: Table[string, ScoreboardChangedCallback] = initTable[string, ScoreboardChangedCallback]()
 
 proc increaseLoadingCount(boardId: BoardId) =
-  boardsLoadingCounts[boardId] = boardsLoadingCounts.getOrDefault(boardId, 0) + 1
+  boardLoadingCounts[boardId] = boardLoadingCounts.getOrDefault(boardId, 0) + 1
 
 proc decreaseLoadingCount(boardId: BoardId) =
-  boardsLoadingCounts[boardId] = boardsLoadingCounts.getOrDefault(boardId, 0) - 1
+  boardLoadingCounts[boardId] = boardLoadingCounts.getOrDefault(boardId, 0) - 1
 
 proc getScoreboards*(): seq[PDScoresList] =
   if scoreboardsCache.getScoreboards.len == 0:
@@ -123,28 +123,30 @@ proc initScoreboardsService() =
   validBoardIds.add(LEADERBOARD_BOARD_ID)
 
 proc updateNextOutdatedBoard*() =
+  if fetchAllQueue.len == 0:
+    # all boards are up to date
+    print "All boards are up to date"
+    return
+
+  let boardId = fetchAllQueue.pop
+  refreshBoard(boardId, proc (result: PDResult[PDScoresList]) =
+    if result.kind == PDResultSuccess:
+      updateNextOutdatedBoard()
+    else:
+      print "Sequential scoreboard update aborted due to failure"
+      fetchAllQueue.setLen(0)
+  )
+
+proc fetchAllScoreboards*() =
+  if fetchAllQueue.len > 0:
+    print "fetchAllScoreboards: already in progress"
+    return
+  
   let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - 3600
   for board in getScoreboards():
     if board.lastUpdated > timeThresholdSeconds:
-      continue  
-    refreshBoard(board.boardId, proc (result: PDResult[PDScoresList]) =
-      if result.kind == PDResultSuccess:
-        updateNextOutdatedBoard()
-      else:
-        print "Sequential scoreboard update aborted due to failure"
-        fetchAllInProgress = false
-    )
-    return
-
-  # all boards are up to date
-  print "All boards are up to date"
-  fetchAllInProgress = false
-
-proc fetchAllScoreboards*() =
-  if fetchAllInProgress:
-    print "fetchAllScoreboards: already in progress"
-    return
-  fetchAllInProgress = true
+      continue
+    fetchAllQueue.add(board.boardID)
   updateNextOutdatedBoard()
 
 initScoreboardsService()
