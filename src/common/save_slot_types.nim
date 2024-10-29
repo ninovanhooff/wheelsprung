@@ -11,7 +11,10 @@ type
     progress*: Table[Path, LevelProgress]
     lastOpenedLevel*: Option[string] # todo remove
     restoreState*: Option[RestoreState]
+    playerName*: Option[string]
     modelVersion*: int
+    # when adding a new field, add it to the entity as well
+    # when modifying a field, increment modelVersion
 
 ## Entities
 type 
@@ -28,6 +31,7 @@ type
     progress*: seq[LevelProgressEntity]
     lastOpenedLevel*: Option[string]
     restoreState*: Option[RestoreState]
+    playerName*: Option[string]
     modelVersion*: int
 
 
@@ -39,6 +43,7 @@ proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
     progress: @[],
     lastOpenedLevel: slot.lastOpenedLevel,
     restoreState: slot.restoreState,
+    playerName: slot.playerName,
     modelVersion: slot.modelVersion
   )
   for level in slot.progress.values:
@@ -54,6 +59,7 @@ proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
     progress: initTable[Path, LevelProgress](),
     lastOpenedLevel: entity.lastOpenedLevel,
     restoreState: entity.restoreState,
+    playerName: entity.playerName,
     modelVersion: entity.modelVersion
   )
   for level in entity.progress:

@@ -10,12 +10,12 @@ export scoreboards_types
 import level_meta/level_data
 import scoreboards_dummy_data_source
 import scoreboards_memory_data_source
+import data_store/user_profile
 import common/utils
 
 var
   validBoardIds: seq[string] = @[]
   boardLoadingCounts = initTable[string, uint32]()
-  optCurrentPlayerName = none(string)
   fetchAllQueue: seq[BoardId] = @[]
   scoreboardChangedCallbacks: Table[string, ScoreboardChangedCallback] = initTable[string, ScoreboardChangedCallback]()
 
@@ -54,20 +54,23 @@ proc removeScoreboardChangedCallback*(key: string) =
 
 let emptyResultHandler = proc(result: PDResult[PDScoresList]) = discard
 proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> void = emptyResultHandler) =
-  let resultCode = playdate.scoreboards.getScores(boardId) do (scoresList: PDResult[PDScoresList]) -> void:
+  let resultCode = playdate.scoreboards.getScores(boardId) do (scoresListResult: PDResult[PDScoresList]) -> void:
     boardId.decreaseLoadingCount()
-    case scoresList.kind
-    of PDResultSuccess: 
-      print "===== NETWORK Scores OK", $scoresList.result
-      scoreboardsCache.setScoreboard(scoresList.result)
+    case scoresListResult.kind
+    of PDResultSuccess:
+      let scoresList = scoresListResult.result
+      print "===== NETWORK Scores OK", $scoresList
+      scoreboardsCache.setScoreboard(scoresList)
+      if scoresList.scores.len == 10:
+        setPlayerName(scoresList.scores[9].player)
       for callback in scoreboardChangedCallbacks.values:
         callback(boardId)
     of PDResultError: 
-      print "===== NETWORK Scores ERROR", scoresList.message
+      print "===== NETWORK Scores ERROR", scoresListResult.message
     of PDResultSuccessEmpty:
       print "===== NETWORK Scores EMPTY", boardId
 
-    resultHandler(scoresList)
+    resultHandler(scoresListResult)
 
   boardId.increaseLoadingCount()
   print "===== NETWORK Scores START", boardId, $resultCode
@@ -76,10 +79,10 @@ proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
   let board = getScoreBoard(boardId)
   if board.isNone:
     return true
-  if optCurrentPlayerName.isNone:
+  if getPlayerName().isNone:
     # we don't know the current player name, so we can't compare new score to old scores
     return true
-  let playerName = optCurrentPlayerName.get
+  let playerName = getPlayerName().get
   let scores = board.get.scores
   let optOldPlayerScore = scores.findFirst(it => it.player == playerName)
   if optOldPlayerScore.isNone:
@@ -101,7 +104,7 @@ proc submitScore*(boardId: BoardId, score: uint32) =
     case score.kind
     of PDResultSuccess:
       print "===== NETWORK addScore OK", score.result.repr
-      optCurrentPlayerName = some(score.result.player)
+      setPlayerName(score.result.player)
       refreshBoard(boardId)
     of PDResultSuccessEmpty: 
       print "==== NETWORK addScore EMPTY: Probably no Wi-Fi"

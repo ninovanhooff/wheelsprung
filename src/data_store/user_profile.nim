@@ -34,6 +34,13 @@ proc isStarEnabled*(id: Path): bool =
   let progress = getLevelProgress(id)
   result = progress.bestTime.isSome
 
+proc getPlayerName*(): Option[string] =
+  return saveSlot.playerName
+
+proc setPlayerName*(name: string) =
+  print "Setting player name to:", name
+  saveSlot.playerName = some(name)
+
 proc setLastOpenedLevel*(levelPath: string) =
   saveSlot.lastOpenedLevel = some(levelPath)
 
