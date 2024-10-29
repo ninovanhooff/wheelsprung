@@ -169,7 +169,7 @@ proc drawLine*(v0: Vertex, v1: Vertex, color: LCDColor = kColorBlack) {.inline.}
 proc fillCircle*(x, y: int32, radius: int32, color: LCDColor = kColorBlack ) {.inline.} =
   gfx.fillEllipse(x - radius,y - radius,radius * 2'i32, radius * 2'i32, 0f, 0f, color);
 
-proc drawRoundRect*(x, y, width, height, radius, lineWidth: int32, color: LCDSolidColor) {.inline.} =
+proc drawRoundRect*(x, y, width, height, radius, lineWidth: Natural, color: LCDSolidColor) {.inline.} =
   let r2 = radius * 2
 
   # lines
@@ -184,7 +184,7 @@ proc drawRoundRect*(x, y, width, height, radius, lineWidth: int32, color: LCDSol
   gfx.drawEllipse(x + width - r2, y + height - r2, r2, r2, lineWidth, 90'f, 180'f, color)
   gfx.drawEllipse(x, y + height - r2, r2, r2, lineWidth, -180'f, -90'f, color)
 
-proc fillRoundRect*(x, y, width, height, radius: int32, color: LCDSolidColor) {.inline.} =
+proc fillRoundRect*(x, y, width, height, radius: Natural, color: LCDSolidColor) {.inline.} =
   let r2 = radius * 2
 
   gfx.fillRect(x + radius, y + radius, width - r2, height - r2, color) #center
