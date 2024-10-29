@@ -63,8 +63,8 @@ proc update() {.raises: [].} =
   discard updateNavigator()
   playdate.system.drawFPS(0, 0)
   # let preloadBudget = lastFrameElapsedSeconds + frameTime - getElapsedSeconds()
-  let preloadBudget = if isFirstFrame: 0.0f else: frameStartTime + frameTime - getElapsedSeconds()
-  runPreloader(preloadBudget)
+  if not isFirstFrame:
+    runPreloader(frameStartTime + frameTime)
   isFirstFrame = false
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 

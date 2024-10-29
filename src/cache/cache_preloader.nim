@@ -2,6 +2,7 @@ import cache/bitmap_cache
 import cache/bitmaptable_cache
 import cache/font_cache
 import common/shared_types
+import common/utils
 import scoreboards/scoreboards_service
 
 type
@@ -59,14 +60,11 @@ proc execute(job: PreloadJob) =
   of PreloadJobType.Scoreboards:
     fetchAllScoreboards()
 
-proc runPreloader*(seconds: Seconds) =
-  if seconds <= 0.Seconds:
-    return
-
-  var remainingSeconds = seconds
+proc runPreloader*(deadline: Seconds) =
+  var currentTime = getElapsedSeconds()
   for idx in countdown(jobs.high, 0):
     let job = jobs[idx]
-    if job.timeCost <= remainingSeconds:
+    if currentTime + job.timeCost <= deadline:
       job.execute()
       jobs.delete(idx)
-      remainingSeconds -= job.timeCost
+      currentTime = getElapsedSeconds()
