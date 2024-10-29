@@ -5,17 +5,16 @@ let dummyScoreboards* = {
   "tutorialaccelerate": PDScoresList(
     boardID: "tutorialaccelerate",
     scores: @[
-      PDScore(player: "John", value: 995_619, rank: 1),
-      PDScore(player: "Nino", value: 995_601, rank: 2),
-      PDScore(player: "Jack", value: 995_600, rank: 3),
-      PDScore(player: "Jill", value: 994_997, rank: 4),
-      PDScore(player: "Jim", value: 994_996, rank: 5),
-      PDScore(player: "Joe", value: 994_995, rank: 6),
-      PDScore(player: "Jenny", value: 994_994, rank: 7),
-      PDScore(player: "James", value: 994_993, rank: 8),
-      PDScore(player: "Jasmine", value: 994_992, rank: 9),
-      PDScore(player: "Jordan", value: 994_991, rank: 10),
-      PDScore(player: "Jerry", value: 994_990, rank: 11)
+      PDScore(player: "JonathanSmithJunior1", value: 995_619, rank: 1000),
+      PDScore(player: "Nino", value: 995_601, rank: 1001),
+      PDScore(player: "Jack", value: 995_600, rank: 1002),
+      PDScore(player: "Jill", value: 994_997, rank: 1003),
+      PDScore(player: "Jim", value: 994_996, rank: 1004),
+      PDScore(player: "JonathanSmithJunior2", value: 994_995, rank: 1005),
+      PDScore(player: "Jenny", value: 994_994, rank: 1006),
+      PDScore(player: "James", value: 994_993, rank: 1007),
+      PDScore(player: "Jasmine", value: 994_992, rank: 1008),
+      PDScore(player: "Jordan", value: 994_991, rank: 1009),
     ],
     lastUpdated: 783437075
   ),
