@@ -32,7 +32,7 @@ proc sign*(progress: LevelProgress) =
 proc verify*(progress: LevelProgress, levelId: Path): bool =
   ## levelId should not be taken from the progress object
   
-  # This check is necessary to prevent and authentic signature from being used for another level
+  # This check is necessary to prevent an authentic signature from being used for another level
   if levelId != progress.levelId: return false
   if progress.bestTime.isNone: return false
 
