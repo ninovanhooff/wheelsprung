@@ -8,7 +8,7 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     return
   let page = screen.pages[screen.currentPageIdx]
   gfx.clear(kColorWhite)
-  gfx.setFont(getOrLoadFont(FontId.NontendoBold))
+  gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
 
   gfx.drawTextAligned(page.boardName, 200, 10)
 
@@ -22,9 +22,9 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     let score = page.scores[i]
     if score.isCurrentPlayer:
       fillRoundRect(5, y - 2, LCD_COLUMNS - 10, 24, 4, kColorBlack)
-    gfx.drawText($score.rank, 20, y)
-    gfx.drawText(score.player, 40, y)
-    gfx.drawText(score.timeString, 250, y)
+    gfx.drawTextAligned($score.rank, 65, y, kTextAlignmentRight)
+    gfx.drawText(score.player, 80, y)
+    gfx.drawText(score.timeString, 290, y)
     y += 24
   gfx.setDrawMode(kDrawModeCopy)
   
