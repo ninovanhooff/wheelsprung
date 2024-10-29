@@ -110,6 +110,10 @@ proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
     let timeout: Seconds = if screen.downActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
     screen.downActivatedAt = some(currentTimeSeconds() + timeout)
 
+proc navigateToLeaderboardsScreen(screen: LevelSelectScreen) =
+  let selectedLevelMeta = screen.levelRows[screen.selectedIndex].levelMeta
+  pushScreen(newLeaderboardsScreen(initialBoardId = selectedLevelMeta.scoreboardId))
+
 
 proc updateInput(screen: LevelSelectScreen) =
   screen.isSelectionDirty = false
@@ -138,7 +142,7 @@ proc updateInput(screen: LevelSelectScreen) =
     if screen.selectedIndex >= numRows:
       screen.selectedIndex = 0
   elif kButtonRight in buttonState.pushed:
-    pushScreen(newLeaderboardsScreen(initialBoardId = selectedLevelMeta.scoreboardId))
+    navigateToLeaderboardsScreen(screen)
 
   updateScrollPosition(screen)
 
@@ -200,6 +204,10 @@ method resume*(screen: LevelSelectScreen) =
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
   )
+  discard playdate.system.addMenuItem("Leaderboards", proc(menuItem: PDMenuItemButton) =
+    navigateToLeaderboardsScreen(screen)
+  )
+  
   addScoreboardChangedCallback(
     LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY,
     proc(boardId: BoardId) = 
