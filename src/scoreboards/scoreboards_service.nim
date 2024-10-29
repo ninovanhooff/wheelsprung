@@ -67,7 +67,7 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
     of PDResultSuccessEmpty:
       print "===== NETWORK Scores EMPTY", boardId
 
-  resultHandler(scoresList)
+    resultHandler(scoresList)
 
   boardId.increaseLoadingCount()
   print "===== NETWORK Scores START", boardId, $resultCode
