@@ -10,9 +10,7 @@ export scoreboards_types
 import level_meta/level_data
 import scoreboards_dummy_data_source
 import scoreboards_memory_data_source
-import common/shared_types
 import common/utils
-import common/score_utils
 
 var
   validBoardIds: seq[string] = @[]
@@ -88,17 +86,10 @@ proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
   return score > optOldPlayerScore.get.value
 
 
-proc submitScore*(levelProgress: LevelProgress) =
-  if levelProgress.signature.isNone:
-    print "Not submitting levelprogress to Scoreboards. Signature is None"
-    return
-
-  let boardId = getLevelMeta(levelProgress.levelId).scoreboardId
+proc submitScore*(boardId: BoardId, score: uint32) =
   if not validBoardIds.contains(boardId):
     print "Not submitting levelprogress to Scoreboards.'" & boardId.repr &  "'is not a valid board id"
     return
-
-  let score = levelProgress.calculateScore()
   if not shouldSubmitScore(boardId, score):
     print "Not submitting levelprogress to Scoreboards. Score is not in top 10 or not higher than current score"
     return
@@ -115,6 +106,9 @@ proc submitScore*(levelProgress: LevelProgress) =
 
   boardId.increaseLoadingCount()
   print "===== NETWORK addScore START", boardId, score, resultCode
+
+proc submitLeaderboardScore*(score: uint32) =
+  submitScore(LEADERBOARD_BOARD_ID, score)
 
 proc initScoreboardsService() =
   # validBoardIds = dummyScoreboards.keys.toSeq

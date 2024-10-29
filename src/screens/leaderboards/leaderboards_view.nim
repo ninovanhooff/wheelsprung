@@ -2,7 +2,6 @@ import playdate/api
 import leaderboards_types
 import common/graphics_utils
 import cache/font_cache
-import common/score_utils
 
 proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
   if screen.pages.len == 0:
@@ -22,6 +21,6 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     let score = page.scores[i]
     gfx.drawText($score.rank, 10, y)
     gfx.drawText(score.player, 30, y)
-    gfx.drawText(scoreToTimeString(score.value), 100, y)
+    gfx.drawText(score.timeString, 100, y)
     y += 24
   

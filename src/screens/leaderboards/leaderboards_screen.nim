@@ -2,6 +2,7 @@
 
 import std/options
 import std/sugar
+import std/tables
 import std/sequtils
 import playdate/api
 import navigation/[screen, navigator]
@@ -10,6 +11,7 @@ import leaderboards_types, leaderboards_view
 import scoreboards/scoreboards_types
 import scoreboards/scoreboards_service
 import common/utils
+import common/score_utils
 
 const 
   LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY = "LeaderboardsScreenScoreboardUpdatedCallbackKey"
@@ -23,7 +25,7 @@ proc newLeaderboardsScreen*(initialPageIdx: int = 0, initialBoardId: BoardId = "
 
 proc toLeaderboardPage*(scoreboard: PDScoresList): LeaderboardPage =
   let optLevelMeta = getMetaByBoardId(scoreboard.boardID)
-  let boardName = if scoreboard.boardID == LEADERBOARD_BOARD_ID:
+  let boardName = if scoreboard.boardId == LEADERBOARD_BOARD_ID:
     "Leaderboard"
   elif optLevelMeta.isNone:
     print "ERROR: Could not find level meta for boardID: ", scoreboard.boardID
@@ -31,11 +33,23 @@ proc toLeaderboardPage*(scoreboard: PDScoresList): LeaderboardPage =
   else:
     optLevelMeta.get.name
 
+  let maxScore = if scoreboard.boardId == LEADERBOARD_BOARD_ID:
+    let numScoreboards = officialLevels.values.toSeq.filterIt(it.scoreboardId.len > 0).len.uint32
+    SCOREBOARDS_MAX_SCORE * numScoreboards
+  else:
+    SCOREBOARDS_MAX_SCORE
+
     
   LeaderboardPage(
     boardID: scoreboard.boardID,
     boardName: boardName,
-    scores: scoreboard.scores
+    scores: scoreboard.scores.mapIt(
+      LeaderboardScore(
+        rank: it.rank,
+        player: it.player,
+        timeString: scoreToTimeString(score = it.value, maxScore = maxScore)
+      )
+    )
   )
 
 proc refreshLeaderboards*(screen: LeaderboardsScreen) =
