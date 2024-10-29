@@ -64,8 +64,10 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
         callback(boardId)
     of PDResultError: 
       print "===== NETWORK Scores ERROR", scoresList.message
+    of PDResultSuccessEmpty:
+      print "===== NETWORK Scores EMPTY", boardId
 
-    resultHandler(scoresList)
+  resultHandler(scoresList)
 
   boardId.increaseLoadingCount()
   print "===== NETWORK Scores START", boardId, $resultCode
@@ -101,6 +103,8 @@ proc submitScore*(boardId: BoardId, score: uint32) =
       print "===== NETWORK addScore OK", score.result.repr
       optCurrentPlayerName = some(score.result.player)
       refreshBoard(boardId)
+    of PDResultSuccessEmpty: 
+      print "==== NETWORK addScore EMPTY: Probably no Wi-Fi"
     of PDResultError: 
       print "==== NETWORK addScore ERROR: ", score.message
 
