@@ -16,11 +16,15 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     gfx.drawTextAligned("Loading...", 200, 110)
     return
 
-  var y = 50
+  var y = 50'i32
+  gfx.setDrawMode(kDrawModeNXOR)
   for i in 0 ..< page.scores.len:
     let score = page.scores[i]
-    gfx.drawText($score.rank, 10, y)
-    gfx.drawText(score.player, 30, y)
-    gfx.drawText(score.timeString, 100, y)
+    if score.isCurrentPlayer:
+      fillRoundRect(5, y - 2, LCD_COLUMNS - 10, 24, 4, kColorBlack)
+    gfx.drawText($score.rank, 20, y)
+    gfx.drawText(score.player, 40, y)
+    gfx.drawText(score.timeString, 250, y)
     y += 24
+  gfx.setDrawMode(kDrawModeCopy)
   

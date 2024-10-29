@@ -13,6 +13,8 @@ import scoreboards_memory_data_source
 import data_store/user_profile
 import common/utils
 
+const useDummyBoards = true
+
 var
   validBoardIds: seq[string] = @[]
   boardLoadingCounts = initTable[string, uint32]()
@@ -27,8 +29,10 @@ proc decreaseLoadingCount(boardId: BoardId) =
 
 proc getScoreboards*(): seq[PDScoresList] =
   if scoreboardsCache.getScoreboards.len == 0:
-    # scoreboardsCache.setScoreboards(dummyScoreboards)
-    scoreboardsCache.createScoreboards(validBoardIds)
+    if useDummyBoards:
+      scoreboardsCache.setScoreboards(dummyScoreboards)
+    else: 
+      scoreboardsCache.createScoreboards(validBoardIds)
   return scoreboardsCache.getScoreboards.values.toSeq
 
 proc getScoreBoard*(boardId: BoardId): Option[PDScoresList] =
@@ -118,12 +122,14 @@ proc submitLeaderboardScore*(score: uint32) =
   submitScore(LEADERBOARD_BOARD_ID, score)
 
 proc initScoreboardsService() =
-  # validBoardIds = dummyScoreboards.keys.toSeq
-  validBoardIds = collect(newSeq):
-    for levelMeta in officialLevels.values:
-      if levelMeta.scoreboardId != "":
-        levelMeta.scoreboardId
-  validBoardIds.add(LEADERBOARD_BOARD_ID)
+  if useDummyBoards:
+    validBoardIds = dummyScoreboards.keys.toSeq
+  else:
+    validBoardIds = collect(newSeq):
+      for levelMeta in officialLevels.values:
+        if levelMeta.scoreboardId != "":
+          levelMeta.scoreboardId
+    validBoardIds.add(LEADERBOARD_BOARD_ID)
 
 proc updateNextOutdatedBoard*() =
   if fetchAllQueue.len == 0:

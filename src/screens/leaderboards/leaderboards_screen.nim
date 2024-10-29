@@ -12,6 +12,7 @@ import scoreboards/scoreboards_types
 import scoreboards/scoreboards_service
 import common/utils
 import common/score_utils
+import data_store/user_profile
 
 const 
   LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY = "LeaderboardsScreenScoreboardUpdatedCallbackKey"
@@ -39,7 +40,8 @@ proc toLeaderboardPage*(scoreboard: PDScoresList): LeaderboardPage =
   else:
     SCOREBOARDS_MAX_SCORE
 
-    
+  let playerName = getPlayerName()
+
   LeaderboardPage(
     boardID: scoreboard.boardID,
     boardName: boardName,
@@ -47,6 +49,7 @@ proc toLeaderboardPage*(scoreboard: PDScoresList): LeaderboardPage =
       LeaderboardScore(
         rank: it.rank,
         player: it.player,
+        isCurrentPlayer: some(it.player) == playerName,
         timeString: scoreToTimeString(score = it.value, maxScore = maxScore)
       )
     )

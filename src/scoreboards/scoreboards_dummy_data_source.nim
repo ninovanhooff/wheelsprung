@@ -6,7 +6,7 @@ let dummyScoreboards* = {
     boardID: "tutorialaccelerate",
     scores: @[
       PDScore(player: "John", value: 995_619, rank: 1),
-      PDScore(player: "Jane", value: 995_601, rank: 2),
+      PDScore(player: "Nino", value: 995_601, rank: 2),
       PDScore(player: "Jack", value: 995_600, rank: 3),
       PDScore(player: "Jill", value: 994_997, rank: 4),
       PDScore(player: "Jim", value: 994_996, rank: 5),
