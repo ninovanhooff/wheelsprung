@@ -1,4 +1,4 @@
-{. push warning[LockLevel]:off.}
+{. push raises: [].}
 import options, sugar
 import chipmunk7
 import chipmunk_utils
@@ -69,9 +69,14 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
     MenuItemDefinition(name: levelSelectLabel, action: popScreen),
     MenuItemDefinition(name: restartLevelLabel, action: onResetGame),
   ]
-  screen.onCanceled = proc() =
-    state.resetGameOnResume = true
-    navigateToGameResult(state.gameResult.get)
+  screen.onCanceled = proc(pushed: PDButtons) =
+    if kButtonA in pushed:
+      state.resetGameOnResume = true
+      navigateToGameResult(state.gameResult.get)
+    elif kButtonB in pushed:
+      onResetGame()
+    else:
+      print "ERROR cannot handle hitstop cancel for buttons: " & repr(pushed)
 
   return screen
 
@@ -325,7 +330,7 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 
 
 method update*(gameScreen: GameScreen): int =
-  handleInput(state)
+  handleInput(state, onResetGame)
   updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
   if state.gameStartState.isSome:
     updateGameStart(state)

@@ -1,6 +1,7 @@
 import chipmunk7
 import math
 import sugar
+import sets
 import common/shared_types
 import common/utils
 import common/graphics_utils
@@ -120,6 +121,9 @@ proc runTests*() =
   check rem(-1, 4) == 3
   check rem(-1, -4) == -1
   check rem(1, 4) == 1
+
+  # test whether any of the buttons are pressed
+  check ({kButtonB, kButtonA} * {kButtonB}).len > 0
 
   testHashing()
 

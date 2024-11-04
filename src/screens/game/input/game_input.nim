@@ -147,7 +147,7 @@ proc resetGameInput*(state: GameState) =
   state.isThrottlePressed = false
   state.applyConfig()
 
-proc handleInput*(state: GameState) =
+proc handleInput*(state: GameState, onResetGame: proc () ) =
   state.isThrottlePressed = false
 
   let buttonState = playdate.system.getButtonState()
@@ -161,6 +161,8 @@ proc handleInput*(state: GameState) =
     if kButtonA in buttonState.pushed:
       state.resetGameOnResume = true
       navigateToGameResult(state.gameResult.get)
+    elif kButtonB in buttonState.pushed:
+      onResetGame()
     return
 
   if actionThrottle in buttonState.current:

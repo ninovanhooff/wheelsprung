@@ -353,7 +353,7 @@ proc drawGame*(statePtr: ptr GameState) =
   if state.gameResult.isSome:
     gfx.setFont(smallFont)
     gfx.setDrawMode(kDrawModeFillWhite)
-    let message = "Ⓐ " & state.gameResult.get.message
+    let message = "Ⓑ Restart | Ⓐ " & state.gameResult.get.message
     let (textW, textH) = smallFont.getTextSize(message)
     let textRect = Rect(
       x: LCD_COLUMNS div 2 - textW.int32 div 2,
