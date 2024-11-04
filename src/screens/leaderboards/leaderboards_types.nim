@@ -15,3 +15,4 @@ type
     leaderboards*: seq[Leaderboard]
     currentLeaderboardIdx*: int
     initialBoardId*: string
+    isDirty*: bool

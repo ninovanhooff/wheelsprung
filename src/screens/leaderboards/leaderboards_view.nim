@@ -4,6 +4,8 @@ import common/graphics_utils
 import cache/font_cache
 
 proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
+  if not screen.isDirty and not forceRedraw: return
+
   if screen.leaderboards.len == 0:
     return
   let leaderboard = screen.leaderboards[screen.currentLeaderboardIdx]

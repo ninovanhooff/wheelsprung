@@ -22,6 +22,7 @@ proc newLeaderboardsScreen*(initialLeaderboardIdx: int = 0, initialBoardId: Boar
     screenType: ScreenType.Leaderboards,
     currentLeaderboardIdx: initialLeaderboardIdx,
     initialBoardId: initialBoardId,
+    isDirty: true
   )
 
 proc toLeaderboard*(scoreboard: PDScoresList): Leaderboard =
@@ -60,6 +61,7 @@ proc refreshLeaderboards*(screen: LeaderboardsScreen) =
   screen.leaderboards = scoreboards.mapIt(it.toLeaderboard())
   if screen.currentLeaderboardIdx > screen.leaderboards.high:
     screen.currentLeaderboardIdx = screen.leaderboards.high
+  screen.isDirty = true
 
 proc updateInput(screen: LeaderboardsScreen) =
   let buttonState = playdate.system.getButtonState()
@@ -68,12 +70,12 @@ proc updateInput(screen: LeaderboardsScreen) =
     screen.currentLeaderboardIdx -= 1
     if screen.currentLeaderboardIdx < 0:
       screen.currentLeaderboardIdx = screen.leaderboards.high
-    screen.draw()
+    screen.isDirty = true
   elif kButtonDown in buttonState.pushed:
     screen.currentLeaderboardIdx += 1
     if screen.currentLeaderboardIdx > screen.leaderboards.high:
       screen.currentLeaderboardIdx = 0
-    screen.draw()
+    screen.isDirty = true
   elif kButtonB in buttonState.pushed or kButtonLeft in buttonState.pushed:
     popScreen()
 
@@ -103,6 +105,7 @@ method destroy*(screen: LeaderboardsScreen) =
 method update*(screen: LeaderboardsScreen): int =
   updateInput(screen)
   draw(screen)
+  screen.isDirty = false
   return 1
 
 method getRestoreState*(screen: LeaderboardsScreen): Option[ScreenRestoreState] =
