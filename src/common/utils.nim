@@ -173,3 +173,6 @@ proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) {
 const allButtons: PDButtons = PDButton.fullSet
 proc anyButton*(buttons: PDButtons): bool =
   (buttons * allButtons).len > 0
+
+proc anyButton*(a: PDButtons, b: PDButtons): bool =
+  return (a * b).len > 0
