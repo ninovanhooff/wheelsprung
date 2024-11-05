@@ -67,7 +67,6 @@ proc updateLevelProgress*(gameResult: GameResult, save: bool) =
     saveSaveSlot()
 
 proc persistGameResult*(gameResult: GameResult) =
-  print "PERSSISTING GAME RESULT"
   try:
     updateLevelProgress(gameResult, save=true)
   except:

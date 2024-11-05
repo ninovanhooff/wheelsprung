@@ -16,7 +16,7 @@ import data_store/user_profile
 import cache/font_cache
 import cache/bitmap_cache
 import cache/bitmaptable_cache
-import game_result_updater
+import data_store/game_result_updater
 
 type 
   GameResultAction {.pure.} = enum

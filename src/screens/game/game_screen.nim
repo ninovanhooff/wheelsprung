@@ -20,9 +20,9 @@ import game_types, game_constants
 import input/game_input
 import game_view
 import navigation/navigator
+import data_store/game_result_updater
 import screens/screen_types
 import screens/game_result/game_result_screen
-import screens/game_result/game_result_updater # todo move out of screens/game_result
 import screens/settings/settings_screen
 import screens/hit_stop/hit_stop_screen
 
