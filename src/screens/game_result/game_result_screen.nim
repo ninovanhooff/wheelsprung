@@ -159,14 +159,6 @@ proc drawGameResult(self: GameResultScreen) =
     drawGameOverResult(self)
   elif self.gameResult.resultType == GameResultType.LevelComplete:
     drawLevelCompleteResult(self)
-  
-
-proc persistGameResult(gameResult: GameResult) =
-  try:
-    updateLevelProgress(gameResult)
-    saveSaveSlot()
-  except:
-    print("Failed to persist game result", getCurrentExceptionMsg())
 
 method resume*(self: GameResultScreen) =
   initGameResultScreen()

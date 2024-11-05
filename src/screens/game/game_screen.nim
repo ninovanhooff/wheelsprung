@@ -22,6 +22,7 @@ import game_view
 import navigation/navigator
 import screens/screen_types
 import screens/game_result/game_result_screen
+import screens/game_result/game_result_updater # todo move out of screens/game_result
 import screens/settings/settings_screen
 import screens/hit_stop/hit_stop_screen
 
@@ -62,6 +63,10 @@ proc enableHints*(state: var GameState) =
   state.hintsEnabled = true
   state.initGameBackground()
 
+proc onRestartGamePressed(state: GameState) =
+  persistGameResult(state.gameResult.get)
+  onResetGame()
+
 proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen {.raises: [].} =
   var screen = createHitstopScreen(state, collisionShape)
   screen.menuItems = @[
@@ -74,7 +79,7 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
       state.resetGameOnResume = true
       navigateToGameResult(state.gameResult.get)
     elif kButtonB in pushed:
-      onResetGame()
+      onRestartGamePressed(state)
     else:
       print "ERROR cannot handle hitstop cancel for buttons: " & repr(pushed)
 
@@ -330,7 +335,7 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 
 
 method update*(gameScreen: GameScreen): int =
-  handleInput(state, onResetGame)
+  handleInput(state, proc () = onRestartGamePressed(state))
   updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
   if state.gameStartState.isSome:
     updateGameStart(state)

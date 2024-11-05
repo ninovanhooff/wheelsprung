@@ -34,7 +34,7 @@ proc submitScoreToScoreboard(progress: LevelProgress) =
       totalScore += levelScore
   submitLeaderboardScore(totalScore)
 
-proc updateLevelProgress*(gameResult: GameResult) =
+proc updateLevelProgress*(gameResult: GameResult, save: bool) =
   let id = gameResult.levelId
 
   case gameResult.resultType
@@ -62,3 +62,13 @@ proc updateLevelProgress*(gameResult: GameResult) =
     print "WARN Level content hash mismatch for level", id
     progress.signature = none(string)
   id.setLevelProgress(progress)
+
+  if save:
+    saveSaveSlot()
+
+proc persistGameResult*(gameResult: GameResult) =
+  print "PERSSISTING GAME RESULT"
+  try:
+    updateLevelProgress(gameResult, save=true)
+  except:
+    print("Failed to persist game result", getCurrentExceptionMsg())
