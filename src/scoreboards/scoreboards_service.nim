@@ -139,11 +139,11 @@ proc updateNextOutdatedBoard*() =
 
   let boardId = fetchAllQueue.pop
   refreshBoard(boardId, proc (result: PDResult[PDScoresList]) =
-    if result.kind == PDResultSuccess:
-      updateNextOutdatedBoard()
-    else:
+    if result.kind == PDResultError:
       print "Sequential scoreboard update aborted due to failure"
       fetchAllQueue.setLen(0)
+    else:
+      updateNextOutdatedBoard()
   )
 
 proc fetchAllScoreboards*() =
