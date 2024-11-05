@@ -14,5 +14,9 @@ type
   LeaderboardsScreen* = ref object of Screen
     leaderboards*: seq[Leaderboard]
     currentLeaderboardIdx*: int
+    currentLeaderboardPageIdx*: int
     initialBoardId*: string
     isDirty*: bool
+
+const
+  LEADERBOARDS_PAGE_SIZE* = 5

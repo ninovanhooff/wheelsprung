@@ -20,7 +20,9 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
 
   var y = 50'i32
   gfx.setDrawMode(kDrawModeNXOR)
-  for i in 0 ..< leaderboard.scores.len:
+  let startIdx = screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE
+  let endIdx = min(startIdx + LEADERBOARDS_PAGE_SIZE, leaderboard.scores.len)
+  for i in startIdx ..< endIdx:
     let score = leaderboard.scores[i]
     if score.isCurrentPlayer:
       fillRoundRect(5, y - 2, LCD_COLUMNS - 10, 24, 4, kColorBlack)

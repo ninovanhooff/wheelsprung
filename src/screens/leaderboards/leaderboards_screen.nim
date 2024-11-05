@@ -56,11 +56,16 @@ proc toLeaderboard*(scoreboard: PDScoresList): Leaderboard =
     )
   )
 
+proc currentLeaderboard(screen: LeaderboardsScreen): Leaderboard {.inline.} =
+  screen.leaderboards[screen.currentLeaderboardIdx]
+
 proc refreshLeaderboards*(screen: LeaderboardsScreen) =
   let scoreboards = getScoreboards()
   screen.leaderboards = scoreboards.mapIt(it.toLeaderboard())
   if screen.currentLeaderboardIdx > screen.leaderboards.high:
     screen.currentLeaderboardIdx = screen.leaderboards.high
+  if screen.currentLeaderboardPageIdx > screen.currentLeaderboard.scores.high div LEADERBOARDS_PAGE_SIZE:
+    screen.currentLeaderboardPageIdx = screen.currentLeaderboard.scores.high div LEADERBOARDS_PAGE_SIZE
   screen.isDirty = true
 
 proc updateInput(screen: LeaderboardsScreen) =
@@ -76,7 +81,27 @@ proc updateInput(screen: LeaderboardsScreen) =
     if screen.currentLeaderboardIdx > screen.leaderboards.high:
       screen.currentLeaderboardIdx = 0
     screen.isDirty = true
-  elif kButtonB in buttonState.pushed or kButtonLeft in buttonState.pushed:
+  elif kButtonRight in buttonState.pushed:
+    screen.currentLeaderboardPageIdx += 1
+    if screen.currentLeaderboard.scores.high > screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE:
+      screen.isDirty = true
+    else:
+      screen.currentLeaderboardPageIdx -= 1
+  elif kButtonLeft in buttonState.pushed:
+    if screen.currentLeaderboardPageIdx > 0:
+      screen.currentLeaderboardPageIdx -= 1
+      screen.isDirty = true
+    else:
+      popScreen()
+  elif kButtonA in buttonState.pushed:
+    let leaderboard = screen.currentLeaderboard
+    let score = leaderboard.scores[screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE]
+    if score.isCurrentPlayer:
+      print "You are already on the leaderboard"
+    else:
+      submitLeaderboardScore(score.rank)
+      screen.isDirty = true
+  elif kButtonB in buttonState.pushed:
     popScreen()
 
 method resume*(screen: LeaderboardsScreen) =
