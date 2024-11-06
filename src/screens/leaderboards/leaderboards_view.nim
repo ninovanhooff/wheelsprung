@@ -31,4 +31,10 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     gfx.drawText(score.timeString, 290, y)
     y += 24
   gfx.setDrawMode(kDrawModeCopy)
+
+  if leaderboard.scores.len > LEADERBOARDS_PAGE_SIZE:
+    gfx.drawTextAligned(
+      fmt"Page {screen.currentLeaderboardPageIdx + 1} of {leaderboard.scores.high div LEADERBOARDS_PAGE_SIZE + 1}",
+      200, 200
+    )
   
