@@ -13,7 +13,7 @@ import scoreboards_memory_data_source
 import data_store/user_profile
 import common/utils
 
-const useDummyBoards = true
+const useDummyBoards = false
 
 var
   validBoardIds: seq[string] = @[]

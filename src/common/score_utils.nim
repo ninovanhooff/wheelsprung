@@ -24,12 +24,17 @@ proc calculateScore*(levelProgress: LevelProgress): uint32 =
   let score = timeScore + starScore
   return score
 
-proc scoreToTimeString*(score: uint32, maxScore: uint32 = SCOREBOARDS_MAX_SCORE): string =
+proc scoreToTime*(score: uint32, maxScore: uint32 = SCOREBOARDS_MAX_SCORE): Milliseconds =
   if score > maxScore:
     print "scoreToTimeString: score is greater than maxValue", score, maxScore
-    return ""
+    return -1
     
   # Floor the score to frame time increments
   let timeMaskedScore = score div NOMINAL_FRAME_TIME_MILLIS * NOMINAL_FRAME_TIME_MILLIS
-  let time = (maxScore - timeMaskedScore).int32
+  return (maxScore - timeMaskedScore).Milliseconds
+
+proc scoreToTimeString*(score: uint32, maxScore: uint32 = SCOREBOARDS_MAX_SCORE): string =
+  let time = scoreToTime(score, maxScore)
+  if time < 0:
+    return "invalid score"
   return formatTime(time)
