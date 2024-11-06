@@ -162,6 +162,8 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] {.raises: [], e
 
 proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) {.raises: [], effectsOf: pred.} =
   ## find the first item in the sequence that satisfies the predicate
+  ## returns the index and the item
+  ## returns (-1, none) if no item satisfies the predicate
   result = (-1, none(T))  # return none if no item satisfies the predicate
   for i, x in s:
     if pred(x):

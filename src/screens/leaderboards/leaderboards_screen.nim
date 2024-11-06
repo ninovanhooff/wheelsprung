@@ -59,6 +59,14 @@ proc toLeaderboard*(scoreboard: PDScoresList): Leaderboard =
 proc currentLeaderboard(screen: LeaderboardsScreen): Leaderboard {.inline.} =
   screen.leaderboards[screen.currentLeaderboardIdx]
 
+proc selectPageContainingPlayer(screen: LeaderboardsScreen) =
+  let (index, _) = screen.currentLeaderboard.scores.findFirstIndexed(it => it.isCurrentPlayer)
+  if index >= 0:
+    screen.currentLeaderboardPageIdx = index div LEADERBOARDS_PAGE_SIZE
+  else:
+    screen.currentLeaderboardPageIdx = 0
+
+
 proc refreshLeaderboards*(screen: LeaderboardsScreen) =
   let scoreboards = getScoreboards()
   screen.leaderboards = scoreboards.mapIt(it.toLeaderboard())
@@ -66,6 +74,7 @@ proc refreshLeaderboards*(screen: LeaderboardsScreen) =
     screen.currentLeaderboardIdx = screen.leaderboards.high
   if screen.currentLeaderboardPageIdx > screen.currentLeaderboard.scores.high div LEADERBOARDS_PAGE_SIZE:
     screen.currentLeaderboardPageIdx = screen.currentLeaderboard.scores.high div LEADERBOARDS_PAGE_SIZE
+  selectPageContainingPlayer(screen)
   screen.isDirty = true
 
 proc updateInput(screen: LeaderboardsScreen) =
@@ -75,11 +84,13 @@ proc updateInput(screen: LeaderboardsScreen) =
     screen.currentLeaderboardIdx -= 1
     if screen.currentLeaderboardIdx < 0:
       screen.currentLeaderboardIdx = screen.leaderboards.high
+    selectPageContainingPlayer(screen)
     screen.isDirty = true
   elif kButtonDown in buttonState.pushed:
     screen.currentLeaderboardIdx += 1
     if screen.currentLeaderboardIdx > screen.leaderboards.high:
       screen.currentLeaderboardIdx = 0
+    selectPageContainingPlayer(screen)
     screen.isDirty = true
   elif kButtonRight in buttonState.pushed:
     screen.currentLeaderboardPageIdx += 1
@@ -114,6 +125,7 @@ method resume*(screen: LeaderboardsScreen) =
     else:
       print "ERROR: Could not find initial boardId: ", screen.initialBoardId
       screen.currentLeaderboardIdx = screen.leaderboards.high # leaderboard is at end
+    selectPageContainingPlayer(screen)
 
   screen.draw(forceRedraw = true)
   addScoreboardChangedCallback(
