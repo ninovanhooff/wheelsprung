@@ -19,8 +19,10 @@ proc formatTime*(time: Seconds): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"
   return formatTime(time * 1000)
 
-proc formatTime*(time: Milliseconds, signed: bool = false): string =
+proc formatTime*(time: Milliseconds, signed: bool = false, trim: bool = false): string =
   ## Format time in miliseconds to a string in the format "MM:SS.ff"
+  ## If signed is true, the string will include a sign (+ or -) for negative times
+  ## If trim is true, the string will not include minutes if the time is less than 1 minute
   
   let absTime = abs(time)
   let minutes = absTime div 60_000
@@ -30,7 +32,10 @@ proc formatTime*(time: Milliseconds, signed: bool = false): string =
     if signed and time < 0: "-" 
     elif signed and time >= 0: "+" 
     else: ""
-  return fmt"{signString}{minutes:02}:{seconds:02}.{hundredths:02}"
+  if trim and minutes == 0:
+    return fmt"{signString}{seconds}.{hundredths:02}"
+  else:
+    return fmt"{signString}{minutes:02}:{seconds:02}.{hundredths:02}"
 
 
 proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): bool =

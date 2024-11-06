@@ -33,8 +33,8 @@ proc scoreToTime*(score: uint32, maxScore: uint32 = SCOREBOARDS_MAX_SCORE): Mill
   let timeMaskedScore = score div NOMINAL_FRAME_TIME_MILLIS * NOMINAL_FRAME_TIME_MILLIS
   return (maxScore - timeMaskedScore).Milliseconds
 
-proc scoreToTimeString*(score: uint32, maxScore: uint32 = SCOREBOARDS_MAX_SCORE): string =
+proc scoreToTimeString*(score: uint32, maxScore: uint32 = SCOREBOARDS_MAX_SCORE, signed: bool = false): string =
   let time = scoreToTime(score, maxScore)
   if time < 0:
     return "invalid score"
-  return formatTime(time)
+  return formatTime(time, signed)

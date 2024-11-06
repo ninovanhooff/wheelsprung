@@ -69,11 +69,23 @@ proc timeText(optScore: Option[uint32]): string =
   if optScore.isNone:
     return emptyTimeText
   else:
-    return optScore.get.uint32.scoreToTimeString()
+    return optScore.get.uint32.scoreToTimeString(signed = true)
 
 proc isCurrentPlayerLeader(row: LevelRow): bool =
   return row.progress.bestTime.isSome and row.optLeaderScore.isSome and 
     row.progress.bestTime.get == row.optLeaderScore.get.scoreToTime
+
+proc leaderText(row: LevelRow): string =
+  if isCurrentPlayerLeader(row):
+    return "YOU"
+  elif row.optLeaderScore.isSome:
+    if row.progress.bestTime.isSome:
+      let diff = row.progress.bestTime.get - row.optLeaderScore.get.scoreToTime
+      return diff.formatTime(signed = true, trim = true)
+    else:
+      return row.optLeaderScore.get.uint32.scoreToTimeString(signed = false)
+  else:
+    return emptyTimeText
 
 
 
@@ -106,10 +118,7 @@ proc renderLevelRow(idx: int32, row: LevelRow) =
   statusImage.draw(x + 200, y + 2, kBitmapUnflipped)
 
   gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
-  if row.isCurrentPlayerLeader:
-    gfx.drawText("LEADER", verticalLines[2] + 6, y+4)
-  else:
-    gfx.drawText(row.optLeaderScore.timeText, verticalLines[2] + 6, y+4)
+  gfx.drawText(row.leaderText, verticalLines[2] + 6, y+4)
   gfx.popContext()
   rowDrawState[idx] = true
 
