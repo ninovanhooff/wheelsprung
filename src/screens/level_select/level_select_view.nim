@@ -118,7 +118,7 @@ proc renderLevelRow(idx: int32, row: LevelRow) =
   statusImage.draw(x + 200, y + 2, kBitmapUnflipped)
 
   gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
-  gfx.drawText(row.leaderText, verticalLines[2] + 6, y+4)
+  gfx.drawTextAligned(row.leaderText, verticalLines[2] + 60, y+4, kTextAlignmentRight)
   gfx.popContext()
   rowDrawState[idx] = true
 
