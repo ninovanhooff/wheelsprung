@@ -32,9 +32,14 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     y += 24
   gfx.setDrawMode(kDrawModeCopy)
 
+  gfx.setFont(getOrLoadFont(FontId.Roobert10Bold))
   if leaderboard.scores.len > LEADERBOARDS_PAGE_SIZE:
     gfx.drawTextAligned(
-      fmt"Page {screen.currentLeaderboardPageIdx + 1} of {leaderboard.scores.high div LEADERBOARDS_PAGE_SIZE + 1}",
-      200, 200
+      fmt"⬅️{screen.currentLeaderboardPageIdx + 1} of {leaderboard.scores.high div LEADERBOARDS_PAGE_SIZE + 1}➡️",
+      200, 180
     )
+  
+  gfx.drawTextAligned("⬆️⬇️ Track | Ⓑ Back", 200, 220)
+
+
   
