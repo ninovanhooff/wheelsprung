@@ -65,12 +65,6 @@ proc timeText(progress: LevelProgress): string =
   else:
     return progress.bestTime.get.formatTime()
 
-proc timeText(optScore: Option[uint32]): string =
-  if optScore.isNone:
-    return emptyTimeText
-  else:
-    return optScore.get.uint32.scoreToTimeString(signed = true)
-
 proc isCurrentPlayerLeader(row: LevelRow): bool =
   return row.progress.bestTime.isSome and row.optLeaderScore.isSome and 
     row.progress.bestTime.get == row.optLeaderScore.get.scoreToTime
