@@ -1,7 +1,6 @@
 import chipmunk7
 import math
 import sugar
-import sets
 import common/shared_types
 import common/utils
 import common/graphics_utils

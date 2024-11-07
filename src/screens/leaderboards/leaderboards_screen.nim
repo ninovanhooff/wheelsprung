@@ -28,8 +28,10 @@ proc newLeaderboardsScreen*(initialLeaderboardIdx: int = 0, initialBoardId: Boar
 proc currentLeaderboard(screen: LeaderboardsScreen): Leaderboard {.inline.} =
   screen.leaderboards[screen.currentLeaderboardIdx]
 
+{.warning[UnusedImport]: off.}
 proc popScreen() =
   print "ERROR: use popScreen(screen: LeaderboardsScreen) instead"
+{.warning[UnusedImport]: on.}
 
 proc popScreen(screen: LeaderboardsScreen) =
   let optLevelMeta = getMetaByBoardId(screen.currentLeaderboard().boardId)
