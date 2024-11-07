@@ -41,9 +41,6 @@ proc setPlayerName*(name: string) =
   print "Setting player name to:", name
   saveSlot.playerName = some(name)
 
-proc setLastOpenedLevel*(levelPath: string) =
-  saveSlot.lastOpenedLevel = some(levelPath)
-
 proc getRestoreState*(): Option[RestoreState] =
   return saveSlot.restoreState
 

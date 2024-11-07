@@ -25,6 +25,19 @@ proc newLeaderboardsScreen*(initialLeaderboardIdx: int = 0, initialBoardId: Boar
     isDirty: true
   )
 
+proc currentLeaderboard(screen: LeaderboardsScreen): Leaderboard {.inline.} =
+  screen.leaderboards[screen.currentLeaderboardIdx]
+
+proc popScreen() =
+  print "ERROR: use popScreen(screen: LeaderboardsScreen) instead"
+
+proc popScreen(screen: LeaderboardsScreen) =
+  let optLevelMeta = getMetaByBoardId(screen.currentLeaderboard().boardId)
+  optLevelMeta.map(proc (it: LevelMeta) = 
+    setResult(ScreenResult(screenType: ScreenType.LevelSelect, selectPath: it.path))
+  )
+  navigator.popScreen()
+
 proc toLeaderboard*(scoreboard: PDScoresList): Leaderboard =
   let optLevelMeta = getMetaByBoardId(scoreboard.boardID)
   let boardName = if scoreboard.boardId == LEADERBOARD_BOARD_ID:
@@ -55,9 +68,6 @@ proc toLeaderboard*(scoreboard: PDScoresList): Leaderboard =
       )
     )
   )
-
-proc currentLeaderboard(screen: LeaderboardsScreen): Leaderboard {.inline.} =
-  screen.leaderboards[screen.currentLeaderboardIdx]
 
 proc selectPageContainingPlayer(screen: LeaderboardsScreen) =
   let (index, _) = screen.currentLeaderboard.scores.findFirstIndexed(it => it.isCurrentPlayer)
@@ -103,7 +113,7 @@ proc updateInput(screen: LeaderboardsScreen) =
       screen.currentLeaderboardPageIdx -= 1
       screen.isDirty = true
     else:
-      popScreen()
+      popScreen(screen)
   elif kButtonA in buttonState.pushed:
     let leaderboard = screen.currentLeaderboard
     let score = leaderboard.scores[screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE]
@@ -113,7 +123,7 @@ proc updateInput(screen: LeaderboardsScreen) =
       submitLeaderboardScore(score.rank)
       screen.isDirty = true
   elif kButtonB in buttonState.pushed:
-    popScreen()
+    popScreen(screen)
 
 method resume*(screen: LeaderboardsScreen) =
   refreshLeaderboards(screen)

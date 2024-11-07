@@ -9,7 +9,6 @@ type
 
   SaveSlot* = ref object of RootObj
     progress*: Table[Path, LevelProgress]
-    lastOpenedLevel*: Option[string] # todo remove
     restoreState*: Option[RestoreState]
     playerName*: Option[string]
     modelVersion*: int
@@ -29,7 +28,6 @@ type
     # Since the table keys are the paths, the table can be reconstructed
     # Note that this problem might have been resolved in the meantime
     progress*: seq[LevelProgressEntity]
-    lastOpenedLevel*: Option[string]
     restoreState*: Option[RestoreState]
     playerName*: Option[string]
     modelVersion*: int
@@ -41,7 +39,6 @@ proc newLevelProgress*(levelId: Path, bestTime: Option[Milliseconds], hasCollect
 proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
   result = SaveSlotEntity(
     progress: @[],
-    lastOpenedLevel: slot.lastOpenedLevel,
     restoreState: slot.restoreState,
     playerName: slot.playerName,
     modelVersion: slot.modelVersion
@@ -57,7 +54,6 @@ proc saveSlotToEntity*(slot: SaveSlot): SaveSlotEntity =
 proc saveSlotFromEntity*(entity: SaveSlotEntity): SaveSlot =
   var slot = SaveSlot(
     progress: initTable[Path, LevelProgress](),
-    lastOpenedLevel: entity.lastOpenedLevel,
     restoreState: entity.restoreState,
     playerName: entity.playerName,
     modelVersion: entity.modelVersion
