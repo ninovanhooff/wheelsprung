@@ -10,7 +10,7 @@ proc createScreen(screenRestoreState: ScreenRestoreState): Screen =
   of ScreenType.Game:
     return newGameScreen(levelPath = screenRestoreState.levelPath)
   of ScreenType.LevelSelect:
-    return newLevelSelectScreen()
+    return newLevelSelectScreen(selectedPath = screenRestoreState.selectedPath)
   of ScreenType.Leaderboards:
     return newLeaderboardsScreen(initialLeaderboardIdx = screenRestoreState.currentLeaderboardIdx)
   of ScreenType.Settings:

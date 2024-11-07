@@ -1,3 +1,4 @@
+{.experimental: "codeReordering".}
 {.push raises: [], warning[LockLevel]:off.}
 
 import playdate/api
@@ -55,11 +56,16 @@ proc getLevelPaths(): seq[string] =
     print("ERROR reading level paths", getCurrentExceptionMsg())
     return @[]
 
-proc newLevelSelectScreen*(): LevelSelectScreen =
-  return LevelSelectScreen(
+proc newLevelSelectScreen*(selectedPath: Option[Path] = none(Path)): LevelSelectScreen =
+  let screen = LevelSelectScreen(
     levelRows: @[],
     screenType: ScreenType.LevelSelect
   )
+  if selectedPath.isSome:
+    screen.refreshLevelRows()
+    screen.selectPath(selectedPath.get)
+    
+  return screen
 
 proc updateScrollPosition(screen: LevelSelectScreen) =
   screen.scrollTarget = screen.selectedIndex.float32 - LEVEL_SELECT_VISIBLE_ROWS / 2 + 0.8f
@@ -80,6 +86,13 @@ proc selectRow(screen: LevelSelectScreen, idx: int) =
     screen.selectedIndex = 0
 
   screen.levelTheme = screen.levelRows[screen.selectedIndex].levelMeta.theme
+
+proc selectPath(screen: LevelSelectScreen, path: string) =
+  let (idx, _) = screen.levelRows.findFirstIndexed(it => it.levelMeta.path == path)
+  if idx >= 0:
+    screen.selectRow(idx)
+  else:
+    print("WARN Could not find level with path: ", path)
 
 proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
   screen.isSelectionDirty = true
@@ -176,15 +189,6 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
     let levelMeta = getLevelMeta(levelPath)
     screen.levelRows.insert(levelMeta.newLevelRow())
 
-proc getInitialRowIdx(screen: LevelSelectScreen): int =
-  let optLastOpenedLevel = getSaveSlot().lastOpenedLevel
-  if optLastOpenedLevel.isSome:
-    let lastOpenedLevelPath = optLastOpenedLevel.get
-    let (previousRowIdx, _) = screen.levelRows.findFirstIndexed(it => it.levelMeta.path == lastOpenedLevelPath)
-    if previousRowIdx >= 0:
-      return previousRowIdx
-  return 0
-
 method resume*(screen: LevelSelectScreen) =
   screen.upActivatedAt = none(Seconds)
   screen.downActivatedAt = none(Seconds)
@@ -196,7 +200,7 @@ method resume*(screen: LevelSelectScreen) =
   initLevelSelectScreen()
   initLevelSelectView()
 
-  screen.selectRow(getInitialRowIdx(screen))
+  # screen.selectRow(getInitialRowIdx(screen))
 
   resumeLevelSelectView(screen)
   backgroundAudioPlayer.play(0)
@@ -227,10 +231,15 @@ method update*(screen: LevelSelectScreen): int =
   draw(screen)
   return 1
 
-method getRestoreState(screen: LevelSelectScreen): Option[ScreenRestoreState] =
+method getRestoreState*(screen: LevelSelectScreen): Option[ScreenRestoreState] =
   return some(ScreenRestoreState(
     screenType: ScreenType.LevelSelect,
+    selectedPath: some(screen.levelRows[screen.selectedIndex].levelMeta.path)
   ))
+
+method setResult*(screen: LevelSelectScreen, screenResult: ScreenResult) =
+  if screenResult.screenType == ScreenType.LevelSelect:
+    screen.selectPath(screenResult.selectPath)
 
 method `$`*(screen: LevelSelectScreen): string =
   return "LevelSelectScreen"

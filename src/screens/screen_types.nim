@@ -1,3 +1,5 @@
+import std/options
+
 type
   ScreenType* {.pure.}= enum
     LevelSelect
@@ -12,7 +14,9 @@ type
       levelPath*: string
     of Leaderboards:
       currentLeaderboardIdx*: int
-    of LevelSelect, HitStop, GameResult, Settings:
+    of LevelSelect:
+      selectedPath*: Option[string] # cannot use levelPath because it is already defined in Game
+    of HitStop, GameResult, Settings:
       discard
   Screen* {.requiresInit.} = ref object of RootObj
     screenType*: ScreenType
@@ -24,7 +28,9 @@ type
     case screenType*: ScreenType
     of Game: 
       enableHints*: bool
-    of LevelSelect, HitStop, GameResult, Leaderboards, Settings: 
+    of LevelSelect:
+      selectPath*: string
+    of HitStop, GameResult, Leaderboards, Settings: 
       discard # no properties
 
 type GameScreen* = ref object of Screen

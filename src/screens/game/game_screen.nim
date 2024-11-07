@@ -330,6 +330,8 @@ method resume*(gameScreen: GameScreen) =
     else:
       state.updateCameraPid(snapToTarget = true)
 
+  setResult(ScreenResult(screenType: ScreenType.LevelSelect, selectPath: gameScreen.levelPath))
+
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
 
@@ -372,7 +374,7 @@ method setResult*(gameScreen: GameScreen, screenResult: ScreenResult) =
   if screenResult.enableHints:
     state.enableHints()
 
-method getRestoreState(gameScreen: GameScreen): Option[ScreenRestoreState] =
+method getRestoreState*(gameScreen: GameScreen): Option[ScreenRestoreState] =
   return some(ScreenRestoreState(
     screenType: ScreenType.Game,
     levelPath: gameScreen.levelPath,
