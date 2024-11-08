@@ -67,7 +67,7 @@ proc timeText(progress: LevelProgress): string =
 
 proc isCurrentPlayerLeader(row: LevelRow): bool =
   return row.progress.bestTime.isSome and row.optLeaderScore.isSome and 
-    row.progress.bestTime.get == row.optLeaderScore.get.scoreToTime
+    row.progress.bestTime.get <= row.optLeaderScore.get.scoreToTime
 
 proc leaderText(row: LevelRow): string =
   if isCurrentPlayerLeader(row):
