@@ -197,7 +197,9 @@ method resume*(screen: LevelSelectScreen) =
   # screen.selectRow(getInitialRowIdx(screen))
 
   resumeLevelSelectView(screen)
+  backgroundAudioPlayer.volume=0.0
   backgroundAudioPlayer.play(0)
+  backgroundAudioPlayer.fadeVolume(1.0, 1.0, 60_000, nil)
 
   discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
@@ -214,7 +216,9 @@ method resume*(screen: LevelSelectScreen) =
   )
 
 method pause*(screen: LevelSelectScreen) =
-  backgroundAudioPlayer.pause()
+  backgroundAudioPlayer.fadeVolume(0.0, 0.0, 30_000, proc (player: FilePlayer) = 
+    player.pause()
+  )
   removeScoreboardChangedCallback(LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY)
 
 method destroy*(screen: LevelSelectScreen) =
