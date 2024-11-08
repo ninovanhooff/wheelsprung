@@ -1,6 +1,7 @@
 {.push raises: [].}
 
 import std/seqUtils
+import std/deques
 import std/tables
 import std/options
 import std/sugar
@@ -18,7 +19,7 @@ const useDummyBoards = false
 var
   validBoardIds: seq[string] = @[]
   boardLoadingCounts = initTable[string, uint32]()
-  fetchAllQueue: seq[BoardId] = @[]
+  fetchAllDeque: Deque[BoardId] = initDeque[BoardId]()
   scoreboardChangedCallbacks: Table[string, ScoreboardChangedCallback] = initTable[string, ScoreboardChangedCallback]()
 
 proc increaseLoadingCount(boardId: BoardId) =
@@ -132,22 +133,22 @@ proc initScoreboardsService() =
     validBoardIds.add(LEADERBOARD_BOARD_ID)
 
 proc updateNextOutdatedBoard*() =
-  if fetchAllQueue.len == 0:
+  if fetchAllDeque.len == 0:
     # all boards are up to date
     print "All boards are up to date"
     return
 
-  let boardId = fetchAllQueue.pop
+  let boardId = fetchAllDeque.popFirst()
   refreshBoard(boardId, proc (result: PDResult[PDScoresList]) =
     if result.kind == PDResultError:
       print "Sequential scoreboard update aborted due to failure"
-      fetchAllQueue.setLen(0)
+      fetchAllDeque.clear()
     else:
       updateNextOutdatedBoard()
   )
 
 proc fetchAllScoreboards*() =
-  if fetchAllQueue.len > 0:
+  if fetchAllDeque.len > 0:
     print "fetchAllScoreboards: already in progress"
     return
   
@@ -155,7 +156,7 @@ proc fetchAllScoreboards*() =
   for board in getScoreboards():
     if board.lastUpdated > timeThresholdSeconds:
       continue
-    fetchAllQueue.add(board.boardID)
+    fetchAllDeque.addLast(board.boardID)
   updateNextOutdatedBoard()
 
 initScoreboardsService()
