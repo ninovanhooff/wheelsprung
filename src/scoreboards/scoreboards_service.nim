@@ -45,7 +45,7 @@ proc getScoreboardStates*(): seq[ScoreboardState] =
       )
     else:
       let board = getScoreBoard(boardId)
-      if board.isNone:
+      if board.isNone or board.get.scores.len == 0:
         print "getScoreboardStates: Error", boardId
         return ScoreboardState(
           boardId: boardId,

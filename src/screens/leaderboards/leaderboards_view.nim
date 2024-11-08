@@ -17,10 +17,8 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
   case leaderboard.state.kind:
   of LeaderboardStateKind.Loading:
     gfx.drawTextAligned("Loading...", 200, 110)
-    return
   of LeaderboardStateKind.Error:
-    gfx.drawTextAligned("Error loading leaderboard", 200, 110)
-    return
+    gfx.drawTextAligned("Leaderboard not available", 200, 110)
   of LeaderboardStateKind.Loaded:
     var y = 50'i32
     gfx.setDrawMode(kDrawModeNXOR)
@@ -44,7 +42,6 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
         200, 180
       )
   
+  gfx.setFont(getOrLoadFont(FontId.Roobert10Bold))
   gfx.drawTextAligned("⬆️⬇️ Track | Ⓑ Back", 200, 220)
-
-
   
