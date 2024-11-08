@@ -135,13 +135,13 @@ proc submitScore*(boardId: BoardId, score: uint32) =
     boardId.decreaseLoadingCount()
     case score.kind
     of PDResultSuccess:
-      print "===== NETWORK addScore OK", score.result.repr
+      print "===== NETWORK addScore OK for " & boardId.repr, score.result.repr
       setPlayerName(score.result.player)
       refreshBoard(boardId)
     of PDResultUnavailable: 
-      print "==== NETWORK addScore UNAVAILABLE: Probably no Wi-Fi"
+      print "==== NETWORK addScore UNAVAILABLE for " & boardId.repr, ": Probably no Wi-Fi"
     of PDResultError: 
-      print "==== NETWORK addScore ERROR: ", score.message
+      print "==== NETWORK addScore ERROR for " & boardId.repr, ": ", score.message
 
   boardId.increaseLoadingCount()
   print "===== NETWORK addScore START", boardId, score, resultCode
