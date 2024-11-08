@@ -38,7 +38,7 @@ proc getScoreBoard*(boardId: BoardId): Option[PDScoresList] =
 proc getScoreboardStates*(): seq[ScoreboardState] =
   return validBoardIds.map(proc (boardId: BoardId): ScoreboardState = 
     if boardLoadingCounts.getOrDefault(boardId, 0) > 0 or fetchAllDeque.contains(boardId):
-      print "getScoreboardStates: Loading", boardId
+      # print "getScoreboardStates: Loading", boardId
       return ScoreboardState(
         boardId: boardId,
         kind: ScoreboardStateKind.Loading
@@ -46,13 +46,13 @@ proc getScoreboardStates*(): seq[ScoreboardState] =
     else:
       let board = getScoreBoard(boardId)
       if board.isNone or board.get.scores.len == 0:
-        print "getScoreboardStates: Error", boardId
+        # print "getScoreboardStates: Error", boardId
         return ScoreboardState(
           boardId: boardId,
           kind: ScoreboardStateKind.Error
         )
       else:
-        print "getScoreboardStates: Loaded", boardId
+        # print "getScoreboardStates: Loaded", boardId
         return ScoreboardState(
           boardId: boardId,
           kind: ScoreboardStateKind.Loaded, scores: board.get

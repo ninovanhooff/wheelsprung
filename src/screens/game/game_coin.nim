@@ -2,7 +2,6 @@ import playdate/api
 import chipmunk7
 import common/graphics_utils
 import game_types
-import common/utils
 import cache/bitmaptable_cache
 
 var 
@@ -37,7 +36,6 @@ proc initGameCoin*() =
 
 proc addGameCoins*(state: GameState) =
   # asssigment by copy
-  print "initGameCoins"
   state.remainingCoins = @[]
   for coin in state.level.coins:
     state.remainingCoins.add(myDeepCopy(coin))

@@ -89,31 +89,31 @@ let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, 
   let shape = cast[Shape](coinShape)
   var coin = cast[Coin](shape.userData)
   if state.time < coin.activeFrom:
-    print("coin activates at: " & repr(coin.activeFrom) & " current time: " & repr(state.time))
+    # print("coin activates at: " & repr(coin.activeFrom) & " current time: " & repr(state.time))
     return
   if coin.count > 1:
     coin.count -= 1
     coin.activeFrom = state.time + 2000.Milliseconds
-    print("new count for coin: " & repr(coin))
+    # print("new count for coin: " & repr(coin))
     playCoinSound(state.coinProgress)
     return
 
-  print("deleting coin: " & repr(coin))
+  # print("deleting coin: " & repr(coin))
   space.removeShape(shape)
   let deleteIndex = state.remainingCoins.find(coin)
   if deleteIndex == -1:
     print("coin not found in remaining coins: " & repr(coin))
   else:
-    print("deleting coin at index: " & repr(deleteIndex))
+    # print("deleting coin at index: " & repr(deleteIndex))
     state.remainingCoins.delete(deleteIndex)
     playCoinSound(state.coinProgress)
 
     if state.remainingCoins.len == 0:
-      print("all coins collected")
+      # print("all coins collected")
       state.finishTrophyBlinkerAt = some(state.time + 2500.Milliseconds)
 
 let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
-  print("star post step callback")
+  # print("star post step callback")
   let shape = cast[Shape](starShape)
   space.removeShape(shape)
   state.remainingStar = none[Star]()
@@ -123,12 +123,12 @@ let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, 
 
 
 let removeBikeConstraintsPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
-  print("removeBikeConstraintsPostStepCallback")
+  # print("removeBikeConstraintsPostStepCallback")
   # detach wheels
   state.removeBikeConstraints()
 
 let gameEndedPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
-  print("gameEndedPostStepCallback")
+  # print("gameEndedPostStepCallback")
   # make chassis collidable
   addChassisShape(state)
   # Make bike parts bouncy for comec effect
@@ -139,7 +139,7 @@ let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused:
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
-  print("coin collision for arbiter" & " shapeA: " & repr(shapeA) & " shapeB: " & repr(shapeB))
+  # print("coin collision for arbiter" & " shapeA: " & repr(shapeA) & " shapeB: " & repr(shapeB))
   discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
   false # don't process the collision further
 
@@ -174,10 +174,10 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
     return false
 
   if not state.isFinishActivated:
-    print("finish collision but not activated")
+    # print("finish collision but not activated")
     return false
   
-  print("gameWin collision")
+  # print("gameWin collision")
   state.setGameResult(GameResultType.LevelComplete)
   playFinishSound()
 
