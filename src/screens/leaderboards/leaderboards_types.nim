@@ -1,15 +1,29 @@
 import navigation/screen
 
 type
+  LeaderboardStateKind* = enum
+    Loading
+    Loaded
+    Error
+  
   LeaderboardScore* = ref object of RootObj
     rank*: uint32
     player*: string
     timeString*: string
     isCurrentPlayer*: bool
+
+  LeaderboardState* = object of RootObj
+    case kind*: LeaderboardStateKind
+    of Loading:
+      discard
+    of Loaded:
+      scores*: seq[LeaderboardScore]
+    of Error:
+      discard
   Leaderboard* = ref object of RootObj
     boardId*: string
     boardName*: string
-    scores*: seq[LeaderboardScore]
+    state*: LeaderboardState
   #   lastUpdated*: uint32
   LeaderboardsScreen* = ref object of Screen
     leaderboards*: seq[Leaderboard]

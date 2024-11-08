@@ -20,6 +20,9 @@ var
   validBoardIds: seq[string] = @[]
   boardLoadingCounts = initTable[string, uint32]()
   fetchAllDeque: Deque[BoardId] = initDeque[BoardId]()
+    ## Deque of boardIds that need to be fetched.
+    ## Boards stay in the deque until the fetch is complete or fails.
+    ## The first board in the deque is the one currently being fetched.
   scoreboardChangedCallbacks: Table[string, ScoreboardChangedCallback] = initTable[string, ScoreboardChangedCallback]()
 
 proc increaseLoadingCount(boardId: BoardId) =
@@ -28,16 +31,33 @@ proc increaseLoadingCount(boardId: BoardId) =
 proc decreaseLoadingCount(boardId: BoardId) =
   boardLoadingCounts[boardId] = boardLoadingCounts.getOrDefault(boardId, 0) - 1
 
-proc getScoreboards*(): seq[PDScoresList] =
-  if scoreboardsCache.getScoreboards.len == 0:
-    if useDummyBoards:
-      scoreboardsCache.setScoreboards(dummyScoreboards)
-    else: 
-      scoreboardsCache.createScoreboards(validBoardIds)
-  return scoreboardsCache.getScoreboards.values.toSeq
 
 proc getScoreBoard*(boardId: BoardId): Option[PDScoresList] =
   return scoreboardsCache.getScoreboard(boardId)
+
+proc getScoreboardStates*(): seq[ScoreboardState] =
+  return validBoardIds.map(proc (boardId: BoardId): ScoreboardState = 
+    if boardLoadingCounts.getOrDefault(boardId, 0) > 0 or fetchAllDeque.contains(boardId):
+      print "getScoreboardStates: Loading", boardId
+      return ScoreboardState(
+        boardId: boardId,
+        kind: ScoreboardStateKind.Loading
+      )
+    else:
+      let board = getScoreBoard(boardId)
+      if board.isNone:
+        print "getScoreboardStates: Error", boardId
+        return ScoreboardState(
+          boardId: boardId,
+          kind: ScoreboardStateKind.Error
+        )
+      else:
+        print "getScoreboardStates: Loaded", boardId
+        return ScoreboardState(
+          boardId: boardId,
+          kind: ScoreboardStateKind.Loaded, scores: board.get
+        )
+  )
 
 proc getGlobalBest*(boardId: BoardId): Option[uint32] =
   let board = getScoreBoard(boardId)
@@ -57,6 +77,10 @@ proc removeScoreboardChangedCallback*(key: string) =
     return
   scoreboardChangedCallbacks.del(key)
 
+proc notifyScoreboardsChanged() =
+  for callback in scoreboardChangedCallbacks.values:
+    callback()
+
 let emptyResultHandler = proc(result: PDResult[PDScoresList]) = discard
 proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> void = emptyResultHandler) =
   let resultCode = playdate.scoreboards.getScores(boardId) do (scoresListResult: PDResult[PDScoresList]) -> void:
@@ -68,16 +92,19 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
       scoreboardsCache.setScoreboard(scoresList)
       if scoresList.scores.len == 10:
         setPlayerName(scoresList.scores[9].player)
-      for callback in scoreboardChangedCallbacks.values:
-        callback(boardId)
     of PDResultError: 
       print "===== NETWORK Scores ERROR", scoresListResult.message
     of PDResultUnavailable:
       print "===== NETWORK Scores UNAVAILABLE", boardId
 
+    # Notify all listeners, also when the board is not updated
+    # So that they can update their UI with data or a failure message
+    notifyScoreboardsChanged()
+
     resultHandler(scoresListResult)
 
   boardId.increaseLoadingCount()
+  notifyScoreboardsChanged()
   print "===== NETWORK Scores START", boardId, $resultCode
 
 proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
@@ -98,10 +125,10 @@ proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
 
 proc submitScore*(boardId: BoardId, score: uint32) =
   if not validBoardIds.contains(boardId):
-    print "Not submitting levelprogress to Scoreboards.'" & boardId.repr &  "'is not a valid board id"
+    print "Not submitting score to Scoreboards.'" & boardId.repr &  "'is not a valid board id"
     return
   if not shouldSubmitScore(boardId, score):
-    print "Not submitting levelprogress to Scoreboards. Score is not in top 10 or not higher than current score"
+    print "Not submitting score to Scoreboards for " & boardId.repr & ". Score is not in top 10 or not higher than current score"
     return
 
   let resultCode = playdate.scoreboards.addScore(boardId, score) do (score: PDResult[PDScore]) -> void:
@@ -125,12 +152,14 @@ proc submitLeaderboardScore*(score: uint32) =
 proc initScoreboardsService() =
   if useDummyBoards:
     validBoardIds = dummyScoreboards.keys.toSeq
+    scoreboardsCache.setScoreboards(dummyScoreboards)
   else:
     validBoardIds = collect(newSeq):
       for levelMeta in officialLevels.values:
         if levelMeta.scoreboardId != "":
           levelMeta.scoreboardId
     validBoardIds.add(LEADERBOARD_BOARD_ID)
+    scoreboardsCache.createScoreboards(validBoardIds)
 
 proc updateNextOutdatedBoard*() =
   if fetchAllDeque.len == 0:
@@ -153,7 +182,8 @@ proc fetchAllScoreboards*() =
     return
   
   let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - 3600
-  for board in getScoreboards():
+  let scoreboards = scoreboardsCache.getScoreboards.values.toSeq
+  for board in scoreboards:
     if board.lastUpdated > timeThresholdSeconds:
       continue
     fetchAllDeque.addLast(board.boardID)

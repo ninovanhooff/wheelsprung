@@ -14,30 +14,35 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
 
   gfx.drawTextAligned(leaderboard.boardName, 200, 10)
 
-  if leaderboard.scores.len == 0:
+  case leaderboard.state.kind:
+  of LeaderboardStateKind.Loading:
     gfx.drawTextAligned("Loading...", 200, 110)
     return
+  of LeaderboardStateKind.Error:
+    gfx.drawTextAligned("Error loading leaderboard", 200, 110)
+    return
+  of LeaderboardStateKind.Loaded:
+    var y = 50'i32
+    gfx.setDrawMode(kDrawModeNXOR)
+    let startIdx = screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE
+    let scores = leaderboard.state.scores
+    let endIdx = min(startIdx + LEADERBOARDS_PAGE_SIZE, scores.len)
+    for i in startIdx ..< endIdx:
+      let score = scores[i]
+      if score.isCurrentPlayer:
+        fillRoundRect(5, y - 2, LCD_COLUMNS - 10, 24, 4, kColorBlack)
+      gfx.drawTextAligned($score.rank, 65, y, kTextAlignmentRight)
+      gfx.drawText(score.player, 80, y)
+      gfx.drawText(score.timeString, 290, y)
+      y += 24
+    gfx.setDrawMode(kDrawModeCopy)
 
-  var y = 50'i32
-  gfx.setDrawMode(kDrawModeNXOR)
-  let startIdx = screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE
-  let endIdx = min(startIdx + LEADERBOARDS_PAGE_SIZE, leaderboard.scores.len)
-  for i in startIdx ..< endIdx:
-    let score = leaderboard.scores[i]
-    if score.isCurrentPlayer:
-      fillRoundRect(5, y - 2, LCD_COLUMNS - 10, 24, 4, kColorBlack)
-    gfx.drawTextAligned($score.rank, 65, y, kTextAlignmentRight)
-    gfx.drawText(score.player, 80, y)
-    gfx.drawText(score.timeString, 290, y)
-    y += 24
-  gfx.setDrawMode(kDrawModeCopy)
-
-  gfx.setFont(getOrLoadFont(FontId.Roobert10Bold))
-  if leaderboard.scores.len > LEADERBOARDS_PAGE_SIZE:
-    gfx.drawTextAligned(
-      fmt"⬅️{screen.currentLeaderboardPageIdx + 1} of {leaderboard.scores.high div LEADERBOARDS_PAGE_SIZE + 1}➡️",
-      200, 180
-    )
+    gfx.setFont(getOrLoadFont(FontId.Roobert10Bold))
+    if scores.len > LEADERBOARDS_PAGE_SIZE:
+      gfx.drawTextAligned(
+        fmt"⬅️{screen.currentLeaderboardPageIdx + 1} of {scores.high div LEADERBOARDS_PAGE_SIZE + 1}➡️",
+        200, 180
+      )
   
   gfx.drawTextAligned("⬆️⬇️ Track | Ⓑ Back", 200, 220)
 

@@ -208,7 +208,7 @@ method resume*(screen: LevelSelectScreen) =
   
   addScoreboardChangedCallback(
     LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY,
-    proc(boardId: BoardId) = 
+    proc() = 
       screen.refreshLevelRows()
       screen.draw(forceRedraw = true)
   )

@@ -40,28 +40,18 @@ proc popScreen(screen: LeaderboardsScreen) =
   )
   navigator.popScreen()
 
-proc toLeaderboard*(scoreboard: PDScoresList): Leaderboard =
-  let optLevelMeta = getMetaByBoardId(scoreboard.boardID)
-  let boardName = if scoreboard.boardId == LEADERBOARD_BOARD_ID:
-    "Leaderboard"
-  elif optLevelMeta.isNone:
-    print "ERROR: Could not find level meta for boardID: ", scoreboard.boardID
-    return default(Leaderboard)
-  else:
-    optLevelMeta.get.name
+proc toLeaderboardState*(scoreboardState: ScoreboardState): LeaderboardState =
+  case scoreboardState.kind:
+  of ScoreboardStateKind.Loaded:
+    let scores = scoreboardState.scores
+    let playerName = getPlayerName()
+    let maxScore = if scoreboardState.boardId == LEADERBOARD_BOARD_ID:
+      let numScoreboards = officialLevels.values.toSeq.filterIt(it.scoreboardId.len > 0).len.uint32
+      SCOREBOARDS_MAX_SCORE * numScoreboards
+    else:
+      SCOREBOARDS_MAX_SCORE
 
-  let maxScore = if scoreboard.boardId == LEADERBOARD_BOARD_ID:
-    let numScoreboards = officialLevels.values.toSeq.filterIt(it.scoreboardId.len > 0).len.uint32
-    SCOREBOARDS_MAX_SCORE * numScoreboards
-  else:
-    SCOREBOARDS_MAX_SCORE
-
-  let playerName = getPlayerName()
-
-  Leaderboard(
-    boardID: scoreboard.boardID,
-    boardName: boardName,
-    scores: scoreboard.scores.mapIt(
+    let leaderboardScores = scores.scores.mapIt(
       LeaderboardScore(
         rank: it.rank,
         player: it.player,
@@ -69,23 +59,62 @@ proc toLeaderboard*(scoreboard: PDScoresList): Leaderboard =
         timeString: scoreToTimeString(score = it.value, maxScore = maxScore)
       )
     )
+    return LeaderboardState(
+      kind: LeaderboardStateKind.Loaded,
+      scores: leaderboardScores
+    )
+  of ScoreboardStateKind.Loading:
+    return LeaderboardState(
+      kind: LeaderboardStateKind.Loading
+    )
+  of ScoreboardStateKind.Error:
+    return LeaderboardState(
+      kind: LeaderboardStateKind.Error
+    )
+
+proc toLeaderboard*(scoreboard: ScoreboardState): Leaderboard =
+  let optLevelMeta = getMetaByBoardId(scoreboard.boardId)
+  let boardName = if scoreboard.boardId == LEADERBOARD_BOARD_ID:
+    "Leaderboard"
+  elif optLevelMeta.isNone:
+    print "ERROR: Could not find level meta for boardID: ", scoreboard.boardId
+    return default(Leaderboard)
+  else:
+    optLevelMeta.get.name
+
+  Leaderboard(
+    boardId: scoreboard.boardId,
+    boardName: boardName,
+    state: scoreboard.toLeaderboardState()
   )
 
 proc selectPageContainingPlayer(screen: LeaderboardsScreen) =
-  let (index, _) = screen.currentLeaderboard.scores.findFirstIndexed(it => it.isCurrentPlayer)
+  if screen.currentLeaderboard.state.kind != LeaderboardStateKind.Loaded:
+    screen.currentLeaderboardPageIdx = 0
+    return
+    
+  let (index, _) = screen.currentLeaderboard.state.scores.findFirstIndexed(it => it.isCurrentPlayer)
   if index >= 0:
     screen.currentLeaderboardPageIdx = index div LEADERBOARDS_PAGE_SIZE
   else:
     screen.currentLeaderboardPageIdx = 0
 
+proc scoreIdxHigh(screen: LeaderboardsScreen): int =
+  let state = screen.currentLeaderboard.state
+  case state.kind:
+  of LeaderboardStateKind.Loaded:
+    return state.scores.high
+  else:
+    return -1
+
 
 proc refreshLeaderboards*(screen: LeaderboardsScreen) =
-  let scoreboards = getScoreboards()
+  let scoreboards = getScoreboardStates()
   screen.leaderboards = scoreboards.mapIt(it.toLeaderboard())
   if screen.currentLeaderboardIdx > screen.leaderboards.high:
     screen.currentLeaderboardIdx = screen.leaderboards.high
-  if screen.currentLeaderboardPageIdx > screen.currentLeaderboard.scores.high div LEADERBOARDS_PAGE_SIZE:
-    screen.currentLeaderboardPageIdx = screen.currentLeaderboard.scores.high div LEADERBOARDS_PAGE_SIZE
+  if screen.currentLeaderboardPageIdx > screen.scoreIdxHigh div LEADERBOARDS_PAGE_SIZE:
+    screen.currentLeaderboardPageIdx = screen.scoreIdxHigh div LEADERBOARDS_PAGE_SIZE
   selectPageContainingPlayer(screen)
   screen.isDirty = true
 
@@ -106,7 +135,7 @@ proc updateInput(screen: LeaderboardsScreen) =
     screen.isDirty = true
   elif kButtonRight in buttonState.pushed:
     screen.currentLeaderboardPageIdx += 1
-    if screen.currentLeaderboard.scores.high > screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE:
+    if screen.scoreIdxHigh > screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE:
       screen.isDirty = true
     else:
       screen.currentLeaderboardPageIdx -= 1
@@ -116,14 +145,14 @@ proc updateInput(screen: LeaderboardsScreen) =
       screen.isDirty = true
     else:
       popScreen(screen)
-  elif kButtonA in buttonState.pushed:
-    let leaderboard = screen.currentLeaderboard
-    let score = leaderboard.scores[screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE]
-    if score.isCurrentPlayer:
-      print "You are already on the leaderboard"
-    else:
-      submitLeaderboardScore(score.rank)
-      screen.isDirty = true
+  # elif kButtonA in buttonState.pushed:
+  #   let leaderboard = screen.currentLeaderboard
+  #   let score = leaderboard.scores[screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE]
+  #   if score.isCurrentPlayer:
+  #     print "You are already on the leaderboard"
+  #   else:
+  #     submitLeaderboardScore(score.rank)
+  #     screen.isDirty = true
   elif kButtonB in buttonState.pushed:
     popScreen(screen)
 
@@ -142,7 +171,8 @@ method resume*(screen: LeaderboardsScreen) =
   screen.draw(forceRedraw = true)
   addScoreboardChangedCallback(
     LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY,
-    proc(boardId: BoardId) = screen.refreshLeaderboards)
+    proc() = screen.refreshLeaderboards
+  )
 
 method pause*(screen: LeaderboardsScreen) =
   removeScoreboardChangedCallback(LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY)
