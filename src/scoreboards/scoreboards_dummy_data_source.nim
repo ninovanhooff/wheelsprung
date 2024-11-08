@@ -36,4 +36,4 @@ let dummyScoreboards* = {
       PDScore(player: "Jack", value: 897_997, rank: 4),
     ]
   ),
-}.toTable
+}.toOrderedTable

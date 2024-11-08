@@ -8,10 +8,10 @@ import scoreboards_types
 
 type
   ScoreboardsMemoryDataSource* = ref object of RootObj
-    scoreboards: Table[BoardId, PDScoresList]
+    scoreboards: OrderedTable[BoardId, PDScoresList]
 
 let scoreboardsCache* = ScoreboardsMemoryDataSource(
-  scoreboards: initTable[BoardId, PDScoresList]()
+  scoreboards: initOrderedTable[BoardId, PDScoresList]()
 )
   ## Global Singleton for the ScoreboardsMemoryDataSource
   ## 
@@ -22,10 +22,10 @@ proc getScoreboard*(cache: ScoreboardsMemoryDataSource, boardID: string): Option
   except KeyError:
     return none(PDScoresList)
 
-proc getScoreboards*(cache: ScoreboardsMemoryDataSource): Table[BoardId, PDScoresList] =
+proc getScoreboards*(cache: ScoreboardsMemoryDataSource): OrderedTable[BoardId, PDScoresList] =
   cache.scoreboards
 
-proc setScoreboards*(cache: ScoreboardsMemoryDataSource, scoreboards: Table[BoardId, PDScoresList]) =
+proc setScoreboards*(cache: ScoreboardsMemoryDataSource, scoreboards: OrderedTable[BoardId, PDScoresList]) =
   cache.scoreboards = scoreboards
 
 proc createScoreboards*(cache: ScoreboardsMemoryDataSource, boardIds: seq[string]) =
