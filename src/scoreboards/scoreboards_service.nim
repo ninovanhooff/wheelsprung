@@ -14,7 +14,10 @@ import scoreboards_memory_data_source
 import data_store/user_profile
 import common/utils
 
-const useDummyBoards = false
+const 
+  useDummyBoards = false
+  REFRESH_TIME_THRESHOLD_SECONDS: uint32 = 3600
+    ## Time in seconds after which a scoreboard is considered outdated and should be refreshed
 
 var
   validBoardIds: seq[string] = @[]
@@ -176,15 +179,20 @@ proc updateNextOutdatedBoard*() =
       updateNextOutdatedBoard()
   )
 
-proc fetchAllScoreboards*() =
+proc fetchAllScoreboards*(ignoreTimeThreshold: bool = false) =
+  ## Fetch all scoreboards that are outdated
+  ## If ignoreTimeThreshold is true, all scoreboards will be fetched
+  ## Otherwise only scoreboards that are older than REFRESH_TIME_THRESHOLD_SECONDS will be fetched
+  ## If a refresh is already in progress, this function will do nothing. Even if ignoreTimeThreshold is true
+  
   if fetchAllDeque.len > 0:
     print "fetchAllScoreboards: already in progress"
     return
   
-  let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - 3600
+  let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - REFRESH_TIME_THRESHOLD_SECONDS
   let scoreboards = scoreboardsCache.getScoreboards.values.toSeq
   for board in scoreboards:
-    if board.lastUpdated > timeThresholdSeconds:
+    if board.lastUpdated > timeThresholdSeconds and not ignoreTimeThreshold:
       continue
     fetchAllDeque.addLast(board.boardID)
   updateNextOutdatedBoard()

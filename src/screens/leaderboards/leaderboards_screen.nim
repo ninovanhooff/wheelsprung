@@ -168,11 +168,16 @@ method resume*(screen: LeaderboardsScreen) =
       screen.currentLeaderboardIdx = screen.leaderboards.high # leaderboard is at end
     selectPageContainingPlayer(screen)
 
-  screen.draw(forceRedraw = true)
   addScoreboardChangedCallback(
     LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY,
     proc() = screen.refreshLeaderboards
   )
+
+  discard playdate.system.addMenuItem("Refresh", proc(menuItem: PDMenuItemButton) =
+    fetchAllScoreboards(ignoreTimeThreshold = true)
+  )
+
+  screen.draw(forceRedraw = true)
 
 method pause*(screen: LeaderboardsScreen) =
   removeScoreboardChangedCallback(LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY)
