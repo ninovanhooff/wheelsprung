@@ -3,7 +3,7 @@ import common/shared_types
 
 type
   BoardId* = string
-  ScoreboardChangedCallback* = VoidCallBack
+  ScoreboardChangedCallback* = VoidCallback
   ScoreboardStateKind* = enum
     Loading
     Loaded

@@ -9,6 +9,7 @@ import common/integrity
 import level_meta/level_data
 import data_store/user_profile
 import scoreboards/scoreboards_service
+import playdate/api
 
 proc submitScoreToScoreboard(progress: LevelProgress) =
   if progress.signature.isNone:
@@ -17,11 +18,12 @@ proc submitScoreToScoreboard(progress: LevelProgress) =
 
   let boardId = getLevelMeta(progress.levelId).scoreboardId
   if boardId.len == 0:
-    print "Not submitting levelprogress to Scoreboards. No scoreboardId"
+    print fmt"Not submitting levelprogress for {progress.levelId} to Scoreboards. No scoreboardId"
     return
 
   let score = progress.calculateScore()
-  submitScore(boardId, score)
+  if not submitScore(boardId, score):
+    return
 
   # get all official levels which have a scoreboardId and sum the scores
   var totalScore = 0'u32
@@ -71,3 +73,8 @@ proc persistGameResult*(gameResult: GameResult) =
     updateLevelProgress(gameResult, save=true)
   except:
     print("Failed to persist game result", getCurrentExceptionMsg())
+
+proc uploadLocalScores*() =
+  for (path, progress) in getSaveSlot().progress.pairs:
+    if progress.bestTime.isSome:
+      progress.submitScoreToScoreboard()

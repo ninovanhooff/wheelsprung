@@ -147,7 +147,7 @@ proc resetGameInput*(state: GameState) =
   state.isThrottlePressed = false
   state.applyConfig()
 
-proc handleInput*(state: GameState, onRestartGamePressed: VoidCallBack ) =
+proc handleInput*(state: GameState, onRestartGamePressed: VoidCallback ) =
   state.isThrottlePressed = false
 
   let buttonState = playdate.system.getButtonState()
