@@ -1,12 +1,11 @@
 {.push raises: [].}
-import std/sets
 import screens/game/game_types
 import playdate/api
 import common/utils
 
 proc newInputRecording*(): InputRecording =
   return InputRecording(
-    buttons: @[],
+    buttons: newSeqOfCap[PDButtons](100), # 2 seconds at 50 fps
   )
 
 proc addInputFrame*(recording: InputRecording, currentButtons: PDButtons, idx: int32) =
