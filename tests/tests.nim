@@ -130,7 +130,11 @@ proc runTests*() =
   let inputRecording = newInputRecording()
   inputRecording.addInputFrame({kButtonA})
   let recordedInputProvider = RecordedInputProvider(recording: inputRecording)
-  check recordedInputProvider.getButtonState(0).current == {kButtonA}
+  check(recordedInputProvider.getButtonState(0), (
+    current: {kButtonA},
+    pushed: {kButtonA},
+    released: {}
+  ).PDButtonState)
 
 
   testHashing()
