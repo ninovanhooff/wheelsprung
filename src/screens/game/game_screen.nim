@@ -350,6 +350,7 @@ method update*(gameScreen: GameScreen): int =
     state.space.step(timeStepSeconds64)
     
     state.ghostRecording.addPose(state)
+    state.inputRecording.addInputFrame(playdate.system.getButtonState().current, state.frameCounter)
 
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:

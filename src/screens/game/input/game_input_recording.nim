@@ -9,8 +9,11 @@ proc newInputRecording*(): InputRecording =
     buttons: @[],
   )
 
-proc addInputFrame*(recording: InputRecording, currentButtons: PDButtons) =
-  recording.buttons.add(currentButtons)
+proc addInputFrame*(recording: InputRecording, currentButtons: PDButtons, idx: int32) =
+  if recording.buttons.len == idx:
+    recording.buttons.add(currentButtons)
+  else:
+    print fmt"ERROR: addInputFrame called with idx {idx} but recording has {recording.buttons.len} frames"
 
 proc newLiveInputProvider*(): LiveInputProvider =
   return LiveInputProvider()

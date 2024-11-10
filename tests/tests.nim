@@ -128,7 +128,7 @@ proc runTests*() =
   check ({kButtonB, kButtonA} * {kButtonB}).len > 0
 
   let inputRecording = newInputRecording()
-  inputRecording.addInputFrame({kButtonA})
+  inputRecording.addInputFrame({kButtonA}, 0)
   let recordedInputProvider = RecordedInputProvider(recording: inputRecording)
   let frame0ButtonState = (
     current: {kButtonA},
@@ -136,31 +136,31 @@ proc runTests*() =
     released: {}
   ).PDButtonState
   check(recordedInputProvider.getButtonState(0), frame0ButtonState)
-  inputRecording.addInputFrame({kButtonA})
+  inputRecording.addInputFrame({kButtonA}, 1)
   check(recordedInputProvider.getButtonState(1), (
     current: {kButtonA},
     pushed: {},
     released: {}
   ).PDButtonState)
-  inputRecording.addInputFrame({kButtonB})
+  inputRecording.addInputFrame({kButtonB}, 2)
   check(recordedInputProvider.getButtonState(2), (
     current: {kButtonB},
     pushed: {kButtonB},
     released: {kButtonA}
   ).PDButtonState)
-  inputRecording.addInputFrame({})
+  inputRecording.addInputFrame({}, 3)
   check(recordedInputProvider.getButtonState(3), (
     current: {},
     pushed: {},
     released: {kButtonB}
   ).PDButtonState)
-  inputRecording.addInputFrame({kButtonA, kButtonRight})
+  inputRecording.addInputFrame({kButtonA, kButtonRight}, 4)
   check(recordedInputProvider.getButtonState(4), (
     current: {kButtonA, kButtonRight},
     pushed: {kButtonA, kButtonRight},
     released: {}
   ).PDButtonState)
-  inputRecording.addInputFrame({kButtonA, kButtonLeft})
+  inputRecording.addInputFrame({kButtonA, kButtonLeft}, 5)
   check(recordedInputProvider.getButtonState(5), (
     current: {kButtonA, kButtonLeft},
     pushed: {kButtonLeft},
