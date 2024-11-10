@@ -18,6 +18,7 @@ import sound/game_sound
 import common/shared_types
 import game_types, game_constants
 import input/game_input
+import input/game_input_recording
 import game_view
 import navigation/navigator
 import data_store/game_result_updater
@@ -241,6 +242,8 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
     gravityDirection: Direction8.D8_DOWN,
     ghostRecording: newGhost(),
     ghostPlayback: ghostPlayBack.get(newGhost()),
+    inputRecording: newInputRecording(),
+    inputProvider: newLiveInputProvider(),
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
     starEnabled: level.id.isStarEnabled,

@@ -1,6 +1,7 @@
 import chipmunk7
 import math
 import sugar
+import std/sets
 import common/shared_types
 import common/utils
 import common/graphics_utils
@@ -9,6 +10,7 @@ import options
 import screens/game/game_types
 import screens/game/game_coin
 import screens/game/game_level_loader
+import screens/game/input/game_input_recording
 
 import minitest
 import hashing_test
@@ -50,7 +52,8 @@ proc runTests*() =
   let level: Level = Level(coins: coins)
   let state: GameState = GameState(
       remainingCoins : coins,
-      level : level
+      level : level,
+      inputProvider: newLiveInputProvider(),
   )
   assert state.coinProgress == 1f, "When level has no coins, progress should be 1"
 
@@ -123,6 +126,12 @@ proc runTests*() =
 
   # test whether any of the buttons are pressed
   check ({kButtonB, kButtonA} * {kButtonB}).len > 0
+
+  let inputRecording = newInputRecording()
+  inputRecording.addInputFrame({kButtonA})
+  let recordedInputProvider = RecordedInputProvider(recording: inputRecording)
+  check recordedInputProvider.getButtonState(0).current == {kButtonA}
+
 
   testHashing()
 

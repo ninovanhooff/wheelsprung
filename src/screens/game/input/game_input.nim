@@ -11,6 +11,7 @@ import common/shared_types
 import data_store/configuration
 import input/input_response
 import screens/game_result/game_result_screen
+import game_input_recording
 
 const
   maxWheelAngularVelocity = 30.0
@@ -150,7 +151,7 @@ proc resetGameInput*(state: GameState) =
 proc handleInput*(state: GameState, onRestartGamePressed: VoidCallBack ) =
   state.isThrottlePressed = false
 
-  let buttonState = playdate.system.getButtonState()
+  let buttonState = state.inputProvider.getButtonState(state.frameCounter)
 
   if not state.isGameStarted and buttonState.pushed.anyButton:
     state.isGameStarted = true

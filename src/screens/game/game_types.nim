@@ -60,6 +60,19 @@ type
     coinProgress*: float32
     gameResult*: GameResult
 
+  PDButtonState* = tuple[current: PDButtons, pushed: PDButtons, released: PDButtons]
+
+  InputRecording* = ref object
+    buttons*: seq[PDButtons]
+      ## Button states for each frame, corresponds to playdate.system.getButtonState().current for each frame
+  
+  InputProvider* = ref object of RootObj
+    # proc getButtonState(frameIdx: int32): PDButtonState {.raises: []}
+
+  LiveInputProvider* = ref object of InputProvider
+  RecordedInputProvider* = ref object of InputProvider
+    recording*: InputRecording
+
   DynamicObject* = object
     shape*: Shape
     bitmapTable*: Option[AnnotatedBitmapTable]
@@ -230,6 +243,9 @@ type GameState* = ref object of RootObj
     ## A ghost that is being recorded
   ghostPlayback*: Ghost
     ## A ghost that represents the best time for the level
+  
+  inputRecording*: InputRecording
+  inputProvider*: InputProvider
 
   # Player
   # bike bodies
