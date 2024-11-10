@@ -1,4 +1,5 @@
 {.push raises: [].}
+import std/sets
 import screens/game/game_types
 import playdate/api
 import common/utils
@@ -19,10 +20,17 @@ method getButtonState*(provider: InputProvider, grameIdx: int32): PDButtonState 
   return default(PDButtonState)
 
 method getButtonState*(provider: RecordedInputProvider, frameIdx: int32): PDButtonState =
+  let recording = provider.recording
+  let current = recording.buttons[frameIdx]
+  let previousOrEmpty = if frameIdx > 0:
+    recording.buttons[frameIdx - 1]
+  else:
+    default(PDButtons)
+  
   return (
-    current: provider.recording.buttons[frameIdx],
-    pushed: default(PDButtons),
-    released: default(PDButtons),
+    current: current,
+    pushed: current - previousOrEmpty,
+    released: previousOrEmpty - current,
   )
 
 method getButtonState*(provider: LiveInputProvider, frameIdx: int32): PDButtonState =

@@ -130,11 +130,44 @@ proc runTests*() =
   let inputRecording = newInputRecording()
   inputRecording.addInputFrame({kButtonA})
   let recordedInputProvider = RecordedInputProvider(recording: inputRecording)
-  check(recordedInputProvider.getButtonState(0), (
+  let frame0ButtonState = (
     current: {kButtonA},
     pushed: {kButtonA},
     released: {}
+  ).PDButtonState
+  check(recordedInputProvider.getButtonState(0), frame0ButtonState)
+  inputRecording.addInputFrame({kButtonA})
+  check(recordedInputProvider.getButtonState(1), (
+    current: {kButtonA},
+    pushed: {},
+    released: {}
   ).PDButtonState)
+  inputRecording.addInputFrame({kButtonB})
+  check(recordedInputProvider.getButtonState(2), (
+    current: {kButtonB},
+    pushed: {kButtonB},
+    released: {kButtonA}
+  ).PDButtonState)
+  inputRecording.addInputFrame({})
+  check(recordedInputProvider.getButtonState(3), (
+    current: {},
+    pushed: {},
+    released: {kButtonB}
+  ).PDButtonState)
+  inputRecording.addInputFrame({kButtonA, kButtonRight})
+  check(recordedInputProvider.getButtonState(4), (
+    current: {kButtonA, kButtonRight},
+    pushed: {kButtonA, kButtonRight},
+    released: {}
+  ).PDButtonState)
+  inputRecording.addInputFrame({kButtonA, kButtonLeft})
+  check(recordedInputProvider.getButtonState(5), (
+    current: {kButtonA, kButtonLeft},
+    pushed: {kButtonLeft},
+    released: {kButtonRight}
+  ).PDButtonState)
+  # earlier frames should not be affected
+  check(recordedInputProvider.getButtonState(0), frame0ButtonState)
 
 
   testHashing()
