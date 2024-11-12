@@ -1,4 +1,5 @@
 import std/options
+import input/input_types
 
 type
   ScreenType* {.pure.}= enum
@@ -36,6 +37,7 @@ type
 type GameScreen* = ref object of Screen
   isInitialized*: bool
   levelPath*: string
+  recording: InputRecording
 
 proc newGameScreen*(levelPath:string): GameScreen {.raises:[].} =
   return GameScreen(

@@ -3,11 +3,13 @@ import chipmunk7
 import options
 import std/sugar
 import common/graphics_types
-import level_meta/level_data
 import common/utils
 import common/shared_types
+import level_meta/level_data
 import cache/bitmaptable_cache
+import input/input_types
 import game_constants
+export input_types
 export game_constants
 
 type 
@@ -59,19 +61,6 @@ type
     poses*: seq[PlayerPose]
     coinProgress*: float32
     gameResult*: GameResult
-
-  PDButtonState* = tuple[current: PDButtons, pushed: PDButtons, released: PDButtons]
-
-  InputRecording* = ref object
-    buttons*: seq[PDButtons]
-      ## Button states for each frame, corresponds to playdate.system.getButtonState().current for each frame
-  
-  InputProvider* = ref object of RootObj
-    # proc getButtonState(frameIdx: int32): PDButtonState {.raises: []}
-
-  LiveInputProvider* = ref object of InputProvider
-  RecordedInputProvider* = ref object of InputProvider
-    recording*: InputRecording
 
   DynamicObject* = object
     shape*: Shape
