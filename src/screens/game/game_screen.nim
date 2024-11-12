@@ -33,7 +33,12 @@ const
   settingsLabel = "Settings"
 
 var 
-  state: GameState
+  state: GameState 
+  # TODO prevent double free of space by removing this global var which gets reused when pushing a second GameScreen on the stack
+  # first, make sure all collision functions that use state use
+  # let state = cast[GameState](space.userData)
+  # this should also allow them to be moved to separate files
+  # then add state to GameScreen
 
 # forward declarations
 proc onResetGame() {.raises: [].}
@@ -51,10 +56,6 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
   )
   state.resetGameOnResume = resetGameOnResume
   state.gameResult = some(result)
-
-proc updateGameResult(state: GameState) {.raises: [].} =
-  if state.gameResult.isSome:
-    state.setGameResult(state.gameResult.get.resultType)
 
 proc isInReplayMode(state: GameState): bool =
   return state.inputProvider of RecordedInputProvider
@@ -101,75 +102,24 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
 
   return screen
 
-let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
-  let shape = cast[Shape](coinShape)
-  var coin = cast[Coin](shape.userData)
-  if state.time < coin.activeFrom:
-    # print("coin activates at: " & repr(coin.activeFrom) & " current time: " & repr(state.time))
-    return
-  if coin.count > 1:
-    coin.count -= 1
-    coin.activeFrom = state.time + 2000.Milliseconds
-    # print("new count for coin: " & repr(coin))
-    playCoinSound(state.coinProgress)
-    return
-
-  # print("deleting coin: " & repr(coin))
-  space.removeShape(shape)
-  let deleteIndex = state.remainingCoins.find(coin)
-  if deleteIndex == -1:
-    print("coin not found in remaining coins: " & repr(coin))
-  else:
-    # print("deleting coin at index: " & repr(deleteIndex))
-    state.remainingCoins.delete(deleteIndex)
-    playCoinSound(state.coinProgress)
-
-    if state.remainingCoins.len == 0:
-      # print("all coins collected")
-      state.finishTrophyBlinkerAt = some(state.time + 2500.Milliseconds)
-
-let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
-  # print("star post step callback")
-  let shape = cast[Shape](starShape)
-  space.removeShape(shape)
-  state.remainingStar = none[Star]()
-  state.updateGameResult()
-  playStarSound()
-
-
-
 let removeBikeConstraintsPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
   # print("removeBikeConstraintsPostStepCallback")
+  let state = cast[GameState](space.userData)
   # detach wheels
   state.removeBikeConstraints()
 
 let gameEndedPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
   # print("gameEndedPostStepCallback")
+  let state = cast[GameState](space.userData)
   # make chassis collidable
   addChassisShape(state)
   # Make bike parts bouncy for comec effect
   makeBikeElastic(state)
 
-let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var 
-    shapeA: Shape
-    shapeB: Shape
-  arb.shapes(addr(shapeA), addr(shapeB))
-  # print("coin collision for arbiter" & " shapeA: " & repr(shapeA) & " shapeB: " & repr(shapeB))
-  discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
-  false # don't process the collision further
-
-let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var
-    shapeA: Shape
-    shapeB: Shape
-  arb.shapes(addr(shapeA), addr(shapeB))
-  discard space.addPostStepCallback(starPostStepCallback, shapeA, nil)
-  return false # don't process the collision further
-
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   playCollisionSound()
 
+  let state = cast[GameState](space.userData)
   var
     shapeA: Shape
     shapeB: Shape
@@ -185,6 +135,7 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
   return true # we still want to collide
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  let state = cast[GameState](space.userData)
   if state.gameResult.isSome:
     # Can't finish the game if it was already finished
     return false

@@ -1,6 +1,10 @@
 import playdate/api
 import chipmunk7
+import std/options
 import common/graphics_utils
+import common/shared_types
+import common/utils
+import sound/game_sound
 import game_types
 import cache/bitmaptable_cache
 
@@ -51,3 +55,40 @@ proc drawCoins*(remainingCoins: seq[Coin], camVertex: Vertex) =
       let coinIndex = (coin.coinIndex + coin.count) mod coinsImageTable.frameCount
       let coinBitmap = coinsImageTable.getBitmap(coinIndex)
       coinBitmap.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
+
+let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
+  let state = cast[GameState](space.userData)
+  let shape = cast[Shape](coinShape)
+  var coin = cast[Coin](shape.userData)
+  if state.time < coin.activeFrom:
+    # print("coin activates at: " & repr(coin.activeFrom) & " current time: " & repr(state.time))
+    return
+  if coin.count > 1:
+    coin.count -= 1
+    coin.activeFrom = state.time + 2000.Milliseconds
+    # print("new count for coin: " & repr(coin))
+    playCoinSound(state.coinProgress)
+    return
+
+  # print("deleting coin: " & repr(coin))
+  space.removeShape(shape)
+  let deleteIndex = state.remainingCoins.find(coin)
+  if deleteIndex == -1:
+    print("coin not found in remaining coins: " & repr(coin))
+  else:
+    # print("deleting coin at index: " & repr(deleteIndex))
+    state.remainingCoins.delete(deleteIndex)
+    playCoinSound(state.coinProgress)
+
+    if state.remainingCoins.len == 0:
+      # print("all coins collected")
+      state.finishTrophyBlinkerAt = some(state.time + 2500.Milliseconds)
+
+let coinBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  var 
+    shapeA: Shape
+    shapeB: Shape
+  arb.shapes(addr(shapeA), addr(shapeB))
+  # print("coin collision for arbiter" & " shapeA: " & repr(shapeA) & " shapeB: " & repr(shapeB))
+  discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
+  false # don't process the collision further
