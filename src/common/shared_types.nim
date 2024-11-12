@@ -1,5 +1,6 @@
 import chipmunk7
 import std/options
+import input/input_types
 
 type
   Seconds* = Float
@@ -27,6 +28,7 @@ type
     time*: Milliseconds
     starCollected*: bool
     hintsAvailable*: bool
+    inputRecording*: Option[InputRecording]
 
   VoidCallBack* = proc() {.raises:[].}
 

@@ -47,6 +47,7 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
     time: state.time,
     starCollected: state.remainingStar.isNone and state.starEnabled and state.level.starPosition.isSome,
     hintsAvailable: (not state.hintsEnabled) and state.level.hintsPath.isSome,
+    inputRecording: some(state.inputRecording),
   )
   state.resetGameOnResume = resetGameOnResume
   state.gameResult = some(result)
@@ -228,8 +229,19 @@ proc createSpace(level: Level): Space {.raises: [].} =
       
   return space
 
-proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Option[Ghost] = none(Ghost), hintsEnabled: bool = false): GameState {.raises: [].} =
+proc newGameState(
+  level: Level,
+  background: LCDBitmap = nil,
+  ghostPlayBack: Option[Ghost] = none(Ghost),
+  replayInputRecording: Option[InputRecording] = none(InputRecording),
+  hintsEnabled: bool = false
+): GameState {.raises: [].} =
   let space = level.createSpace()
+  let inputProvider: InputProvider = if replayInputRecording.isSome:
+    newRecordedInputProvider(replayInputRecording.get)
+  else:
+    newLiveInputProvider()
+  
   state = GameState(
     level: level, 
     gameStartState: some(GameStartState(
@@ -243,12 +255,12 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
     ghostRecording: newGhost(),
     ghostPlayback: ghostPlayBack.get(newGhost()),
     inputRecording: newInputRecording(),
-    inputProvider: newLiveInputProvider(),
+    inputProvider: inputProvider,
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
     starEnabled: level.id.isStarEnabled,
   )
-  space.userData= cast[DataPointer](state) # Caution: cyclic reference: space -> state -> space
+  space.userData = cast[DataPointer](state) # Caution: cyclic reference: space -> state -> space
   initGameBike(state)
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initGameRider(state, riderPosition)
