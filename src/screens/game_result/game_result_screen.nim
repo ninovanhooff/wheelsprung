@@ -20,7 +20,7 @@ import data_store/game_result_updater
 
 type 
   GameResultAction {.pure.} = enum
-    LevelSelect, Restart, Next, ShowHints
+    LevelSelect, Restart, Next, ShowHints, ShowReplay
   GameResultScreen = ref object of Screen
     previousProgress: LevelProgress
     gameResult: GameResult
@@ -59,9 +59,9 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
   let previousProgress = getLevelProgress(gameResult.levelId).copy()
   let nextPath = nextLevelPath(gameResult.levelId)
   var availableActions = if nextPath.isSome:
-    @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.LevelSelect]
+    @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.ShowReplay, GameResultAction.LevelSelect]
   else:
-    @[GameResultAction.Restart, GameResultAction.LevelSelect]
+    @[GameResultAction.Restart, GameResultAction.ShowReplay, GameResultAction.LevelSelect]
 
   if gameResult.hintsAvailable and resultType == GameResultType.GameOver:
     # if hints are available, show them as the the first option if they have not been dismissed
@@ -106,6 +106,7 @@ proc label(resultType: GameResultType, gameResultAction: GameResultAction): stri
   of GameResultAction.Restart: return if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
   of GameResultAction.Next: return if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
   of GameResultAction.ShowHints: "Show hints"
+  of GameResultAction.ShowReplay: "Show replay"
 
 const buttonTextCenterX = 100
 
@@ -195,6 +196,12 @@ proc executeAction(self: GameResultScreen, action: GameResultAction) =
   of GameResultAction.ShowHints:
     setResult(ScreenResult(screenType: ScreenType.Game, enableHints: true))
     popScreen()
+  of GameResultAction.ShowReplay:
+    let inputRecording= self.gameResult.inputRecording
+    if inputRecording.isSome:
+      pushScreen(newGameScreen(self.gameResult.levelId, inputRecording))
+    else:
+      print "ERROR: No input recording available"
 
 method update*(self: GameResultScreen): int =
   # no drawing needed here, we do it in resume
@@ -213,4 +220,4 @@ method update*(self: GameResultScreen): int =
   return 1
 
 method `$`*(self: GameResultScreen): string {.raises: [], tags: [].} =
-  return "GameResultScreen; type: " & repr(self)
+  return "GameResultScreen; type: " & repr(self.gameResult.resultType) & "; level: " & self.gameResult.levelId

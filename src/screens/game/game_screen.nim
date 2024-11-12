@@ -238,8 +238,10 @@ proc newGameState(
 ): GameState {.raises: [].} =
   let space = level.createSpace()
   let inputProvider: InputProvider = if replayInputRecording.isSome:
+    print "replay input recording"
     newRecordedInputProvider(replayInputRecording.get)
   else:
+    print "live input provider"
     newLiveInputProvider()
   
   state = GameState(
@@ -311,16 +313,16 @@ proc updateTimers(state: GameState) =
   if state.finishTrophyBlinkerAt.expire(currentTime):
     echo("blinker timeout")
 
-proc initGame*(levelPath: string) {.raises: [].} =
+proc initGame(levelPath: string, replayInputRecording: Option[InputRecording]) {.raises: [].} =
   initGameSound()
   initGameView()
-  state = newGameState(loadLevel(levelPath))
+  state = newGameState(loadLevel(levelPath), replayInputRecording = replayInputRecording)
 
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
   if not gameScreen.isInitialized:
-    initGame(gameScreen.levelPath)
+    initGame(gameScreen.levelPath, gameScreen.replayInputRecording)
     gameScreen.isInitialized = true
   
   discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
@@ -398,4 +400,4 @@ method getRestoreState*(gameScreen: GameScreen): Option[ScreenRestoreState] =
   
 
 method `$`*(gameScreen: GameScreen): string =
-  return "GameScreen"
+  return fmt"GameScreen {gameScreen.levelPath}, inputRecording: {gameScreen.replayInputRecording.isSome}" 

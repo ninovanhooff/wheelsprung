@@ -37,7 +37,7 @@ type
 type GameScreen* = ref object of Screen
   isInitialized*: bool
   levelPath*: string
-  replayInputRecording: Option[InputRecording]
+  replayInputRecording*: Option[InputRecording]
 
 proc newGameScreen*(levelPath:string, recording: Option[InputRecording] = none(InputRecording)): GameScreen {.raises:[].} =
   return GameScreen(

@@ -16,6 +16,9 @@ method getButtonState*(provider: InputProvider, grameIdx: int32): PDButtonState 
 
 method getButtonState*(provider: RecordedInputProvider, frameIdx: int32): PDButtonState =
   let recording = provider.recording
+  if frameIdx >= recording.buttons.len:
+    print fmt"ERROR: getButtonState called with frameIdx {frameIdx} but recording has {recording.buttons.len} frames"
+    return default(PDButtonState)
   let current = recording.buttons[frameIdx]
   let previousOrEmpty = if frameIdx > 0:
     recording.buttons[frameIdx - 1]
