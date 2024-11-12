@@ -56,6 +56,21 @@ proc updateGameResult(state: GameState) {.raises: [].} =
   if state.gameResult.isSome:
     state.setGameResult(state.gameResult.get.resultType)
 
+proc isInReplayMode(state: GameState): bool =
+  return state.inputProvider of RecordedInputProvider
+
+proc isInLiveMode(state: GameState): bool =
+  return state.inputProvider of LiveInputProvider
+
+proc popOrPushGameResult(state: GameState) =
+  state.resetGameOnResume = true
+  if state.isInReplayMode:
+    print "pop game result"
+    popScreen()
+  else:
+    print "push game result"
+    navigateToGameResult(state.gameResult.get)
+
 proc enableHints*(state: var GameState) =
   if state.level.hintsPath.isNone:
     print "ERROR: No hints available for this level"
@@ -78,8 +93,7 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
   ]
   screen.onCanceled = proc(pushed: PDButtons) =
     if kButtonA in pushed:
-      state.resetGameOnResume = true
-      navigateToGameResult(state.gameResult.get)
+      state.popOrPushGameResult()
     elif kButtonB in pushed:
       onRestartGamePressed(state)
     else:
@@ -299,8 +313,7 @@ proc updateTimers(state: GameState) =
     let gameResult = state.gameResult.get
     let finishTime = gameResult.time
     if currentTime > finishTime + 5000.Milliseconds: # this timeout can be skipped by pressing any button
-      state.resetGameOnResume = true
-      navigateToGameResult(gameResult)
+      state.popOrPushGameResult()
 
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
@@ -354,7 +367,11 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 
 
 method update*(gameScreen: GameScreen): int =
-  handleInput(state, proc () = onRestartGamePressed(state))
+  handleInput(
+    state,
+    onShowGameResultPressed = proc () = state.popOrPushGameResult(),
+    onRestartGamePressed = proc () = onRestartGamePressed(state)
+  )
   updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
   if state.gameStartState.isSome:
     updateGameStart(state)
@@ -364,14 +381,14 @@ method update*(gameScreen: GameScreen): int =
     state.space.step(timeStepSeconds64)
     
     state.ghostRecording.addPose(state)
-    state.inputRecording.addInputFrame(playdate.system.getButtonState().current, state.frameCounter)
+    if state.isInLiveMode:
+      state.inputRecording.addInputFrame(playdate.system.getButtonState().current, state.frameCounter)
 
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
         playScreamSound()
-      state.resetGameOnResume = true
-      navigateToGameResult(state.gameResult.get)
+      state.popOrPushGameResult()
 
     state.updateTimers() # increment for next frame
 

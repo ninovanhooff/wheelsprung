@@ -148,23 +148,25 @@ proc resetGameInput*(state: GameState) =
   state.isThrottlePressed = false
   state.applyConfig()
 
-proc handleInput*(state: GameState, onRestartGamePressed: VoidCallBack ) =
+proc handleInput*(state: GameState, onShowGameResultPressed: VoidCallBack, onRestartGamePressed: VoidCallBack ) =
   state.isThrottlePressed = false
+
+  if state.gameResult.isSome:
+    # when the game is over, the bike cannot be controlled anymore,
+    # but any button can be pressed to navigate to the result screen
+    # always take the button state from the system, we don't want this controlled by the recorded input
+    let buttonState = playdate.system.getButtonState()
+
+    if kButtonA in buttonState.pushed:
+      onShowGameResultPressed()
+    elif kButtonB in buttonState.pushed:
+      onRestartGamePressed()
+    return
 
   let buttonState = state.inputProvider.getButtonState(state.frameCounter)
 
   if not state.isGameStarted and buttonState.pushed.anyButton:
     state.isGameStarted = true
-
-  if state.gameResult.isSome:
-    # when the game is over, the bike cannot be controlled anymore,
-    # but any button can be pressed to navigate to the result screen
-    if kButtonA in buttonState.pushed:
-      state.resetGameOnResume = true
-      navigateToGameResult(state.gameResult.get)
-    elif kButtonB in buttonState.pushed:
-      onRestartGamePressed()
-    return
 
   if actionThrottle in buttonState.current:
     state.isThrottlePressed = true
