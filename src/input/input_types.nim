@@ -13,3 +13,14 @@ type
   LiveInputProvider* = ref object of InputProvider
   RecordedInputProvider* = ref object of InputProvider
     recording*: InputRecording
+
+proc newInputRecording*(): InputRecording =
+  return InputRecording(
+    buttons: newSeqOfCap[PDButtons](100), # 2 seconds at 50 fps
+  )
+
+proc newLiveInputProvider*(): LiveInputProvider =
+  return LiveInputProvider()
+
+proc newRecordedInputProvider*(recording: InputRecording): RecordedInputProvider =
+  return RecordedInputProvider(recording: recording)

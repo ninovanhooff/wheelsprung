@@ -3,19 +3,12 @@ import screens/game/game_types
 import playdate/api
 import common/utils
 
-proc newInputRecording*(): InputRecording =
-  return InputRecording(
-    buttons: newSeqOfCap[PDButtons](100), # 2 seconds at 50 fps
-  )
-
 proc addInputFrame*(recording: InputRecording, currentButtons: PDButtons, idx: int32) =
   if recording.buttons.len == idx:
     recording.buttons.add(currentButtons)
   else:
     print fmt"ERROR: addInputFrame called with idx {idx} but recording has {recording.buttons.len} frames"
 
-proc newLiveInputProvider*(): LiveInputProvider =
-  return LiveInputProvider()
 
 method getButtonState*(provider: InputProvider, grameIdx: int32): PDButtonState {.base.} =
   print fmt"ERROR: getButtonState not implemented for {provider.repr}"
