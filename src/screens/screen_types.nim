@@ -1,5 +1,6 @@
 import std/options
 import input/input_types
+import screens/game/game_types
 
 type
   ScreenType* {.pure.}= enum
@@ -29,20 +30,21 @@ type
     case screenType*: ScreenType
     of Game: 
       enableHints*: bool
+      restartGame*: bool
     of LevelSelect:
       selectPath*: string
     of HitStop, GameResult, Leaderboards, Settings: 
       discard # no properties
 
 type GameScreen* = ref object of Screen
-  isInitialized*: bool
   levelPath*: string
   replayInputRecording*: Option[InputRecording]
+  state*: GameState
 
 proc newGameScreen*(levelPath:string, recording: Option[InputRecording] = none(InputRecording)): GameScreen {.raises:[].} =
   return GameScreen(
-    isInitialized: false,
     levelPath: levelPath,
     replayInputRecording: recording,
+    state: nil, # will be initialized in the game screen
     screenType: ScreenType.Game
   )

@@ -32,16 +32,8 @@ const
   levelSelectLabel = "Level select"
   settingsLabel = "Settings"
 
-var 
-  state: GameState 
-  # TODO prevent double free of space by removing this global var which gets reused when pushing a second GameScreen on the stack
-  # first, make sure all collision functions that use state use
-  # let state = cast[GameState](space.userData)
-  # this should also allow them to be moved to separate files
-  # then add state to GameScreen
-
 # forward declarations
-proc onResetGame() {.raises: [].}
+proc onResetGame(screen: GameScreen) {.raises: [].}
 
 proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
   state.tailRotarySpring.restAngle = 0f
@@ -81,22 +73,24 @@ proc enableHints*(state: var GameState) =
   state.hintsEnabled = true
   state.initGameBackground()
 
-proc onRestartGamePressed(state: GameState) =
-  persistGameResult(state.gameResult.get)
-  onResetGame()
+proc onRestartGamePressed(screen: GameScreen) =
+  persistGameResult(screen.state.gameResult.get)
+  screen.onResetGame()
 
 proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen {.raises: [].} =
+  let restartGameHandler = proc() = 
+    setResult(ScreenResult(screenType: ScreenType.Game, restartGame: true))
   var screen = createHitstopScreen(state, collisionShape)
   screen.menuItems = @[
     MenuItemDefinition(name: settingsLabel, action: () => pushScreen(newSettingsScreen())),
     MenuItemDefinition(name: levelSelectLabel, action: popScreen),
-    MenuItemDefinition(name: restartLevelLabel, action: onResetGame),
+    MenuItemDefinition(name: restartLevelLabel, action: restartGameHandler),
   ]
   screen.onCanceled = proc(pushed: PDButtons) =
     if kButtonA in pushed:
       state.popOrPushGameResult()
     elif kButtonB in pushed:
-      onRestartGamePressed(state)
+      restartGameHandler()
     else:
       print "ERROR cannot handle hitstop cancel for buttons: " & repr(pushed)
 
@@ -155,7 +149,6 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
 
 proc createSpace(level: Level): Space {.raises: [].} =
   let space = newSpace()
-  # todo test. At iterations = 4 and sleepTimeThreshold 0.5, I managed to crash the game
   space.iterations = 8
   space.sleepTimeThreshold = 0.5
   # space.collisionSlop = 0.4 # default is 0.1. But since our units are pixels, less that 0.5 pixels should not be noticeable
@@ -209,7 +202,7 @@ proc newGameState(
     print "live input provider"
     newLiveInputProvider()
   
-  state = GameState(
+  let state = GameState(
     level: level, 
     gameStartState: some(GameStartState(
       readyGoFrame: 0,
@@ -243,17 +236,19 @@ proc newGameState(
   state.killers = space.addKillers(level)
   return state
 
-proc onResetGame() {.raises: [].} =
-  state.destroy()
-  state.updateGhostRecording(state.coinProgress)
-  state = newGameState(
-    level = state.level,
-    background = state.background,
-    hintsenabled = state.hintsEnabled,
-    ghostPlayback = some(pickBestGhost(state.ghostRecording, state.ghostPlayback))
+proc onResetGame(screen: GameScreen) =
+  # onResetGame(screen.state)
+  let oldState = screen.state
+  oldState.destroy()
+  oldState.updateGhostRecording(oldState.coinProgress)
+  screen.state = newGameState(
+    level = oldState.level,
+    background = oldState.background,
+    hintsenabled = oldState.hintsEnabled,
+    ghostPlayback = some(pickBestGhost(oldState.ghostRecording, oldState.ghostPlayback))
   )
 
-  resetGameInput(state)
+  resetGameInput(oldState) # todo needed?
 
 proc updateTimers(state: GameState) =
   state.frameCounter += 1
@@ -277,17 +272,17 @@ proc updateTimers(state: GameState) =
   if state.finishTrophyBlinkerAt.expire(currentTime):
     echo("blinker timeout")
 
-proc initGame(levelPath: string, replayInputRecording: Option[InputRecording]) {.raises: [].} =
+proc initGame() {.raises: [].} =
   initGameSound()
   initGameView()
-  state = newGameState(loadLevel(levelPath), replayInputRecording = replayInputRecording)
 
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
-  if not gameScreen.isInitialized:
-    initGame(gameScreen.levelPath, gameScreen.replayInputRecording)
-    gameScreen.isInitialized = true
+  initGame()
+  if gameScreen.state == nil:
+    gameScreen.state = newGameState(loadLevel(gameScreen.levelPath), replayInputRecording = gameScreen.replayInputRecording)
+  var state = gameScreen.state
   
   discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
     pushScreen(newSettingsScreen())
@@ -296,13 +291,13 @@ method resume*(gameScreen: GameScreen) =
     popScreen()
   )
   discard playdate.system.addMenuItem(restartLevelLabel, proc(menuItem: PDMenuItemButton) =
-    onResetGame()
+    gameScreen.onResetGame()
   )
 
   resetGameInput(state)
 
   if state.resetGameOnResume:
-    onResetGame()
+    gameScreen.onResetGame()
     state.resetGameOnResume = false
 
   if not state.isGameStarted:
@@ -318,10 +313,11 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 
 
 method update*(gameScreen: GameScreen): int =
+  var state = gameScreen.state
   handleInput(
     state,
     onShowGameResultPressed = proc () = state.popOrPushGameResult(),
-    onRestartGamePressed = proc () = onRestartGamePressed(state)
+    onRestartGamePressed = proc () = gameScreen.onRestartGamePressed(),
   )
   updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
   if state.gameStartState.isSome:
@@ -353,12 +349,14 @@ method update*(gameScreen: GameScreen): int =
 
 method destroy*(gameScreen: GameScreen) =
   gameScreen.pause()
-  state.destroy()
+  gameScreen.state.destroy()
 
 method setResult*(gameScreen: GameScreen, screenResult: ScreenResult) =
   if screenResult.screenType != gameScreen.screenType: return
   if screenResult.enableHints:
-    state.enableHints()
+    gameScreen.state.enableHints()
+  if screenResult.restartGame:
+    gameScreen.onRestartGamePressed()
 
 method getRestoreState*(gameScreen: GameScreen): Option[ScreenRestoreState] =
   return some(ScreenRestoreState(
