@@ -12,7 +12,7 @@ import game_coin, game_star, game_killer, game_finish, game_gravity_zone
 import game_start_overlay
 import game_terrain
 import game_dynamic_object
-import game_camera
+import game_camera_lerp
 import game_camera_pid
 import sound/game_sound
 import common/shared_types

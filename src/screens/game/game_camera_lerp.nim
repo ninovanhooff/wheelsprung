@@ -12,6 +12,8 @@ var
   chassisVelocity: Vect
   targetCameraOffset: Vect
 proc updateCamera*(state: GameState, snapToTarget: bool = false) =
+  ## This camera controller is called "classic" in the game and is not enabled by default.
+  ## It is used to demonstrate the difference between the PID controller and the classic controller.
   chassisVelocity = state.chassis.velocity
   targetCameraOffset = v(
     state.driveDirection * cameraDirectionOffsetX + chassisVelocity.x * cameraVelocityOffsetFactorX,
