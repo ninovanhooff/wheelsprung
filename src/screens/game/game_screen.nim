@@ -357,6 +357,10 @@ method setResult*(gameScreen: GameScreen, screenResult: ScreenResult) =
     gameScreen.onRestartGamePressed()
 
 method getRestoreState*(gameScreen: GameScreen): Option[ScreenRestoreState] =
+  if gameScreen.replayInputRecording.isSome:
+    # replays are not stored to disk yet,
+    # so we can't restore
+    return none(ScreenRestoreState)
   return some(ScreenRestoreState(
     screenType: ScreenType.Game,
     levelPath: gameScreen.levelPath,
