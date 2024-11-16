@@ -31,6 +31,7 @@ const
   restartLevelLabel = "Restart level"
   levelSelectLabel = "Level select"
   settingsLabel = "Settings"
+  exitReplayLabel = "Exit replay"
 
 # forward declarations
 proc onResetGame(screen: GameScreen) {.raises: [].}
@@ -275,6 +276,22 @@ proc initGame() {.raises: [].} =
   initGameSound()
   initGameView()
 
+proc addMenuItems(gameScreen: GameScreen) =
+  if gameScreen.state.isInLiveMode:
+    discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
+      pushScreen(newSettingsScreen())
+    )
+    discard playdate.system.addMenuItem(levelSelectLabel, proc(menuItem: PDMenuItemButton) =
+      popScreen()
+    )
+    discard playdate.system.addMenuItem(restartLevelLabel, proc(menuItem: PDMenuItemButton) =
+      gameScreen.onResetGame()
+    )
+  elif gameScreen.state.isInReplayMode:
+    discard playdate.system.addMenuItem(exitReplayLabel, proc(menuItem: PDMenuItemButton) =
+      popScreen()
+    )
+
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
@@ -283,15 +300,7 @@ method resume*(gameScreen: GameScreen) =
     gameScreen.state = newGameState(loadLevel(gameScreen.levelPath), replayInputRecording = gameScreen.replayInputRecording)
   var state = gameScreen.state
   
-  discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
-    pushScreen(newSettingsScreen())
-  )
-  discard playdate.system.addMenuItem(levelSelectLabel, proc(menuItem: PDMenuItemButton) =
-    popScreen()
-  )
-  discard playdate.system.addMenuItem(restartLevelLabel, proc(menuItem: PDMenuItemButton) =
-    gameScreen.onResetGame()
-  )
+  gameScreen.addMenuItems()
 
   resetGameInput(state)
 
