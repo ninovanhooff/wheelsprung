@@ -199,10 +199,8 @@ proc newGameState(
 ): GameState {.raises: [].} =
   let space = level.createSpace()
   let inputProvider: InputProvider = if replayInputRecording.isSome:
-    print "replay input recording"
     newRecordedInputProvider(replayInputRecording.get)
   else:
-    print "live input provider"
     newLiveInputProvider()
 
   let gameReplayState = if replayInputRecording.isSome:

@@ -32,5 +32,6 @@ proc updateGameReplayOverlay*(state: GameState) =
 
 proc drawGameReplayOverlay*(state: GameState) =
   if state.gameReplayState.get.hideOverlayAt.isSome:
-    let message = "Ⓑ Exit Replay | Ⓐ Resume Playback"
+    let aAction = if state.isGamePaused: "Resume Playback" else: "Pause Playback"
+    let message = fmt"Ⓑ Exit Replay | Ⓐ {aAction}"
     drawButtonMapOverlay(message)
