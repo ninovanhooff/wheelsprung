@@ -13,6 +13,7 @@ import scoreboards/scoreboards_service
 import common/utils
 import common/score_utils
 import data_store/user_profile
+import data_store/game_result_updater
 
 const 
   LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY = "LeaderboardsScreenScoreboardUpdatedCallbackKey"
@@ -168,11 +169,16 @@ method resume*(screen: LeaderboardsScreen) =
       screen.currentLeaderboardIdx = screen.leaderboards.high # leaderboard is at end
     selectPageContainingPlayer(screen)
 
-  screen.draw(forceRedraw = true)
   addScoreboardChangedCallback(
     LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY,
     proc() = screen.refreshLeaderboards
   )
+
+  discard playdate.system.addMenuItem("Refresh", proc(menuItem: PDMenuItemButton) =
+    fetchAllScoreboards(ignoreTimeThreshold = true, finishCallback = uploadLocalScores)
+  )
+
+  screen.draw(forceRedraw = true)
 
 method pause*(screen: LeaderboardsScreen) =
   removeScoreboardChangedCallback(LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY)

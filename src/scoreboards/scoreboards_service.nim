@@ -12,9 +12,13 @@ import level_meta/level_data
 import scoreboards_dummy_data_source
 import scoreboards_memory_data_source
 import data_store/user_profile
+import common/shared_types
 import common/utils
 
-const useDummyBoards = false
+const 
+  useDummyBoards = false
+  REFRESH_TIME_THRESHOLD_SECONDS: uint32 = 3600
+    ## Time in seconds after which a scoreboard is considered outdated and should be refreshed
 
 var
   validBoardIds: seq[string] = @[]
@@ -120,16 +124,21 @@ proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
   if optOldPlayerScore.isNone:
     # player has no score yet
     return true
-  return score > optOldPlayerScore.get.value
+  if score <= optOldPlayerScore.get.value:
+    print fmt"Not submitting score to Scoreboards for {boardId}. Score {score} is not higher than current score {optOldPlayerScore.get.value}"
+    return false
+
+  return true
 
 
-proc submitScore*(boardId: BoardId, score: uint32) =
+proc submitScore*(boardId: BoardId, score: uint32, force: bool = false): bool {.discardable.} =
+  ## Returns true when a score submit is enqueued, false when it is discarded
+  
   if not validBoardIds.contains(boardId):
-    print "Not submitting score to Scoreboards.'" & boardId.repr &  "'is not a valid board id"
-    return
-  if not shouldSubmitScore(boardId, score):
-    print "Not submitting score to Scoreboards for " & boardId.repr & ". Score is not in top 10 or not higher than current score"
-    return
+    print fmt"Not submitting score to Scoreboards. {boardId} is not a valid board id"
+    return false
+  if not shouldSubmitScore(boardId, score) and not force:
+    return false
 
   let resultCode = playdate.scoreboards.addScore(boardId, score) do (score: PDResult[PDScore]) -> void:
     boardId.decreaseLoadingCount()
@@ -145,6 +154,7 @@ proc submitScore*(boardId: BoardId, score: uint32) =
 
   boardId.increaseLoadingCount()
   print "===== NETWORK addScore START", boardId, score, resultCode
+  return true
 
 proc submitLeaderboardScore*(score: uint32) =
   submitScore(LEADERBOARD_BOARD_ID, score)
@@ -161,10 +171,11 @@ proc initScoreboardsService() =
     validBoardIds.add(LEADERBOARD_BOARD_ID)
     scoreboardsCache.createScoreboards(validBoardIds)
 
-proc updateNextOutdatedBoard*() =
+proc updateNextOutdatedBoard*(finishCallback: VoidCallback = noOp) =
   if fetchAllDeque.len == 0:
     # all boards are up to date
     print "All boards are up to date"
+    finishCallback()
     return
 
   let boardId = fetchAllDeque.popFirst()
@@ -173,20 +184,25 @@ proc updateNextOutdatedBoard*() =
       print "Sequential scoreboard update aborted due to failure"
       fetchAllDeque.clear()
     else:
-      updateNextOutdatedBoard()
+      updateNextOutdatedBoard(finishCallback)
   )
 
-proc fetchAllScoreboards*() =
+proc fetchAllScoreboards*(ignoreTimeThreshold: bool = false, finishCallback: VoidCallback = noOp) =
+  ## Fetch all scoreboards that are outdated
+  ## If ignoreTimeThreshold is true, all scoreboards will be fetched
+  ## Otherwise only scoreboards that are older than REFRESH_TIME_THRESHOLD_SECONDS will be fetched
+  ## If a refresh is already in progress, this function will do nothing. Even if ignoreTimeThreshold is true
+  
   if fetchAllDeque.len > 0:
     print "fetchAllScoreboards: already in progress"
     return
   
-  let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - 3600
+  let timeThresholdSeconds = playdate.system.getSecondsSinceEpoch().seconds - REFRESH_TIME_THRESHOLD_SECONDS
   let scoreboards = scoreboardsCache.getScoreboards.values.toSeq
   for board in scoreboards:
-    if board.lastUpdated > timeThresholdSeconds:
+    if board.lastUpdated > timeThresholdSeconds and not ignoreTimeThreshold:
       continue
     fetchAllDeque.addLast(board.boardID)
-  updateNextOutdatedBoard()
+  updateNextOutdatedBoard(finishCallback)
 
 initScoreboardsService()

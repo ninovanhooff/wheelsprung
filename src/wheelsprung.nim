@@ -9,6 +9,7 @@ import globals
 import data_store/user_profile
 import navigation/[navigator, screen, backstack_builder]
 import cache/cache_preloader
+import scoreboards/scoreboards_service
 
 
 import playdate/api
@@ -105,9 +106,15 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)
   elif event == kEventTerminate or event == kEventLowPower:
-    print("Wheelsprung will terminate")
+    if event == kEventLowPower:
+      print("Wheelsprung: Low power mode, saving state")
+    elif event == kEventTerminate:
+      print("Wheelsprung will terminate")
     setRestoreState(createRestoreState())
     saveSaveSlot()
+  elif event == kEventUnlock:
+    print("Wheelsprung: Unlocked. Refreshing scoreboards")
+    fetchAllScoreboards()
   elif event == kEventKeyReleased:
     if keycode == 116:
       print("T")

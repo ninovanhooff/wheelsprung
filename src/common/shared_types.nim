@@ -30,7 +30,7 @@ type
     hintsAvailable*: bool
     inputRecording*: Option[InputRecording]
 
-  VoidCallBack* = proc() {.raises:[].}
+  VoidCallback* = proc() {.raises:[].}
 
 let fallbackGameResult*: GameResult = GameResult(
   resultType: GameResultType.low,
@@ -38,7 +38,7 @@ let fallbackGameResult*: GameResult = GameResult(
   starCollected: false
 )
 
-let noOp*: VoidCallBack = proc() {.raises: [].} =
+let noOp*: VoidCallback = proc() {.raises: [].} =
   ## A no-op function that does nothing.
   ## It can be used as a placeholder or a default callback function.
   discard
