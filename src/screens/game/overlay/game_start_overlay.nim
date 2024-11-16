@@ -1,7 +1,7 @@
 import playdate/api
 import std/options
 import common/graphics_utils
-import game_types
+import screens/game/game_types
 import cache/font_cache
 import cache/bitmaptable_cache
 
@@ -10,7 +10,9 @@ const readyEndFrameIdx = 4 # the frame idx in the readyGoBitmapTable that is the
 var readyGoBitmapTable: AnnotatedBitmapTable
 var titleFont: LCDFont
 
-proc updateGameStart*(state: GameState) =
+proc updateGameStartOverlay*(state: GameState) =
+  if state.gameStartState.isNone:
+    return
   if readyGoBitmapTable.isNil:
     readyGoBitmapTable = getOrLoadBitmapTable(BitmapTableId.ReadyGo)
     titleFont = getOrLoadFont(FontId.M6X11)
@@ -30,7 +32,7 @@ proc updateGameStart*(state: GameState) =
     startState.readyGoFrame += 1
     
 
-proc drawGameStart*(state: GameStartState) =
+proc drawGameStartOverlay*(state: GameStartState) =
   let name = state.levelName
   let (textW, textH) = titleFont.getTextSize(name)
   let textRect = Rect(

@@ -38,11 +38,11 @@ proc formatTime*(time: Milliseconds, signed: bool = false, trim: bool = false): 
     return fmt"{signString}{minutes:02}:{seconds:02}.{hundredths:02}"
 
 
-proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): bool =
+proc expire*[T](expireAt: var Option[T], currentTime: T): bool {.discardable} =
   ## Sets expireAt to none and returns true if expireAt is after currentTime
   if expireAt.isSome:
     if currentTime > expireAt.get:
-      expireAt = none[Milliseconds]()
+      expireAt = none[T]()
       return true
   return false
 

@@ -9,7 +9,8 @@ import data_store/configuration
 import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
-import game_start_overlay
+import overlay/game_start_overlay
+import overlay/game_replay_overlay
 import game_terrain
 import game_dynamic_object
 import game_camera_lerp
@@ -203,6 +204,14 @@ proc newGameState(
   else:
     print "live input provider"
     newLiveInputProvider()
+
+  let gameReplayState = if replayInputRecording.isSome:
+    some(GameReplayState(
+      isPaused: false,
+      hideOverlayAt: none(Seconds)
+    ))
+  else:
+    none(GameReplayState)
   
   let state = GameState(
     level: level, 
@@ -210,6 +219,7 @@ proc newGameState(
       readyGoFrame: 0,
       levelName: level.meta.name
     )),
+    gameReplayState: gameReplayState,
     background: background,
     hintsEnabled: hintsEnabled,
     space: space,
@@ -327,9 +337,11 @@ method update*(gameScreen: GameScreen): int =
     onShowGameResultPressed = proc () = state.popOrPushGameResult(),
     onRestartGamePressed = proc () = gameScreen.onRestartGamePressed(),
   )
-  updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
-  if state.gameStartState.isSome:
-    updateGameStart(state)
+  updateGameBikeSound(state)
+  updateGameStartOverlay(state)
+  if updateGameReplayOverlay(state) == false:
+    drawGame(addr state)
+    return 1
 
   if state.isGameStarted:
     updateAttitudeAdjust(state)
