@@ -207,7 +207,6 @@ proc newGameState(
 
   let gameReplayState = if replayInputRecording.isSome:
     some(GameReplayState(
-      isPaused: false,
       hideOverlayAt: none(Seconds)
     ))
   else:
@@ -339,11 +338,9 @@ method update*(gameScreen: GameScreen): int =
   )
   updateGameBikeSound(state)
   updateGameStartOverlay(state)
-  if updateGameReplayOverlay(state) == false:
-    drawGame(addr state)
-    return 1
+  updateGameReplayOverlay(state)
 
-  if state.isGameStarted:
+  if state.isGameStarted and not state.isGamePaused:
     updateAttitudeAdjust(state)
     state.space.step(timeStepSeconds64)
     

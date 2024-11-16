@@ -12,28 +12,22 @@ const
   REPLAY_OVERLAY_TIMEOUT = 3.0.Seconds
 
 
-proc updateGameReplayOverlay*(state: GameState): bool =
-  ## Returns true when game update can continue or false when the replay is paused
+proc updateGameReplayOverlay*(state: GameState) =
   if state.gameReplayState.isNone:
-    return true
+    return
 
   let buttonState = playdate.system.getButtonState()
   let replayState = state.gameReplayState.get
   let currentTime = getElapsedSeconds()
   if kButtonA in buttonState.pushed:
-    replayState.isPaused = not replayState.isPaused
+    state.isGamePaused = not state.isGamePaused
   elif kButtonB in buttonState.pushed:
     popScreen()
   
   if buttonState.pushed.anyButton: 
-    # if replayState.hideOverlayAt.isSome:
-    #   replayState.hideOverlayAt = none(Seconds)
-    # else:
-      replayState.hideOverlayAt = some(currentTime + REPLAY_OVERLAY_TIMEOUT)
+    replayState.hideOverlayAt = some(currentTime + REPLAY_OVERLAY_TIMEOUT)
   
   replayState.hideOverlayAt.expire(currentTime)
-  return not replayState.isPaused
-
 
 
 proc drawGameReplayOverlay*(state: GameState) =

@@ -187,7 +187,6 @@ type GameStartState* = ref object of RootObj
 
 type GameReplayState* = ref object of RootObj
   hideOverlayAt*: Option[Seconds]
-  isPaused*: bool
 
 type GameState* = ref object of RootObj
   level*: Level
@@ -197,6 +196,7 @@ type GameState* = ref object of RootObj
 
   # Game state
   isGameStarted*: bool
+  isGamePaused*: bool
   remainingCoins*: seq[Coin]
   remainingStar*: Option[Star]
   starEnabled*: bool

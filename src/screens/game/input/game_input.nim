@@ -163,7 +163,7 @@ proc handleInput*(state: GameState, onShowGameResultPressed: VoidCallBack, onRes
       onRestartGamePressed()
     return
 
-  if state.gameReplayState.isSome and state.gameReplayState.get.isPaused:
+  if state.isGamePaused:
     return
 
   let buttonState = state.inputProvider.getButtonState(state.frameCounter)
