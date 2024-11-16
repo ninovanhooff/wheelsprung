@@ -121,7 +121,8 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
 
   if state.gameResult.isNone:
     state.setGameResult(GameResultType.GameOver, false)
-    pushScreen(buildHitStopScreen(state, shapeB))
+    if state.isInLiveMode:
+      pushScreen(buildHitStopScreen(state, shapeB))
   if state.bikeConstraints.len > 0:
     discard space.addPostStepCallback(removeBikeConstraintsPostStepCallback, removeBikeConstraintsPostStepCallback, nil)
   if state.chassisShape.isNil:
