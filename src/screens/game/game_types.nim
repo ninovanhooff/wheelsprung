@@ -9,6 +9,7 @@ import level_meta/level_data
 import cache/bitmaptable_cache
 import input/input_types
 import game_constants
+import pid_controller
 export input_types
 export game_constants
 
@@ -229,6 +230,8 @@ type GameState* = ref object of RootObj
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect
+  camXController*: PIDController
+  camYController*: PIDController
   driveDirection*: DriveDirection
   dynamicObjects*: seq[DynamicObject]
 
@@ -345,14 +348,6 @@ proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
     value: value,
     position: position,
     alignment: alignment,
-  )
-
-proc newCameraState*(camera: Camera, camVertex: Vertex, viewport: LCDRect, frameCounter: int32): CameraState =
-  result = CameraState(
-    camera: camera,
-    camVertex: camVertex,
-    viewport: viewport,
-    frameCounter: frameCounter,
   )
 
 proc getRiderBodies*(state: GameState): seq[Body] =

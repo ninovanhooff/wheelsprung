@@ -138,3 +138,11 @@ proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): A
 
 proc newVertex*(x, y: int32): Vertex =
   result = (x: x, y: y)
+
+proc newCameraState*(camera: Camera, camVertex: Vertex, viewport: LCDRect, frameCounter: int32): CameraState =
+  result = CameraState(
+    camera: camera,
+    camVertex: camVertex,
+    viewport: viewport,
+    frameCounter: frameCounter,
+  )

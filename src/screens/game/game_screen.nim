@@ -251,6 +251,9 @@ proc onResetGame(screen: GameScreen) =
     ghostPlayback = some(pickBestGhost(oldState.ghostRecording, oldState.ghostPlayback))
   )
 
+  screen.state.updateCameraPid(snapToTarget = true)
+
+
 proc updateTimers(state: GameState) =
   state.frameCounter += 1
   state.time += timeStep

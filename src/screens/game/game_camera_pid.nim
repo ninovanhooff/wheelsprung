@@ -10,28 +10,25 @@ const
   cameraVelocityOffsetFactorX = 0.25
   cameraVelocityOffsetFactorY = 0.25
 
-var camXController = initPIDController(
-  kp = 0.5,
-  ki = 0.01,
-  kd = 0.1,
-  setpoint = 0.0
-)
-var camYController = initPIDController(
-  kp = 0.5,
-  ki = 0.01,
-  kd = 0.1,
-  setpoint = 0.0
-)
+
 
 var 
   chassisVelocity: Vect
   targetCameraOffset: Vect
 
-proc resetCameraControllers*(target: Vect) =
-  # todo seems not to be called on every level. Move controllers into GameState
+proc newGameCamPID(target: float32 = 0f): PIDController =
+  newPIDController(
+    kp = 0.5,
+    ki = 0.01,
+    kd = 0.1,
+    setpoint = target
+  )
+
+proc resetCameraControllers*(state: GameState, target: Vect) =
   print "Resetting camera: ", target
-  camXController.resetPID(target.x)
-  camYController.resetPID(target.y)
+
+  state.camXController = newGameCamPID(target.x)
+  state.camYController = newGameCamPID(target.y)
 
 proc updateCameraPid*(state: GameState, snapToTarget: bool = false) =
   chassisVelocity = state.chassis.velocity
@@ -44,19 +41,21 @@ proc updateCameraPid*(state: GameState, snapToTarget: bool = false) =
     state.cameraOffset = targetCameraOffset
     let cameraTarget = state.chassis.position - halfDisplaySize + state.cameraOffset
     state.camera = cameraTarget
-    resetCameraControllers(cameraTarget)
+    state.resetCameraControllers(cameraTarget)
   else:
     state.cameraOffset = state.cameraOffset.vlerp(targetCameraOffset, cameraLerpSpeed)
     let cameraTarget = state.level.cameraBounds.clampVect(
       state.chassis.position - halfDisplaySize + state.cameraOffset
     )
     # todo combine 3 calls into 1
-    camXController.setTargetPosition(cameraTarget.x)
-    camYController.setTargetPosition(cameraTarget.y)
-    let controlX = camXController.updatePID(state.camera.x)
-    let controlY = camYController.updatePID(state.camera.y)
-    let newX = moveCamera(state.camera.x, controlX)
-    let newY = moveCamera(state.camera.y, controlY)
+    # camXController.setTargetPosition(cameraTarget.x)
+    # camYController.setTargetPosition(cameraTarget.y)
+    # let controlX = camXController.updatePID(state.camera.x)
+    # let controlY = camYController.updatePID(state.camera.y)
+    # let newX = moveCamera(state.camera.x, controlX)
+    # let newY = moveCamera(state.camera.y, controlY)
+    let newX = state.camXController.stepToTarget(state.camera.x, cameraTarget.x)
+    let newY = state.camYController.stepToTarget(state.camera.y, cameraTarget.y)
     state.camera = state.level.cameraBounds.clampVect(
       v(newX, newY)
     ).round()
