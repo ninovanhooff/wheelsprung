@@ -148,6 +148,12 @@ proc resetGameInput*(state: GameState) =
   state.isThrottlePressed = false
   state.applyConfig()
 
+proc isInReplayMode*(state: GameState): bool =
+  return state.inputProvider of RecordedInputProvider
+
+proc isInLiveMode*(state: GameState): bool =
+  return state.inputProvider of LiveInputProvider
+
 proc handleInput*(state: GameState, onShowGameResultPressed: VoidCallBack, onRestartGamePressed: VoidCallBack ) =
   state.isThrottlePressed = false
 
@@ -157,10 +163,11 @@ proc handleInput*(state: GameState, onShowGameResultPressed: VoidCallBack, onRes
     # always take the button state from the system, we don't want this controlled by the recorded input
     let buttonState = playdate.system.getButtonState()
 
-    if kButtonA in buttonState.pushed:
-      onShowGameResultPressed()
-    elif kButtonB in buttonState.pushed:
-      onRestartGamePressed()
+    if state.isInLiveMode:
+      if kButtonA in buttonState.pushed:
+        onShowGameResultPressed()
+      elif kButtonB in buttonState.pushed:
+        onRestartGamePressed()
     return
 
   if state.isGamePaused:

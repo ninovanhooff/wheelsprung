@@ -345,10 +345,10 @@ proc drawGame*(statePtr: ptr GameState) =
   if state.gameStartState.isSome:
     drawGameStartOverlay(state.gameStartState.get)
 
-  if state.gameResult.isSome:
-    state.drawGameEndedOverlay()
-  elif state.gameReplayState.isSome:
+  if state.gameReplayState.isSome:
     state.drawGameReplayOverlay()
+  elif state.gameResult.isSome:
+    state.drawGameEndedOverlay()
 
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items

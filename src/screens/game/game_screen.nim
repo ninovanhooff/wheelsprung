@@ -51,12 +51,6 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
   state.resetGameOnResume = resetGameOnResume
   state.gameResult = some(result)
 
-proc isInReplayMode(state: GameState): bool =
-  return state.inputProvider of RecordedInputProvider
-
-proc isInLiveMode(state: GameState): bool =
-  return state.inputProvider of LiveInputProvider
-
 proc popOrPushGameResult(state: GameState) =
   state.resetGameOnResume = true
   if state.isInReplayMode:
