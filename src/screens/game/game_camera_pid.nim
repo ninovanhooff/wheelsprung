@@ -24,7 +24,7 @@ proc newGameCamPID(target: float32 = 0f): PIDController =
     setpoint = target
   )
 
-proc resetCameraControllers*(state: GameState, target: Vect) =
+proc resetCameraControllers(state: GameState, target: Vect) =
   print "Resetting camera: ", target
 
   state.camXController = newGameCamPID(target.x)
