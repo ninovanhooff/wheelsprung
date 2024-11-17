@@ -7,7 +7,8 @@
   "scripts": {
     "start": "esbuild --watch src/index.ts --bundle --target=es2017 --outfile=wheelsprung/index.js",
     "build": "esbuild src/index.ts --bundle --target=es2017 --outfile=wheelsprung/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "watch 'npm run build' src"
   },
   "author": "Nino van Hooff",
   "license": "ISC",
@@ -16,5 +17,8 @@
     "esbuild": "0.20.2",
     "prettier": "3.2.5",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "watch": "^1.0.2"
   }
 }

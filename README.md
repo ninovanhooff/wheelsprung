@@ -39,3 +39,14 @@ The resulting lib is placed in the [lib](./lib) folder.
 
 [pdnim]: https://github.com/samdze/playdate-nim/tree/main/playdate_example
 [editor]: https://github.com/ninovanhooff/wheelsprung/wiki/Level-Editor
+
+## Development
+
+To build the Tiled extension every time you save changes to the typescript files:
+
+```
+cd editor/extensions
+npm run watch
+```
+
+...or select the Node.js > Run Script: watch from the Run and Debug dropdown
