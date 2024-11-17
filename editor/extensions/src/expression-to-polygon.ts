@@ -2,28 +2,35 @@
 let cos = Math.cos;
 let sin = Math.sin;
 
-export function genPolyline(posX: number, posY: number, numPoints: number = 10, expressionX: string = "t", expressionY: string, name: string = undefined, epsilon: number = 0.5) {
-  if (tiled.activeAsset.isTileMap == false) {
-    tiled.log("No active layer selected")
-    return
+export function genPolyline({ 
+  posX, posY, 
+  startT = 0,
+  endT = startT + 100, 
+  expressionX = "t", expressionY, 
+  objectName = undefined, 
+  epsilon = 0.5 
+}: { posX: number, posY: number, endT?: number, startT: number, expressionX?: string, expressionY: string, objectName?: string, epsilon?: number }) {
+  if (!tiled.activeAsset.isTileMap) {
+    tiled.log("No active layer selected");
+    return;
   }
   let activeAsset: TileMap = tiled.activeAsset as TileMap;
   var currentLayer = activeAsset.currentLayer as ObjectGroup;
-  if (currentLayer == undefined || currentLayer.isObjectLayer == false) {
-    tiled.log("No active layer selected, or not an object layer")
-    return
+  if (!currentLayer || !currentLayer.isObjectLayer) {
+    tiled.log("No active layer selected, or not an object layer");
+    return;
   }
-  let resultsX = evaluateExpression(expressionX, numPoints);
-  let resultsY = evaluateExpression(expressionY, numPoints);
+  let resultsX = evaluateExpression(expressionX, startT, endT);
+  let resultsY = evaluateExpression(expressionY, startT, endT);
   let points: point[] = resultsX.map((x, i) => ({ x, y: resultsY[i] }));
   let polyline = new MapObject();
   polyline.x = posX;
   polyline.y = posY;
   polyline.shape = MapObject.Polyline;
-  polyline.polygon = optimizePoints(points, epsilon)
-  if (name != "" && name != undefined){
-    removeObjectWithName(name, currentLayer);
-    polyline.name = name;
+  polyline.polygon = optimizePoints(points, epsilon);
+  if (objectName) {
+    removeObjectWithName(objectName, currentLayer);
+    polyline.name = objectName;
   }
   tiled.log("Optimized polygon: " + polyline.polygon.length);
   currentLayer.addObject(polyline);
@@ -37,12 +44,12 @@ function removeObjectWithName(name: string, layer: ObjectGroup) {
   }
 }
 
-function evaluateExpression(expression: string, numPoints: number): number[] {
+function evaluateExpression(expression: string, startT:number = 0, endT: number): number[] {
   tiled.log("Evaluating expression: " + expression);
   const sanitizedExpression = expression.replace(/[^-()\d/*+.\w\^]/g, '');
   tiled.log("Sanitized expression: " + sanitizedExpression);
-  return Array.from({ length: numPoints }, (_, i) => {
-    let t = i;
+  return Array.from({ length: endT - startT }, (_, i) => {
+    let t = startT + i;
     let replacedExpression = eval(sanitizedExpression.replace("t", t.toString()));
     let result = eval(replacedExpression);
     return result;
