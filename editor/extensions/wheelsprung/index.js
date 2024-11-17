@@ -63,16 +63,34 @@
   }
 
   // src/expression-to-polygon.ts
-  var code = `({
-  Run: (data: string): string => {
-      console.log(data); return Promise.resolve("SUCCESS"); }
-  })`;
-  function evalDemo(expression = code) {
-    for (let i = 0; i < 10; i++) {
-      let x = i;
-      let result = eval(expression.replace("x", x.toString()));
-      tiled.log(eval(result));
-    }
+  var cos = Math.cos;
+  var sin = Math.sin;
+  function newPolygon(posX, posY, polygon) {
+    var object = new MapObject();
+    object.x = posX;
+    object.y = posY;
+    object.shape = MapObject.Polygon;
+    object.polygon = polygon;
+    return object;
+  }
+  function evalDemo(posX, posY, resolution2 = 10, expressionX = "t", expressionY) {
+    let resultsX = evaluateExpression(expressionX, resolution2);
+    let resultsY = evaluateExpression(expressionY, resolution2);
+    let points = resultsX.map((x, i2) => ({ x, y: resultsY[i2] }));
+    let polygon = newPolygon(posX, posY, points);
+    this.activeAsset.currentLayer.addObject(polygon);
+  }
+  function evaluateExpression(expression, resolution) {
+    tiled.log("Evaluating expression: " + expression);
+    const sanitizedExpression = expression.replace(/[^-()\d/*+.\w\^]/g, "");
+    tiled.log("Sanitized expression: " + sanitizedExpression);
+    return Array.from({ length: resolution }, (_, i) => {
+      let t = i;
+      let replacedExpression = eval(sanitizedExpression.replace("t", t.toString()));
+      let result = eval(replacedExpression);
+      tiled.log(result);
+      return result;
+    });
   }
 
   // src/wheelsprung-map.ts
