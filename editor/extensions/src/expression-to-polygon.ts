@@ -2,27 +2,38 @@
 let cos = Math.cos;
 let sin = Math.sin;
 
-function newPolyline(posX: number, posY: number, polygon: point[]) {
-  var object = new MapObject();
-  object.x = posX;
-  object.y = posY;
-  object.shape = MapObject.Polyline;
-  object.polygon = polygon
-  return object;
-}
-
-export function evalDemo(posX: number, posY: number, numPoints: number = 10, expressionX: string = "t", expressionY: string, epsilon: number = 0.5) {
-  
-  // let runnable :any = eval(result);
-  // runnable.Run("RUN!").then((result:string)=>{tiled.log(result);});
-  
-
+export function genPolyline(posX: number, posY: number, numPoints: number = 10, expressionX: string = "t", expressionY: string, epsilon: number = 0.5, name: string = undefined) {
+  if (tiled.activeAsset.isTileMap == false) {
+    tiled.log("No active layer selected")
+    return
+  }
+  let activeAsset: TileMap = tiled.activeAsset as TileMap;
+  var currentLayer = activeAsset.currentLayer as ObjectGroup;
+  if (currentLayer == undefined || currentLayer.isObjectLayer == false) {
+    tiled.log("No active layer selected, or not an object layer")
+    return
+  }
   let resultsX = evaluateExpression(expressionX, numPoints);
   let resultsY = evaluateExpression(expressionY, numPoints);
   let points: point[] = resultsX.map((x, i) => ({ x, y: resultsY[i] }));
-  let polygon = newPolyline(posX, posY, optimizePoints(points, epsilon));
-  tiled.log("Optimized polygon: " + polygon.polygon.length);
-  this.activeAsset.currentLayer.addObject(polygon);
+  let polyline = new MapObject();
+  polyline.x = posX;
+  polyline.y = posY;
+  polyline.shape = MapObject.Polyline;
+  polyline.polygon = optimizePoints(points, epsilon)
+  if (name != "" && name != undefined){
+    removeObjectWithName(name, currentLayer);
+    polyline.name = name;
+  }
+  tiled.log("Optimized polygon: " + polyline.polygon.length);
+  currentLayer.addObject(polyline);
+}
+
+function removeObjectWithName(name: string, layer: ObjectGroup) {
+  let existingObject = layer.objects.find(obj => obj.name === name);
+  if (existingObject) {
+    layer.removeObject(existingObject);
+  }
 }
 
 function evaluateExpression(expression: string, numPoints: number): number[] {

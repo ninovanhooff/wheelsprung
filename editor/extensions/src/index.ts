@@ -1,7 +1,7 @@
 import { applyWheelsprungFixes } from "./apply-wheelsprung-fixes";
-import { evalDemo } from "./expression-to-polygon";
+import { genPolyline } from "./expression-to-polygon";
 import mapFormat from "./wheelsprung-map";
-export { applyWheelsprungFixes, evalDemo, mapFormat };
+export { applyWheelsprungFixes, genPolyline as evalDemo, mapFormat };
 
 tiled.registerMapFormat("wheelsprung", mapFormat);
 
@@ -17,4 +17,4 @@ tiled.extendMenu("Edit", [
 ]);
 
 // @ts-ignore
-tiled.evalDemo = evalDemo;
+tiled.genPolyline = genPolyline;

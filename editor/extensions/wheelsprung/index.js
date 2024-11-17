@@ -65,21 +65,37 @@
   // src/expression-to-polygon.ts
   var cos = Math.cos;
   var sin = Math.sin;
-  function newPolyline(posX, posY, polygon) {
-    var object = new MapObject();
-    object.x = posX;
-    object.y = posY;
-    object.shape = MapObject.Polyline;
-    object.polygon = polygon;
-    return object;
-  }
-  function evalDemo(posX, posY, numPoints2 = 10, expressionX = "t", expressionY, epsilon = 0.5) {
+  function genPolyline(posX, posY, numPoints2 = 10, expressionX = "t", expressionY, epsilon = 0.5, name = void 0) {
+    if (tiled.activeAsset.isTileMap == false) {
+      tiled.log("No active layer selected");
+      return;
+    }
+    let activeAsset = tiled.activeAsset;
+    var currentLayer = activeAsset.currentLayer;
+    if (currentLayer == void 0 || currentLayer.isObjectLayer == false) {
+      tiled.log("No active layer selected, or not an object layer");
+      return;
+    }
     let resultsX = evaluateExpression(expressionX, numPoints2);
     let resultsY = evaluateExpression(expressionY, numPoints2);
     let points = resultsX.map((x, i2) => ({ x, y: resultsY[i2] }));
-    let polygon = newPolyline(posX, posY, optimizePoints(points, epsilon));
-    tiled.log("Optimized polygon: " + polygon.polygon.length);
-    this.activeAsset.currentLayer.addObject(polygon);
+    let polyline = new MapObject();
+    polyline.x = posX;
+    polyline.y = posY;
+    polyline.shape = MapObject.Polyline;
+    polyline.polygon = optimizePoints(points, epsilon);
+    if (name != "" && name != void 0) {
+      removeObjectWithName(name, currentLayer);
+      polyline.name = name;
+    }
+    tiled.log("Optimized polygon: " + polyline.polygon.length);
+    currentLayer.addObject(polyline);
+  }
+  function removeObjectWithName(name, layer) {
+    let existingObject = layer.objects.find((obj) => obj.name === name);
+    if (existingObject) {
+      layer.removeObject(existingObject);
+    }
   }
   function evaluateExpression(expression, numPoints) {
     tiled.log("Evaluating expression: " + expression);
@@ -151,5 +167,5 @@
   tiled.extendMenu("Edit", [
     { action: "ApplyWheelsprungFixes", before: "Preferences" }
   ]);
-  tiled.evalDemo = evalDemo;
+  tiled.genPolyline = genPolyline;
 })();
