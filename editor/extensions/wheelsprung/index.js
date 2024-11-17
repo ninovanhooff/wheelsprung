@@ -65,11 +65,11 @@
   // src/expression-to-polygon.ts
   var cos = Math.cos;
   var sin = Math.sin;
-  function newPolygon(posX, posY, polygon) {
+  function newPolyline(posX, posY, polygon) {
     var object = new MapObject();
     object.x = posX;
     object.y = posY;
-    object.shape = MapObject.Polygon;
+    object.shape = MapObject.Polyline;
     object.polygon = polygon;
     return object;
   }
@@ -77,7 +77,7 @@
     let resultsX = evaluateExpression(expressionX, resolution2);
     let resultsY = evaluateExpression(expressionY, resolution2);
     let points = resultsX.map((x, i2) => ({ x, y: resultsY[i2] }));
-    let polygon = newPolygon(posX, posY, points);
+    let polygon = newPolyline(posX, posY, points);
     this.activeAsset.currentLayer.addObject(polygon);
   }
   function evaluateExpression(expression, resolution) {

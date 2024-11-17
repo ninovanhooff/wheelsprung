@@ -2,11 +2,11 @@
 let cos = Math.cos;
 let sin = Math.sin;
 
-function newPolygon(posX: number, posY: number, polygon: point[]) {
+function newPolyline(posX: number, posY: number, polygon: point[]) {
   var object = new MapObject();
   object.x = posX;
   object.y = posY;
-  object.shape = MapObject.Polygon;
+  object.shape = MapObject.Polyline;
   object.polygon = polygon
   return object;
 }
@@ -20,7 +20,7 @@ export function evalDemo(posX: number, posY: number, resolution: number = 10, ex
   let resultsX = evaluateExpression(expressionX, resolution);
   let resultsY = evaluateExpression(expressionY, resolution);
   let points: point[] = resultsX.map((x, i) => ({ x, y: resultsY[i] }));
-  let polygon = newPolygon(posX, posY, points);
+  let polygon = newPolyline(posX, posY, points);
   this.activeAsset.currentLayer.addObject(polygon);
 }
 
