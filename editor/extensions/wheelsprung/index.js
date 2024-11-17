@@ -3,10 +3,10 @@
   function polygonArea(vertices) {
     var area = 0;
     var j = 0;
-    for (var i = 0; i < vertices.length; i++) {
-      j = (i + 1) % vertices.length;
-      area += vertices[i].x * vertices[j].y;
-      area -= vertices[j].x * vertices[i].y;
+    for (var i2 = 0; i2 < vertices.length; i2++) {
+      j = (i2 + 1) % vertices.length;
+      area += vertices[i2].x * vertices[j].y;
+      area -= vertices[j].x * vertices[i2].y;
     }
     return area / 2;
   }
@@ -55,10 +55,23 @@
       }
     } else if (mapOrLayer.isTileMap || mapOrLayer.isGroupLayer) {
       let numLayers = mapOrLayer.layerCount;
-      for (var i = 0; i < numLayers; i++) {
-        applyWheelsprungFixes(mapOrLayer.layerAt(i));
+      for (var i2 = 0; i2 < numLayers; i2++) {
+        applyWheelsprungFixes(mapOrLayer.layerAt(i2));
       }
     } else {
+    }
+  }
+
+  // src/expression-to-polygon.ts
+  var code = `({
+  Run: (data: string): string => {
+      console.log(data); return Promise.resolve("SUCCESS"); }
+  })`;
+  function evalDemo(expression = code) {
+    for (let i = 0; i < 10; i++) {
+      let x = i;
+      let result = eval(expression.replace("x", x.toString()));
+      tiled.log(eval(result));
     }
   }
 
@@ -90,4 +103,5 @@
   tiled.extendMenu("Edit", [
     { action: "ApplyWheelsprungFixes", before: "Preferences" }
   ]);
+  tiled.evalDemo = evalDemo;
 })();
