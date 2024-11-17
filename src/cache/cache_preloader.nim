@@ -46,7 +46,7 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.018.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderTail),
   PreloadJob(timeCost: 0.019.Seconds, jobType: PreloadJobType.Font, fontId: FontId.Roobert10Bold),
   PreloadJob(timeCost: 0.024.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeChassis),
-  PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.Scoreboards),
+  # PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.Scoreboards),
 ]
 
 proc execute(job: PreloadJob) =
