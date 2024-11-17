@@ -65,7 +65,7 @@
   // src/expression-to-polygon.ts
   var cos = Math.cos;
   var sin = Math.sin;
-  function genPolyline(posX, posY, numPoints2 = 10, expressionX = "t", expressionY, epsilon = 0.5, name = void 0) {
+  function genPolyline(posX, posY, numPoints2 = 10, expressionX = "t", expressionY, name = void 0, epsilon = 0.5) {
     if (tiled.activeAsset.isTileMap == false) {
       tiled.log("No active layer selected");
       return;
@@ -94,6 +94,7 @@
   function removeObjectWithName(name, layer) {
     let existingObject = layer.objects.find((obj) => obj.name === name);
     if (existingObject) {
+      tiled.log("Removing existing object with name: " + name);
       layer.removeObject(existingObject);
     }
   }
@@ -105,7 +106,6 @@
       let t = i;
       let replacedExpression = eval(sanitizedExpression.replace("t", t.toString()));
       let result = eval(replacedExpression);
-      tiled.log(result);
       return result;
     });
   }

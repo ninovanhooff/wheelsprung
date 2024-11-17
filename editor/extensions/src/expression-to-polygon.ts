@@ -2,7 +2,7 @@
 let cos = Math.cos;
 let sin = Math.sin;
 
-export function genPolyline(posX: number, posY: number, numPoints: number = 10, expressionX: string = "t", expressionY: string, epsilon: number = 0.5, name: string = undefined) {
+export function genPolyline(posX: number, posY: number, numPoints: number = 10, expressionX: string = "t", expressionY: string, name: string = undefined, epsilon: number = 0.5) {
   if (tiled.activeAsset.isTileMap == false) {
     tiled.log("No active layer selected")
     return
@@ -32,6 +32,7 @@ export function genPolyline(posX: number, posY: number, numPoints: number = 10, 
 function removeObjectWithName(name: string, layer: ObjectGroup) {
   let existingObject = layer.objects.find(obj => obj.name === name);
   if (existingObject) {
+    tiled.log("Removing existing object with name: " + name);
     layer.removeObject(existingObject);
   }
 }
@@ -44,7 +45,6 @@ function evaluateExpression(expression: string, numPoints: number): number[] {
     let t = i;
     let replacedExpression = eval(sanitizedExpression.replace("t", t.toString()));
     let result = eval(replacedExpression);
-    tiled.log(result);
     return result;
   });
 }
