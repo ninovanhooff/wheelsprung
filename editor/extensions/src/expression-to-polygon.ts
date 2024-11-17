@@ -23,24 +23,23 @@ export function genPolyline({
   let resultsX = evaluateExpression(expressionX, startT, endT);
   let resultsY = evaluateExpression(expressionY, startT, endT);
   let points: point[] = resultsX.map((x, i) => ({ x, y: resultsY[i] }));
-  let polyline = new MapObject();
+  let polyline = getOrCreateObjectWithName(objectName, currentLayer);
   polyline.x = posX;
   polyline.y = posY;
   polyline.shape = MapObject.Polyline;
   polyline.polygon = optimizePoints(points, epsilon);
-  if (objectName) {
-    removeObjectWithName(objectName, currentLayer);
-    polyline.name = objectName;
-  }
   tiled.log("Optimized polygon: " + polyline.polygon.length);
-  currentLayer.addObject(polyline);
+  if (!polyline.layer){
+    currentLayer.addObject(polyline);
+  }
 }
 
-function removeObjectWithName(name: string, layer: ObjectGroup) {
+function getOrCreateObjectWithName(name: string, layer: ObjectGroup): MapObject {
   let existingObject = layer.objects.find(obj => obj.name === name);
   if (existingObject) {
-    tiled.log("Removing existing object with name: " + name);
-    layer.removeObject(existingObject);
+    return existingObject;
+  } else {
+    return new MapObject(name);
   }
 }
 

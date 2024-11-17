@@ -65,45 +65,53 @@
   // src/expression-to-polygon.ts
   var cos = Math.cos;
   var sin = Math.sin;
-  function genPolyline(posX, posY, numPoints2 = 10, expressionX = "t", expressionY, name = void 0, epsilon = 0.5) {
-    if (tiled.activeAsset.isTileMap == false) {
+  function genPolyline({
+    posX,
+    posY,
+    startT: startT2 = 0,
+    endT: endT2 = startT2 + 100,
+    expressionX = "t",
+    expressionY,
+    objectName = void 0,
+    epsilon = 0.5
+  }) {
+    if (!tiled.activeAsset.isTileMap) {
       tiled.log("No active layer selected");
       return;
     }
     let activeAsset = tiled.activeAsset;
     var currentLayer = activeAsset.currentLayer;
-    if (currentLayer == void 0 || currentLayer.isObjectLayer == false) {
+    if (!currentLayer || !currentLayer.isObjectLayer) {
       tiled.log("No active layer selected, or not an object layer");
       return;
     }
-    let resultsX = evaluateExpression(expressionX, numPoints2);
-    let resultsY = evaluateExpression(expressionY, numPoints2);
+    let resultsX = evaluateExpression(expressionX, startT2, endT2);
+    let resultsY = evaluateExpression(expressionY, startT2, endT2);
     let points = resultsX.map((x, i2) => ({ x, y: resultsY[i2] }));
-    let polyline = new MapObject();
+    let polyline = getOrCreateObjectWithName(objectName, currentLayer);
     polyline.x = posX;
     polyline.y = posY;
     polyline.shape = MapObject.Polyline;
     polyline.polygon = optimizePoints(points, epsilon);
-    if (name != "" && name != void 0) {
-      removeObjectWithName(name, currentLayer);
-      polyline.name = name;
-    }
     tiled.log("Optimized polygon: " + polyline.polygon.length);
-    currentLayer.addObject(polyline);
+    if (!polyline.layer) {
+      currentLayer.addObject(polyline);
+    }
   }
-  function removeObjectWithName(name, layer) {
+  function getOrCreateObjectWithName(name, layer) {
     let existingObject = layer.objects.find((obj) => obj.name === name);
     if (existingObject) {
-      tiled.log("Removing existing object with name: " + name);
-      layer.removeObject(existingObject);
+      return existingObject;
+    } else {
+      return new MapObject(name);
     }
   }
-  function evaluateExpression(expression, numPoints) {
+  function evaluateExpression(expression, startT = 0, endT) {
     tiled.log("Evaluating expression: " + expression);
     const sanitizedExpression = expression.replace(/[^-()\d/*+.\w\^]/g, "");
     tiled.log("Sanitized expression: " + sanitizedExpression);
-    return Array.from({ length: numPoints }, (_, i) => {
-      let t = i;
+    return Array.from({ length: endT - startT }, (_, i) => {
+      let t = startT + i;
       let replacedExpression = eval(sanitizedExpression.replace("t", t.toString()));
       let result = eval(replacedExpression);
       return result;
