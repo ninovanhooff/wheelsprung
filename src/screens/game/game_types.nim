@@ -363,3 +363,4 @@ proc getRiderBodies*(state: GameState): seq[Body] =
 proc destroy*(state: GameState) =
   print("Destroying game state")
   state.space.destroy()
+  state.space = nil

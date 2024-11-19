@@ -154,7 +154,7 @@ proc isInReplayMode*(state: GameState): bool =
 proc isInLiveMode*(state: GameState): bool =
   return state.inputProvider of LiveInputProvider
 
-proc handleInput*(state: GameState, onShowGameResultPressed: VoidCallBack, onRestartGamePressed: VoidCallback ) =
+proc handleInput*(state: GameState, onShowGameResultPressed: VoidCallback, onRestartGamePressed: VoidCallback ) =
   state.isThrottlePressed = false
 
   if state.gameResult.isSome:

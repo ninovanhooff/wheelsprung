@@ -242,7 +242,6 @@ proc newGameState(
 proc onResetGame(screen: GameScreen) =
   # onResetGame(screen.state)
   let oldState = screen.state
-  oldState.destroy()
   oldState.updateGhostRecording(oldState.coinProgress)
   screen.state = newGameState(
     level = oldState.level,
@@ -250,6 +249,7 @@ proc onResetGame(screen: GameScreen) =
     hintsenabled = oldState.hintsEnabled,
     ghostPlayback = some(pickBestGhost(oldState.ghostRecording, oldState.ghostPlayback))
   )
+  oldState.destroy()
 
   screen.state.updateCameraPid(snapToTarget = true)
 
@@ -331,12 +331,14 @@ method update*(gameScreen: GameScreen): int =
     onShowGameResultPressed = proc () = state.popOrPushGameResult(),
     onRestartGamePressed = proc () = gameScreen.onRestartGamePressed(),
   )
+  state = gameScreen.state # handleInput might have changed the state if onRestartGamePressed was called
   updateGameBikeSound(state)
   updateGameStartOverlay(state)
   updateGameReplayOverlay(state)
 
   if state.isGameStarted and not state.isGamePaused:
     updateAttitudeAdjust(state)
+    assert state.space.isNil == false
     state.space.step(timeStepSeconds64)
     
     state.ghostRecording.addPose(state)
@@ -368,7 +370,7 @@ method setResult*(gameScreen: GameScreen, screenResult: ScreenResult) =
   if screenResult.enableHints:
     gameScreen.state.enableHints()
   if screenResult.restartGame:
-    gameScreen.onRestartGamePressed()
+    gameScreen.state.resetGameOnResume = true
 
 method getRestoreState*(gameScreen: GameScreen): Option[ScreenRestoreState] =
   if gameScreen.replayInputRecording.isSome:
