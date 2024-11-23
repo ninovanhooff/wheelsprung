@@ -7,5 +7,8 @@
     "search.exclude": {
         "**/stderr.txt": true,
         "**/stdout.txt": true
-    }
+    },
+    "cSpell.words": [
+        "Unflipped"
+    ]
 }

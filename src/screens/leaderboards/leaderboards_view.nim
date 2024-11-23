@@ -2,6 +2,7 @@ import playdate/api
 import leaderboards_types
 import common/graphics_utils
 import cache/font_cache
+import cache/bitmap_cache
 
 proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
   if not screen.isDirty and not forceRedraw: return
@@ -9,7 +10,7 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
   if screen.leaderboards.len == 0:
     return
   let leaderboard = screen.leaderboards[screen.currentLeaderboardIdx]
-  gfx.clear(kColorWhite)
+  getOrLoadBitmap(BitmapId.LeaderboardsBg).draw(0,0, kBitmapUnflipped)
   gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
 
   gfx.drawTextAligned(leaderboard.boardName, 200, 10)
