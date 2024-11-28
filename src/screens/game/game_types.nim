@@ -338,10 +338,10 @@ proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, f
     raise newException(RangeDefect, "Box mass must be greater than 0")
   result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, bitmapTableId: bitmapTableId)
 
-proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float): DynamicCircleSpec =
+proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float, bitmapTableId: Option[BitmapTableId]): DynamicCircleSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Circle mass must be greater than 0")
-  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction)
+  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction, bitmapTableId: bitmapTableId)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(

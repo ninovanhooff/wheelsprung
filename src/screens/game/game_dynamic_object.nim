@@ -7,7 +7,7 @@ import common/utils
 import common/graphics_utils
 import game_types
 
-proc adddynamicObjects*(state: GameState) =
+proc addDynamicObjects*(state: GameState) =
   # Add the polygons as segment shapes to the physics space
   for obj in state.level.dynamicBoxes:
     state.dynamicObjects.add(
@@ -33,7 +33,8 @@ proc adddynamicObjects*(state: GameState) =
           friction = obj.friction,
           collisionType=GameCollisionTypes.DynamicObject,
           shapeFilter = GameShapeFilters.DynamicObject
-        )[1] # get shape from tuple
+        )[1], # get shape from tuple
+        bitmapTableId = obj.bitmapTableId,
       )
     )
 
@@ -70,6 +71,13 @@ proc drawDynamicObjects*(state: GameState) =
         drawPolyShape(polyShape, camera)
     elif shape.kind == cpCircleShape:
       let circle = cast[CircleShape](shape)
-      drawCircle(camera, circle.body.position + circle.offset, circle.radius, circle.body.angle, kColorBlack)
+      if obj.bitmapTable.isSome:
+        let body = circle.body
+        obj.bitmapTable.get.drawRotated(
+          body.position - camera + circle.offset,
+          body.angle,
+        )
+      else:
+        drawCircle(camera, circle.body.position + circle.offset, circle.radius, circle.body.angle, kColorBlack)
     else:
       print "drawDynamicObjects: Unknown shape kind: ", shape.kind

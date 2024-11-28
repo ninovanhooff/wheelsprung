@@ -231,7 +231,7 @@ proc newGameState(
   addGameCoins(state)
   addGravityZones(state)
   initGameStar(state)
-  state.adddynamicObjects()
+  state.addDynamicObjects()
 
   if background.isNil:
     initGameBackground(state)

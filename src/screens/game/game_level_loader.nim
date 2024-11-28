@@ -27,7 +27,7 @@ import common/lcd_patterns
 type
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
-    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32
+    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32, BowlingBall = 10'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -239,7 +239,7 @@ proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): V
   let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
   return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
 
-proc loadAsDynamicObject(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
+proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
@@ -249,6 +249,24 @@ proc loadAsDynamicObject(level: Level, obj: LevelObjectEntity, bitmapTableId: Op
     position = centerV, 
     size = size,
     mass = obj.massMultiplier * size.area * 0.005f,
+    angle = obj.rotation.degToRad,
+    friction = obj.friction,
+    bitmapTableId = bitmapTableId,
+  ))
+  return true
+
+
+proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
+  if obj.width < 1 or obj.height < 1:
+    return false
+
+  let centerV = v(obj.x.Float + obj.width/2, obj.y.Float + obj.height / 2)
+  let radius = obj.width.float32 * 0.5f
+  let area = PI * radius * radius 
+  level.dynamicCircles.add(newDynamicCircleSpec(
+    position = centerV, 
+    radius = radius,
+    mass = obj.massMultiplier * area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
     bitmapTableId = bitmapTableId,
@@ -303,7 +321,9 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.gravityZones.add(spec)
     of ClassIds.TallBook:
       # todo: should a default mass be set?
-      return loadAsDynamicObject(level, obj, some(BitmapTableId.TallBook))
+      return loadAsDynamicBox(level, obj, some(BitmapTableId.TallBook))
+    of ClassIds.BowlingBall:
+      return loadAsDynamicCircle(level, obj, some(BitmapTableId.BowlingBall))
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
@@ -315,7 +335,7 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
     return false
 
   if obj.`type` == "DynamicObject":
-    return loadAsDynamicObject(level, obj)
+    return loadAsDynamicBox(level, obj)
   else:
     let objOffset: Vertex = (obj.x, obj.y)
     let width = obj.width
@@ -347,6 +367,7 @@ proc loadEllipse(level: var Level, obj: LevelObjectEntity): bool =
     mass = obj.massMultiplier * area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
+    bitmapTableId = none(BitmapTableId),
   ))
   return true
 

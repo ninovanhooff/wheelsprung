@@ -19,6 +19,7 @@ type
     RiderLowerLeg = "images/rider/lower-leg"
     Killer = "images/killer/killer"
     TallBook = "images/dynamic_objects/tall-book"
+    BowlingBall = "images/dynamic_objects/bowling-ball"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
     Nuts = "images/nuts"
