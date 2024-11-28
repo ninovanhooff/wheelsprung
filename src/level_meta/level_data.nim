@@ -46,7 +46,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Hooked", path="levels/hooked.wmj", theme= Bookshelf, hash="A19C795ACD4E767DB78059B362FAE50C"),
   newLevelMeta(name= "Upside Down Hook", path="levels/upside_down_hook.wmj", theme= Bookshelf, hash="07E579B5F483454DA8317F2F1277E9F0"),
   newLevelMeta(name= "Backflip", path="levels/backflip.wmj", theme= Bookshelf, hash="BEFEAFDE2090C77399C2115F8BACA82C"),
-  newLevelMeta(name= "Dominoes", path="levels/dominoes.wmj", theme= Bookshelf, hash="19FF82C50A0ED49B64617535113EF0C3"),
+  newLevelMeta(name= "Dominoes", path="levels/dominoes.wmj", theme= Bookshelf, hash="0589E5384259D4A73AD378C4C4462765"),
 
 
   newLevelMeta(name= "Tutorial: Gravity", path="levels/tutorial_gravity.wmj", theme= Space, hash="D515B80D7961D381F24784F95FE566D9"),
@@ -56,15 +56,15 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Killveyor", path="levels/killveyor.wmj", theme= Space, hash="01F13539BF2C80BA51C6493C8EBE7D3E"),
   newLevelMeta(name= "Return to sender", path="levels/return_to_sender.wmj", theme= Space, hash="38786445A7556330267493A3984ED90E"),
 
-  newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.wmj", theme= Plants, hash="8794DC01BABFDA156334585A86EF000B"),
+  newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.wmj", theme= Plants, hash="601591B5D06C97A692A7A8989C632646"),
   newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.wmj", theme= Plants, hash="6C2F198E9F13954B832ECC78D605BCBC"),
   newLevelMeta(name= "Half Pipe", path="levels/halfpipe.wmj", theme= Plants, hash="052A6854A05D68DC806296A6E5C64F70"),
   newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.wmj", theme= Plants, hash="DC16167AB074178813D718F340A11E53"),
 
   newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.wmj", theme= Desk, hash="65492135DDF3E619FF3790D8B09727D8"),
   newLevelMeta(name= "Leg Up", path="levels/leg_up.wmj", theme= Desk, hash="0B16E215044C42D19BDFC8F3CEA158F1"),
-  newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.wmj", theme= Desk, hash="49CC4A72B29B501B2B3ACCB68E678248"),
-  newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.wmj", theme= Desk, hash="8FFCAD8B3D12CA55EEE0A99F1FFCBE37")
+  newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.wmj", theme= Desk, hash="4659C8AF8FFC51E4B58F3C5B9DC44315"),
+  newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.wmj", theme= Desk, hash="63ECFDC03365C70AF23079F5FEDEA620")
 ]
   .map(meta => (meta.path, meta)) # use path as key
   .toOrderedTable
