@@ -42,6 +42,13 @@ The resulting lib is placed in the [lib](./lib) folder.
 
 ## Development
 
+### Level hash updater
+
+```
+./scripts/run_level_updater.sh
+```
+
+### Tiled extension
 To build the Tiled extension every time you save changes to the typescript files:
 
 ```

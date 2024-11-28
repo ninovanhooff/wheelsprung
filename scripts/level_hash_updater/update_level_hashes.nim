@@ -6,7 +6,8 @@ import std/paths
 import std/strutils
 import tables
 
-const relativeLevelDataPath = "../src/level_meta/level_data.nim"
+const relativeLevelDataPath = "./src/level_meta/level_data.nim"
+const relativeSourcePath = "./Source"
 
 proc updateHash(oldHash: string, newHash: string) =
   try:
@@ -18,22 +19,26 @@ proc updateHash(oldHash: string, newHash: string) =
 
 proc testPath(path: string) =
   try:
-    let jsonString = readFile(path)
+    let fullPath = (Path(relativeSourcePath) / Path(path)).string
+    let jsonString = readFile(fullPath)
     let actualHash = jsonString.levelContentHash()
     let expectedHash = officialLevels[path].contentHash
     if actualHash != expectedHash:
       echo "updating: ", path, " expected: ", expectedHash, " got: ", actualHash
-      updateHash(expectedHash, actualHash)
+      try:
+        updateHash(expectedHash, actualHash)
+      except:
+        echo "Failed to update hash for ", path, getCurrentExceptionMsg()
 
       # update Flatty file
       let levelEntity = parseJsonLevelContents(jsonString)
       let flattyString = levelEntity.toFlatty()
-      let flattyPath = Path(path).changeFileExt("flatty")
+      let flattyPath = Path(fullPath).changeFileExt("flatty")
       writeFile(flattyPath.string, flattyString)
     else:
       echo "up to date: ", path
   except:
-    echo "Failed to load file: ", getCurrentExceptionMsg()
+    echo "Failed to process file: ", getCurrentExceptionMsg()
 
 proc updateHashes() =
   echo "===== Updating Level Hashes ====="

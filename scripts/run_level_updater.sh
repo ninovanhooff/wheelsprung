@@ -8,7 +8,4 @@ SOURCE_DIR="${SCRIPT_DIR}/../source"
 
 echo "level salt run_updater $WHEELSPRUNG_LEVEL_SALT"
 
-# switch to source dire because level data definitions are relative to source directory
-cd "$SOURCE_DIR" || exit
-
-nim c --skipUserCfg --skipParentCfg -r "../scripts/level_hash_updater/update_level_hashes.nim"
+nim c -r "./scripts/level_hash_updater/update_level_hashes.nim"
