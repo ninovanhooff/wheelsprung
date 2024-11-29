@@ -13,7 +13,8 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
   getOrLoadBitmap(BitmapId.LeaderboardsBg).draw(0,0, kBitmapUnflipped)
   gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
 
-  gfx.drawTextAligned(leaderboard.boardName, 200, 10)
+  # Board Name
+  gfx.drawTextAligned(leaderboard.boardName, 200, 14)
 
   case leaderboard.state.kind:
   of LeaderboardStateKind.Loading:
@@ -32,10 +33,11 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
         fillRoundRect(5, y - 2, LCD_COLUMNS - 10, 24, 4, kColorBlack)
       gfx.drawTextAligned($score.rank, 65, y, kTextAlignmentRight)
       gfx.drawText(score.player, 80, y)
-      gfx.drawText(score.timeString, 290, y)
+      gfx.drawText(score.timeString, 286, y)
       y += 24
     gfx.setDrawMode(kDrawModeCopy)
 
+    # Page navigation
     gfx.setFont(getOrLoadFont(FontId.Roobert10Bold))
     if scores.len > LEADERBOARDS_PAGE_SIZE:
       gfx.drawTextAligned(
@@ -43,6 +45,7 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
         200, 180
       )
   
+  # Screen navigation
   gfx.setFont(getOrLoadFont(FontId.Roobert10Bold))
-  gfx.drawTextAligned("⬆️⬇️ Track | Ⓑ Back", 200, 220)
+  gfx.drawTextAligned("Ⓑ Back | ⬆️⬇️ Track", 200, 216)
   
