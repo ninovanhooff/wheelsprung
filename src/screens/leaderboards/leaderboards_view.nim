@@ -11,10 +11,12 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     return
   let leaderboard = screen.leaderboards[screen.currentLeaderboardIdx]
   getOrLoadBitmap(BitmapId.LeaderboardsBg).draw(0,0, kBitmapUnflipped)
-  gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
 
   # Board Name
+  gfx.setFont(getOrLoadFont(FontId.Fredoka22Bold))
   gfx.drawTextAligned(leaderboard.boardName, 200, 14)
+
+  gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
 
   case leaderboard.state.kind:
   of LeaderboardStateKind.Loading:

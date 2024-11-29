@@ -18,6 +18,22 @@ let dummyScoreboards* = {
     ],
     lastUpdated: 783437075
   ),
+  "tutorialturnaround": PDScoresList(
+    boardID: "tutorialturnaround",
+    scores: @[
+      PDScore(player: "JonathanSmithSenior1", value: 995_619, rank: 1000),
+      PDScore(player: "Bordan", value: 995_601, rank: 1001),
+      PDScore(player: "Black", value: 995_600, rank: 1002),
+      PDScore(player: "Gill", value: 994_997, rank: 1003),
+      PDScore(player: "Jones", value: 994_996, rank: 1004),
+      PDScore(player: "JonathanSmithJunior2", value: 994_995, rank: 1005),
+      PDScore(player: "Jonny", value: 994_994, rank: 1006),
+      PDScore(player: "James", value: 994_993, rank: 1007),
+      PDScore(player: "Nino", value: 994_992, rank: 1008),
+      PDScore(player: "Jasmine", value: 994_991, rank: 1009),
+    ],
+    lastUpdated: 783437075
+  ),
   "hills" : PDScoresList(
     boardID: "hills",
     scores: @[
