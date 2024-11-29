@@ -30,7 +30,7 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
     for i in startIdx ..< endIdx:
       let score = scores[i]
       if score.isCurrentPlayer:
-        fillRoundRect(5, y - 2, LCD_COLUMNS - 10, 24, 4, kColorBlack)
+        fillRoundRect(20, y + 19, LCD_COLUMNS - 47, 4, 2, kColorBlack)
       gfx.drawTextAligned($score.rank, 65, y, kTextAlignmentRight)
       gfx.drawText(score.player, 80, y)
       gfx.drawText(score.timeString, 286, y)
