@@ -8,4 +8,4 @@ SOURCE_DIR="${SCRIPT_DIR}/../source"
 
 echo "level salt run_updater $WHEELSPRUNG_LEVEL_SALT"
 
-nim c -r "./scripts/level_hash_updater/update_level_hashes.nim"
+nim c -d:useHostOS -r "./scripts/level_hash_updater/update_level_hashes.nim"
