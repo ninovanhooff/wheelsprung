@@ -136,7 +136,7 @@ proc updateInput(screen: LeaderboardsScreen) =
     screen.isDirty = true
   elif kButtonRight in buttonState.pushed:
     screen.currentLeaderboardPageIdx += 1
-    if screen.scoreIdxHigh > screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE:
+    if screen.scoreIdxHigh >= screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE:
       screen.isDirty = true
     else:
       screen.currentLeaderboardPageIdx -= 1
