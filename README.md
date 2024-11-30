@@ -13,11 +13,13 @@ A physics-based motocross-platformer for the Playdate console. Made with the Nim
 A public level editor is available. See the [guide on the Wiki][editor] for installation and usage instructions.
 
 ## Installation
+NOTE: Although this repository is publicly available, the level files are not. You may be able to compile the project, but will have to provide your own level files to run the game.
+
 This project should work on MacOS and Windows. See [Playdate-Nim][pdnim] for installation instructions.
 
 
 ## Troubleshooting
-
+As noted above, the level files are not included. This may be a cause for crashes.
 
 ### Make sure you can run the playdate-nim sample project
 See [Playdate-Nim][pdnim] for installation instructions.
@@ -41,6 +43,8 @@ The resulting lib is placed in the [lib](./lib) folder.
 [editor]: https://github.com/ninovanhooff/wheelsprung/wiki/Level-Editor
 
 ## Development
+As noted above, the level files are not included. This may be a cause for crashes.
+
 
 ### Level hash updater
 
