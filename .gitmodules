@@ -1,4 +1,4 @@
-[submodule "source/levels"]
+[submodule "support/levels"]
 	path = support/levels
 	url = https://github.com/ninovanhooff/wheelsprung-levels
 	branch = main
