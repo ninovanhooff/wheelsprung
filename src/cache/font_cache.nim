@@ -10,6 +10,7 @@ type
     M6X11 = "fonts/m6x11-12"
     Roobert10Bold = "fonts/Roobert-10-Bold"
     Roobert11Medium = "fonts/Roobert-11-Medium"
+    Roobert11Bold = "fonts/Roobert-11-Bold"
     Fredoka22Bold = "fonts/Fredoka-22-Bold"
   # a table mapping font path to LCDFont
   FontCache = TableRef[string, LCDFont]

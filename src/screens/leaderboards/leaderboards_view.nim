@@ -13,7 +13,7 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
   getOrLoadBitmap(BitmapId.LeaderboardsBg).draw(0,0, kBitmapUnflipped)
 
   # Board Name
-  gfx.setFont(getOrLoadFont(FontId.Fredoka22Bold))
+  gfx.setFont(getOrLoadFont(FontId.Roobert11Bold))
   gfx.drawTextAligned(leaderboard.boardName, 200, 14)
 
   gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
