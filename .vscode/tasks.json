@@ -57,7 +57,7 @@
       "group": {
         "kind": "none"
       }
-    }
+    },
     {
       "label": "Reboot Device to Data disk",
       "type": "shell",
