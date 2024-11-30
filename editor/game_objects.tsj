@@ -102,6 +102,12 @@
          "image":"marble.png",
          "imageheight":20,
          "imagewidth":20,
+         "properties":[
+                {
+                 "name":"massMultiplier",
+                 "type":"float",
+                 "value":2.5
+                }],
          "type":"DynamicObject"
         }, 
         {
