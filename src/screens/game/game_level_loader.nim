@@ -27,7 +27,7 @@ import common/lcd_patterns
 type
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
-    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32, BowlingBall = 10'u32
+    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32, BowlingBall = 10'u32, Marble = 11'u32, TennisBall = 12'u32,
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -324,6 +324,10 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       return loadAsDynamicBox(level, obj, some(BitmapTableId.TallBook))
     of ClassIds.BowlingBall:
       return loadAsDynamicCircle(level, obj, some(BitmapTableId.BowlingBall))
+    of ClassIds.Marble:
+      return loadAsDynamicCircle(level, obj, some(BitmapTableId.Marble))
+    of ClassIds.TennisBall:
+      return loadAsDynamicCircle(level, obj, some(BitmapTableId.TennisBall))
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =

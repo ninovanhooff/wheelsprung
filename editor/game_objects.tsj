@@ -9,7 +9,7 @@
  "name":"Game Objects",
  "objectalignment":"topleft",
  "spacing":0,
- "tilecount":10,
+ "tilecount":12,
  "tiledversion":"1.11.0",
  "tileheight":140,
  "tiles":[
@@ -95,6 +95,20 @@
          "image":"bowling_ball.png",
          "imageheight":95,
          "imagewidth":95,
+         "type":"DynamicObject"
+        }, 
+        {
+         "id":10,
+         "image":"marble.png",
+         "imageheight":20,
+         "imagewidth":20,
+         "type":"DynamicObject"
+        }, 
+        {
+         "id":11,
+         "image":"tennis_ball.png",
+         "imageheight":40,
+         "imagewidth":40,
          "type":"DynamicObject"
         }],
  "tilewidth":95,
