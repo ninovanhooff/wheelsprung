@@ -9,6 +9,10 @@ game.map
 # Blender autosave files
 **/*.blend[0-9]*
 
+# levels
+# the levels folder contains a .gitkeep which is checked in, but otherwise the contents are generated and should be ignored
+source/levels
+
 # editor
 editor/extensions/node_modules/*
 editor/wheelsprung_template.tiled-session

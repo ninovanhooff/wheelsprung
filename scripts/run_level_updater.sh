@@ -2,7 +2,6 @@
 
 # Get the absolute path of the directory containing the current file
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-SOURCE_DIR="${SCRIPT_DIR}/../source"
 
 . "$SCRIPT_DIR/set_release_env.sh"
 
