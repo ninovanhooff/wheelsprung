@@ -37,17 +37,17 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Tutorial: Turning", path="levels/tutorial_turn_around.wmj", theme= Kitchen, hash="E751FAC8747A40C9B7B81E108B71A73A", boardId = "tutorialturnaround"),
   
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.wmj", theme= Bath, hash="FAF07A1B8B14F20E349AAD05F0FC7A8D"),
+  newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.wmj", theme= Desk, hash="63ECFDC03365C70AF23079F5FEDEA620"),
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.wmj", theme= Bath, hash="647A30204555BF33C7CD9BEFE17002E1"),
   newLevelMeta(name= "Ripple Ride", path="levels/hills.wmj", theme= Bath, hash="EE9CE18CF99447145C813C6F52417B9A"),
   newLevelMeta(name= "Laundry Loop", path="levels/globe_of_death.wmj", theme= Bath, hash="56FC52E55FAFF1A1D762B9B529ABC0AB"),
   newLevelMeta(name= "Ripcurl Rush", path="levels/looping.wmj", theme= Bath, hash="4EAA4829FCD2AB20D79455849BC69C65", boardId = "hills"),
 
-
+  newLevelMeta(name= "Novel Navigations", path="levels/novel_navigations.wmj", theme= Bookshelf, hash="A14ACBBE8662F36634EABCA4605765D1"),
   newLevelMeta(name= "Hooked", path="levels/hooked.wmj", theme= Bookshelf, hash="A19C795ACD4E767DB78059B362FAE50C"),
   newLevelMeta(name= "Upside Down Hook", path="levels/upside_down_hook.wmj", theme= Bookshelf, hash="07E579B5F483454DA8317F2F1277E9F0"),
   newLevelMeta(name= "Backflip", path="levels/backflip.wmj", theme= Bookshelf, hash="BEFEAFDE2090C77399C2115F8BACA82C"),
   newLevelMeta(name= "Dominoes", path="levels/dominoes.wmj", theme= Bookshelf, hash="0589E5384259D4A73AD378C4C4462765"),
-
 
   newLevelMeta(name= "Tutorial: Gravity", path="levels/tutorial_gravity.wmj", theme= Space, hash="D515B80D7961D381F24784F95FE566D9"),
   newLevelMeta(name= "Wall Rider", path="levels/wall_rider.wmj", theme= Space, hash="289CE0F59B13B17C6C24E11366ED99C0"),
@@ -56,15 +56,16 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Killveyor", path="levels/killveyor.wmj", theme= Space, hash="01F13539BF2C80BA51C6493C8EBE7D3E"),
   newLevelMeta(name= "Return to sender", path="levels/return_to_sender.wmj", theme= Space, hash="38786445A7556330267493A3984ED90E"),
 
-  newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.wmj", theme= Plants, hash="601591B5D06C97A692A7A8989C632646"),
   newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.wmj", theme= Plants, hash="6C2F198E9F13954B832ECC78D605BCBC"),
+  newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.wmj", theme= Plants, hash="601591B5D06C97A692A7A8989C632646"),
   newLevelMeta(name= "Half Pipe", path="levels/halfpipe.wmj", theme= Plants, hash="052A6854A05D68DC806296A6E5C64F70"),
   newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.wmj", theme= Plants, hash="DC16167AB074178813D718F340A11E53"),
 
   newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.wmj", theme= Desk, hash="65492135DDF3E619FF3790D8B09727D8"),
-  newLevelMeta(name= "Leg Up", path="levels/leg_up.wmj", theme= Desk, hash="0B16E215044C42D19BDFC8F3CEA158F1"),
+  
+  newLevelMeta(name = "Tight Squeeze", path="levels/tight_squeeze.wmj", theme= Desk, hash="19025E1A9F0859EB4A67C81EF6A1B3C0"),
+  newLevelMeta(name = "Time Traveler", path="levels/time_traveler.wmj", theme= Desk, hash="71FA68AE543E10364566B59EE0521684"),
   newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.wmj", theme= Desk, hash="4659C8AF8FFC51E4B58F3C5B9DC44315"),
-  newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.wmj", theme= Desk, hash="63ECFDC03365C70AF23079F5FEDEA620")
 ]
   .map(meta => (meta.path, meta)) # use path as key
   .toOrderedTable

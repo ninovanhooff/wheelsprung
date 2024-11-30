@@ -10,7 +10,6 @@ import input/input_manager
 import common/shared_types
 import data_store/configuration
 import input/input_response
-import screens/game_result/game_result_screen
 import game_input_recording
 
 const

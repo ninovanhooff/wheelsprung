@@ -6,7 +6,7 @@ import options
 import std/sequtils
 import chipmunk7
 import game_types
-import common/[graphics_types, shared_types]
+import common/graphics_types
 import game_bike, game_finish, game_ghost, game_killer, game_coin, game_gravity_zone
 import overlay/game_start_overlay
 import overlay/game_ended_overlay
