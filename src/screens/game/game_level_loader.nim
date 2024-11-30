@@ -470,7 +470,7 @@ proc loadLevel*(path: string): Level =
   )
   
   markStartTime()
-  let (levelEntity, contentHash) = if path.endsWith(jsonLevelFileExtension): 
+  let (levelEntity, contentHash) = if path.endsWith(jsonLevelFileExtensionWithDot): 
     parseJsonLevel(path)
   else: 
     parseFlattyLevel(path)
