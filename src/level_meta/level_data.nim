@@ -56,7 +56,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Gravity Vault", path="levels/gravity_vault.flatty", theme= Space, hash="99865E7F90943DB1DC7EBC793DD4FC41"),
   newLevelMeta(name= "Marble Vault", path="levels/marble_vault.flatty", theme= Space, hash="8F041544B9888D460BA22A2799E81552"),
   newLevelMeta(name= "Killveyor", path="levels/killveyor.flatty", theme= Space, hash="854AAFEFFD113BB092E52C3187FFAECC"),
-  newLevelMeta(name= "Return to sender", path="levels/return_to_sender.flatty", theme= Space, hash="49FFD120D704A5898CD5BEE2CD8A3805"),
+  newLevelMeta(name= "Return to sender", path="levels/return_to_sender.flatty", theme= Space, hash="A31292554F624005229E5FAA85D8ECCD"),
 
   newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.flatty", theme= Plants, hash="6C2AFA63DB64AD88EB324918BEA8B557"),
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.flatty", theme= Plants, hash="6E5F2C44C7ED48F25ED86E834C68149B"),
