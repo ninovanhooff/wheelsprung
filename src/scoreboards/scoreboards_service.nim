@@ -16,7 +16,7 @@ import common/shared_types
 import common/utils
 
 const 
-  useDummyBoards = false
+  useDummyBoards = true
   REFRESH_TIME_THRESHOLD_SECONDS: uint32 = 3600
     ## Time in seconds after which a scoreboard is considered outdated and should be refreshed
 
