@@ -10,7 +10,7 @@ proc addInputFrame*(recording: InputRecording, currentButtons: PDButtons, idx: i
     print fmt"ERROR: addInputFrame called with idx {idx} but recording has {recording.buttons.len} frames"
 
 
-method getButtonState*(provider: InputProvider, grameIdx: int32): PDButtonState {.base.} =
+method getButtonState*(provider: InputProvider, frameIdx: int32): PDButtonState {.base.} =
   print fmt"ERROR: getButtonState not implemented for {provider.repr}"
   return default(PDButtonState)
 

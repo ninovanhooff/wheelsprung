@@ -153,46 +153,45 @@ proc isInReplayMode*(state: GameState): bool =
 proc isInLiveMode*(state: GameState): bool =
   return state.inputProvider of LiveInputProvider
 
-proc handleInput*(state: GameState, onShowGameResultPressed: VoidCallback, onRestartGamePressed: VoidCallback ) =
+proc handleInput*(state: GameState, liveButtonState: PDButtonState, onShowGameResultPressed: VoidCallback, onRestartGamePressed: VoidCallback ) =
   state.isThrottlePressed = false
 
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,
     # but any button can be pressed to navigate to the result screen
     # always take the button state from the system, we don't want this controlled by the recorded input
-    let buttonState = playdate.system.getButtonState()
 
     if state.isInLiveMode:
-      if kButtonA in buttonState.pushed:
+      if kButtonA in liveButtonState.pushed:
         onShowGameResultPressed()
-      elif kButtonB in buttonState.pushed:
+      elif kButtonB in liveButtonState.pushed:
         onRestartGamePressed()
     return
 
   if state.isGamePaused:
     return
 
-  let buttonState = state.inputProvider.getButtonState(state.frameCounter)
+  let providedButtonState = state.inputProvider.getButtonState(state.frameCounter)
 
-  if not state.isGameStarted and buttonState.pushed.anyButton:
+  if not state.isGameStarted and providedButtonState.pushed.anyButton:
     state.isGameStarted = true
 
-  if actionThrottle in buttonState.current:
+  if actionThrottle in providedButtonState.current:
     state.isThrottlePressed = true
     state.onThrottle()
-  if actionBrake in buttonState.current:
+  if actionBrake in providedButtonState.current:
     state.onBrake()
   
   if state.isAccelerometerEnabled:
     state.setAttitudeAdjust(getAccelerometerX())
   else:
-    if actionLeanLeft in buttonState.current:
+    if actionLeanLeft in providedButtonState.current:
       state.onButtonAttitudeAdjust(ROT_CCW)
-    elif actionLeanRight in buttonState.current:
+    elif actionLeanRight in providedButtonState.current:
       state.onButtonAttitudeAdjust(ROT_CW)
     else:
       state.onButtonAttitudeAdjust(0.0)
 
-  if actionFlipDirection in buttonState.pushed:
+  if actionFlipDirection in providedButtonState.pushed:
     echo("Flip direction pressed")
     state.onFlipDirection()
