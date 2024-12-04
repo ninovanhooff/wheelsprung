@@ -17,14 +17,14 @@ proc initGameSound*() =
 
   ## Load the sounds
   try:
-    finishPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish")
-    coinPlayer = playdate.sound.newSamplePlayer("/audio/pickup/coin")
-    starPlayer = playdate.sound.newSamplePlayer("/audio/pickup/star")
-    finishUnlockPlayer = playdate.sound.newSamplePlayer("/audio/finish/finish_unlock")
-    for i in 1..9:
-      collisionPlayers.add(playdate.sound.newSamplePlayer("/audio/collision/collision-0" & $i))
+    finishPlayer = getOrLoadSamplePlayer("/audio/finish/finish")
+    coinPlayer = getOrLoadSamplePlayer("/audio/pickup/coin")
+    starPlayer = getOrLoadSamplePlayer("/audio/pickup/star")
+    finishUnlockPlayer = getOrLoadSamplePlayer("/audio/finish/finish_unlock")
+    for i in 1..2:
+      collisionPlayers.add(getOrLoadSamplePlayer("/audio/collision/collision-0" & $i))
     for i in 1..3:
-      screamPlayers.add(playdate.sound.newSamplePlayer("/audio/scream/wilhelm_scream-0" & $i))
+      screamPlayers.add(getOrLoadSamplePlayer("/audio/scream/wilhelm_scream-0" & $i))
 
   except:
     quit(getCurrentExceptionMsg(), 1)
