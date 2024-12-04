@@ -24,17 +24,18 @@ function call_spriterot {
   spriterot -a "$algorithm" -r "$rotations" --width "$size" --height "$size" -o "$output_file" "$input_file"
 }
 
-call_spriterot "bike-wheel" 22 64
-call_spriterot "bike-ghost-wheel" 22 64
-call_spriterot "bike-chassis" 48 64
-call_spriterot "rider/upper-arm" 14 64
-call_spriterot "rider/lower-arm" 11 64 linear
-call_spriterot "rider/upper-leg" 16 64
-call_spriterot "rider/lower-leg" 14 64
-call_spriterot "rider/tail" 27 64
-call_spriterot "rider/torso" 21 64
-call_spriterot "rider/head" 22 64
-call_spriterot "rider/ghost-head" 20 64
-call_spriterot "killer/killer" 20 64
-call_spriterot "dynamic_objects/tall-book" 140 240
+# call_spriterot "bike-wheel" 22 64
+# call_spriterot "bike-ghost-wheel" 22 64
+# call_spriterot "bike-chassis" 48 64
+# call_spriterot "rider/upper-arm" 14 64
+# call_spriterot "rider/lower-arm" 11 64 linear
+# call_spriterot "rider/upper-leg" 16 64
+# call_spriterot "rider/lower-leg" 14 64
+# call_spriterot "rider/tail" 27 64
+# call_spriterot "rider/torso" 21 64
+# call_spriterot "rider/head" 22 64
+# call_spriterot "rider/ghost-head" 20 64
+# call_spriterot "killer/killer" 20 64
+# call_spriterot "dynamic_objects/tall-book" 140 240
+# call_spriterot "dynamic_objects/marble" 20 64
 
