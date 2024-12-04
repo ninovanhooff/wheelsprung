@@ -9,9 +9,9 @@
  "name":"Game Objects",
  "objectalignment":"topleft",
  "spacing":0,
- "tilecount":12,
+ "tilecount":13,
  "tiledversion":"1.11.0",
- "tileheight":140,
+ "tileheight":175,
  "tiles":[
         {
          "id":0,
@@ -115,6 +115,13 @@
          "image":"tennis_ball.png",
          "imageheight":40,
          "imagewidth":40,
+         "type":"DynamicObject"
+        }, 
+        {
+         "id":12,
+         "image":"tall_plank.png",
+         "imageheight":175,
+         "imagewidth":10,
          "type":"DynamicObject"
         }],
  "tilewidth":95,

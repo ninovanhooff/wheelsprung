@@ -37,5 +37,6 @@ function call_spriterot {
 # call_spriterot "rider/ghost-head" 20 64
 # call_spriterot "killer/killer" 20 64
 # call_spriterot "dynamic_objects/tall-book" 140 240
+call_spriterot "dynamic_objects/tall-plank" 175 240
 # call_spriterot "dynamic_objects/marble" 20 64
 
