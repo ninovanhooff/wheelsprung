@@ -23,8 +23,8 @@ proc initGameSound*() =
     finishUnlockPlayer = getOrLoadSamplePlayer("/audio/finish/finish_unlock")
     for i in 1..2:
       collisionPlayers.add(getOrLoadSamplePlayer("/audio/collision/collision-0" & $i))
-    for i in 1..3:
-      screamPlayers.add(getOrLoadSamplePlayer("/audio/scream/wilhelm_scream-0" & $i))
+    for i in 1..2:
+      screamPlayers.add(getOrLoadSamplePlayer("/audio/fall/fall-0" & $i))
 
   except:
     quit(getCurrentExceptionMsg(), 1)
