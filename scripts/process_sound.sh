@@ -18,7 +18,8 @@ process_sounds() {
 }
 
 # Call the function with the specified input and output directories
-process_sounds "support/sounds/thud" "source/audio/thud" "$1"
+# process_sounds "support/sounds/thud" "source/audio/thud" "$1"
+process_sounds "support/sounds/star" "source/audio/pickup" "$1"
 
 # when uncommenting make sure no doubles wav files for music that is used as mpe)
 #process_sounds "support/music" "source/audio/music" "$1"

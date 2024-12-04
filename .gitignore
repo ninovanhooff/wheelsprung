@@ -6,6 +6,7 @@ wheelsprung.pdx.zip
 game.map
 # Audacity autosave files
 **.aup3-wal
+**.aup3-shm
 # Blender autosave files
 **/*.blend[0-9]*
 
