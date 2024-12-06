@@ -45,7 +45,8 @@ proc addGameCoins*(state: GameState) =
     state.remainingCoins.add(myDeepCopy(coin))
   state.space.addCoins(state.remainingCoins)
 
-proc drawCoins*(remainingCoins: seq[Coin], camVertex: Vertex) =
+proc drawCoins*(remainingCoins: seq[Coin], camState: CameraState) =
+  let camVertex = camState.camVertex
   let viewport = offsetScreenRect(camVertex)
   for coin in remainingCoins:
       if not viewport.intersects(coin.bounds):
@@ -54,6 +55,9 @@ proc drawCoins*(remainingCoins: seq[Coin], camVertex: Vertex) =
       let coinScreenPos = coin.position - camVertex
       let coinIndex = (coin.coinIndex + coin.count) mod coinsImageTable.frameCount
       let coinBitmap = coinsImageTable.getBitmap(coinIndex)
+      # animate highlight at 1/4 speed, starting from the coinIndex
+      let highlightImage = getOrLoadBitmapTable(BitmapTableId.PickupHighlight).getBitmap(coinIndex + camState.frameCounter div 4)
+      highlightImage.draw(coinScreenPos[0] - 5, coinScreenPos[1] - 5, kBitmapUnflipped)
       coinBitmap.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
 
 let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =

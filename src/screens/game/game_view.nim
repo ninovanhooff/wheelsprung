@@ -7,7 +7,7 @@ import std/sequtils
 import chipmunk7
 import game_types
 import common/graphics_types
-import game_bike, game_finish, game_ghost, game_killer, game_coin, game_gravity_zone
+import game_bike, game_finish, game_ghost, game_killer, game_coin, game_star, game_gravity_zone
 import overlay/game_start_overlay
 import overlay/game_ended_overlay
 import overlay/game_replay_overlay
@@ -40,7 +40,6 @@ var
   riderLowerArmImageTable: AnnotatedBitmapTable
   riderUpperLegImageTable: AnnotatedBitmapTable
   riderLowerLegImageTable: AnnotatedBitmapTable
-  starImage: LCDBitmap
   gridImage: LCDBitmap
 
   smallFont: LCDFont
@@ -69,7 +68,6 @@ proc initGameView*() =
   initGameGhost()
 
   try:
-    starImage = getOrLoadBitmap(BitmapId.Acorn)
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
   except:
     print "Image load failed:", getCurrentExceptionMsg()
@@ -312,12 +310,11 @@ proc drawGame*(statePtr: ptr GameState) =
     drawGravityZones(state.gravityZones, state.gravityDirection, cameraState)
 
     # coins
-    drawCoins(state.remainingCoins, camVertex)
+    drawCoins(state.remainingCoins, cameraState)
 
     # star
     if state.remainingStar.isSome:
-      let starScreenPos = state.remainingStar.get - camVertex
-      starImage.draw(starScreenPos[0], starScreenPos[1], kBitmapUnflipped)
+      drawStar(state.remainingStar.get, cameraState)
 
 
     # killer

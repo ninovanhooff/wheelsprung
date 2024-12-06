@@ -1,8 +1,11 @@
 import chipmunk7
+import playdate/api
 import common/graphics_utils
 import game_types
 import sound/game_sound
 import std/options
+import cache/bitmap_cache
+import cache/bitmaptable_cache
 
 const
   starRadius = 10.0
@@ -21,6 +24,14 @@ proc addStar*(space: Space, star: Star) =
   shape.collisionType = GameCollisionTypes.Star
   shape.filter = GameShapeFilters.Collectible
   discard space.addShape(shape)
+
+proc drawStar*(remainingStar: Star, camState: CameraState) =
+  let starScreenPos = remainingStar - camState.camVertex
+  # animate highlight at 1/4 speed
+  let highlightImage = getOrLoadBitmapTable(BitmapTableId.PickupHighlight).getBitmap(camState.frameCounter div 4)
+  highlightImage.draw(starScreenPos[0] - 5, starScreenPos[1] - 5, kBitmapUnflipped)
+  # draw the star
+  getOrLoadBitmap(BitmapId.Acorn).draw(starScreenPos[0], starScreenPos[1], kBitmapUnflipped)
 
 let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
   # print("star post step callback")
