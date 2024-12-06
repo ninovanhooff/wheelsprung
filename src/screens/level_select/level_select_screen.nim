@@ -30,6 +30,7 @@ var
   backgroundAudioPlayer: FilePlayer
   confirmPlayer: SamplePlayer
   selectNextPlayer, selectPreviousPlayer, selectBumperPlayer: SamplePlayer
+  cachedLevelPaths: seq[string] = @[]
 
 proc initLevelSelectScreen() =
   if not backgroundAudioPlayer.isNil:
@@ -48,10 +49,15 @@ proc initLevelSelectScreen() =
 
 
 proc getLevelPaths(): seq[string] =
+  if cachedLevelPaths.len > 0 and defined(device):
+    # reading from disk is expensive, and no levels will change on device:
+    return cachedLevelPaths
+    
   try:
-    return playdate.file.listFiles(levelsBasePath)
+    cachedLevelPaths = playdate.file.listFiles(levelsBasePath)
       .filterIt(it.isLevelFile)
       .mapIt(levelsBasePath & it)
+    return cachedLevelPaths
   except IOError:
     print("ERROR reading level paths", getCurrentExceptionMsg())
     return @[]
