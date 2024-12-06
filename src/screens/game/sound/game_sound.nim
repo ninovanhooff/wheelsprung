@@ -17,10 +17,10 @@ proc initGameSound*() =
 
   ## Load the sounds
   try:
-    for i in 1..2:
-      collisionPlayers.add(getOrLoadSamplePlayer("/audio/collision/collision-0" & $i))
-    for i in 1..2:
-      fallPlayers.add(getOrLoadSamplePlayer("/audio/fall/fall-0" & $i))
+    collisionPlayers.add(getOrLoadSamplePlayer(SampleId.Collision1))
+    collisionPlayers.add(getOrLoadSamplePlayer(SampleId.Collision2))
+    fallPlayers.add(getOrLoadSamplePlayer(SampleId.Fall1))
+    fallPlayers.add(getOrLoadSamplePlayer(SampleId.Fall2))
 
   except:
     quit(getCurrentExceptionMsg(), 1)

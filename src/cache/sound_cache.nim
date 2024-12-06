@@ -23,6 +23,10 @@ type
     BikeThud1 = "/audio/thud/thud_1"
     BikeThud2 = "/audio/thud/thud_2"
     BikeThud3 = "/audio/thud/thud_3"
+    BikeCollision1 = "/audio/collision/collision-01"
+    BikeCollision2 = "/audio/collision/collision-02"
+    BikeFall1 = "/audio/fall/fall-01"
+    BikeFall2 = "/audio/fall/fall-02"
 
 
 # global singleton
