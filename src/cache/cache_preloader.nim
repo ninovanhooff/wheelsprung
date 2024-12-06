@@ -1,6 +1,7 @@
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import cache/font_cache
+import cache/sound_cache
 import common/shared_types
 import common/utils
 import scoreboards/scoreboards_service
@@ -10,6 +11,7 @@ type
     BitmapTable
     Font
     Bitmap
+    SoundSample
     Scoreboards
   PreloadJob* = ref object
     timeCost: Seconds
@@ -20,6 +22,8 @@ type
       bitmapId*: BitmapId
     of Font:
       fontId*: FontId
+    of SoundSample:
+      sampleId*: SampleId
     of Scoreboards:
       discard
 
@@ -41,6 +45,10 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.GravityUp),
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.GravityRight),
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.GravityUpRight),
+  PreloadJob(timeCost: 0.008.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Star),
+  PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Finish),
+  PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.FinishUnlock),
+  PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Coin),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.Nuts),
   PreloadJob(timeCost: 0.014.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderHead),
   PreloadJob(timeCost: 0.018.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderTail),
@@ -57,6 +65,8 @@ proc execute(job: PreloadJob) =
     discard getOrLoadBitmapTable(job.bitmapTableId)
   of PreloadJobType.Font:
     discard getOrLoadFont(job.fontId)
+  of PreloadJobType.SoundSample:
+    discard getOrLoadSample(job.sampleId)
   of PreloadJobType.Scoreboards:
     fetchAllScoreboards()
 

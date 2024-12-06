@@ -10,36 +10,40 @@ var
   starPlayer: SamplePlayer
   finishUnlockPlayer: SamplePlayer
   collisionPlayers: seq[SamplePlayer]
-  screamPlayers: seq[SamplePlayer]
+  fallPlayers: seq[SamplePlayer]
 
 proc initGameSound*() =
   if finishPlayer != nil: return # already initialized
 
   ## Load the sounds
   try:
-    finishPlayer = getOrLoadSamplePlayer("/audio/finish/finish")
-    coinPlayer = getOrLoadSamplePlayer("/audio/pickup/coin")
-    starPlayer = getOrLoadSamplePlayer("/audio/pickup/star")
-    finishUnlockPlayer = getOrLoadSamplePlayer("/audio/finish/finish_unlock")
     for i in 1..2:
       collisionPlayers.add(getOrLoadSamplePlayer("/audio/collision/collision-0" & $i))
     for i in 1..2:
-      screamPlayers.add(getOrLoadSamplePlayer("/audio/fall/fall-0" & $i))
+      fallPlayers.add(getOrLoadSamplePlayer("/audio/fall/fall-0" & $i))
 
   except:
     quit(getCurrentExceptionMsg(), 1)
 
 proc playFinishSound*() =
+  if finishPlayer == nil:
+    finishPlayer = getOrLoadSamplePlayer(SampleId.Finish)
   finishPlayer.playVariation()
 
 proc playCoinSound*(coinProgress: float32) =
   ## coinProgress the fraction of coins collected
   if coinProgress < 1.0f:
+    if coinPlayer == nil:
+      coinPlayer = getOrLoadSamplePlayer(SampleId.Coin)
     coinPlayer.play(1, lerp(0.9, 1.1, coinProgress))
   else:
+    if finishUnlockPlayer == nil:
+      finishUnlockPlayer = getOrLoadSamplePlayer(SampleId.FinishUnlock)
     finishUnlockPlayer.playVariation()
 
 proc playStarSound*() =
+  if starPlayer == nil:
+    starPlayer = getOrLoadSamplePlayer(SampleId.Star)
   starPlayer.playVariation()
 
 
@@ -47,4 +51,4 @@ proc playCollisionSound*() =
   collisionPlayers[rand(collisionPlayers.high)].playVariation()
 
 proc playScreamSound*() =
-  screamPlayers[rand(screamPlayers.high)].playVariation()
+  fallPlayers[rand(fallPlayers.high)].playVariation()
