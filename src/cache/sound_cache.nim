@@ -19,6 +19,10 @@ type
     Collision2 = "/audio/collision/collision-02"
     Fall1 = "/audio/fall/fall-01"
     Fall2 = "/audio/fall/fall-02"
+    BikeSqueak = "/audio/suspension/suspension_contract_adpcm"
+    BikeThud1 = "/audio/thud/thud_1"
+    BikeThud2 = "/audio/thud/thud_2"
+    BikeThud3 = "/audio/thud/thud_3"
 
 
 # global singleton
