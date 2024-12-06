@@ -29,6 +29,8 @@ type
 
 var jobs: seq[PreloadJob] = @[
   # order items lowest to highest prio since we will pop from the end
+  PreloadJob(timeCost: 0.009.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.Marble),
+  PreloadJob(timeCost: 0.016.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.TennisBall),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.Bitmap, bitmapId: BitmapId.Acorn),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeGhostWheel),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeWheel),
