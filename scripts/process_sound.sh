@@ -21,10 +21,11 @@ process_sounds() {
 # process_sounds "support/sounds/thud" "source/audio/thud" "$1"
 # process_sounds "support/sounds/star" "source/audio/pickup" "$1"
 # process_sounds "support/sounds/thud" "source/audio/thud" "$1"
-# process_sounds "support/sounds/pickup" "source/audio/pickup" "$1"
+# process_sounds "support/sounds/star" "source/audio/pickup" "$1"
+# process_sounds "support/sounds/coin" "source/audio/pickup" "$1"
 # process_sounds "support/sounds/fall" "source/audio/fall" "$1"
 # process_sounds "support/sounds/collision" "source/audio/collision" "$1"
-process_sounds "support/sounds/finish" "source/audio/finish" "$1"
+# process_sounds "support/sounds/finish" "source/audio/finish" "$1"
 # process_sounds "support/sounds/gravity" "source/audio/gravity" "$1"
 
 # when uncommenting make sure no doubles wav files for music that is used as mpe)
