@@ -61,11 +61,9 @@ proc initGameView*() =
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
-  smallFont = getOrLoadFont(FontId.Roobert10Bold)
   initGameCoin()
   initGameKiller()
   initGameFinish()
-  initGameGhost()
 
   try:
     gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
@@ -100,6 +98,8 @@ proc initGeometryBackground(state: GameState)=
       if radius > 0:
         fillCircle(vertex.x, vertex.y, radius)
 
+  if smallFont.isNil:
+    smallFont = getOrLoadFont(FontId.Roobert10Bold)
   gfx.setFont(smallFont)
   for text in level.texts:
     gfx.drawTextAligned(text.value, text.position.x, text.position.y, text.alignment)

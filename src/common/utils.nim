@@ -56,9 +56,9 @@ proc print*(things: varargs[string, `$`]) =
 proc printT*(things: varargs[string, `$`]) =
   let duration = playdate.system.getElapsedTime - printTStartTime
   printTStartTime = -1f
-  if defined(device):
+  # if defined(device):
     # timing info is only meaningful on device
-    playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t") & " in ms:" & $(duration * 1000f))
+  playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t") & " in ms:" & $(duration * 1000f))
 
 proc markStartTime*() =
   ## Mark the start time for the printT function

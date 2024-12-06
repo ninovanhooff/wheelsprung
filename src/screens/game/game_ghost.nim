@@ -50,6 +50,7 @@ proc initGameGhost*() =
 
 
 proc drawGhostPose*(state: GameState, pose: PlayerPose) =
+  initGameGhost()
   let camera = state.camera
   drawRotated(
     riderGhostHeadImageTable,
