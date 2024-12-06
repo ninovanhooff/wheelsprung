@@ -203,13 +203,16 @@ proc newGameState(
     ))
   else:
     none(GameReplayState)
+
+  let gameStartState = some(GameStartState(
+    gameStartFrame: -2, # -2 to skip first frame. On first update, we increment to -1 and on -1 we perform loading
+    readyGoFrame: 0,
+    levelName: level.meta.name
+  ))
   
   let state = GameState(
     level: level, 
-    gameStartState: some(GameStartState(
-      readyGoFrame: 0,
-      levelName: level.meta.name
-    )),
+    gameStartState: gameStartState,
     gameReplayState: gameReplayState,
     background: background,
     hintsEnabled: hintsEnabled,

@@ -13,16 +13,20 @@ var titleFont: LCDFont
 proc updateGameStartOverlay*(state: GameState) =
   if state.gameStartState.isNone:
     return
+  var startState = state.gameStartState.get
+  startState.gameStartFrame += 1
+  if startState.gameStartFrame < 0:
+    # do not delay level load, skip first game frame
+    return 
+
   if readyGoBitmapTable.isNil:
     readyGoBitmapTable = getOrLoadBitmapTable(BitmapTableId.ReadyGo)
     titleFont = getOrLoadFont(FontId.M6X11)
   
-  var startState = state.gameStartState.get
   if startState.readyGoFrame >= readyGoBitmapTable.frameCount - 1:
     state.gameStartState = none(GameStartState)
     return
 
-  startState.gameStartFrame += 1
   if startState.readyGoFrame == readyEndFrameIdx and not state.isGameStarted:
     # "Ready?" should be displayed until the game starts
     return
@@ -31,8 +35,9 @@ proc updateGameStartOverlay*(state: GameState) =
   if startState.gameStartFrame mod frameRepeat == 0 and startState.readyGoFrame < readyGoBitmapTable.frameCount - 1:
     startState.readyGoFrame += 1
     
-
 proc drawGameStartOverlay*(state: GameStartState) =
+  if state.gameStartFrame < 0:
+    return
   let name = state.levelName
   let (textW, textH) = titleFont.getTextSize(name)
   let textRect = Rect(

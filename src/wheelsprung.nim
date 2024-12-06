@@ -66,7 +66,9 @@ proc update() {.raises: [].} =
   # let preloadBudget = lastFrameElapsedSeconds + frameTime - getElapsedSeconds()
   if not isFirstFrame:
     runPreloader(frameStartTime + frameTime)
-  isFirstFrame = false
+  else:
+    isFirstFrame = false
+    print "RENDERED FIRST FRAME"
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
   try:
