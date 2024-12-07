@@ -2,7 +2,6 @@ import screens/game/game_types
 import bike_engine, bike_squeak, bike_thud
 
 proc initBikeSound*() =
-  initBikeEngine()
   initBikeSqueak()
   initBikeThud()
 

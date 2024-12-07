@@ -34,6 +34,9 @@ proc initBikeEngine*()=
         print(getCurrentExceptionMsg())
 
 proc updateBikeEngine*(state: GameState) =
+    if not state.isGameStarted: return
+    initBikeEngine()
+        
     let throttle = state.isThrottlePressed
     let wheelForwardAngularVelocity = state.rearWheel.angularVelocity * state.driveDirection
     let targetRpm = 
