@@ -8,7 +8,7 @@ template snd*: untyped = playdate.sound
 
 type 
   # a table mapping sound path to AudioSample
-  AudioSampleCache = TableRef[string, AudioSample]
+  AudioSampleCache = TableRef[SampleId, AudioSample]
 
   SampleId* {.pure.} = enum
     Finish = "/audio/finish/finish"
@@ -27,28 +27,27 @@ type
     BikeCollision2 = "/audio/collision/collision-02"
     BikeFall1 = "/audio/fall/fall-01"
     BikeFall2 = "/audio/fall/fall-02"
-
+    GravityUp = "/audio/gravity/gravity_up"
+    GravityDown = "/audio/gravity/gravity_down"
+    SelectPrevious = "/audio/menu/select_previous"
+    SelectNext = "/audio/menu/select_next"
+    Confirm = "/audio/menu/confirm"
+    Bumper = "/audio/menu/bumper"
 
 # global singleton
 let audioSampleCache = AudioSampleCache()
 
-proc getOrLoadSample(path: string): AudioSample =
+proc getOrLoadSample*(id: SampleId): AudioSample =
   try:
-    if not audioSampleCache.hasKey(path):
+    if not audioSampleCache.hasKey(id):
       markStartTime()
-      audioSampleCache[path] = snd.newAudioSample(path)
-      printT("LOAD Sample: ", path)
+      audioSampleCache[id] = snd.newAudioSample($id)
+      printT("LOAD Sample: ", id)
     
-    return audioSampleCache[path]
+    return audioSampleCache[id]
   except Exception:
     playdate.system.error("FATAL: " & getCurrentExceptionMsg())
 
-proc getOrLoadSample*(id: SampleId): AudioSample =
-  return getOrLoadSample($id)
-
-proc getOrLoadSamplePlayer*(path: string): SamplePlayer =
-  result = snd.newSamplePlayer()
-  result.sample= getOrLoadSample(path)
-
 proc getOrLoadSamplePlayer*(id: SampleId): SamplePlayer =
-  return getOrLoadSamplePlayer($id)
+  result = snd.newSamplePlayer()
+  result.sample= getOrLoadSample(id)

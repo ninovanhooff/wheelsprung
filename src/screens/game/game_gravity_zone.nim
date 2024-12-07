@@ -72,12 +72,12 @@ proc playSoundForGravity(newGravity: Vect) =
 # play sound
   if newGravity.y > 0:
     if gravityDownPlayer.isNil:
-      gravityDownPlayer = getOrLoadSamplePlayer("/audio/gravity/gravity_down")
+      gravityDownPlayer = getOrLoadSamplePlayer(SampleId.GravityDown)
     if not gravityDownPlayer.isPlaying:
       gravityDownPlayer.playVariation()
   else:
     if gravityUpPlayer.isNil:
-      gravityUpPlayer = getOrLoadSamplePlayer("/audio/gravity/gravity_up")
+      gravityUpPlayer = getOrLoadSamplePlayer(SampleId.GravityUp)
     if not gravityUpPlayer.isPlaying:
       gravityUpPlayer.playVariation()
 

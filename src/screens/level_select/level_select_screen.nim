@@ -42,10 +42,10 @@ proc initLevelSelectScreen() =
     playdate.system.error(getCurrentExceptionMsg())
     nil
   
-  selectPreviousPlayer = getOrLoadSamplePlayer("audio/menu/select_previous")
-  selectNextPlayer = getOrLoadSamplePlayer("audio/menu/select_next")
-  confirmPlayer = getOrLoadSamplePlayer("audio/menu/confirm")
-  selectBumperPlayer = getOrLoadSamplePlayer("audio/menu/bumper")
+  selectPreviousPlayer = getOrLoadSamplePlayer(SampleId.SelectPrevious)
+  selectNextPlayer = getOrLoadSamplePlayer(SampleId.SelectNext)
+  confirmPlayer = getOrLoadSamplePlayer(SampleId.Confirm)
+  selectBumperPlayer = getOrLoadSamplePlayer(SampleId.Bumper)
 
 proc getLevelRowByBoardIdIndexed(screen: LevelSelectScreen, boardId: string): (int, Option[LevelRow]) =
   return screen.levelRows.findFirstIndexed(it => it.levelMeta.scoreboardId == boardId)

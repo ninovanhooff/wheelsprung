@@ -29,6 +29,11 @@ type
 
 var jobs: seq[PreloadJob] = @[
   # order items lowest to highest prio since we will pop from the end
+  PreloadJob(timeCost: 0.014.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Bumper),
+  PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Confirm),
+  PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.SelectNext),
+  PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.SelectPrevious),  
+  PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.LevelStatus),
   PreloadJob(timeCost: 0.009.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.Marble),
   PreloadJob(timeCost: 0.016.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.TennisBall),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.Bitmap, bitmapId: BitmapId.Acorn),
@@ -54,6 +59,8 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.GravityUp),
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.GravityRight),
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.GravityUpRight),
+  PreloadJob(timeCost: 0.030.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.GravityUp),
+  PreloadJob(timeCost: 0.033.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.GravityDown),
   PreloadJob(timeCost: 0.008.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Star),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Finish),
   PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.FinishUnlock),
