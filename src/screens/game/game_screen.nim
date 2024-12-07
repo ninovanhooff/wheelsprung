@@ -280,7 +280,7 @@ proc updateTimers(state: GameState) =
     echo("blinker timeout")
 
 proc initGame() {.raises: [].} =
-  initGameSound()
+  # initGameSound()
   initGameView()
 
 proc addMenuItems(gameScreen: GameScreen) =
@@ -339,9 +339,9 @@ method update*(gameScreen: GameScreen): int =
     onRestartGamePressed = proc () = gameScreen.onRestartGamePressed(),
   )
   state = gameScreen.state # handleInput might have changed the state if onRestartGamePressed was called
-  updateGameBikeSound(state)
   updateGameStartOverlay(state)
   updateGameReplayOverlay(state)
+  updateGameBikeSound(state)
 
   if state.isGameStarted and not state.isGamePaused:
     updateAttitudeAdjust(state)

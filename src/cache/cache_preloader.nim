@@ -53,7 +53,7 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeThud2),
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeThud3),
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeSqueak),
-  PreloadJob(timeCost: 0.030.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeEngineIdle),
+  PreloadJob(timeCost: 0.022.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeEngineIdle),
   PreloadJob(timeCost: 0.019.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeEngineThrottle),
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderUpperLeg),
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderLowerLeg),

@@ -1,9 +1,14 @@
 import playdate/api
 import std/options
+import common/utils
+import common/shared_types
 import common/graphics_utils
 import screens/game/game_types
+import screens/game/sound/game_sound
+import screens/game/sound/bike_sound
 import cache/font_cache
 import cache/bitmaptable_cache
+import cache/cache_preloader
 
 const readyEndFrameIdx = 4 # the frame idx in the readyGoBitmapTable that is the last frame before it transforms in to Go!
 
@@ -13,6 +18,11 @@ var titleFont: LCDFont
 proc updateGameStartOverlay*(state: GameState) =
   if state.gameStartState.isNone:
     return
+
+  if state.isGameStarted:
+      initGameSound()
+      initBikeSound()
+
   var startState = state.gameStartState.get
   startState.gameStartFrame += 1
   if startState.gameStartFrame < 0:
@@ -27,11 +37,14 @@ proc updateGameStartOverlay*(state: GameState) =
     state.gameStartState = none(GameStartState)
     return
 
+  let frameRepeat = if state.isGameStarted: 2 else: 4
+
   if startState.readyGoFrame == readyEndFrameIdx and not state.isGameStarted:
     # "Ready?" should be displayed until the game starts
+    # While idle, perform preloading
+    runPreloader(getElapsedSeconds() + 0.50.Seconds)
     return
 
-  let frameRepeat = if state.isGameStarted: 2 else: 4
   if startState.gameStartFrame mod frameRepeat == 0 and startState.readyGoFrame < readyGoBitmapTable.frameCount - 1:
     startState.readyGoFrame += 1
     

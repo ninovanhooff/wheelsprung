@@ -13,7 +13,7 @@ var
   fallPlayers: seq[SamplePlayer]
 
 proc initGameSound*() =
-  if finishPlayer != nil: return # already initialized
+  if collisionPlayers.len > 0: return # already initialized
 
   ## Load the sounds
   try:
