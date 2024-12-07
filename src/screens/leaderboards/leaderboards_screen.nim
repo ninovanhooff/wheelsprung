@@ -177,6 +177,9 @@ method resume*(screen: LeaderboardsScreen) =
   discard playdate.system.addMenuItem("Refresh", proc(menuItem: PDMenuItemButton) =
     fetchAllScoreboards(ignoreTimeThreshold = true, finishCallback = uploadLocalScores)
   )
+  discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
+    popToScreenType(ScreenType.LevelSelect)
+  )
 
   screen.draw(forceRedraw = true)
 
