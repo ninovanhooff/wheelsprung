@@ -171,7 +171,7 @@ method resume*(screen: LeaderboardsScreen) =
 
   addScoreboardChangedCallback(
     LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY,
-    proc() = screen.refreshLeaderboards
+    proc(boardId: BoardId) = screen.refreshLeaderboards
   )
 
   discard playdate.system.addMenuItem("Refresh", proc(menuItem: PDMenuItemButton) =

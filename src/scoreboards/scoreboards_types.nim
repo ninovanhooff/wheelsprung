@@ -1,9 +1,8 @@
 import playdate/api
-import common/shared_types
 
 type
   BoardId* = string
-  ScoreboardChangedCallback* = VoidCallback
+  ScoreboardChangedCallback* = proc (boardId: BoardId) {.raises: [].}
   ScoreboardStateKind* = enum
     Loading
     Loaded

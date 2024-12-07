@@ -1,6 +1,7 @@
 import playdate/api
 import level_select_types
 import std/tables
+import std/sequtils
 import math
 import common/shared_types
 import common/graphics_utils
@@ -15,7 +16,7 @@ import level_meta/level_data
 
 const 
   borderInset = 7
-  verticalLines = [199, 219, 279]
+  verticalLinesDrawRegion = [199, 219, 279]
     ## x positions of vertical table cell dividers relative to levelDrawRegion.x
   rowHeight = 20
   emptyTimeText = "--:--.--"
@@ -24,6 +25,7 @@ const
 
 let 
   levelDrawRegion = Rect(x: 30,y: 70, width: 342, height:110)
+  verticalLinesScreen = verticalLinesDrawRegion.mapIt(it + levelDrawRegion.x)
 
 var 
   levelStatusImages: AnnotatedBitmapTable
@@ -37,6 +39,13 @@ proc initLevelSelectView*() =
     
   levelStatusImages = getOrLoadBitmapTable(BitmapTableId.LevelStatus)
   levelFont = getOrLoadFont(FontId.M6X11)
+
+proc markRowDirty*(screen: LevelSelectScreen, idx: int32) =
+  gfx.pushContext(rowsBitmap)
+  let y = idx * rowHeight
+  gfx.fillRect(levelDrawRegion.x, y, levelDrawRegion.width, rowHeight, kColorWhite)
+  gfx.popContext()
+  rowDrawState.del(idx)
 
 proc getBackground(levelTheme: LevelTheme): LCDBitmap =
   case levelTheme
@@ -92,11 +101,6 @@ proc initTableRowsImage(screen: LevelSelectScreen, forceRedraw: bool) =
   
   rowsBitmap = gfx.newBitmap(levelDrawRegion.width, requiredHeight, kColorWhite)
   
-  gfx.pushContext(rowsBitmap)
-  for x in verticalLines:
-    gfx.drawLine(x, 0, x, requiredHeight, 2, kColorBlack)
-  gfx.popContext()
-  
   rowDrawState.clear()
 
 proc renderLevelRow(idx: int32, row: LevelRow) =
@@ -111,8 +115,8 @@ proc renderLevelRow(idx: int32, row: LevelRow) =
   let statusImage = getLevelStatusImage(progress)
   statusImage.draw(x + 200, y + 2, kBitmapUnflipped)
 
-  gfx.drawText(progress.timeText, verticalLines[1] + 6, y+4)
-  gfx.drawTextAligned(row.leaderText, verticalLines[2] + 60, y+4, kTextAlignmentRight)
+  gfx.drawText(progress.timeText, verticalLinesDrawRegion[1] + 6, y+4)
+  gfx.drawTextAligned(row.leaderText, verticalLinesDrawRegion[2] + 60, y+4, kTextAlignmentRight)
   gfx.popContext()
   rowDrawState[idx] = true
 
@@ -162,6 +166,10 @@ proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
   gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
 
   rowsBitmap.draw(levelDrawRegion.x, levelDrawRegion.y - (scrollPosition * rowHeight).int32, kBitmapUnflipped)
+
+  # vertical lines
+  for x in verticalLinesScreen:
+    gfx.drawLine(x, levelDrawRegion.y, x, levelDrawRegion.bottom, 2, kColorBlack)
 
   # invert the selected row
   let selectedRowY = y + (screen.selectedIndex - scrollPosition.int32) * rowHeight

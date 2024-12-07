@@ -81,9 +81,9 @@ proc removeScoreboardChangedCallback*(key: string) =
     return
   scoreboardChangedCallbacks.del(key)
 
-proc notifyScoreboardsChanged() =
+proc notifyScoreboardsChanged(boardId: BoardId) =
   for callback in scoreboardChangedCallbacks.values:
-    callback()
+    callback(boardId)
 
 let emptyResultHandler = proc(result: PDResult[PDScoresList]) = discard
 proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> void = emptyResultHandler) =
@@ -103,12 +103,12 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
 
     # Notify all listeners, also when the board is not updated
     # So that they can update their UI with data or a failure message
-    notifyScoreboardsChanged()
+    notifyScoreboardsChanged(boardId)
 
     resultHandler(scoresListResult)
 
   boardId.increaseLoadingCount()
-  notifyScoreboardsChanged()
+  notifyScoreboardsChanged(boardId) # Notify listeners that the board is being updated
   print "===== NETWORK Scores START", boardId, $resultCode
 
 proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =

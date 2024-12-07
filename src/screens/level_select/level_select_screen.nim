@@ -47,6 +47,9 @@ proc initLevelSelectScreen() =
   confirmPlayer = getOrLoadSamplePlayer("audio/menu/confirm")
   selectBumperPlayer = getOrLoadSamplePlayer("audio/menu/bumper")
 
+proc getLevelRowByBoardIdIndexed(screen: LevelSelectScreen, boardId: string): (int, Option[LevelRow]) =
+  return screen.levelRows.findFirstIndexed(it => it.levelMeta.scoreboardId == boardId)
+
 
 proc getLevelPaths(): seq[string] =
   if cachedLevelPaths.len > 0 and defined(device):
@@ -166,6 +169,13 @@ proc newLevelRow(levelMeta: LevelMeta): LevelRow =
     optLeaderScore: getGlobalBest(levelMeta.scoreboardId)
   )
 
+proc refreshLevelRow(screen: LevelSelectScreen, boardId: BoardId) =
+  let (idx, optRow) = getLevelRowByBoardIdIndexed(screen, boardId)
+  if optRow.isSome:
+    let row = optRow.get
+    row.optLeaderScore = getGlobalBest(boardId)
+    screen.levelRows[idx] = row
+    screen.markRowDirty(idx.int32)
 
 proc refreshLevelRows(screen: LevelSelectScreen) =
   screen.levelRows.setLen(0)
@@ -216,9 +226,8 @@ method resume*(screen: LevelSelectScreen) =
   
   addScoreboardChangedCallback(
     LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY,
-    proc() = 
-      screen.refreshLevelRows()
-      screen.draw(forceRedraw = true)
+    proc(boardId: BoardId) = 
+      screen.refreshLevelRow(boardId)
   )
 
 method pause*(screen: LevelSelectScreen) =
