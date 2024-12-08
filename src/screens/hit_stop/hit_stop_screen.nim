@@ -61,7 +61,7 @@ method update*(screen: HitStopScreen): int =
     return 0
   
   let remainingSeconds = screen.finishAt - currentTimeSeconds()
-  if remainingSeconds <= 0.Seconds :
+  if remainingSeconds <= 0.Seconds:
     popScreen()
   elif currentTimeSeconds() > screen.flipBitmapsAt:
     swap(screen.currentBitmap, screen.otherBitmap)

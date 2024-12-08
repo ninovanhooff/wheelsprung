@@ -249,7 +249,7 @@ proc onResetGame(screen: GameScreen) =
   screen.state = newGameState(
     level = oldState.level,
     background = oldState.background,
-    hintsenabled = oldState.hintsEnabled,
+    hintsEnabled = oldState.hintsEnabled,
     ghostPlayback = some(pickBestGhost(oldState.ghostRecording, oldState.ghostPlayback))
   )
   oldState.destroy()

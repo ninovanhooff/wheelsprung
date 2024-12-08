@@ -30,6 +30,7 @@ const
   patternSize: int32 = 8'i32
 
 var
+  isGameViewInitialized: bool = false
   bikeChassisImageTable: AnnotatedBitmapTable
   bikeWheelImageTable: AnnotatedBitmapTable
 
@@ -50,7 +51,7 @@ var
 
 
 proc initGameView*() =
-  if bikeChassisImageTable != nil: return # already initialized
+  if isGameViewInitialized: return # already initialized
 
   bikeChassisImageTable = getOrLoadBitmapTable(BitmapTableId.BikeChassis)
   bikeWheelImageTable = getOrLoadBitmapTable(BitmapTableId.BikeWheel)
@@ -65,10 +66,7 @@ proc initGameView*() =
   initGameKiller()
   initGameFinish()
 
-  try:
-    gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
-  except:
-    print "Image load failed:", getCurrentExceptionMsg()
+  isGameViewInitialized = true
 
 proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
@@ -295,6 +293,11 @@ proc drawGame*(statePtr: ptr GameState) =
 
   # draw grid
   if debugDrawGrid:
+    if gridImage.isNil:
+      try:
+        gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
+      except:
+        print "Image load failed:", getCurrentExceptionMsg()
     gfx.setDrawMode(kDrawmodeWhiteTransparent)
     gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
     gfx.setDrawMode(kDrawmodeCopy)
