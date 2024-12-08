@@ -203,16 +203,10 @@ proc newGameState(
     ))
   else:
     none(GameReplayState)
-
-  let gameStartState = some(GameStartState(
-    gameStartFrame: -2, # -2 to skip first frame. On first update, we increment to -1 and on -1 we perform loading
-    readyGoFrame: 0,
-    levelName: level.meta.name
-  ))
   
   let state = GameState(
     level: level, 
-    gameStartState: gameStartState,
+    gameStartState: some(createGameStartOverlayState(level.meta.name)),
     gameReplayState: gameReplayState,
     background: background,
     hintsEnabled: hintsEnabled,
@@ -279,10 +273,6 @@ proc updateTimers(state: GameState) =
   if state.finishTrophyBlinkerAt.expire(currentTime):
     echo("blinker timeout")
 
-proc initGame() {.raises: [].} =
-  # initGameSound()
-  initGameView()
-
 proc addMenuItems(gameScreen: GameScreen) =
   if gameScreen.state.isInLiveMode:
     discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
@@ -302,7 +292,6 @@ proc addMenuItems(gameScreen: GameScreen) =
 ### Screen methods
 
 method resume*(gameScreen: GameScreen) =
-  initGame()
   if gameScreen.state == nil:
     gameScreen.state = newGameState(loadLevel(gameScreen.levelPath), replayInputRecording = gameScreen.replayInputRecording)
   var state = gameScreen.state

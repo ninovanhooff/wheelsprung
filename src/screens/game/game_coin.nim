@@ -35,7 +35,8 @@ proc myDeepCopy[T](src: ref T): ref T =
   new(result)
   result[] = src[]
 
-proc initGameCoin*() =
+proc initGameCoin() =
+  if coinsImageTable != nil: return
   coinsImageTable = getOrLoadBitmapTable(BitmapTableId.Nuts)
 
 proc addGameCoins*(state: GameState) =
@@ -51,6 +52,8 @@ proc drawCoins*(remainingCoins: seq[Coin], camState: CameraState) =
   for coin in remainingCoins:
       if not viewport.intersects(coin.bounds):
         continue
+
+      initGameCoin()
       
       let coinScreenPos = coin.position - camVertex
       let coinIndex = (coin.coinIndex + coin.count) mod coinsImageTable.frameCount

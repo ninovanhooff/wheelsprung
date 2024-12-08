@@ -8,7 +8,7 @@ import chipmunk7
 import game_types
 import common/graphics_types
 import game_bike, game_finish, game_ghost, game_killer, game_coin, game_star, game_gravity_zone
-import overlay/game_start_overlay
+import overlay/game_start_overlay_view
 import overlay/game_ended_overlay
 import overlay/game_replay_overlay
 import game_dynamic_object
@@ -19,7 +19,6 @@ import chipmunk_utils
 import common/utils
 import globals
 import cache/bitmaptable_cache
-import cache/bitmap_cache
 import cache/font_cache
 import screens/hit_stop/hit_stop_screen
 
@@ -62,11 +61,11 @@ proc initGameView*() =
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
-  initGameCoin()
-  initGameKiller()
-  initGameFinish()
 
   isGameViewInitialized = true
+
+proc getIsGameViewInitialized*(): bool =
+  isGameViewInitialized
 
 proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
   let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
@@ -330,7 +329,7 @@ proc drawGame*(statePtr: ptr GameState) =
     state.drawGhostPose(state.ghostPlayback.poses[frameCounter])
 
 
-  if debugDrawPlayer:
+  if isGameViewInitialized and debugDrawPlayer:
     drawPlayer(state)
 
   if debugDrawShapes:

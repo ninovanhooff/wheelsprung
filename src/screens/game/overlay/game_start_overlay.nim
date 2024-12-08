@@ -1,39 +1,53 @@
-import playdate/api
 import std/options
 import common/utils
 import common/shared_types
-import common/graphics_utils
 import screens/game/game_types
+import screens/game/game_view
 import screens/game/sound/game_sound
 import screens/game/sound/bike_sound
-import cache/font_cache
-import cache/bitmaptable_cache
+import game_start_overlay_view
 import cache/cache_preloader
 
 const readyEndFrameIdx = 4 # the frame idx in the readyGoBitmapTable that is the last frame before it transforms in to Go!
 
-var readyGoBitmapTable: AnnotatedBitmapTable
-var titleFont: LCDFont
+proc createGameStartOverlayState*(levelName: string): GameStartState =
+  let gameStartFrame: int32 = if not getIsGameViewInitialized():
+    -3
+  elif not getIsGameStartOverlayInitialized():
+    -2
+  else:
+    -1
+
+  return GameStartState(
+    gameStartFrame: gameStartFrame,
+    readyGoFrame: -1, # will be incremented to 0 in the first frame
+    levelName: levelName
+  )
 
 proc updateGameStartOverlay*(state: GameState) =
   if state.gameStartState.isNone:
     return
 
   if state.isGameStarted:
-      initGameSound()
-      initBikeSound()
+    initGameSound()
+    initBikeSound()
 
   var startState = state.gameStartState.get
   startState.gameStartFrame += 1
-  if startState.gameStartFrame < 0:
+  let gameStartFrame = startState.gameStartFrame
+
+  if gameStartFrame == -1:
+    initGameView()
+  elif gameStartFrame == 0:
+    initGameStartOverlay()
+    
+  if gameStartFrame < 0:
     # do not delay level load, skip first game frame
     return 
 
-  if readyGoBitmapTable.isNil:
-    readyGoBitmapTable = getOrLoadBitmapTable(BitmapTableId.ReadyGo)
-    titleFont = getOrLoadFont(FontId.M6X11)
+  let readyGoFrameCount = getReadyGoFrameCount()
   
-  if startState.readyGoFrame >= readyGoBitmapTable.frameCount - 1:
+  if startState.readyGoFrame >= readyGoFrameCount - 1:
     state.gameStartState = none(GameStartState)
     return
 
@@ -45,27 +59,6 @@ proc updateGameStartOverlay*(state: GameState) =
     runPreloader(getElapsedSeconds() + 0.50.Seconds)
     return
 
-  if startState.gameStartFrame mod frameRepeat == 0 and startState.readyGoFrame < readyGoBitmapTable.frameCount - 1:
+  if gameStartFrame mod frameRepeat == 0 and startState.readyGoFrame < readyGoFrameCount - 1:
     startState.readyGoFrame += 1
     
-proc drawGameStartOverlay*(state: GameStartState) =
-  if state.gameStartFrame < 0:
-    return
-  let name = state.levelName
-  let (textW, textH) = titleFont.getTextSize(name)
-  let textRect = Rect(
-    x: 18,
-    y: 216,
-    width: textW.int32,
-    height: textH.int32
-  )
-  textRect.inset(-4,-4, -4, -2).fillRoundRect(
-    radius=4,
-    color=kColorBlack
-  )
-  gfx.setFont(titleFont)
-  gfx.setDrawMode(kDrawModeFillWhite)
-  gfx.drawText(name, textRect.x, textRect.y)
-  gfx.setDrawMode(kDrawModeCopy)
-  
-  readyGoBitmapTable.getBitmap(state.readyGoFrame).draw(113, 4, kBitmapUnflipped)
