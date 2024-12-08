@@ -15,6 +15,10 @@ const
   riderOffset* = v(-4.0, -18.0) # offset from chassis center
   HALF_PI*: float = PI * 0.5
 
+  ## Finish
+  finishSize*: int32 = 38
+  finishSizeF*: Float = finishSize.Float
+
   ## killers
   killerRadius*: Float = 10f
   killerSize*: int32 = killerRadius.int32 * 2

@@ -322,7 +322,7 @@ proc drawGame*(statePtr: ptr GameState) =
     # killer
     drawKillers(state.killers, camera)
 
-    drawFinish(state)
+    drawFinish(state, cameraState)
 
   ## do not store poses in a variable to avoid copying
   if state.ghostPlayback.poses.high >= frameCounter:

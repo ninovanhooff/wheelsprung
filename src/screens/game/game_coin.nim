@@ -48,9 +48,8 @@ proc addGameCoins*(state: GameState) =
 
 proc drawCoins*(remainingCoins: seq[Coin], camState: CameraState) =
   let camVertex = camState.camVertex
-  let viewport = offsetScreenRect(camVertex)
   for coin in remainingCoins:
-      if not viewport.intersects(coin.bounds):
+      if not camState.viewport.intersects(coin.bounds):
         continue
 
       initGameCoin()

@@ -33,6 +33,7 @@ type
     body*: Body
   Finish* = object
     position*: Vertex
+    bounds*: LCDRect
     flip*: LCDBitmapFlip
   GravityZone* = ref object
     position*: Vertex
@@ -294,6 +295,18 @@ type GameState* = ref object of RootObj
   handPivot*: PivotJoint
   headPivot*: PivotJoint
 
+proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
+  result = Finish(
+    position: position,
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + finishSize,
+      top: position.y,
+      bottom: position.y + finishSize,
+    ),
+    flip: flip
+  )
+
 proc newCoin*(position: Vertex, count: int32 = 1, coinIndex: int32 = 0): Coin =
   result = Coin(
     position: position,
@@ -325,9 +338,6 @@ proc newGravityZone*(position: Vertex, direction: Direction8, animation: Animati
 
 proc newGravityZoneSpec*(position: Vertex, direction: Direction8): GravityZoneSpec =
   result = GravityZoneSpec(position: position, direction: direction)
-
-proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
-  result = Finish(position: position, flip: flip)
 
 proc newDynamicObject*(shape: Shape, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): DynamicObject =
   let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
