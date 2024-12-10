@@ -12,7 +12,7 @@ type
 
     case kind*: ScoreboardStateKind
     of Loading:
-      discard
+      position*: int32
     of Loaded:
       scores*: PDScoresList
     of Error:

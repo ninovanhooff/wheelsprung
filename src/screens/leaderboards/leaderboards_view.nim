@@ -20,7 +20,9 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
 
   case leaderboard.state.kind:
   of LeaderboardStateKind.Loading:
-    gfx.drawTextAligned("Loading...", 200, 110)
+    # position -1: currently loading
+    # position 0: next up
+    gfx.drawTextAligned(fmt"Loading ({leaderboard.state.position + 2})", 200, 110)
   of LeaderboardStateKind.Error:
     gfx.drawTextAligned("Leaderboard not available", 200, 110)
   of LeaderboardStateKind.Loaded:

@@ -40,12 +40,14 @@ proc getScoreBoard*(boardId: BoardId): Option[PDScoresList] =
   return scoreboardsCache.getScoreboard(boardId)
 
 proc getScoreboardStates*(): seq[ScoreboardState] =
+  let fetchAllSeq = fetchAllDeque.toSeq
   return validBoardIds.map(proc (boardId: BoardId): ScoreboardState = 
-    if boardLoadingCounts.getOrDefault(boardId, 0) > 0 or fetchAllDeque.contains(boardId):
+    if boardLoadingCounts.getOrDefault(boardId, 0) > 0 or fetchAllSeq.contains(boardId):
       # print "getScoreboardStates: Loading", boardId
       return ScoreboardState(
         boardId: boardId,
-        kind: ScoreboardStateKind.Loading
+        kind: ScoreboardStateKind.Loading,
+        position: fetchAllSeq.find(boardId).int32
       )
     else:
       let board = getScoreBoard(boardId)
@@ -182,7 +184,8 @@ proc updateNextOutdatedBoard*(finishCallback: VoidCallback = noOp) =
   refreshBoard(boardId, proc (result: PDResult[PDScoresList]) =
     if result.kind == PDResultError:
       print "Sequential scoreboard update aborted due to failure"
-      fetchAllDeque.clear()
+      while fetchAllDeque.len > 0:
+        notifyScoreboardsChanged(fetchAllDeque.popLast)
     else:
       updateNextOutdatedBoard(finishCallback)
   )

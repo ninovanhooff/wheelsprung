@@ -15,7 +15,7 @@ type
   LeaderboardState* = object of RootObj
     case kind*: LeaderboardStateKind
     of Loading:
-      discard
+      position*: int32
     of Loaded:
       scores*: seq[LeaderboardScore]
     of Error:

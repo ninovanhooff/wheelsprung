@@ -66,7 +66,8 @@ proc toLeaderboardState*(scoreboardState: ScoreboardState): LeaderboardState =
     )
   of ScoreboardStateKind.Loading:
     return LeaderboardState(
-      kind: LeaderboardStateKind.Loading
+      kind: LeaderboardStateKind.Loading,
+      position: scoreboardState.position
     )
   of ScoreboardStateKind.Error:
     return LeaderboardState(
