@@ -6,6 +6,7 @@ import navigation/[screen, navigator]
 import common/utils
 import common/shared_types
 import common/audio_utils
+import common/data_utils
 import std/sequtils
 import std/options
 import std/tables
@@ -60,9 +61,11 @@ proc getLevelPaths(): seq[string] =
     cachedLevelPaths = playdate.file.listFiles(levelsBasePath)
       .filterIt(it.isLevelFile)
       .mapIt(levelsBasePath & it)
+    
     return cachedLevelPaths
   except IOError:
     print("ERROR reading level paths", getCurrentExceptionMsg())
+    makeDir(levelsBasePath)
     return @[]
 
 proc newLevelSelectScreen*(selectedPath: Option[Path] = none(Path)): LevelSelectScreen =

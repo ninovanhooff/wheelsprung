@@ -12,17 +12,10 @@ proc save*(config: Config) =
   print "Saving", repr(config)
   saveJson(config, "config.json")
 
-proc createAndsave(): Config =
+proc createAndSave(): Config =
   let config = Config()
   save(config)
   return config
-
-proc makeDir(dir: string) =
-  print "Creating directory", dir
-  try:
-    playdate.file.mkdir(dir)
-  except:
-    print "Failed to create directory", dir, getCurrentExceptionMsg()
 
 proc loadConfig(): Config =
   let optConfig = loadJson[Config]("config.json")
@@ -33,7 +26,7 @@ proc loadConfig(): Config =
     # we usually end up here when the data folder doesn't exist yet.
     # this is a good time to create the levels folder too.
     makeDir("levels")
-    return createAndsave()
+    return createAndSave()
 
 proc getConfig*(): Config =
   if config == nil:
