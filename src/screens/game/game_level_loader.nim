@@ -143,7 +143,7 @@ proc frameRepeat(obj: LevelLayerEntity): int32 =
   )
 
 
-proc readDataFileContents(path: string): string {.raises: [].} =
+proc readDataFileContents(path: string): string {.raises: [Exception].} =
   try:
     let playdateFile = playdate.file
     let contentString = playdateFile.open(path, kFileReadAny).readString()
@@ -151,13 +151,13 @@ proc readDataFileContents(path: string): string {.raises: [].} =
   except:
     print("Could not read " & $path)
     print(getCurrentExceptionMsg())
-    return ""
+    raise getCurrentException()
 
-proc parseJsonLevel(path: string): (LevelEntity, string) {.raises: [].} =
+proc parseJsonLevel(path: string): (LevelEntity, string) {.raises: [Exception].} =
   let jsonString = readDataFileContents(path)
   return parseJsonLevelContents(jsonString)
 
-proc parseFlattyLevel(path: string): (LevelEntity, string) {.raises: [].} =
+proc parseFlattyLevel(path: string): (LevelEntity, string) {.raises: [Exception].} =
   let flattyString = readDataFileContents(path)
   try:
     let levelEntity = flattyString.fromFlatty(LevelEntity)
@@ -462,7 +462,7 @@ proc loadLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
       print("Unknown layer type: " & $layer.`type`)
       return
 
-proc loadLevel*(path: string): Level =
+proc loadLevel*(path: string): Level {.raises: [Exception].} =
   print "Loading level: " & $path
   var level = Level(
     id: path,

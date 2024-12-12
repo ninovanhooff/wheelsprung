@@ -142,6 +142,8 @@ proc updateInput(screen: LevelSelectScreen) =
   let buttonState = playdate.system.getButtonState()
   let rows = screen.levelRows
   let numRows = rows.len
+  if numRows == 0:
+    return
   let selectedLevelMeta = rows[screen.selectedIndex].levelMeta
 
   if kButtonA in buttonState.pushed:
@@ -199,7 +201,7 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
     let levelMeta = getLevelMeta(levelPath)
     screen.levelRows.insert(levelMeta.newLevelRow())
 
-method resume*(screen: LevelSelectScreen) =
+method resume*(screen: LevelSelectScreen): bool =
   screen.upActivatedAt = none(Seconds)
   screen.downActivatedAt = none(Seconds)
   try:
@@ -229,6 +231,7 @@ method resume*(screen: LevelSelectScreen) =
     proc(boardId: BoardId) = 
       screen.refreshLevelRow(boardId)
   )
+  return true
 
 method pause*(screen: LevelSelectScreen) =
   backgroundAudioPlayer.fadeVolume(0.0, 0.0, 30_000, proc (player: FilePlayer) = 

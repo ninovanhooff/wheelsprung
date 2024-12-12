@@ -161,7 +161,7 @@ proc drawGameResult(self: GameResultScreen) =
   elif self.gameResult.resultType == GameResultType.LevelComplete:
     drawLevelCompleteResult(self)
 
-method resume*(self: GameResultScreen) =
+method resume*(self: GameResultScreen): bool =
   initGameResultScreen()
 
   gfx.setFont(buttonFont)
@@ -179,6 +179,7 @@ method resume*(self: GameResultScreen) =
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     popScreen()
   )
+  return true
 
 proc executeAction(self: GameResultScreen, action: GameResultAction) =
   case action

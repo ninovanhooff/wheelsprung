@@ -45,12 +45,13 @@ proc createMenuCallback(menuItem: MenuItemDefinition): proc(button: PDMenuItemBu
     popScreen() # pop self (HitStopScreen)
     menuItem.action()
 
-method resume*(screen: HitStopScreen) =
+method resume*(screen: HitStopScreen): bool =
   for menuItem in screen.menuItems:
     discard playdate.system.addMenuItem(
       menuItem.name, 
       createMenuCallback(menuItem)
     )
+  return true
 
 method update*(screen: HitStopScreen): int =
   let buttonState = playdate.system.getButtonState()

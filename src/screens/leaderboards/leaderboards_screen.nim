@@ -158,7 +158,7 @@ proc updateInput(screen: LeaderboardsScreen) =
   elif kButtonB in buttonState.pushed:
     popScreen(screen)
 
-method resume*(screen: LeaderboardsScreen) =
+method resume*(screen: LeaderboardsScreen): bool =
   refreshLeaderboards(screen)
   if screen.initialBoardId.len > 0:
     let (idx, _) = screen.leaderboards.findFirstIndexed(it => it.boardId == screen.initialBoardId)
@@ -183,6 +183,7 @@ method resume*(screen: LeaderboardsScreen) =
   )
 
   screen.draw(forceRedraw = true)
+  return true
 
 method pause*(screen: LeaderboardsScreen) =
   removeScoreboardChangedCallback(LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY)

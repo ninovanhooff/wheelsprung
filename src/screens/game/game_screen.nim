@@ -291,9 +291,14 @@ proc addMenuItems(gameScreen: GameScreen) =
 
 ### Screen methods
 
-method resume*(gameScreen: GameScreen) =
+method resume*(gameScreen: GameScreen): bool =
   if gameScreen.state == nil:
-    gameScreen.state = newGameState(loadLevel(gameScreen.levelPath), replayInputRecording = gameScreen.replayInputRecording)
+    try:
+      gameScreen.state = newGameState(loadLevel(gameScreen.levelPath), replayInputRecording = gameScreen.replayInputRecording)
+    except Exception as e:
+      print "ERROR: Could not load level: " & gameScreen.levelPath
+      print e.msg
+      return false
   var state = gameScreen.state
   
   gameScreen.addMenuItems()
@@ -311,6 +316,7 @@ method resume*(gameScreen: GameScreen) =
       state.updateCameraPid(snapToTarget = true)
 
   setResult(ScreenResult(screenType: ScreenType.LevelSelect, selectPath: gameScreen.levelPath))
+  return true
 
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()

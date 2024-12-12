@@ -119,12 +119,13 @@ proc init(screen: SettingsScreen) =
 method pause*(screen: SettingsScreen) =
   screen.config.save()
 
-method resume*(screen: SettingsScreen) =
+method resume*(screen: SettingsScreen): bool =
   if not screen.isInitialized:
     screen.init()
   gfx.setFont(getOrLoadFont("fonts/Roobert-11-Medium"))
   screen.config = getConfig()
   draw(screen)
+  return true
 
 method update*(screen: SettingsScreen): int =
   if updateInput(screen):

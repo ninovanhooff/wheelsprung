@@ -60,7 +60,10 @@ proc resumeActiveScreen() =
   # Since resume isthe callback where menu items are added, 
   # we remove all menu items before resuming
   playdate.system.removeAllMenuItems() 
-  activeScreen.resume()
+  if not activeScreen.resume():
+    print("ERROR: Screen did not resume")
+    popScreenImmediately()
+    resumeActiveScreen()
 
 proc pushScreen*(toScreen: Screen) =
   pendingNavigators.add(() =>

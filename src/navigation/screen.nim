@@ -12,7 +12,7 @@ method `$`*(self: Screen): string = $self.screenType
 method pause*(screen: Screen) =
   discard
 
-method resume*(screen: Screen) =
+method resume*(screen: Screen): bool =
   ## Notify screen that it will become visible to the user,
   ## either for the first time or after it was paused
   ## and subsequently brought back to the front of the backstack

@@ -141,6 +141,10 @@ proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
   )
 
 proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
+  if screen.levelRows.len == 0:
+    gfx.drawText("No levels found. Add a .wmj file to the levels folder.", levelDrawRegion.x + 10, levelDrawRegion.y + 10)
+    return
+    
   initTableRowsImage(screen, forceRedraw)
   let scrollPosition = screen.scrollPosition
   var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).round.int32
