@@ -82,11 +82,13 @@ rm "$TEMP_DESTINATION_DIR/pdxinfo"
 if [ -f "$INPUT" ]; then
   # we know this will be 1 file
   mv "$TEMP_DESTINATION_DIR"/* "$DESTINATION_DIR" || { echo "Failed to move files"; exit 1; }
-  rm -rf "$TEMP_DESTINATION_DIR"
 else
   # we know this will be a directory
-  mv "$TEMP_DESTINATION_DIR" "$DESTINATION_DIR" || { echo "Failed to move files"; exit 1; }
+  cp -r $TEMP_DESTINATION_DIR/* "$DESTINATION_DIR" || { echo "Failed to move files"; exit 1; }
 fi
+
+echo "Removing the temp output directory"
+rm -rf "$TEMP_DESTINATION_DIR"
 
 echo "DONE"
 
