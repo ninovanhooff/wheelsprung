@@ -81,7 +81,7 @@ rm "$TEMP_DESTINATION_DIR/pdxinfo"
 
 if [ -f "$INPUT" ]; then
   # we know this will be 1 file
-  mv "$TEMP_DESTINATION_DIR"/* "$DESTINATION_DIR" || { echo "Failed to move files"; exit 1; }
+  mv $TEMP_DESTINATION_DIR/* "$DESTINATION_DIR" || { echo "Failed to move file"; exit 1; }
 else
   # we know this will be a directory
   cp -r $TEMP_DESTINATION_DIR/* "$DESTINATION_DIR" || { echo "Failed to move files"; exit 1; }
