@@ -9,6 +9,15 @@
 # Get the absolute path of the directory containing the current file
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
+# print the location of the pdc command
+PDC_COMMAND=$(which pdc)
+if [ -z "$PDC_COMMAND" ]; then
+  printf "Error: pdc command not found. Please install the Playdate SDK from\nhttps://play.date/dev/"
+  exit 1
+else
+  echo "PDC command location: $PDC_COMMAND"
+fi
+
 SOURCE_DIR="$SCRIPT_DIR/pd_converter_source"
 TEMP_DESTINATION_DIR="$SCRIPT_DIR/pd_converter_output"
 TEMP_DESTINATION_DIR_PDX="$TEMP_DESTINATION_DIR.pdx"
@@ -33,9 +42,6 @@ removeDir() {
     rm -rf "$1"
   fi
 }
-
-# print the location of the pdc command
-echo "PDC command location: $(which pdc)"
 
 if [ ! -e "$INPUT" ]; then
   echo "The specified input does not exist: $INPUT"
@@ -68,7 +74,7 @@ echo "Copying the input file to the temp source directory"
 cp -r "$INPUT" "$SOURCE_DIR"
 
 
-pdc -v -k "$SOURCE_DIR" "$TEMP_DESTINATION_DIR_PDX"
+"$PDC_COMMAND" -v -k "$SOURCE_DIR" "$TEMP_DESTINATION_DIR_PDX"
 
 # Remove the source directory
 echo "Removing the temp source directory"
