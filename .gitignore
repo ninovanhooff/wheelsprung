@@ -1,6 +1,6 @@
 *.pdx
 source/pdex.*
-wheelsprung.pdx.zip
+wheelsprung*.pdx.zip
 *.dSYM
 .DS_Store
 game.map
