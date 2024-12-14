@@ -142,7 +142,7 @@ proc drawLockedLevelsScrim(screen: LevelSelectScreen) =
 
 proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
   if screen.levelRows.len == 0:
-    gfx.drawText("No levels found. Add a .wmj file to the levels folder\ninside the com.ninovanhooff.wheelsprung data folder.", levelDrawRegion.x + 10, levelDrawRegion.y + 10)
+    gfx.drawText("No levels found. Add a .wmj file to the levels folder\ninside the com.ninovanhooff.wheelsprung data folder.\nTo reload, press ctrl/cmd-R", levelDrawRegion.x + 10, levelDrawRegion.y + 10)
     return
     
   initTableRowsImage(screen, forceRedraw)
