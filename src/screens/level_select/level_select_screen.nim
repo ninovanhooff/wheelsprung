@@ -147,6 +147,8 @@ proc updateInput(screen: LevelSelectScreen) =
   let numRows = rows.len
   if numRows == 0:
     return
+  if screen.selectedIndex >= numRows:
+    screen.selectedIndex = 0
   let selectedLevelMeta = rows[screen.selectedIndex].levelMeta
 
   if kButtonA in buttonState.pushed:
