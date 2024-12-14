@@ -25,22 +25,7 @@ As noted above, the level files are not included. This may be a cause for crashe
 See [Playdate-Nim][pdnim] for installation instructions.
 
 ### Linux support
-This project needs Chipmunk as **static** library. This is provided for the windows simulator(64 bit), MacOs simulator(Apple silicon), and the playdate device. For other platforms, I appreciate a Pull Request.
-
-I compiled the windows lib, by installing Msys2, and adding the C build tools for MinGW (make and cmake). Then, I could build `libchipmunk.a` with 
-
-```
-mkdir build
-cd build
-cmake --fresh -G "MinGW Makefiles" -D BUILD_STATIC=ON -D BUILD_SHARED=OFF -D BUILD_DEMOS=OFF -D INSTALL_STATIC=OFF -D CMAKE_BUILD_TYPE=Debug -D PLAYDATE=ON ../
-cmake --build .
-```
-
-The resulting lib is placed in the [lib](./lib) folder.
-
-
-[pdnim]: https://github.com/samdze/playdate-nim/tree/main/playdate_example
-[editor]: https://github.com/ninovanhooff/wheelsprung/wiki/Level-Editor
+All the necessities to run on Linux should be in place, but the Linux build target is not maintained and last checked a long time ago. 
 
 ## Development
 As noted above, the level files are not included. This may be a cause for crashes.
@@ -61,3 +46,20 @@ npm run watch
 ```
 
 ...or select the Node.js > Run Script: watch from the Run and Debug dropdown
+
+### Chipmunk
+The Chipmunk physics library comes bundled as a pre-compiled static library. For future reference; this is how I was able to compile it for Mac and Linux. For Windows, I used [tdm-gcc][tdm-gcc].
+
+```
+mkdir build
+cd build
+cmake --fresh -G "MinGW Makefiles" -D BUILD_STATIC=ON -D BUILD_SHARED=OFF -D BUILD_DEMOS=OFF -D INSTALL_STATIC=OFF -D CMAKE_BUILD_TYPE=Debug -D PLAYDATE=ON ../
+cmake --build .
+```
+
+The resulting lib is placed in the [lib](./lib) folder.
+
+
+[pdnim]: https://github.com/samdze/playdate-nim/tree/main/playdate_example
+[editor]: https://github.com/ninovanhooff/wheelsprung/wiki/Level-Editor
+[tdm-gcc]: https://jmeubank.github.io/tdm-gcc/
