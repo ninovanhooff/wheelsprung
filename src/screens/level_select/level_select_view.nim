@@ -147,7 +147,6 @@ proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
     
   initTableRowsImage(screen, forceRedraw)
   let scrollPosition = screen.scrollPosition
-  var y = levelDrawRegion.y - ((scrollPosition mod 1.0f) * rowHeight).round.int32
   let maxRenderIdx = clamp(
     screen.scrollPosition.int + LEVEL_SELECT_VISIBLE_ROWS.ceil.int32, 
     0, screen.levelRows.high
@@ -165,18 +164,18 @@ proc drawLevelRows(screen: LevelSelectScreen, forceRedraw: bool = false) =
     # rowIdx == -1: no rows where updated
     not screen.isSelectionDirty and
     not forceRedraw:
-    return
+      return
 
   gfx.setClipRect(levelDrawRegion.x, levelDrawRegion.y, levelDrawRegion.width, levelDrawRegion.height)
-
-  rowsBitmap.draw(levelDrawRegion.x, levelDrawRegion.y - (scrollPosition * rowHeight).int32, kBitmapUnflipped)
+  let rowsBitmapY = levelDrawRegion.y - (scrollPosition * rowHeight).int32
+  rowsBitmap.draw(levelDrawRegion.x, rowsBitmapY, kBitmapUnflipped)
 
   # vertical lines
   for x in verticalLinesScreen:
     gfx.drawLine(x, levelDrawRegion.y, x, levelDrawRegion.bottom, 2, kColorBlack)
 
   # invert the selected row
-  let selectedRowY = y + (screen.selectedIndex - scrollPosition.int32) * rowHeight
+  let selectedRowY = rowsBitmapY + screen.selectedIndex * rowHeight
   gfx.fillRect(
     levelDrawRegion.x, selectedRowY, 
     levelDrawRegion.width, rowHeight, 
