@@ -114,7 +114,7 @@ proc runTests*() =
   check(tiledRectPosToCenterPos(0, 0, 100, 100, -90).toVertex, newVertex(50, -50))
   check(tiledRectPosToCenterPos(0, 0, 100, 100, 360).toVertex, newVertex(50, 50))
 
-  check("levels/tutorial_brake.wmj".nextLevelPath(), some("levels/tutorial_turn_around.wmj"))
+  check("levels/tutorial_brake.flatty".nextLevelPath(), some("levels/tutorial_turn_around.flatty"))
   check("nonExisting.wmj".nextLevelPath(), none(Path))
   check("levels/level3.wmj".nextLevelPath(), none(Path))
 
