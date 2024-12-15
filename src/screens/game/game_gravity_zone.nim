@@ -1,7 +1,6 @@
 import std/options
 import playdate/api
 import chipmunk7
-import common/utils
 import common/graphics_utils
 import common/audio_utils
 import cache/bitmaptable_cache
@@ -112,7 +111,6 @@ proc drawGravityZones*(gravityZones: seq[GravityZone], activeDirection: Directio
 let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityShape: pointer, unused: pointer) {.cdecl raises: [].} =
   let gravityShape = cast[Shape](gravityShape)
   let gravityZone = cast[GravityZone](gravityShape.userData)
-  echo "hit gravity zone:" & repr(gravityZone)
 
   let state = cast[GameState](space.userData)
   state.gravityDirection = gravityZone.direction
@@ -121,7 +119,6 @@ let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityShape:
   playSoundForGravity(newGravity)
     
 let gravityZoneBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  print "gravityZoneBeginFunc"
   var shapeA, shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   discard space.addPostStepCallback(gravityZonePostStepCallback, shapeA, nil)
