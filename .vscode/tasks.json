@@ -50,15 +50,6 @@
       }
     },
     {
-      "label": "Reboot Device to Boot disk",
-      "type": "shell",
-      "command": "./scripts/reboot_bootdisk.sh",
-      "problemMatcher": [],
-      "group": {
-        "kind": "none"
-      }
-    },
-    {
       "label": "Reboot Device to Data disk",
       "type": "shell",
       "command": "./scripts/reboot_datadisk.sh",
