@@ -84,9 +84,9 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
   ]
   screen.onCanceled = proc(pushed: PDButtons) =
     if kButtonA in pushed:
-      state.popOrPushGameResult()
-    elif kButtonB in pushed:
       restartGameHandler()
+    elif kButtonB in pushed:
+      state.popOrPushGameResult()
     else:
       print "ERROR cannot handle hitstop cancel for buttons: " & repr(pushed)
 

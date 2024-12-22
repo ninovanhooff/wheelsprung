@@ -161,11 +161,19 @@ proc handleInput*(state: GameState, liveButtonState: PDButtonState, onShowGameRe
     # but any button can be pressed to navigate to the result screen
     # always take the button state from the system, we don't want this controlled by the recorded input
 
+    let resultType = state.gameResult.get.resultType
+
     if state.isInLiveMode:
       if kButtonA in liveButtonState.pushed:
-        onShowGameResultPressed()
+        if resultType == GameResultType.GameOver:
+          onRestartGamePressed()
+        elif resultType == GameResultType.LevelComplete:
+          onShowGameResultPressed()
       elif kButtonB in liveButtonState.pushed:
-        onRestartGamePressed()
+        if resultType == GameResultType.GameOver:
+          onShowGameResultPressed()
+        elif resultType == GameResultType.LevelComplete:
+          onRestartGamePressed()
     return
 
   if state.isGamePaused:
