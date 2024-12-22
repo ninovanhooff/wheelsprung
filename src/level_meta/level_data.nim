@@ -61,7 +61,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.flatty", theme= Plants, hash="6C2AFA63DB64AD88EB324918BEA8B557"),
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.flatty", theme= Plants, hash="6E5F2C44C7ED48F25ED86E834C68149B"),
   newLevelMeta(name= "Half Pipe", path="levels/halfpipe.flatty", theme= Plants, hash="AD044D60F6F6C95534182E7C7C105AE6"),
-  newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.flatty", theme= Plants, hash="7C123749D89BC83C606CF710CEA93DED"),
+  newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.flatty", theme= Plants, hash="0CF980DB09C2EE873C16836319B51CBD"),
 
   newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.flatty", theme= Desk, hash="633154C6A64C4C0EB4FCC1FE1F0490B0"),
   newLevelMeta(name= "Leg Up", path="levels/leg_up.flatty", theme= Desk, hash="6F48907EB90D6985CB66486C4A11FFEC"),
