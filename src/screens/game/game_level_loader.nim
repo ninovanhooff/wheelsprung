@@ -240,7 +240,7 @@ proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): V
   let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
   return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
 
-proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
+proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, dynamicObjectType: Option[DynamicObjectType] = none(DynamicObjectType)): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
@@ -252,12 +252,12 @@ proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, bitmapTableId: Optio
     mass = obj.massMultiplier * size.area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
-    bitmapTableId = bitmapTableId,
+    objectType = dynamicObjectType,
   ))
   return true
 
 
-proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
+proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, dynamicObjectType: Option[DynamicObjectType] = none(DynamicObjectType)): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
@@ -270,7 +270,7 @@ proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, bitmapTableId: Op
     mass = obj.massMultiplier * area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
-    bitmapTableId = bitmapTableId,
+    objectType = dynamicObjectType,
   ))
   return true
     
@@ -322,15 +322,15 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.gravityZones.add(spec)
     of ClassIds.TallBook:
       # todo: should a default mass be set?
-      return loadAsDynamicBox(level, obj, some(BitmapTableId.TallBook))
+      return loadAsDynamicBox(level, obj, some(DynamicObjectType.TallBook))
     of ClassIds.BowlingBall:
-      return loadAsDynamicCircle(level, obj, some(BitmapTableId.BowlingBall))
+      return loadAsDynamicCircle(level, obj, some(DynamicObjectType.BowlingBall))
     of ClassIds.Marble:
-      return loadAsDynamicCircle(level, obj, some(BitmapTableId.Marble))
+      return loadAsDynamicCircle(level, obj, some(DynamicObjectType.Marble))
     of ClassIds.TennisBall:
-      return loadAsDynamicCircle(level, obj, some(BitmapTableId.TennisBall))
+      return loadAsDynamicCircle(level, obj, some(DynamicObjectType.TennisBall))
     of ClassIds.TallPlank:
-      return loadAsDynamicBox(level, obj, some(BitmapTableId.TallPlank))
+      return loadAsDynamicBox(level, obj, some(DynamicObjectType.TallPlank))
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
@@ -374,7 +374,7 @@ proc loadEllipse(level: var Level, obj: LevelObjectEntity): bool =
     mass = obj.massMultiplier * area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
-    bitmapTableId = none(BitmapTableId),
+    objectType = none(DynamicObjectType),
   ))
   return true
 

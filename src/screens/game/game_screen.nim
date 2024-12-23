@@ -174,6 +174,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
   handler.beginFunc = gravityZoneBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.GravityZone, GameCollisionTypes.Head)
   handler.beginFunc = gravityZoneBeginFunc
+  space.addDynamicObjectHandlers()
 
   space.addTerrain(level.terrainPolygons)
   space.addTerrain(level.terrainPolylines)
@@ -246,6 +247,10 @@ proc onResetGame(screen: GameScreen) =
     hintsEnabled = oldState.hintsEnabled,
     ghostPlayback = some(pickBestGhost(oldState.ghostRecording, oldState.ghostPlayback))
   )
+  
+  pauseGameBike()
+  pauseDynamicObjects()
+
   oldState.destroy()
 
   screen.state.updateCameraPid(snapToTarget = true)
@@ -320,6 +325,7 @@ method resume*(gameScreen: GameScreen): bool =
 
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
+  pauseDynamicObjects()
 
 
 method update*(gameScreen: GameScreen): int =

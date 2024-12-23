@@ -13,6 +13,7 @@ type
   SampleId* {.pure.} = enum
     BikeEngineIdle = "/audio/engine/1300rpm_idle"
     BikeEngineThrottle = "/audio/engine/1700rpm_throttle"
+    BowlingBallRolling = "/audio/dynamic_objects/bowling_ball_rolling"
     Finish = "/audio/finish/finish"
     FinishUnlock = "/audio/finish/finish_unlock"
     Coin = "/audio/pickup/coin"

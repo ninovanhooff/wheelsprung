@@ -2,6 +2,7 @@ import playdate/api
 import chipmunk7
 import options
 import std/sugar
+import std/tables
 import common/graphics_types
 import common/utils
 import common/shared_types
@@ -64,9 +65,17 @@ type
     coinProgress*: float32
     gameResult*: GameResult
 
+  DynamicObjectType* {.pure.} = enum 
+    TallBook,
+    TallPlank
+    BowlingBall,
+    Marble,
+    TennisBall
+
   DynamicObject* = object
     shape*: Shape
     bitmapTable*: Option[AnnotatedBitmapTable]
+    dynamicObjectType*: Option[DynamicObjectType]
 
   DynamicBoxSpec* = object
     position*: Vect
@@ -74,7 +83,7 @@ type
     mass*: Float
     angle*: Float
     friction*: Float
-    bitmapTableId*: Option[BitmapTableId]
+    objectType*: Option[DynamicObjectType]
 
   DynamicCircleSpec* = object
     position*: Vect
@@ -82,7 +91,7 @@ type
     mass*: Float
     angle*: Float
     friction*: Float
-    bitmapTableId*: Option[BitmapTableId]
+    objectType*: Option[DynamicObjectType]
 
 
   Text* = object
@@ -235,6 +244,7 @@ type GameState* = ref object of RootObj
   camYController*: PIDController
   driveDirection*: DriveDirection
   dynamicObjects*: seq[DynamicObject]
+  contactCounts*: Table[DynamicObjectType, int32]
 
   ## Ghost
   ghostRecording*: Ghost
@@ -339,19 +349,31 @@ proc newGravityZone*(position: Vertex, direction: Direction8, animation: Animati
 proc newGravityZoneSpec*(position: Vertex, direction: Direction8): GravityZoneSpec =
   result = GravityZoneSpec(position: position, direction: direction)
 
-proc newDynamicObject*(shape: Shape, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): DynamicObject =
-  let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
-  result = DynamicObject(shape: shape, bitmapTable: bitmapTable)
+proc toBitmapTableId*(dynamicObjectType: DynamicObjectType): BitmapTableId =
+  case dynamicObjectType
+  of DynamicObjectType.TallBook: return BitmapTableId.TallBook
+  of DynamicObjectType.TallPlank: return BitmapTableId.TallPlank
+  of DynamicObjectType.BowlingBall: return BitmapTableId.BowlingBall
+  of DynamicObjectType.Marble: return BitmapTableId.Marble
+  of DynamicObjectType.TennisBall: return BitmapTableId.TennisBall
 
-proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, bitmapTableId: Option[BitmapTableId]): DynamicBoxSpec =
+proc newDynamicObject*(shape: Shape, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): DynamicObject =
+  let bitmapTableId = objectType.map(it => it.toBitmapTableId())
+  let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
+  result = DynamicObject(
+    shape: shape, 
+    bitmapTable: bitmapTable
+    )
+
+proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, objectType: Option[DynamicObjectType]): DynamicBoxSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Box mass must be greater than 0")
-  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, bitmapTableId: bitmapTableId)
+  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, objectType: objectType)
 
-proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float, bitmapTableId: Option[BitmapTableId]): DynamicCircleSpec =
+proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float, objectType: Option[DynamicObjectType]): DynamicCircleSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Circle mass must be greater than 0")
-  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction, bitmapTableId: bitmapTableId)
+  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction, objectType: objectType)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(
