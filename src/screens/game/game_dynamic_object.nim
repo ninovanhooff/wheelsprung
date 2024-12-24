@@ -12,18 +12,18 @@ import common/graphics_utils
 import game_types
 import cache/sound_cache
 
-var rollPlayers = initTable[DynamicObjectType, SamplePlayer]()
+var rollPlayers = initTable[DynamicObjectType, Option[SamplePlayer]]()
 
-proc rollSampleId(objectType: DynamicObjectType): SampleId =
+proc rollSampleId(objectType: DynamicObjectType): Option[SampleId] =
   case objectType
-  of DynamicObjectType.BowlingBall: SampleId.BowlingBallRolling
-  else: SampleId.BowlingBallRolling
+  of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallRolling)
+  else: none(SampleId)
 
-proc getRollPlayer*(objectType: DynamicObjectType): SamplePlayer =
+proc getRollPlayer*(objectType: DynamicObjectType): Option[SamplePlayer] =
   rollPlayers.withValue(objectType, value):
     return value[]
   do:
-    let player = getOrLoadSamplePlayer(rollSampleId(objectType))
+    let player = rollSampleId(objectType).map(getOrLoadSamplePlayer)
     rollPlayers[objectType] = player
     return player
 
@@ -70,6 +70,12 @@ proc addDynamicObjects*(state: GameState) =
 proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
   var fastestAngularVelocity = 0f
 
+  let optRollPlayer = getRollPlayer(objectType)
+  if optRollPlayer.isNone:
+    return
+  let rollPlayer = optRollPlayer.get
+
+
   for item in state.dynamicObjects:
     if item.objectType != some(objectType):
       continue
@@ -82,7 +88,6 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
       fastestAngularVelocity = angularVelocity
   
   let shouldPlay = fastestAngularVelocity > 0.1f
-  let rollPlayer = getRollPlayer(objectType)
   if shouldPlay and not rollPlayer.isPlaying:
     rollPlayer.play(0, 1f)
     let targetRate = clamp(fastestAngularVelocity, 0.5f, 1.3f)
@@ -125,10 +130,6 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
 
-  let objectType = cast[DynamicObjectType](shapeA.userData)
-
-  # print "collisionPostSolveFunc: ", objectType, shapeB.collisionType.repr
-  
   discard space.addPostStepCallback(
     postStepCallback,
     shapeA,
@@ -208,5 +209,6 @@ proc drawDynamicObjects*(state: GameState) =
       print "drawDynamicObjects: Unknown shape kind: ", shape.kind
 
 proc pauseDynamicObjects*() =
-  for player in rollPlayers.values:
-    player.stop()
+  for optPlayer in rollPlayers.values:
+    if optPlayer.isSome:
+      optPlayer.get.stop()
