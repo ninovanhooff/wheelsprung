@@ -240,7 +240,7 @@ proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): V
   let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
   return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
 
-proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, dynamicObjectType: Option[DynamicObjectType] = none(DynamicObjectType)): bool =
+proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
@@ -252,12 +252,12 @@ proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, dynamicObjectType: O
     mass = obj.massMultiplier * size.area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
-    objectType = dynamicObjectType,
+    objectType = objectType,
   ))
   return true
 
 
-proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, dynamicObjectType: Option[DynamicObjectType] = none(DynamicObjectType)): bool =
+proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
@@ -270,7 +270,7 @@ proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, dynamicObjectType
     mass = obj.massMultiplier * area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
-    objectType = dynamicObjectType,
+    objectType = objectType,
   ))
   return true
     

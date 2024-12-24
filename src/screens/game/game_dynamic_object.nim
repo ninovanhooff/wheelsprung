@@ -1,5 +1,8 @@
+{.push raises: [].}
+
 import playdate/api
 import std/tables
+import std/sets
 import std/math
 import std/options
 import chipmunk7
@@ -9,7 +12,20 @@ import common/graphics_utils
 import game_types
 import cache/sound_cache
 
-var bowlingBallRollPlayer: SamplePlayer
+var rollPlayers = initTable[DynamicObjectType, SamplePlayer]()
+
+proc rollSampleId(objectType: DynamicObjectType): SampleId =
+  case objectType
+  of DynamicObjectType.BowlingBall: SampleId.BowlingBallRolling
+  else: SampleId.BowlingBallRolling
+
+proc getRollPlayer*(objectType: DynamicObjectType): SamplePlayer =
+  rollPlayers.withValue(objectType, value):
+    return value[]
+  do:
+    let player = getOrLoadSamplePlayer(rollSampleId(objectType))
+    rollPlayers[objectType] = player
+    return player
 
 proc addDynamicObjects*(state: GameState) =
   
@@ -44,44 +60,48 @@ proc addDynamicObjects*(state: GameState) =
       )
     )
 
-proc increaseCount*(state: GameState, objectType: DynamicObjectType) =
-  state.contactCounts[objectType] = state.contactCounts.getOrDefault(objectType, 0) + 1
+# proc increaseCount*(state: GameState, objectType: DynamicObjectType) =
+#   state.collidingShapes[objectType] = state.collidingShapes.getOrDefault(objectType, 0) + 1
 
-# Can't use CountTable because it doesn't allow decrement
-proc decreaseCount*(state: GameState, objectType: DynamicObjectType) =
-  state.contactCounts[objectType] = state.contactCounts.getOrDefault(objectType, 0) - 1
+# # Can't use CountTable because it doesn't allow decrement
+# proc decreaseCount*(state: GameState, objectType: DynamicObjectType) =
+#   state.collidingShapes[objectType] = state.collidingShapes.getOrDefault(objectType, 0) - 1
+
+proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
+  var fastestAngularVelocity = 0f
+
+  for item in state.dynamicObjects:
+    if item.objectType != some(objectType):
+      continue
+    let shape = item.shape
+    if shape notin state.collidingShapes:
+      continue
+    print "considering shape: ", shape.repr
+    let angularVelocity = abs(shape.body.angularVelocity)
+    if angularVelocity > fastestAngularVelocity:
+      fastestAngularVelocity = angularVelocity
+  
+  let shouldPlay = fastestAngularVelocity > 0.1f
+  let rollPlayer = getRollPlayer(objectType)
+  if shouldPlay and not rollPlayer.isPlaying:
+    rollPlayer.play(0, 1f)
+    let targetRate = clamp(fastestAngularVelocity, 0.5f, 1.3f)
+    let newRate = lerp(rollPlayer.rate, targetRate, 0.1f)
+    rollPlayer.rate = newRate
+  elif not shouldPlay and rollPlayer.isPlaying:
+    rollPlayer.stop()
+
+  print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
 
 let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: pointer, unused: pointer) {.cdecl raises: [].} =
   let state = cast[GameState](space.userData)
-  let count = state.contactCounts.getOrDefault(DynamicObjectType.BowlingBall, -1) # todo do for every type
-  
-
-  var fastestAngularVelocity = 0f
-  for obj in state.dynamicObjects:
-    let shape = obj.shape
-    if shape.kind == cpCircleShape: # todo check object type == bowling ball
-      let circle = cast[CircleShape](shape)
-      let angularVelocity = abs(circle.body.angularVelocity)
-      if angularVelocity > fastestAngularVelocity:
-        fastestAngularVelocity = angularVelocity
-
-  let shouldPlay = count >= 1 and fastestAngularVelocity > 0.1f
-  if bowlingBallRollPlayer.isNil:
-    bowlingBallRollPlayer = getOrLoadSamplePlayer(SampleId.BowlingBallRolling)
-  if shouldPlay and not bowlingBallRollPlayer.isPlaying:
-    print "starting sound"
-    bowlingBallRollPlayer.play(0, 1f)
-  elif not shouldPlay and bowlingBallRollPlayer.isPlaying:
-    print "stopping sound", count
-    bowlingBallRollPlayer.stop()
-  
-  let targetRate = clamp(fastestAngularVelocity, 0.5f, 1.3f)
-  let newRate = lerp(bowlingBallRollPlayer.rate, targetRate, 0.1f)
-  bowlingBallRollPlayer.rate = newRate
-  print "postStepCallback: ", count, fastestAngularVelocity, bowlingBallRollPlayer.rate
+  print "num colliding shapes: ", state.collidingShapes.len
+  for objType in DynamicObjectType:
+    updateRollSound(objType, state)
+  # updateRollSound(DynamicObjectType.BowlingBall, state) # todo: loop through all object types
 
 let collisionBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  let state = cast[GameState](space.userData)
+  var state: GameState = cast[GameState](space.userData)
   var 
     shapeA: Shape
     shapeB: Shape
@@ -90,7 +110,7 @@ let collisionBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; u
   let objectType = cast[DynamicObjectType](shapeA.userData)
 
   print "collisionBeginFunc: ", objectType, shapeB.collisionType.repr
-  state.increaseCount(objectType)
+  state.collidingShapes.incl(shapeA)
   
   discard space.addPostStepCallback(
     postStepCallback,
@@ -107,7 +127,7 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
 
   let objectType = cast[DynamicObjectType](shapeA.userData)
 
-  print "collisionPostSolveFunc: ", objectType, shapeB.collisionType.repr
+  # print "collisionPostSolveFunc: ", objectType, shapeB.collisionType.repr
   
   discard space.addPostStepCallback(
     postStepCallback,
@@ -117,7 +137,7 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
 
 
 let collisionSeparateFunc*: CollisionSeparateFunc = proc(arb: Arbiter; space: Space; unused: pointer) {.cdecl.} =
-  let state = cast[GameState](space.userData)
+  var state = cast[GameState](space.userData)
   var 
     shapeA: Shape
     shapeB: Shape
@@ -126,7 +146,7 @@ let collisionSeparateFunc*: CollisionSeparateFunc = proc(arb: Arbiter; space: Sp
   let objectType = cast[DynamicObjectType](shapeA.userData)
 
   print "collisionSeparateFunc: ", objectType, shapeB.collisionType.repr
-  state.decreaseCount(objectType)
+  state.collidingShapes.excl(shapeA)
 
   discard space.addPostStepCallback(
     postStepCallback,
@@ -188,5 +208,5 @@ proc drawDynamicObjects*(state: GameState) =
       print "drawDynamicObjects: Unknown shape kind: ", shape.kind
 
 proc pauseDynamicObjects*() =
-  if not bowlingBallRollPlayer.isNil:
-    bowlingBallRollPlayer.stop()
+  for player in rollPlayers.values:
+    player.stop()

@@ -2,7 +2,7 @@ import playdate/api
 import chipmunk7
 import options
 import std/sugar
-import std/tables
+import std/sets
 import common/graphics_types
 import common/utils
 import common/shared_types
@@ -75,7 +75,7 @@ type
   DynamicObject* = object
     shape*: Shape
     bitmapTable*: Option[AnnotatedBitmapTable]
-    dynamicObjectType*: Option[DynamicObjectType]
+    objectType*: Option[DynamicObjectType]
 
   DynamicBoxSpec* = object
     position*: Vect
@@ -244,7 +244,7 @@ type GameState* = ref object of RootObj
   camYController*: PIDController
   driveDirection*: DriveDirection
   dynamicObjects*: seq[DynamicObject]
-  contactCounts*: Table[DynamicObjectType, int32]
+  collidingShapes*: sets.HashSet[Shape]
 
   ## Ghost
   ghostRecording*: Ghost
@@ -349,21 +349,22 @@ proc newGravityZone*(position: Vertex, direction: Direction8, animation: Animati
 proc newGravityZoneSpec*(position: Vertex, direction: Direction8): GravityZoneSpec =
   result = GravityZoneSpec(position: position, direction: direction)
 
-proc toBitmapTableId*(dynamicObjectType: DynamicObjectType): BitmapTableId =
-  case dynamicObjectType
-  of DynamicObjectType.TallBook: return BitmapTableId.TallBook
-  of DynamicObjectType.TallPlank: return BitmapTableId.TallPlank
-  of DynamicObjectType.BowlingBall: return BitmapTableId.BowlingBall
-  of DynamicObjectType.Marble: return BitmapTableId.Marble
-  of DynamicObjectType.TennisBall: return BitmapTableId.TennisBall
+proc toBitmapTableId*(objectType: DynamicObjectType): BitmapTableId =
+  case objectType
+  of DynamicObjectType.TallBook: BitmapTableId.TallBook
+  of DynamicObjectType.TallPlank: BitmapTableId.TallPlank
+  of DynamicObjectType.BowlingBall: BitmapTableId.BowlingBall
+  of DynamicObjectType.Marble: BitmapTableId.Marble
+  of DynamicObjectType.TennisBall: BitmapTableId.TennisBall
 
 proc newDynamicObject*(shape: Shape, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): DynamicObject =
   let bitmapTableId = objectType.map(it => it.toBitmapTableId())
   let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
   result = DynamicObject(
     shape: shape, 
-    bitmapTable: bitmapTable
-    )
+    bitmapTable: bitmapTable,
+    objectType: objectType
+  )
 
 proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, objectType: Option[DynamicObjectType]): DynamicBoxSpec =
   if mass <= 0.0:
@@ -395,5 +396,6 @@ proc getRiderBodies*(state: GameState): seq[Body] =
 proc destroy*(state: GameState) =
   print("Destroying game state")
   if state != nil and state.space != nil:
+    state.collidingShapes.clear()
     state.space.destroy()
     state.space = nil
