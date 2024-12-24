@@ -8,15 +8,26 @@ import std/options
 import chipmunk7
 import chipmunk_utils
 import common/utils
+import common/audio_utils
 import common/graphics_utils
 import game_types
 import cache/sound_cache
 
-var rollPlayers = initTable[DynamicObjectType, Option[SamplePlayer]]()
+const
+  minImpactImpulse: Float = 500.0
+
+var 
+  rollPlayers = initTable[DynamicObjectType, Option[SamplePlayer]]()
+  impactPlayers = initTable[DynamicObjectType, Option[SamplePlayer]]()
 
 proc rollSampleId(objectType: DynamicObjectType): Option[SampleId] =
   case objectType
   of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallRolling)
+  else: none(SampleId)
+
+proc impactSampleId(objectType: DynamicObjectType): Option[SampleId] =
+  case objectType
+  of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallImpact)
   else: none(SampleId)
 
 proc getRollPlayer*(objectType: DynamicObjectType): Option[SamplePlayer] =
@@ -25,6 +36,14 @@ proc getRollPlayer*(objectType: DynamicObjectType): Option[SamplePlayer] =
   do:
     let player = rollSampleId(objectType).map(getOrLoadSamplePlayer)
     rollPlayers[objectType] = player
+    return player
+
+proc getImpactPlayer*(objectType: DynamicObjectType): Option[SamplePlayer] =
+  impactPlayers.withValue(objectType, value):
+    return value[]
+  do:
+    let player = impactSampleId(objectType).map(getOrLoadSamplePlayer)
+    impactPlayers[objectType] = player
     return player
 
 proc addDynamicObjects*(state: GameState) =
@@ -60,13 +79,6 @@ proc addDynamicObjects*(state: GameState) =
       )
     )
 
-# proc increaseCount*(state: GameState, objectType: DynamicObjectType) =
-#   state.collidingShapes[objectType] = state.collidingShapes.getOrDefault(objectType, 0) + 1
-
-# # Can't use CountTable because it doesn't allow decrement
-# proc decreaseCount*(state: GameState, objectType: DynamicObjectType) =
-#   state.collidingShapes[objectType] = state.collidingShapes.getOrDefault(objectType, 0) - 1
-
 proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
   var fastestAngularVelocity = 0f
 
@@ -82,7 +94,7 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
     let shape = item.shape
     if shape notin state.collidingShapes:
       continue
-    print "considering shape: ", shape.repr
+    # print "considering shape: ", shape.repr
     let angularVelocity = abs(shape.body.angularVelocity)
     if angularVelocity > fastestAngularVelocity:
       fastestAngularVelocity = angularVelocity
@@ -96,14 +108,13 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
   elif not shouldPlay and rollPlayer.isPlaying:
     rollPlayer.stop()
 
-  print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
+  # print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
 
 let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: pointer, unused: pointer) {.cdecl raises: [].} =
   let state = cast[GameState](space.userData)
-  print "num colliding shapes: ", state.collidingShapes.len
+  # print "num colliding shapes: ", state.collidingShapes.len
   for objType in DynamicObjectType:
     updateRollSound(objType, state)
-  # updateRollSound(DynamicObjectType.BowlingBall, state) # todo: loop through all object types
 
 let collisionBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   var state: GameState = cast[GameState](space.userData)
@@ -114,7 +125,7 @@ let collisionBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; u
 
   let objectType = cast[DynamicObjectType](shapeA.userData)
 
-  print "collisionBeginFunc: ", objectType, shapeB.collisionType.repr
+  # print "collisionBeginFunc: ", objectType, shapeB.collisionType.repr
   state.collidingShapes.incl(shapeA)
   
   discard space.addPostStepCallback(
@@ -129,6 +140,17 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
+
+  let totalImpulse = arb.totalImpulse.vlength
+  let objectType = cast[DynamicObjectType](shapeA.userData)
+  if arb.isFirstContact and shapeB.collisionType == GameCollisionTypes.Terrain and  totalImpulse >= minImpactImpulse:
+    let impactPlayer = getImpactPlayer(objectType)
+    if impactPlayer.isSome:
+      let player = impactPlayer.get
+      if not player.isPlaying:
+        print "impact", arb.totalImpulse.vlength
+        impactPlayer.get.volume = clamp(totalImpulse / 3000f, 0.0, 1.0)
+        impactPlayer.get.playVariation()
 
   discard space.addPostStepCallback(
     postStepCallback,
