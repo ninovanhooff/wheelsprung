@@ -244,7 +244,6 @@ type GameState* = ref object of RootObj
   camYController*: PIDController
   driveDirection*: DriveDirection
   dynamicObjects*: seq[DynamicObject]
-  collidingShapes*: sets.HashSet[Shape]
 
   ## Ghost
   ghostRecording*: Ghost
@@ -396,6 +395,5 @@ proc getRiderBodies*(state: GameState): seq[Body] =
 proc destroy*(state: GameState) =
   print("Destroying game state")
   if state != nil and state.space != nil:
-    state.collidingShapes.clear()
     state.space.destroy()
     state.space = nil

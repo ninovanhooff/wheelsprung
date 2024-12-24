@@ -92,27 +92,33 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
     if item.objectType != some(objectType):
       continue
     let shape = item.shape
-    if shape notin state.collidingShapes:
+    var count = 0
+    let incrementCount = proc(_: Arbiter) =
+      count += 1
+
+    shape.body.eachArbiter(incrementCount)
+    if count == 0:
       continue
-    # print "considering shape: ", shape.repr
+
+    print "considering shape: ", shape.repr
     let angularVelocity = abs(shape.body.angularVelocity)
     if angularVelocity > fastestAngularVelocity:
       fastestAngularVelocity = angularVelocity
   
   let shouldPlay = fastestAngularVelocity > 0.1f
-  if shouldPlay and not rollPlayer.isPlaying:
-    rollPlayer.play(0, 1f)
+  if shouldPlay: 
+    if not rollPlayer.isPlaying:
+      rollPlayer.play(0, 1f)
     let targetRate = clamp(fastestAngularVelocity, 0.5f, 1.3f)
     let newRate = lerp(rollPlayer.rate, targetRate, 0.1f)
     rollPlayer.rate = newRate
   elif not shouldPlay and rollPlayer.isPlaying:
     rollPlayer.stop()
 
-  # print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
+  print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
 
 let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: pointer, unused: pointer) {.cdecl raises: [].} =
   let state = cast[GameState](space.userData)
-  # print "num colliding shapes: ", state.collidingShapes.len
   for objType in DynamicObjectType:
     updateRollSound(objType, state)
 
@@ -126,8 +132,6 @@ let collisionBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; u
   let objectType = cast[DynamicObjectType](shapeA.userData)
 
   # print "collisionBeginFunc: ", objectType, shapeB.collisionType.repr
-  state.collidingShapes.incl(shapeA)
-  
   discard space.addPostStepCallback(
     postStepCallback,
     shapeA,
@@ -169,7 +173,6 @@ let collisionSeparateFunc*: CollisionSeparateFunc = proc(arb: Arbiter; space: Sp
   let objectType = cast[DynamicObjectType](shapeA.userData)
 
   print "collisionSeparateFunc: ", objectType, shapeB.collisionType.repr
-  state.collidingShapes.excl(shapeA)
 
   discard space.addPostStepCallback(
     postStepCallback,
