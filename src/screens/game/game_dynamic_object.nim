@@ -10,6 +10,7 @@ import chipmunk_utils
 import common/utils
 import common/audio_utils
 import common/graphics_utils
+import common/fading_sample_player
 import game_types
 import cache/sound_cache
 
@@ -17,7 +18,7 @@ const
   minImpactImpulse: Float = 500.0
 
 var 
-  rollPlayers = initTable[DynamicObjectType, Option[SamplePlayer]]()
+  rollPlayers = initTable[DynamicObjectType, Option[FadingSamplePlayer]]()
   impactPlayers = initTable[DynamicObjectType, Option[SamplePlayer]]()
 
 proc rollSampleId(objectType: DynamicObjectType): Option[SampleId] =
@@ -30,11 +31,15 @@ proc impactSampleId(objectType: DynamicObjectType): Option[SampleId] =
   of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallImpact)
   else: none(SampleId)
 
-proc getRollPlayer*(objectType: DynamicObjectType): Option[SamplePlayer] =
+proc getOrLoadFadingSamplePlayer(sampleId: SampleId): FadingSamplePlayer =
+  let player = getOrLoadSamplePlayer(sampleId)
+  return newFadingSamplePlayer(player, lerpSpeed= 0.15f)
+
+proc getRollPlayer*(objectType: DynamicObjectType): Option[FadingSamplePlayer] =
   rollPlayers.withValue(objectType, value):
     return value[]
   do:
-    let player = rollSampleId(objectType).map(getOrLoadSamplePlayer)
+    let player = rollSampleId(objectType).map(getOrLoadFadingSamplePlayer)
     rollPlayers[objectType] = player
     return player
 
@@ -100,7 +105,7 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
     if count == 0:
       continue
 
-    print "considering shape: ", shape.repr
+    # print "considering shape: ", shape.repr
     let angularVelocity = abs(shape.body.angularVelocity)
     if angularVelocity > fastestAngularVelocity:
       fastestAngularVelocity = angularVelocity
@@ -108,14 +113,15 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
   let shouldPlay = fastestAngularVelocity > 0.1f
   if shouldPlay: 
     if not rollPlayer.isPlaying:
-      rollPlayer.play(0, 1f)
+      rollPlayer.fadeIn()
     let targetRate = clamp(fastestAngularVelocity, 0.5f, 1.3f)
     let newRate = lerp(rollPlayer.rate, targetRate, 0.1f)
     rollPlayer.rate = newRate
   elif not shouldPlay and rollPlayer.isPlaying:
-    rollPlayer.stop()
+    rollPlayer.fadeOut()
 
-  print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
+  # print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
+  rollPlayer.update()
 
 let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: pointer, unused: pointer) {.cdecl raises: [].} =
   let state = cast[GameState](space.userData)
@@ -172,7 +178,7 @@ let collisionSeparateFunc*: CollisionSeparateFunc = proc(arb: Arbiter; space: Sp
 
   let objectType = cast[DynamicObjectType](shapeA.userData)
 
-  print "collisionSeparateFunc: ", objectType, shapeB.collisionType.repr
+  # print "collisionSeparateFunc: ", objectType, shapeB.collisionType.repr
 
   discard space.addPostStepCallback(
     postStepCallback,
