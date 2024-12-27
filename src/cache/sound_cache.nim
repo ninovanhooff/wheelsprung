@@ -15,6 +15,8 @@ type
     BikeEngineThrottle = "/audio/engine/1700rpm_throttle"
     BowlingBallRolling = "/audio/dynamic_objects/bowling_ball_rolling"
     BowlingBallImpact = "/audio/dynamic_objects/bowling_ball_impact"
+    MarbleRolling = "/audio/dynamic_objects/marble_rolling"
+    MarbleImpact = "/audio/dynamic_objects/marble_impact"
     Finish = "/audio/finish/finish"
     FinishUnlock = "/audio/finish/finish_unlock"
     Coin = "/audio/pickup/coin"

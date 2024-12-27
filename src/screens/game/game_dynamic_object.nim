@@ -15,7 +15,8 @@ import game_types
 import cache/sound_cache
 
 const
-  minImpactImpulse: Float = 0.0
+  minImpactVolume: Float = 0.1f
+  minRollSoundAngularVelocity: Float = 0.6f # if angular velocity is less than this, don't play roll sound
 
 var 
   rollPlayers = initTable[DynamicObjectType, Option[FadingSamplePlayer]]()
@@ -112,17 +113,17 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
     if angularVelocity > fastestAngularVelocity:
       fastestAngularVelocity = angularVelocity
   
-  let shouldPlay = fastestAngularVelocity > 0.1f
+  let shouldPlay = fastestAngularVelocity > minRollSoundAngularVelocity
   if shouldPlay: 
     if not rollPlayer.isPlaying:
       rollPlayer.fadeIn()
-    let targetRate = clamp(fastestAngularVelocity, 0.5f, 1.3f)
+    let targetRate = clamp(fastestAngularVelocity, 0.8f, 1.3f)
     let newRate = lerp(rollPlayer.rate, targetRate, 0.1f)
     rollPlayer.rate = newRate
   elif not shouldPlay and rollPlayer.isPlaying:
     rollPlayer.fadeOut()
 
-  # print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
+  print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
   rollPlayer.update()
 
 let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: pointer, unused: pointer) {.cdecl raises: [].} =
@@ -155,13 +156,13 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
 
   let totalImpulse = arb.totalImpulse.vlength
   let objectType = cast[DynamicObjectType](shapeA.userData)
-  if arb.isFirstContact and shapeB.collisionType == GameCollisionTypes.Terrain and  totalImpulse >= minImpactImpulse:
+  let mass = shapeA.body.mass
+  let targetVolume = totalImpulse / mass / 100f
+  if arb.isFirstContact and shapeB.collisionType == GameCollisionTypes.Terrain and  targetVolume >= minImpactVolume:
     let impactPlayer = getImpactPlayer(objectType)
     if impactPlayer.isSome:
       let player = impactPlayer.get
       if not player.isPlaying:
-        let mass = shapeA.body.mass
-        let targetVolume = totalImpulse / mass / 100f
         print "impact", totalImpulse, mass
         impactPlayer.get.volume = clamp(targetVolume, 0.0, 1.0)
         impactPlayer.get.playVariation()
