@@ -35,7 +35,7 @@ proc finishCallback(state: LuaStatePtr): cint {.cdecl, raises: [].} =
     playdate.system.logToConsole(getCurrentExceptionMsg())
 
   playdate.system.logToConsole("cutscene finished. Starting game")
-  replaceScreen(newGameScreen(levelPath = "levels/level1.wmj"))
+  replaceScreen(newGameScreen(levelPath = "levels/dragster.flatty"))
   
   return 0
 
