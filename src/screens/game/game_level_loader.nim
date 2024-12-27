@@ -53,7 +53,7 @@ proc fallbackElasticity(objectType: Option[DynamicObjectType]): float32 =
     # keep in sync with editor defaults in game_objects.tsj
     of DynamicObjectType.BowlingBall: 0.05f
     of DynamicObjectType.Marble: 0.1f
-    of DynamicObjectType.TennisBall: 0.3f
+    of DynamicObjectType.TennisBall: 0.6f
     else: 0.0f
 
 proc toLCDPattern(str: string): LCDPattern =
