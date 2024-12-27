@@ -247,7 +247,7 @@ proc onResetGame(screen: GameScreen) =
     hintsEnabled = oldState.hintsEnabled,
     ghostPlayback = some(pickBestGhost(oldState.ghostRecording, oldState.ghostPlayback))
   )
-  
+
   pauseGameBike()
   pauseDynamicObjects()
 
@@ -343,6 +343,7 @@ method update*(gameScreen: GameScreen): int =
   updateGameStartOverlay(state)
   updateGameReplayOverlay(state)
   updateGameBikeSound(state)
+  updateDynamicObjects(state)
 
   if state.isGameStarted and not state.isGamePaused:
     updateAttitudeAdjust(state)

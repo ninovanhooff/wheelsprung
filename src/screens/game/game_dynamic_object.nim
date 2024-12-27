@@ -28,6 +28,14 @@ proc rollSampleId(objectType: DynamicObjectType): Option[SampleId] =
   of DynamicObjectType.Marble: some(SampleId.MarbleRolling)
   else: none(SampleId)
 
+proc rollRateMultiplier(objectType: DynamicObjectType): float =
+  ## Returns a multiplier for the roll playback rate based on the object type
+  ## Will be multiplied by angular velocity to determine playback rate
+  case objectType
+  of DynamicObjectType.BowlingBall: 1.0f
+  of DynamicObjectType.Marble: 0.7f
+  else: 1.0f
+
 proc impactSampleId(objectType: DynamicObjectType): Option[SampleId] =
   case objectType
   of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallImpact)
@@ -118,16 +126,15 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
   
   let shouldPlay = fastestAngularVelocity > minRollSoundAngularVelocity
   if shouldPlay: 
-    if not rollPlayer.isPlaying:
-      rollPlayer.fadeIn()
-    let targetRate = clamp(fastestAngularVelocity, 0.8f, 1.3f)
+    rollPlayer.fadeIn()
+    let targetRate = clamp(fastestAngularVelocity * objectType.rollRateMultiplier, 0.8f, 1.6f)
     let newRate = lerp(rollPlayer.rate, targetRate, 0.1f)
     rollPlayer.rate = newRate
   elif not shouldPlay and rollPlayer.isPlaying:
     rollPlayer.fadeOut()
 
-  # print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
-  rollPlayer.update()
+  print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
+  # rollPlayer.update()
 
 let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: pointer, unused: pointer) {.cdecl raises: [].} =
   let state = cast[GameState](space.userData)
@@ -251,3 +258,8 @@ proc pauseDynamicObjects*() =
   for optPlayer in rollPlayers.values:
     if optPlayer.isSome:
       optPlayer.get.stop()
+
+proc updateDynamicObjects*(state: GameState) =
+  for optPlayer in rollPlayers.values:
+    if optPlayer.isSome:
+      optPlayer.get.update()
