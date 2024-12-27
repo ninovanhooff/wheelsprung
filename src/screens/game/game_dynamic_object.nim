@@ -16,7 +16,7 @@ import cache/sound_cache
 
 const
   minImpactVolume: Float = 0.1f
-  minRollSoundAngularVelocity: Float = 0.6f # if angular velocity is less than this, don't play roll sound
+  minRollSoundAngularVelocity: Float = 0.3f # if angular velocity multiplied by rollRateMultiplier is less than this, don't play roll sound
 
 var 
   rollPlayers = initTable[DynamicObjectType, Option[FadingSamplePlayer]]()
@@ -33,7 +33,7 @@ proc rollRateMultiplier(objectType: DynamicObjectType): float =
   ## Will be multiplied by angular velocity to determine playback rate
   case objectType
   of DynamicObjectType.BowlingBall: 1.0f
-  of DynamicObjectType.Marble: 0.7f
+  of DynamicObjectType.Marble: 0.6f
   else: 1.0f
 
 proc impactSampleId(objectType: DynamicObjectType): Option[SampleId] =
@@ -124,10 +124,11 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
     if angularVelocity > fastestAngularVelocity:
       fastestAngularVelocity = angularVelocity
   
-  let shouldPlay = fastestAngularVelocity > minRollSoundAngularVelocity
+  let multipliedAngularVelocity = fastestAngularVelocity * rollRateMultiplier(objectType)
+  let shouldPlay = multipliedAngularVelocity > minRollSoundAngularVelocity
   if shouldPlay: 
     rollPlayer.fadeIn()
-    let targetRate = clamp(fastestAngularVelocity * objectType.rollRateMultiplier, 0.8f, 1.6f)
+    let targetRate = clamp(multipliedAngularVelocity, 0.8f, 1.6f)
     let newRate = lerp(rollPlayer.rate, targetRate, 0.1f)
     rollPlayer.rate = newRate
   elif not shouldPlay and rollPlayer.isPlaying:
