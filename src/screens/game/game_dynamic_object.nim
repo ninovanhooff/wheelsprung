@@ -15,7 +15,7 @@ import game_types
 import cache/sound_cache
 
 const
-  minImpactImpulse: Float = 500.0
+  minImpactImpulse: Float = 0.0
 
 var 
   rollPlayers = initTable[DynamicObjectType, Option[FadingSamplePlayer]]()
@@ -24,11 +24,13 @@ var
 proc rollSampleId(objectType: DynamicObjectType): Option[SampleId] =
   case objectType
   of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallRolling)
+  of DynamicObjectType.Marble: some(SampleId.MarbleRolling)
   else: none(SampleId)
 
 proc impactSampleId(objectType: DynamicObjectType): Option[SampleId] =
   case objectType
   of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallImpact)
+  of DynamicObjectType.Marble: some(SampleId.MarbleImpact)
   else: none(SampleId)
 
 proc getOrLoadFadingSamplePlayer(sampleId: SampleId): FadingSamplePlayer =
@@ -158,8 +160,10 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
     if impactPlayer.isSome:
       let player = impactPlayer.get
       if not player.isPlaying:
-        print "impact", arb.totalImpulse.vlength
-        impactPlayer.get.volume = clamp(totalImpulse / 3000f, 0.0, 1.0)
+        let mass = shapeA.body.mass
+        let targetVolume = totalImpulse / mass / 100f
+        print "impact", totalImpulse, mass
+        impactPlayer.get.volume = clamp(targetVolume, 0.0, 1.0)
         impactPlayer.get.playVariation()
 
   discard space.addPostStepCallback(
