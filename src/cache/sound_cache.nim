@@ -17,6 +17,7 @@ type
     BowlingBallImpact = "/audio/dynamic_objects/bowling_ball_impact"
     MarbleRolling = "/audio/dynamic_objects/marble_rolling"
     MarbleImpact = "/audio/dynamic_objects/marble_impact"
+    TennisBallImpact = "/audio/dynamic_objects/tennis_ball_impact"
     Finish = "/audio/finish/finish"
     FinishUnlock = "/audio/finish/finish_unlock"
     Coin = "/audio/pickup/coin"

@@ -32,6 +32,7 @@ proc impactSampleId(objectType: DynamicObjectType): Option[SampleId] =
   case objectType
   of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallImpact)
   of DynamicObjectType.Marble: some(SampleId.MarbleImpact)
+  of DynamicObjectType.TennisBall: some(SampleId.TennisBallImpact)
   else: none(SampleId)
 
 proc getOrLoadFadingSamplePlayer(sampleId: SampleId): FadingSamplePlayer =
@@ -125,7 +126,7 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
   elif not shouldPlay and rollPlayer.isPlaying:
     rollPlayer.fadeOut()
 
-  print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
+  # print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
   rollPlayer.update()
 
 let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: pointer, unused: pointer) {.cdecl raises: [].} =

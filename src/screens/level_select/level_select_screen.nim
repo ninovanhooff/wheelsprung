@@ -99,7 +99,7 @@ proc selectRow(screen: LevelSelectScreen, idx: int) =
 
   # clamp to unlocked levels
   screen.selectedIndex = screen.selectedIndex.clamp(0, screen.firstLockedRowIdx.get(screen.levelRows.len) - 1)
-  print "selected index: ", screen.selectedIndex, " firstLockedRowIdx: ", screen.firstLockedRowIdx, " levelRows.high: ", screen.levelRows.high
+  # print "selected index: ", screen.selectedIndex, " firstLockedRowIdx: ", screen.firstLockedRowIdx, " levelRows.high: ", screen.levelRows.high
   screen.levelTheme = screen.levelRows[screen.selectedIndex].levelMeta.theme
 
 proc selectPath(screen: LevelSelectScreen, path: string) =
