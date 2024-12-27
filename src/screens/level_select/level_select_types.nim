@@ -1,5 +1,3 @@
-import playdate/api
-
 import level_meta/level_data
 import navigation/screen
 import std/options
@@ -15,6 +13,7 @@ type
   LevelRow* = ref object
     levelMeta*: LevelMeta
     progress*: LevelProgress
+    optLeaderScore*: Option[uint32]
     
   LevelSelectScreen* = ref object of Screen
     levelRows*: seq[LevelRow]
@@ -25,3 +24,4 @@ type
     firstLockedRowIdx*: Option[int]
     upActivatedAt*: Option[Seconds]
     downActivatedAt*: Option[Seconds]
+    isSelectionDirty*: bool

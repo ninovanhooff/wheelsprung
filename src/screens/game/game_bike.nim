@@ -219,7 +219,6 @@ proc initGameBike*(state: GameState) =
   state.forkArm = state.addForkArm(forkArmPosOffset.transform(dd))
   
   state.setBikeConstraints()
-  initBikeSound()
 
 proc isBikeInLevelBounds*(state: GameState): bool =
   state.level.chassisBounds.containsVect(

@@ -9,9 +9,9 @@
  "name":"Game Objects",
  "objectalignment":"topleft",
  "spacing":0,
- "tilecount":9,
+ "tilecount":13,
  "tiledversion":"1.11.0",
- "tileheight":140,
+ "tileheight":175,
  "tiles":[
         {
          "id":0,
@@ -89,8 +89,59 @@
          "imageheight":140,
          "imagewidth":10,
          "type":"DynamicObject"
+        }, 
+        {
+         "id":9,
+         "image":"bowling_ball.png",
+         "imageheight":95,
+         "imagewidth":95,
+         "properties":[
+                {
+                 "name":"bounciness",
+                 "type":"float",
+                 "value":0.05
+                }],
+         "type":"DynamicObject"
+        }, 
+        {
+         "id":10,
+         "image":"marble.png",
+         "imageheight":20,
+         "imagewidth":20,
+         "properties":[
+                {
+                 "name":"bounciness",
+                 "type":"float",
+                 "value":0.1
+                }, 
+                {
+                 "name":"massMultiplier",
+                 "type":"float",
+                 "value":2.5
+                }],
+         "type":"DynamicObject"
+        }, 
+        {
+         "id":11,
+         "image":"tennis_ball.png",
+         "imageheight":40,
+         "imagewidth":40,
+         "properties":[
+                {
+                 "name":"bounciness",
+                 "type":"float",
+                 "value":0.6
+                }],
+         "type":"DynamicObject"
+        }, 
+        {
+         "id":12,
+         "image":"tall_plank.png",
+         "imageheight":175,
+         "imagewidth":10,
+         "type":"DynamicObject"
         }],
- "tilewidth":66,
+ "tilewidth":95,
  "type":"tileset",
  "version":"1.10"
 }

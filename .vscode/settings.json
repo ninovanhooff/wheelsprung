@@ -7,5 +7,16 @@
     "search.exclude": {
         "**/stderr.txt": true,
         "**/stdout.txt": true
-    }
+    },
+    "cSpell.words": [
+        "Backflip",
+        "elif",
+        "Flatty",
+        "Fredoka",
+        "Killveyor",
+        "Navigations",
+        "Roobert",
+        "Unflipped",
+        "Vect"
+    ]
 }

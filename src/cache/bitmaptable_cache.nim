@@ -19,9 +19,15 @@ type
     RiderLowerLeg = "images/rider/lower-leg"
     Killer = "images/killer/killer"
     TallBook = "images/dynamic_objects/tall-book"
+    TallPlank = "images/dynamic_objects/tall-plank"
+    BowlingBall = "images/dynamic_objects/bowling-ball"
+    Marble = "images/dynamic_objects/marble"
+    TennisBall = "images/dynamic_objects/tennis-ball"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
     Nuts = "images/nuts"
+    PickupHighlight = "images/pickup-highlight"
+    ReadyGo = "images/ready-go"
     GravityUp = "images/gravity/gravity-up"
     GravityUpRight = "images/gravity/gravity-up-right"
     GravityRight = "images/gravity/gravity-right"
@@ -41,9 +47,6 @@ proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
       bitmapTable = bitmapTable,
       frameCount = bitmapTable.getBitmapTableInfo().count.int32,
     )
-  except KeyError:
-    playdate.system.error("BitmapTableId or FrameCount not found for: " & $id)
-    return nil
   except IOError:
     playdate.system.error(getCurrentExceptionMsg())
     return nil

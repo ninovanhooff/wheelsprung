@@ -9,8 +9,6 @@ const
   killerFriction: Float = 10f
   vKillerOffset = v(killerRadius, killerRadius)
 
-var killerImageTable: AnnotatedBitmapTable
-
 proc addKiller(space: Space, killer: Killer): Killer =
   let body = space.addCircle(
     pos = v(killer.bounds.left.Float, killer.bounds.top.Float) + vKillerOffset,
@@ -25,10 +23,6 @@ proc addKiller(space: Space, killer: Killer): Killer =
   body.angle=rand(2.0*PI)
   return newKiller(killer.bounds, body)
 
-proc initGameKiller*() =
-  killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
-
-
 proc addKillers*(space: Space, level: Level): seq[Killer] =
   level.killers.map(killer => space.addKiller(killer))
 
@@ -40,4 +34,4 @@ proc drawKillers*(killers: seq[Killer], camera: Camera) =
         continue
       let body = killer.body
       let killerScreenPos = body.position - camera
-      killerImageTable.drawRotated(killerScreenPos, body.angle)
+      getOrLoadBitmapTable(BitmapTableId.Killer).drawRotated(killerScreenPos, body.angle)

@@ -93,19 +93,19 @@ method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
   let frameIdx = (asset.startOffset + frameCounter div asset.frameRepeat) mod asset.frameCount
   return asset.bitmapTable.getBitmap(frameIdx)
 
-proc setStencil*(patternId: LCDPatternId) {.inline.} =
+proc setStencilPattern*(patternId: LCDPatternId) {.inline.} =
   gfx.setStencilImage(patternId.getOrCreateBitmap(), true)
 
 proc drawAsset*(asset: Asset, camState: CameraState) =
   if asset.stencilPatternId.isSome:
-    setStencil(asset.stencilPatternId.get)
+    setStencilPattern(asset.stencilPatternId.get)
 
   if asset.bounds.intersects(camState.viewport):
     let assetScreenPos = asset.position - camState.camVertex
     asset.getBitmap(camState.frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
 
   if asset.stencilPatternId.isSome:
-    gfx.setStencil(nil)
+    gfx.setStencilImage(nil)
 
 proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32, frameRepeat: int32, stencilPattern: Option[LCDPatternId] = none(LCDPatternId)): Animation =
   let firstFrame = bitmapTable.getBitmap(0)
@@ -169,15 +169,38 @@ proc drawLine*(v0: Vertex, v1: Vertex, color: LCDColor = kColorBlack) {.inline.}
 proc fillCircle*(x, y: int32, radius: int32, color: LCDColor = kColorBlack ) {.inline.} =
   gfx.fillEllipse(x - radius,y - radius,radius * 2'i32, radius * 2'i32, 0f, 0f, color);
 
-proc draw*(rect: Rect, color: LCDColor) {.inline.} =
-  gfx.drawRect(rect.x, rect.y, rect.width, rect.height, color)
+proc drawRoundRect*(x, y, width, height, radius, lineWidth: Natural, color: LCDSolidColor) {.inline.} =
+  let r2 = radius * 2
 
-proc fill*(rect: Rect, color: LCDColor) {.inline.} =
-  gfx.fillRect(rect.x, rect.y, rect.width, rect.height, color)
+  # lines
+  gfx.fillRect(x + radius, y, width - r2, lineWidth, color)
+  gfx.fillRect(x + width - lineWidth, y + radius, lineWidth, height - r2, color)
+  gfx.fillRect(x + radius, y + height - lineWidth, width - r2, lineWidth, color)
+  gfx.fillRect(x, y + radius, lineWidth, height - r2, color)
 
-proc setScreenClipRect*(rect: Rect) {.inline.} =
-  gfx.setClipRect(rect.x, rect.y, rect.width, rect.height)
+  # corners
+  gfx.drawEllipse(x, y, r2, r2, lineWidth, -90'f, 0'f, color)
+  gfx.drawEllipse(x + width - r2, y, r2, r2, lineWidth, 0'f, 90'f, color)
+  gfx.drawEllipse(x + width - r2, y + height - r2, r2, r2, lineWidth, 90'f, 180'f, color)
+  gfx.drawEllipse(x, y + height - r2, r2, r2, lineWidth, -180'f, -90'f, color)
 
+proc fillRoundRect*(x, y, width, height, radius: Natural, color: LCDSolidColor) {.inline.} =
+  let r2 = radius * 2
+
+  gfx.fillRect(x + radius, y + radius, width - r2, height - r2, color) #center
+
+  # body as a cross between the four corners
+  # vertical body beam
+  gfx.fillRect(x + radius, y, width - r2, height, color)
+  # horizontal body beam
+  gfx.fillRect(x, y + radius, width, height - r2, color)
+
+  # corners
+  gfx.fillEllipse(x, y, r2, r2, 270 ,0, color) # top left
+  gfx.fillEllipse(x + width - r2, y, r2, r2, 0, 90, color) # top right
+  gfx.fillEllipse(x + width - r2, y + height - r2, r2, r2, 90, 180, color) # bottom right
+  gfx.fillEllipse(x, y + height - r2, r2, r2, 180, 270, color) # bottom left
+  
 # Rect
 
 proc inset*(rect: Rect, left, top, right, bottom: int32): Rect =
@@ -202,4 +225,34 @@ proc inset*(rect: Rect, size: int32): Rect =
     y: rect.y + size, 
     width: rect.width - size * 2, 
     height: rect.height - size * 2
+  )
+
+proc draw*(rect: Rect, color: LCDColor) {.inline.} =
+  gfx.drawRect(rect.x, rect.y, rect.width, rect.height, color)
+
+proc fill*(rect: Rect, color: LCDColor) {.inline.} =
+  gfx.fillRect(rect.x, rect.y, rect.width, rect.height, color)
+
+proc setScreenClipRect*(rect: Rect) {.inline.} =
+  gfx.setClipRect(rect.x, rect.y, rect.width, rect.height)
+
+proc drawRoundRect*(rect: Rect, radius: int32, lineWidth: int32, color: LCDSolidColor) {.inline.} =
+  drawRoundRect(
+    x= rect.x, 
+    y= rect.y, 
+    width= rect.width, 
+    height= rect.height, 
+    radius= radius, 
+    lineWidth= lineWidth, 
+    color= color
+  )
+
+proc fillRoundRect*(rect: Rect, radius: int32, color: LCDSolidColor) {.inline.} =
+  fillRoundRect(
+    x= rect.x, 
+    y= rect.y, 
+    width= rect.width, 
+    height= rect.height, 
+    radius= radius, 
+    color= color
   )

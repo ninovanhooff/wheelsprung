@@ -6,6 +6,8 @@ import common/utils
 
 type
   BitmapId* {.pure.} = enum
+    Acorn = "images/acorn"
+    LeaderBoardsBg = "images/leaderboards/leaderboards-bg"
     LevelSelectBgKitchen = "images/level_select/bg-kitchen"
     LevelSelectBgBath = "images/level_select/bg-bath"
     LevelSelectBgBookshelf = "images/level_select/bg-bookshelf"

@@ -7,7 +7,9 @@ import common/utils
 import common/shared_types
 import globals
 import data_store/user_profile
-import navigation/[navigator, screen]
+import navigation/[navigator, screen, backstack_builder]
+import cache/cache_preloader
+import scoreboards/scoreboards_service
 
 
 import playdate/api
@@ -18,47 +20,55 @@ import screens/level_select/level_select_screen
 import screens/settings/settings_screen
 import screens/game_result/game_result_screen
 
-const FONT_PATH = "fonts/Roobert-11-Medium.pft"
-
 let initialScreenProvider: InitialScreenProvider = 
   proc(): Screen =
     result = newLevelSelectScreen()
 
 var 
-  font: LCDFont
+  isFirstFrame = true
+  frameRate* = NOMINAL_FRAME_RATE
+  frameTime: Seconds = 1.0f / frameRate
 
 proc init() {.raises: [].} =
   discard getSaveSlot() # preload user profile
-  playdate.display.setRefreshRate(refreshRate)
+  playdate.display.setRefreshRate(frameRate)
   playdate.system.randomize() # seed the random number generator
 
-  font = try: playdate.graphics.newFont(FONT_PATH) except: nil
-  playdate.graphics.setFont(font)
   # The color used when the display is drawn at an offset. See HitStopScreen
   playdate.graphics.setBackgroundColor(kColorBlack)
 
   if defined(debug):
     runTests()
-  
+
   initNavigator(initialScreenProvider)
-  let lastOpenedLevelPath = getSaveSlot().lastOpenedLevel
-  if false: # can be set to true for debugging-convenience
-    # pushScreen(newCutSceneScreen())
-    let gameResult = GameResult(
-      levelId: "levels/level1.wmj",
-      resultType: GameResultType.LevelComplete,
-      time: 1840,
-      starCollected: true,
-    )
-    pushScreen(newGameResultScreen(gameResult))
-  elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
-    pushScreen(newGameScreen(lastOpenedLevelPath.get()))
+  let restoreState = getRestoreState()
+  print "restoreState:", restoreState.repr
+  if true: # can be set to true for debugging-convenience
+    pushScreen(newCutSceneScreen())
+    # let gameResult = GameResult(
+    #   levelId: "levels/level1.wmj",
+    #   resultType: GameResultType.LevelComplete,
+    #   time: 1840,
+    #   starCollected: true,
+    # )
+    # pushScreen(newGameResultScreen(gameResult))
+  elif restoreState.get(@[]).len > 0:
+    let screens = createBackStack(restoreState.get(@[]))
+    replaceBackstack(screens)
   else:
     pushScreen(newLevelSelectScreen())
 
+
+
 proc update() {.raises: [].} =
+  let frameStartTime = getElapsedSeconds()
   discard updateNavigator()
-  playdate.system.drawFPS(0, 0)
+  playdate.system.drawFPS(0, 0)# let preloadBudget = lastFrameElapsedSeconds + frameTime - getElapsedSeconds()
+  if not isFirstFrame:
+    runPreloader(frameStartTime + frameTime)
+  else:
+    isFirstFrame = false
+    print "RENDERED FIRST FRAME"
 
 proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
   try:
@@ -84,6 +94,12 @@ proc catchingUpdate(): int {.raises: [].} =
   runCatching(update)
   return 1 ## 1: update display
 
+proc incrementFrameRate(change: float32) =
+  frameRate += change
+  frameTime = 1.0f / frameRate
+  playdate.display.setRefreshRate(frameRate)
+  print("frameRate:" & $frameRate)
+
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   if event == kEventInit:
@@ -94,7 +110,15 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)
   elif event == kEventTerminate or event == kEventLowPower:
-    print("Program will terminate")
+    if event == kEventLowPower:
+      print("Wheelsprung: Low power mode, saving state")
+    elif event == kEventTerminate:
+      print("Wheelsprung will terminate")
+    setRestoreState(createRestoreState())
+    saveSaveSlot()
+  elif event == kEventUnlock:
+    print("Wheelsprung: Unlocked. Refreshing scoreboards")
+    fetchAllScoreboards()
   elif event == kEventKeyReleased:
     if keycode == 116:
       print("T")
@@ -121,14 +145,10 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("debugDrawConstraints:" & $debugDrawConstraints)
     elif keycode == 106:
       print("J")
-      refreshRate -= 5.0f
-      playdate.display.setRefreshRate(refreshRate)
-      print("refreshRate:" & $refreshRate)
+      incrementFrameRate(-5.0f)
     elif keycode == 108:
       print("L")
-      refreshRate += 5.0f
-      playdate.display.setRefreshRate(refreshRate)
-      print("refreshRate:" & $refreshRate)
+      incrementFrameRate(5.0f)
     else:
       print("keycode:" & $keycode)
   elif event == kEventKeyPressed:

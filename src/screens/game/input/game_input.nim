@@ -10,7 +10,7 @@ import input/input_manager
 import common/shared_types
 import data_store/configuration
 import input/input_response
-import screens/game_result/game_result_screen
+import game_input_recording
 
 const
   maxWheelAngularVelocity = 30.0
@@ -147,38 +147,59 @@ proc resetGameInput*(state: GameState) =
   state.isThrottlePressed = false
   state.applyConfig()
 
-proc handleInput*(state: GameState) =
+proc isInReplayMode*(state: GameState): bool =
+  return state.inputProvider of RecordedInputProvider
+
+proc isInLiveMode*(state: GameState): bool =
+  return state.inputProvider of LiveInputProvider
+
+proc handleInput*(state: GameState, liveButtonState: PDButtonState, onShowGameResultPressed: VoidCallback, onRestartGamePressed: VoidCallback ) =
   state.isThrottlePressed = false
-
-  let buttonState = playdate.system.getButtonState()
-
-  if not state.isGameStarted and buttonState.pushed.anyButton:
-    state.isGameStarted = true
 
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,
     # but any button can be pressed to navigate to the result screen
-    if kButtonA in buttonState.pushed:
-      state.resetGameOnResume = true
-      navigateToGameResult(state.gameResult.get)
+    # always take the button state from the system, we don't want this controlled by the recorded input
+
+    let resultType = state.gameResult.get.resultType
+
+    if state.isInLiveMode:
+      if kButtonA in liveButtonState.pushed:
+        if resultType == GameResultType.GameOver:
+          onRestartGamePressed()
+        elif resultType == GameResultType.LevelComplete:
+          onShowGameResultPressed()
+      elif kButtonB in liveButtonState.pushed:
+        if resultType == GameResultType.GameOver:
+          onShowGameResultPressed()
+        elif resultType == GameResultType.LevelComplete:
+          onRestartGamePressed()
     return
 
-  if actionThrottle in buttonState.current:
+  if state.isGamePaused:
+    return
+
+  let providedButtonState = state.inputProvider.getButtonState(state.frameCounter)
+
+  if not state.isGameStarted and providedButtonState.pushed.anyButton:
+    state.isGameStarted = true
+
+  if actionThrottle in providedButtonState.current:
     state.isThrottlePressed = true
     state.onThrottle()
-  if actionBrake in buttonState.current:
+  if actionBrake in providedButtonState.current:
     state.onBrake()
   
   if state.isAccelerometerEnabled:
     state.setAttitudeAdjust(getAccelerometerX())
   else:
-    if actionLeanLeft in buttonState.current:
+    if actionLeanLeft in providedButtonState.current:
       state.onButtonAttitudeAdjust(ROT_CCW)
-    elif actionLeanRight in buttonState.current:
+    elif actionLeanRight in providedButtonState.current:
       state.onButtonAttitudeAdjust(ROT_CW)
     else:
       state.onButtonAttitudeAdjust(0.0)
 
-  if actionFlipDirection in buttonState.pushed:
+  if actionFlipDirection in providedButtonState.pushed:
     echo("Flip direction pressed")
     state.onFlipDirection()

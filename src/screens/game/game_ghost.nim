@@ -50,6 +50,7 @@ proc initGameGhost*() =
 
 
 proc drawGhostPose*(state: GameState, pose: PlayerPose) =
+  initGameGhost()
   let camera = state.camera
   drawRotated(
     riderGhostHeadImageTable,
@@ -102,7 +103,7 @@ proc compare(
   ghostB: Ghost, 
   byKey: Ghost -> Comparable,
   preferLargeValue: bool = true
-): Option[Ghost] =
+): Option[Ghost] {.raises: [], effectsOf: byKey.} =
   ## Returns the better ghost according to the comparator
   ## If ghosts are equal, ghostA is picked
   

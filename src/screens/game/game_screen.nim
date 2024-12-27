@@ -1,4 +1,4 @@
-{. push warning[LockLevel]:off.}
+{. push raises: [].}
 import options, sugar
 import chipmunk7
 import chipmunk_utils
@@ -9,16 +9,20 @@ import data_store/configuration
 import game_level_loader
 import game_bike, game_rider, game_ghost
 import game_coin, game_star, game_killer, game_finish, game_gravity_zone
+import overlay/game_start_overlay
+import overlay/game_replay_overlay
 import game_terrain
 import game_dynamic_object
-import game_camera
+import game_camera_lerp
 import game_camera_pid
 import sound/game_sound
 import common/shared_types
 import game_types, game_constants
 import input/game_input
+import input/game_input_recording
 import game_view
 import navigation/navigator
+import data_store/game_result_updater
 import screens/screen_types
 import screens/game_result/game_result_screen
 import screens/settings/settings_screen
@@ -28,12 +32,10 @@ const
   restartLevelLabel = "Restart level"
   levelSelectLabel = "Level select"
   settingsLabel = "Settings"
-
-var 
-  state: GameState
+  exitReplayLabel = "Exit replay"
 
 # forward declarations
-proc onResetGame() {.raises: [].}
+proc onResetGame(screen: GameScreen) {.raises: [].}
 
 proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
   state.tailRotarySpring.restAngle = 0f
@@ -43,96 +45,71 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.starEnabled and state.level.starPosition.isSome,
+    hintsAvailable: (not state.hintsEnabled) and state.level.hintsPath.isSome,
+    inputRecording: some(state.inputRecording),
   )
   state.resetGameOnResume = resetGameOnResume
   state.gameResult = some(result)
 
-proc updateGameResult(state: GameState) {.raises: [].} =
-  if state.gameResult.isSome:
-    state.setGameResult(state.gameResult.get.resultType)
+proc popOrPushGameResult(state: GameState) =
+  state.resetGameOnResume = true
+  if state.isInReplayMode:
+    print "pop game result"
+    popScreen()
+  else:
+    print "push game result"
+    navigateToGameResult(state.gameResult.get)
+
+proc enableHints*(state: var GameState) =
+  if state.level.hintsPath.isNone:
+    print "ERROR: No hints available for this level"
+    return
+    
+  state.background = nil
+  state.hintsEnabled = true
+  state.initGameBackground()
+
+proc onRestartGamePressed(screen: GameScreen) =
+  persistGameResult(screen.state.gameResult.get)
+  screen.onResetGame()
 
 proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen {.raises: [].} =
+  let restartGameHandler = proc() = 
+    setResult(ScreenResult(screenType: ScreenType.Game, restartGame: true))
   var screen = createHitstopScreen(state, collisionShape)
   screen.menuItems = @[
     MenuItemDefinition(name: settingsLabel, action: () => pushScreen(newSettingsScreen())),
     MenuItemDefinition(name: levelSelectLabel, action: popScreen),
-    MenuItemDefinition(name: restartLevelLabel, action: onResetGame),
+    MenuItemDefinition(name: restartLevelLabel, action: restartGameHandler),
   ]
-  screen.onCanceled = proc() =
-    state.resetGameOnResume = true
-    navigateToGameResult(state.gameResult.get)
+  screen.onCanceled = proc(pushed: PDButtons) =
+    if kButtonA in pushed:
+      restartGameHandler()
+    elif kButtonB in pushed:
+      state.popOrPushGameResult()
+    else:
+      print "ERROR cannot handle hitstop cancel for buttons: " & repr(pushed)
 
   return screen
 
-let coinPostStepCallback: PostStepFunc = proc(space: Space, coinShape: pointer, unused: pointer) {.cdecl raises: [].} =
-  let shape = cast[Shape](coinShape)
-  var coin = cast[Coin](shape.userData)
-  if state.time < coin.activeFrom:
-    print("coin activates at: " & repr(coin.activeFrom) & " current time: " & repr(state.time))
-    return
-  if coin.count > 1:
-    coin.count -= 1
-    coin.activeFrom = state.time + 2000.Milliseconds
-    print("new count for coin: " & repr(coin))
-    playCoinSound(state.coinProgress)
-    return
-
-  print("deleting coin: " & repr(coin))
-  space.removeShape(shape)
-  let deleteIndex = state.remainingCoins.find(coin)
-  if deleteIndex == -1:
-    print("coin not found in remaining coins: " & repr(coin))
-  else:
-    print("deleting coin at index: " & repr(deleteIndex))
-    state.remainingCoins.delete(deleteIndex)
-    playCoinSound(state.coinProgress)
-
-    if state.remainingCoins.len == 0:
-      print("all coins collected")
-      state.finishTrophyBlinkerAt = some(state.time + 2500.Milliseconds)
-
-let starPostStepCallback: PostStepFunc = proc(space: Space, starShape: pointer, unused: pointer) {.cdecl.} =
-  print("star post step callback")
-  let shape = cast[Shape](starShape)
-  space.removeShape(shape)
-  state.remainingStar = none[Star]()
-  state.updateGameResult()
-  playStarSound()
-
-
-
 let removeBikeConstraintsPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
-  print("removeBikeConstraintsPostStepCallback")
+  # print("removeBikeConstraintsPostStepCallback")
+  let state = cast[GameState](space.userData)
   # detach wheels
   state.removeBikeConstraints()
 
 let gameEndedPostStepCallback: PostStepFunc = proc(space: Space, unused: pointer, unused2: pointer) {.cdecl.} =
-  print("gameEndedPostStepCallback")
+  # print("gameEndedPostStepCallback")
+  let state = cast[GameState](space.userData)
   # make chassis collidable
   addChassisShape(state)
   # Make bike parts bouncy for comec effect
   makeBikeElastic(state)
 
-let coinBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var 
-    shapeA: Shape
-    shapeB: Shape
-  arb.shapes(addr(shapeA), addr(shapeB))
-  print("coin collision for arbiter" & " shapeA: " & repr(shapeA) & " shapeB: " & repr(shapeB))
-  discard space.addPostStepCallback(coinPostStepCallback, shapeA, nil)
-  false # don't process the collision further
-
-let starBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var
-    shapeA: Shape
-    shapeB: Shape
-  arb.shapes(addr(shapeA), addr(shapeB))
-  discard space.addPostStepCallback(starPostStepCallback, shapeA, nil)
-  return false # don't process the collision further
-
 let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
   playCollisionSound()
 
+  let state = cast[GameState](space.userData)
   var
     shapeA: Shape
     shapeB: Shape
@@ -140,7 +117,8 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
 
   if state.gameResult.isNone:
     state.setGameResult(GameResultType.GameOver, false)
-    pushScreen(buildHitStopScreen(state, shapeB))
+    if state.isInLiveMode:
+      pushScreen(buildHitStopScreen(state, shapeB))
   if state.bikeConstraints.len > 0:
     discard space.addPostStepCallback(removeBikeConstraintsPostStepCallback, removeBikeConstraintsPostStepCallback, nil)
   if state.chassisShape.isNil:
@@ -148,15 +126,16 @@ let gameOverBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unu
   return true # we still want to collide
 
 let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
+  let state = cast[GameState](space.userData)
   if state.gameResult.isSome:
     # Can't finish the game if it was already finished
     return false
 
   if not state.isFinishActivated:
-    print("finish collision but not activated")
+    # print("finish collision but not activated")
     return false
   
-  print("gameWin collision")
+  # print("gameWin collision")
   state.setGameResult(GameResultType.LevelComplete)
   playFinishSound()
 
@@ -167,7 +146,6 @@ let finishBeginFunc: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unuse
 
 proc createSpace(level: Level): Space {.raises: [].} =
   let space = newSpace()
-  # todo test. At iterations = 4 and sleepTimeThreshold 0.5, I managed to crash the game
   space.iterations = 8
   space.sleepTimeThreshold = 0.5
   # space.collisionSlop = 0.4 # default is 0.1. But since our units are pixels, less that 0.5 pixels should not be noticeable
@@ -196,6 +174,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
   handler.beginFunc = gravityZoneBeginFunc
   handler = space.addCollisionHandler(GameCollisionTypes.GravityZone, GameCollisionTypes.Head)
   handler.beginFunc = gravityZoneBeginFunc
+  space.addDynamicObjectHandlers()
 
   space.addTerrain(level.terrainPolygons)
   space.addTerrain(level.terrainPolylines)
@@ -206,20 +185,43 @@ proc createSpace(level: Level): Space {.raises: [].} =
       
   return space
 
-proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Option[Ghost] = none(Ghost)): GameState {.raises: [].} =
+proc newGameState(
+  level: Level,
+  background: LCDBitmap = nil,
+  ghostPlayBack: Option[Ghost] = none(Ghost),
+  replayInputRecording: Option[InputRecording] = none(InputRecording),
+  hintsEnabled: bool = false
+): GameState {.raises: [].} =
   let space = level.createSpace()
-  state = GameState(
+  let inputProvider: InputProvider = if replayInputRecording.isSome:
+    newRecordedInputProvider(replayInputRecording.get)
+  else:
+    newLiveInputProvider()
+
+  let gameReplayState = if replayInputRecording.isSome:
+    some(GameReplayState(
+      hideOverlayAt: none(Seconds)
+    ))
+  else:
+    none(GameReplayState)
+  
+  let state = GameState(
     level: level, 
+    gameStartState: some(createGameStartOverlayState(level.meta.name)),
+    gameReplayState: gameReplayState,
     background: background,
+    hintsEnabled: hintsEnabled,
     space: space,
     gravityDirection: Direction8.D8_DOWN,
     ghostRecording: newGhost(),
     ghostPlayback: ghostPlayBack.get(newGhost()),
+    inputRecording: newInputRecording(),
+    inputProvider: inputProvider,
     driveDirection: level.initialDriveDirection,
     attitudeAdjust: none[AttitudeAdjust](),
     starEnabled: level.id.isStarEnabled,
   )
-  space.userData= cast[DataPointer](state) # Caution: cyclic reference: space -> state -> space
+  space.userData = cast[DataPointer](state) # Caution: cyclic reference: space -> state -> space
   initGameBike(state)
   let riderPosition = level.initialChassisPosition + riderOffset.transform(state.driveDirection)
   initGameRider(state, riderPosition)
@@ -227,7 +229,7 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
   addGameCoins(state)
   addGravityZones(state)
   initGameStar(state)
-  state.adddynamicObjects()
+  state.addDynamicObjects()
 
   if background.isNil:
     initGameBackground(state)
@@ -235,16 +237,24 @@ proc newGameState(level: Level, background: LCDBitmap = nil, ghostPlayBack: Opti
   state.killers = space.addKillers(level)
   return state
 
-proc onResetGame() {.raises: [].} =
-  state.destroy()
-  state.updateGhostRecording(state.coinProgress)
-  state = newGameState(
-    level = state.level,
-    background = state.background,
-    ghostPlayback = some(pickBestGhost(state.ghostRecording, state.ghostPlayback))
+proc onResetGame(screen: GameScreen) =
+  # onResetGame(screen.state)
+  let oldState = screen.state
+  oldState.updateGhostRecording(oldState.coinProgress)
+  screen.state = newGameState(
+    level = oldState.level,
+    background = oldState.background,
+    hintsEnabled = oldState.hintsEnabled,
+    ghostPlayback = some(pickBestGhost(oldState.ghostRecording, oldState.ghostPlayback))
   )
 
-  resetGameInput(state)
+  pauseGameBike()
+  pauseDynamicObjects()
+
+  oldState.destroy()
+
+  screen.state.updateCameraPid(snapToTarget = true)
+
 
 proc updateTimers(state: GameState) =
   state.frameCounter += 1
@@ -255,8 +265,7 @@ proc updateTimers(state: GameState) =
     let gameResult = state.gameResult.get
     let finishTime = gameResult.time
     if currentTime > finishTime + 5000.Milliseconds: # this timeout can be skipped by pressing any button
-      state.resetGameOnResume = true
-      navigateToGameResult(gameResult)
+      state.popOrPushGameResult()
 
   if state.finishFlipDirectionAt.isSome:
     # apply a torque to the chassis to compensate for the rider's inertia
@@ -269,34 +278,40 @@ proc updateTimers(state: GameState) =
   if state.finishTrophyBlinkerAt.expire(currentTime):
     echo("blinker timeout")
 
-proc initGame*(levelPath: string) {.raises: [].} =
-  initGameSound()
-  initGameView()
-  state = newGameState(loadLevel(levelPath))
+proc addMenuItems(gameScreen: GameScreen) =
+  if gameScreen.state.isInLiveMode:
+    discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
+      pushScreen(newSettingsScreen())
+    )
+    discard playdate.system.addMenuItem(levelSelectLabel, proc(menuItem: PDMenuItemButton) =
+      popScreen()
+    )
+    discard playdate.system.addMenuItem(restartLevelLabel, proc(menuItem: PDMenuItemButton) =
+      gameScreen.onResetGame()
+    )
+  elif gameScreen.state.isInReplayMode:
+    discard playdate.system.addMenuItem(exitReplayLabel, proc(menuItem: PDMenuItemButton) =
+      popScreen()
+    )
 
 ### Screen methods
 
-method resume*(gameScreen: GameScreen) =
-  if not gameScreen.isInitialized:
-    initGame(gameScreen.levelPath)
-    gameScreen.isInitialized = true
+method resume*(gameScreen: GameScreen): bool =
+  if gameScreen.state == nil:
+    try:
+      gameScreen.state = newGameState(loadLevel(gameScreen.levelPath), replayInputRecording = gameScreen.replayInputRecording)
+    except Exception as e:
+      print "ERROR: Could not load level: " & gameScreen.levelPath
+      print e.msg
+      return false
+  var state = gameScreen.state
   
-  discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
-    pushScreen(newSettingsScreen())
-  )
-  discard playdate.system.addMenuItem(levelSelectLabel, proc(menuItem: PDMenuItemButton) =
-    popScreen()
-  )
-  discard playdate.system.addMenuItem(restartLevelLabel, proc(menuItem: PDMenuItemButton) =
-    onResetGame()
-  )
-
-  resumeGameView()
+  gameScreen.addMenuItems()
 
   resetGameInput(state)
 
   if state.resetGameOnResume:
-    onResetGame()
+    gameScreen.onResetGame()
     state.resetGameOnResume = false
 
   if not state.isGameStarted:
@@ -304,29 +319,46 @@ method resume*(gameScreen: GameScreen) =
       state.updateCamera(snapToTarget = true)
     else:
       state.updateCameraPid(snapToTarget = true)
-    # the update loop won't draw the game
-    drawGame(addr state)
+
+  setResult(ScreenResult(screenType: ScreenType.LevelSelect, selectPath: gameScreen.levelPath))
+  return true
 
 method pause*(gameScreen: GameScreen) {.raises: [].} =
   pauseGameBike()
+  pauseDynamicObjects()
 
 
 method update*(gameScreen: GameScreen): int =
-  handleInput(state)
-  updateGameBikeSound(state) # even when game is not started, we might want to kickstart the engine
+  var state = gameScreen.state
+  let liveButtonState = playdate.system.getButtonState()
+  handleInput(
+    state,
+    # by passing the liveButtonState we know we process the button state atomically. 
+    # There is no chance that the button state changes between processing here and recording below
+    liveButtonState,
+    onShowGameResultPressed = proc () = state.popOrPushGameResult(),
+    onRestartGamePressed = proc () = gameScreen.onRestartGamePressed(),
+  )
+  state = gameScreen.state # handleInput might have changed the state if onRestartGamePressed was called
+  updateGameStartOverlay(state)
+  updateGameReplayOverlay(state)
+  updateGameBikeSound(state)
+  updateDynamicObjects(state)
 
-  if state.isGameStarted:
+  if state.isGameStarted and not state.isGamePaused:
     updateAttitudeAdjust(state)
+    assert state.space.isNil == false
     state.space.step(timeStepSeconds64)
     
     state.ghostRecording.addPose(state)
+    if state.isInLiveMode:
+      state.inputRecording.addInputFrame(liveButtonState.current, state.frameCounter)
 
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
         playScreamSound()
-      state.resetGameOnResume = true
-      navigateToGameResult(state.gameResult.get)
+      state.popOrPushGameResult()
 
     state.updateTimers() # increment for next frame
 
@@ -340,7 +372,25 @@ method update*(gameScreen: GameScreen): int =
 
 method destroy*(gameScreen: GameScreen) =
   gameScreen.pause()
-  state.destroy()
+  gameScreen.state.destroy()
+
+method setResult*(gameScreen: GameScreen, screenResult: ScreenResult) =
+  if screenResult.screenType != gameScreen.screenType: return
+  if screenResult.enableHints:
+    gameScreen.state.enableHints()
+  if screenResult.restartGame:
+    gameScreen.state.resetGameOnResume = true
+
+method getRestoreState*(gameScreen: GameScreen): Option[ScreenRestoreState] =
+  if gameScreen.replayInputRecording.isSome:
+    # replays are not stored to disk yet,
+    # so we can't restore
+    return none(ScreenRestoreState)
+  return some(ScreenRestoreState(
+    screenType: ScreenType.Game,
+    levelPath: gameScreen.levelPath,
+  ))
+  
 
 method `$`*(gameScreen: GameScreen): string =
-  return "GameScreen"
+  return fmt"GameScreen {gameScreen.levelPath}, inputRecording: {gameScreen.replayInputRecording.isSome}" 

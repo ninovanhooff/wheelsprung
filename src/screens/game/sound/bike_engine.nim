@@ -2,6 +2,7 @@ import playdate/api
 import chipmunk7
 import common/utils
 import screens/game/game_types
+import cache/sound_cache
 
 const
     idleRpm = 1300.0f
@@ -23,8 +24,8 @@ proc initBikeEngine*()=
     if isInitialized: return
     
     try:
-        idlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1300rpm_idle")
-        throttlePlayer = playdate.sound.newSamplePlayer("/audio/engine/1700rpm_throttle")
+        idlePlayer = getOrLoadSamplePlayer(SampleId.BikeEngineIdle)
+        throttlePlayer = getOrLoadSamplePlayer(SampleId.BikeEngineThrottle)
         currentPlayer = idlePlayer
         # currentPlayer.play(0, 1.0f)
         currentPlayer.volume = maxVolume
@@ -33,6 +34,9 @@ proc initBikeEngine*()=
         print(getCurrentExceptionMsg())
 
 proc updateBikeEngine*(state: GameState) =
+    if not state.isGameStarted: return
+    initBikeEngine()
+        
     let throttle = state.isThrottlePressed
     let wheelForwardAngularVelocity = state.rearWheel.angularVelocity * state.driveDirection
     let targetRpm = 
@@ -68,11 +72,6 @@ proc updateBikeEngine*(state: GameState) =
             fadeoutPlayer = nil
 
     # print("playerBaseRpm: " & $playerBaseRpm & "throttlePlayerIndex" & " rate: " & $currentPlayer.rate)
-
-proc startBikeEngine*()=
-    if currentPlayer.isPlaying: return
-    
-    currentPlayer.play(0, 1.0f)
 
 proc pauseBikeEngine*()=
     if not isInitialized: return

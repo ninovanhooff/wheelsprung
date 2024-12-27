@@ -7,7 +7,7 @@ type
     integral: float
     previousError: float
 
-proc initPIDController*(kp, ki, kd, setpoint: float): PIDController =
+proc newPIDController*(kp, ki, kd, setpoint: float): PIDController =
   PIDController(kp: kp, ki: ki, kd: kd, setpoint: setpoint, integral: 0.0, previousError: 0.0)
 
 proc setTargetPosition*(controller: var PIDController, targetPosition: float) =
@@ -28,6 +28,11 @@ proc resetPID*(controller: var PIDController, setPoint: float) =
 proc moveCamera*(currentPosition: float, controlSignal: float): float =
   let moveStep = 2.0 * round(controlSignal / 2.0)
   result = currentPosition + moveStep
+
+proc stepToTarget*(controller: var PIDController, currentPosition: float, target: float): float =
+  controller.setTargetPosition(target)
+  let controlSignal = controller.updatePID(currentPosition)
+  return moveCamera(currentPosition, controlSignal)
 
 # # Unit tests
 # suite "PID Camera Controller Tests":

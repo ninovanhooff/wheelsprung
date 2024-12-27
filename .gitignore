@@ -1,13 +1,18 @@
 *.pdx
 source/pdex.*
-wheelsprung.pdx.zip
+wheelsprung*.zip
 *.dSYM
 .DS_Store
 game.map
 # Audacity autosave files
 **.aup3-wal
+**.aup3-shm
 # Blender autosave files
-**.blend[0-9]
+**/*.blend[0-9]*
+
+# levels
+# the levels folder contains a .gitkeep which is checked in, but otherwise the contents are generated and should be ignored
+source/levels
 
 # editor
 editor/extensions/node_modules/*

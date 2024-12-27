@@ -3,6 +3,7 @@ import std/options
 import chipmunk7
 import common/utils
 import screens/game/game_types
+import cache/sound_cache
 
 const
   contractImpulseThreshold = 25.0
@@ -15,7 +16,7 @@ proc initBikeSqueak*()=
   print("initializing bike squeak")
 
   try:
-    contractPlayer = playdate.sound.newSamplePlayer("/audio/suspension/suspension_contract_adpcm")
+    contractPlayer = getOrLoadSamplePlayer(SampleId.BikeSqueak)
   except:
     print(getCurrentExceptionMsg())
 

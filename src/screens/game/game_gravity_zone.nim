@@ -1,9 +1,10 @@
 import std/options
 import playdate/api
 import chipmunk7
-import common/utils
 import common/graphics_utils
+import common/audio_utils
 import cache/bitmaptable_cache
+import cache/sound_cache
 import game_types
 
 const 
@@ -63,6 +64,22 @@ proc toGravityAnimation(spec: GravityZoneSpec): Animation =
     stencilPattern = some(Gray)
   )
 
+var gravityDownPlayer: SamplePlayer = nil
+var gravityUpPlayer: SamplePlayer = nil
+
+proc playSoundForGravity(newGravity: Vect) =
+# play sound
+  if newGravity.y > 0:
+    if gravityDownPlayer.isNil:
+      gravityDownPlayer = getOrLoadSamplePlayer(SampleId.GravityDown)
+    if not gravityDownPlayer.isPlaying:
+      gravityDownPlayer.playVariation()
+  else:
+    if gravityUpPlayer.isNil:
+      gravityUpPlayer = getOrLoadSamplePlayer(SampleId.GravityUp)
+    if not gravityUpPlayer.isPlaying:
+      gravityUpPlayer.playVariation()
+
 proc addGravityZones(space: Space, gravityZones: seq[GravityZone]) =
   for gravityZone in gravityZones:
     let vCenter = gravityZone.position.toVect + vGravityZoneCenterOffset
@@ -74,7 +91,6 @@ proc addGravityZones(space: Space, gravityZones: seq[GravityZone]) =
 
 proc addGravityZones*(state: GameState) =
   # assignment by copy
-  print "initGravityZones"
   state.gravityZones = @[]
   for spec in state.level.gravityZones:
     let animation = spec.toGravityAnimation()
@@ -84,7 +100,6 @@ proc addGravityZones*(state: GameState) =
       animation = animation
     )
     state.gravityZones.add(gravityZone)
-  print "state.gravityZones: " & repr(state.gravityZones)
   state.space.addGravityZones(state.gravityZones)
 
 proc drawGravityZones*(gravityZones: seq[GravityZone], activeDirection: Direction8, camState: CameraState) =
@@ -96,15 +111,14 @@ proc drawGravityZones*(gravityZones: seq[GravityZone], activeDirection: Directio
 let gravityZonePostStepCallback: PostStepFunc = proc(space: Space, gravityShape: pointer, unused: pointer) {.cdecl raises: [].} =
   let gravityShape = cast[Shape](gravityShape)
   let gravityZone = cast[GravityZone](gravityShape.userData)
-  echo "hit gravity zone:" & repr(gravityZone)
 
   let state = cast[GameState](space.userData)
   state.gravityDirection = gravityZone.direction
   let newGravity = gravityZone.direction.toVect
   space.gravity = newGravity
-
+  playSoundForGravity(newGravity)
+    
 let gravityZoneBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  print "gravityZoneBeginFunc"
   var shapeA, shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
   discard space.addPostStepCallback(gravityZonePostStepCallback, shapeA, nil)

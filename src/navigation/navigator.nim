@@ -11,6 +11,7 @@
 .}
 
 import std/sugar
+import std/options
 import screen
 import common/utils
 import playdate/api
@@ -59,7 +60,10 @@ proc resumeActiveScreen() =
   # Since resume isthe callback where menu items are added, 
   # we remove all menu items before resuming
   playdate.system.removeAllMenuItems() 
-  activeScreen.resume()
+  if not activeScreen.resume():
+    print("ERROR: Screen did not resume")
+    popScreenImmediately()
+    resumeActiveScreen()
 
 proc pushScreen*(toScreen: Screen) =
   pendingNavigators.add(() =>
@@ -90,6 +94,17 @@ proc clearNavigationStack*() =
       popScreenImmediately()
   )
 
+proc setResult*(screenResult: ScreenResult) =
+  # start searching at screen below current screen on backstack
+  # since returning a result to self does not make sense
+  # not using Option here because that doesn't seem to work well for generic types like Screen
+  print "Processing", screenResult.repr
+  for i in countdown(backStack.high - 1, 0):
+    let targetScreen = backStack[i]
+    if targetScreen.screenType == screenResult.screenType:
+      targetScreen.setResult(screenResult)
+      break
+
 proc executePendingNavigators() =
   if pendingNavigators.len == 0: return
 
@@ -118,3 +133,16 @@ proc updateNavigator*(): int =
     result = getActiveScreen().update()
     ## Ensure no graphics state is leaked
     playdate.graphics.popContext()
+
+proc createRestoreState*(): seq[ScreenRestoreState] = 
+  result = @[]
+  for screen in backStack:
+    let screenState = screen.getRestoreState()
+    if screenState.isSome:
+      result.add(screenState.get)
+
+proc replaceBackstack*(screens: seq[Screen]) =
+  for screen in backStack:
+    screen.destroy()
+  backStack = screens
+  resumeActiveScreen()

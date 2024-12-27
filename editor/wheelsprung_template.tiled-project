@@ -29,7 +29,6 @@
             "name": "AnimationLayer",
             "type": "class",
             "useAs": [
-                "property",
                 "layer",
                 "project"
             ]
@@ -57,6 +56,11 @@
             "drawFill": true,
             "id": 7,
             "members": [
+                {
+                    "name": "bounciness",
+                    "type": "float",
+                    "value": 0
+                },
                 {
                     "name": "friction",
                     "type": "float",
@@ -86,6 +90,19 @@
                 "black"
             ],
             "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 11,
+            "members": [
+            ],
+            "name": "HintsBackgroundLayer",
+            "type": "class",
+            "useAs": [
+                "layer",
+                "project"
+            ]
         },
         {
             "id": 10,

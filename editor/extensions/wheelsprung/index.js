@@ -3,10 +3,10 @@
   function polygonArea(vertices) {
     var area = 0;
     var j = 0;
-    for (var i = 0; i < vertices.length; i++) {
-      j = (i + 1) % vertices.length;
-      area += vertices[i].x * vertices[j].y;
-      area -= vertices[j].x * vertices[i].y;
+    for (var i2 = 0; i2 < vertices.length; i2++) {
+      j = (i2 + 1) % vertices.length;
+      area += vertices[i2].x * vertices[j].y;
+      area -= vertices[j].x * vertices[i2].y;
     }
     return area / 2;
   }
@@ -55,11 +55,96 @@
       }
     } else if (mapOrLayer.isTileMap || mapOrLayer.isGroupLayer) {
       let numLayers = mapOrLayer.layerCount;
-      for (var i = 0; i < numLayers; i++) {
-        applyWheelsprungFixes(mapOrLayer.layerAt(i));
+      for (var i2 = 0; i2 < numLayers; i2++) {
+        applyWheelsprungFixes(mapOrLayer.layerAt(i2));
       }
     } else {
     }
+  }
+
+  // src/expression-to-polygon.ts
+  var cos = Math.cos;
+  var sin = Math.sin;
+  function genPolyline({
+    posX,
+    posY,
+    startT: startT2 = 0,
+    endT: endT2 = startT2 + 100,
+    expressionX = "t",
+    expressionY,
+    objectName = void 0,
+    epsilon = 0.5
+  }) {
+    if (!tiled.activeAsset.isTileMap) {
+      tiled.log("No active layer selected");
+      return;
+    }
+    let activeAsset = tiled.activeAsset;
+    var currentLayer = activeAsset.currentLayer;
+    if (!currentLayer || !currentLayer.isObjectLayer) {
+      tiled.log("No active layer selected, or not an object layer");
+      return;
+    }
+    let resultsX = evaluateExpression(expressionX, startT2, endT2);
+    let resultsY = evaluateExpression(expressionY, startT2, endT2);
+    let points = resultsX.map((x, i2) => ({ x, y: resultsY[i2] }));
+    let polyline = getOrCreateObjectWithName(objectName, currentLayer);
+    polyline.x = posX;
+    polyline.y = posY;
+    polyline.shape = MapObject.Polyline;
+    polyline.polygon = optimizePoints(points, epsilon);
+    tiled.log("Optimized polygon: " + polyline.polygon.length);
+    if (!polyline.layer) {
+      currentLayer.addObject(polyline);
+    }
+  }
+  function getOrCreateObjectWithName(name, layer) {
+    let existingObject = layer.objects.find((obj) => obj.name === name);
+    if (existingObject) {
+      return existingObject;
+    } else {
+      return new MapObject(name);
+    }
+  }
+  function evaluateExpression(expression, startT = 0, endT) {
+    tiled.log("Evaluating expression: " + expression);
+    const sanitizedExpression = expression.replace(/[^-()\d/*+.\w\^]/g, "");
+    tiled.log("Sanitized expression: " + sanitizedExpression);
+    return Array.from({ length: endT - startT }, (_, i) => {
+      let t = startT + i;
+      let replacedExpression = eval(sanitizedExpression.replace("t", t.toString()));
+      let result = eval(replacedExpression);
+      return result;
+    });
+  }
+  function optimizePoints(points, epsilon = 0.5) {
+    if (points.length < 3) {
+      return points;
+    }
+    var dMax = 0;
+    let dMaxIndex = 0;
+    for (let i2 = 1; i2 < points.length - 1; i2++) {
+      let d = perpendicularDistance(points[i2], points[0], points[points.length - 1]);
+      if (d > dMax) {
+        dMax = d;
+        dMaxIndex = i2;
+      }
+    }
+    if (dMax > epsilon) {
+      const left = optimizePoints(points.slice(0, dMaxIndex + 1), epsilon);
+      const right = optimizePoints(points.slice(dMaxIndex), epsilon);
+      return left.slice(0, -1).concat(right);
+    } else {
+      return [points[0], points[points.length - 1]];
+    }
+  }
+  function perpendicularDistance(arg0, arg1, arg2) {
+    const { x: x1, y: y1 } = arg1;
+    const { x: x2, y: y2 } = arg2;
+    const { x: x0, y: y0 } = arg0;
+    const numerator = Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1);
+    const denominator = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2);
+    return numerator / denominator;
   }
 
   // src/wheelsprung-map.ts
@@ -90,4 +175,5 @@
   tiled.extendMenu("Edit", [
     { action: "ApplyWheelsprungFixes", before: "Preferences" }
   ]);
+  tiled.genPolyline = genPolyline;
 })();

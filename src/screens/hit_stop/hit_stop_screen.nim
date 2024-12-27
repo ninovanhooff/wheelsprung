@@ -1,5 +1,6 @@
-{. push warning[LockLevel]:off.}
-
+{. push raises: [].}
+import std/options
+import std/sugar
 import random
 import playdate/api
 import chipmunk7
@@ -11,6 +12,7 @@ import common/utils
 ## A Screen that Blinks the screen for a few frames
 
 type
+  CanceledCallback = (PDButtons) -> (void)
   MenuItemDefinition* = ref object of RootObj 
     name*: string
     action*: proc() {.raises: [].}
@@ -20,7 +22,7 @@ type
     otherBitmap: LCDBitmap
     flipBitmapsAt: Seconds
     menuItems*: MenuItemDefinitions
-    onCanceled*: VoidCallBack
+    onCanceled*: CanceledCallback
     finishAt: Seconds
     maxShakeMagnitude: Float
 
@@ -29,7 +31,7 @@ proc newHitStopScreen*(
   bitmapB: LCDBitmap,
   maxShakeMagnitude: Float = 10.0f,
   menuItems: MenuItemDefinitions = @[],
-  onCanceled: VoidCallBack = noOp,
+  onCanceled: CanceledCallback = default(CanceledCallback),
   duration: Seconds = 0.38.Seconds
 ): HitStopScreen =
   result = HitStopScreen(currentBitmap: bitmapA, otherBitmap: bitmapB, menuItems: menuItems,
@@ -43,23 +45,24 @@ proc createMenuCallback(menuItem: MenuItemDefinition): proc(button: PDMenuItemBu
     popScreen() # pop self (HitStopScreen)
     menuItem.action()
 
-method resume*(screen: HitStopScreen) =
+method resume*(screen: HitStopScreen): bool =
   for menuItem in screen.menuItems:
     discard playdate.system.addMenuItem(
       menuItem.name, 
       createMenuCallback(menuItem)
     )
+  return true
 
 method update*(screen: HitStopScreen): int =
   let buttonState = playdate.system.getButtonState()
 
-  if kButtonA in buttonState.pushed:
+  if buttonState.pushed.anyButton({kButtonA, kButtonB}):
     popScreen()
-    screen.onCanceled()
+    screen.onCanceled(buttonState.pushed)
     return 0
   
   let remainingSeconds = screen.finishAt - currentTimeSeconds()
-  if remainingSeconds <= 0.Seconds :
+  if remainingSeconds <= 0.Seconds:
     popScreen()
   elif currentTimeSeconds() > screen.flipBitmapsAt:
     swap(screen.currentBitmap, screen.otherBitmap)
@@ -75,3 +78,7 @@ method update*(screen: HitStopScreen): int =
   )
 
   return 1
+
+method getRestoreState*(self: Screen): Option[ScreenRestoreState] =
+  # not worth the effort restoring this screen
+  return none(ScreenRestoreState)

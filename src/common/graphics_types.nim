@@ -123,7 +123,7 @@ proc newTexture*(image: LCDBitmap, position: Vertex, flip: LCDBitmapFlip): Textu
   )
 
 proc getBitmap*(annotatedTable: AnnotatedBitmapTable, frame: int32): LCDBitmap {.inline.} =
-  result = annotatedTable.bitmapTable.getBitmap(frame)
+  result = annotatedTable.bitmapTable.getBitmap(frame mod annotatedTable.frameCount)
 
 proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): AnnotatedBitmapTable =
   let firstBitmap = bitmapTable.getBitmap(0)
@@ -138,3 +138,11 @@ proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): A
 
 proc newVertex*(x, y: int32): Vertex =
   result = (x: x, y: y)
+
+proc newCameraState*(camera: Camera, camVertex: Vertex, viewport: LCDRect, frameCounter: int32): CameraState =
+  result = CameraState(
+    camera: camera,
+    camVertex: camVertex,
+    viewport: viewport,
+    frameCounter: frameCounter,
+  )

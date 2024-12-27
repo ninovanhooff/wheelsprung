@@ -7,23 +7,54 @@ template snd*: untyped = playdate.sound
 
 
 type 
-  # a table mapping image path to SamplePlayer
-  SamplePlayerCache = TableRef[string, AudioSample]
+  # a table mapping sound path to AudioSample
+  AudioSampleCache = TableRef[SampleId, AudioSample]
+
+  SampleId* {.pure.} = enum
+    BikeEngineIdle = "/audio/engine/1300rpm_idle"
+    BikeEngineThrottle = "/audio/engine/1700rpm_throttle"
+    BowlingBallRolling = "/audio/dynamic_objects/bowling_ball_rolling"
+    BowlingBallImpact = "/audio/dynamic_objects/bowling_ball_impact"
+    MarbleRolling = "/audio/dynamic_objects/marble_rolling"
+    MarbleImpact = "/audio/dynamic_objects/marble_impact"
+    TennisBallImpact = "/audio/dynamic_objects/tennis_ball_impact"
+    Finish = "/audio/finish/finish"
+    FinishUnlock = "/audio/finish/finish_unlock"
+    Coin = "/audio/pickup/coin"
+    Star = "/audio/pickup/star"
+    Collision1 = "/audio/collision/collision-01"
+    Collision2 = "/audio/collision/collision-02"
+    Fall1 = "/audio/fall/fall-01"
+    Fall2 = "/audio/fall/fall-02"
+    BikeSqueak = "/audio/suspension/suspension_contract_adpcm"
+    BikeThud1 = "/audio/thud/thud_1"
+    BikeThud2 = "/audio/thud/thud_2"
+    BikeThud3 = "/audio/thud/thud_3"
+    BikeCollision1 = "/audio/collision/collision-01"
+    BikeCollision2 = "/audio/collision/collision-02"
+    BikeFall1 = "/audio/fall/fall-01"
+    BikeFall2 = "/audio/fall/fall-02"
+    GravityUp = "/audio/gravity/gravity_up"
+    GravityDown = "/audio/gravity/gravity_down"
+    SelectPrevious = "/audio/menu/select_previous"
+    SelectNext = "/audio/menu/select_next"
+    Confirm = "/audio/menu/confirm"
+    Bumper = "/audio/menu/bumper"
 
 # global singleton
-let sampleplayerCache = SamplePlayerCache()
+let audioSampleCache = AudioSampleCache()
 
-proc getOrLoadSample(path: string): AudioSample =
+proc getOrLoadSample*(id: SampleId): AudioSample =
   try:
-    if not sampleplayerCache.hasKey(path):
+    if not audioSampleCache.hasKey(id):
       markStartTime()
-      sampleplayerCache[path] = snd.newAudioSample(path)
-      printT("LOAD Sample: ", path)
+      audioSampleCache[id] = snd.newAudioSample($id)
+      printT("LOAD Sample: ", id)
     
-    return sampleplayerCache[path]
+    return audioSampleCache[id]
   except Exception:
     playdate.system.error("FATAL: " & getCurrentExceptionMsg())
 
-proc getOrLoadSamplePlayer*(path: string): SamplePlayer =
+proc getOrLoadSamplePlayer*(id: SampleId): SamplePlayer =
   result = snd.newSamplePlayer()
-  result.sample= getOrLoadSample(path)
+  result.sample= getOrLoadSample(id)

@@ -119,18 +119,23 @@ proc init(screen: SettingsScreen) =
 method pause*(screen: SettingsScreen) =
   screen.config.save()
 
-method resume*(screen: SettingsScreen) =
+method resume*(screen: SettingsScreen): bool =
   if not screen.isInitialized:
     screen.init()
   gfx.setFont(getOrLoadFont("fonts/Roobert-11-Medium"))
   screen.config = getConfig()
   draw(screen)
+  return true
 
 method update*(screen: SettingsScreen): int =
   if updateInput(screen):
     draw(screen)
     return 1
   return 0
+
+method getRestoreState*(self: Screen): Option[ScreenRestoreState] =
+  ## This screen could be easily restored, but it might be a bit disorienting
+  return none(ScreenRestoreState)
 
 method `$`*(screen: SettingsScreen): string =
   return "SettingsScreen"

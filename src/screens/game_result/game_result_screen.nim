@@ -3,6 +3,7 @@ import playdate/api
 import navigation/[screen, navigator]
 import std/options
 import std/math
+import std/tables
 import std/sequtils
 import common/graphics_types
 import common/shared_types
@@ -15,10 +16,11 @@ import data_store/user_profile
 import cache/font_cache
 import cache/bitmap_cache
 import cache/bitmaptable_cache
+import data_store/game_result_updater
 
 type 
   GameResultAction {.pure.} = enum
-    LevelSelect, Restart, Next
+    LevelSelect, Restart, Next, ShowHints, ShowReplay
   GameResultScreen = ref object of Screen
     previousProgress: LevelProgress
     gameResult: GameResult
@@ -28,11 +30,17 @@ type
     currentActionIndex: int
     hasPersistedResult: bool
 
+const 
+  HINT_RETRY_COUNT = 5
+
 var
   timeFont: LCDFont
   buttonFont: LCDFont
   newPersonalBestImage: LCDBitmap
   actionArrowsImageTable: AnnotatedBitmapTable
+  hintOfferCount: Table[Path, int] = initTable[Path, int]()
+    ## key: level path, value number of times hints have been offered for this level
+
 
 proc initGameResultScreen() =
   if not buttonFont.isNil:
@@ -50,10 +58,20 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
   let resultType = gameResult.resultType
   let previousProgress = getLevelProgress(gameResult.levelId).copy()
   let nextPath = nextLevelPath(gameResult.levelId)
-  let availableActions = if nextPath.isSome:
-    @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.LevelSelect]
+  var availableActions = if nextPath.isSome:
+    @[GameResultAction.Restart, GameResultAction.Next, GameResultAction.ShowReplay, GameResultAction.LevelSelect]
   else:
-    @[GameResultAction.Restart, GameResultAction.LevelSelect]
+    @[GameResultAction.Restart, GameResultAction.ShowReplay, GameResultAction.LevelSelect]
+
+  if gameResult.hintsAvailable and resultType == GameResultType.GameOver:
+    # if hints are available, show them as the the first option if they have not been dismissed
+    let timesOffered = hintOfferCount.getOrDefault(gameResult.levelId, 0)
+    let position = if timesOffered != HINT_RETRY_COUNT: 
+      availableActions.len 
+    else: 
+      0
+    availableActions.insert(GameResultAction.ShowHints, position)
+    hintOfferCount[gameResult.levelId] = timesOffered + 1
 
   let currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default
 
@@ -87,6 +105,8 @@ proc label(resultType: GameResultType, gameResultAction: GameResultAction): stri
   of GameResultAction.LevelSelect: return "Level Select"
   of GameResultAction.Restart: return if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
   of GameResultAction.Next: return if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
+  of GameResultAction.ShowHints: "Show hints"
+  of GameResultAction.ShowReplay: "Show replay"
 
 const buttonTextCenterX = 100
 
@@ -140,16 +160,8 @@ proc drawGameResult(self: GameResultScreen) =
     drawGameOverResult(self)
   elif self.gameResult.resultType == GameResultType.LevelComplete:
     drawLevelCompleteResult(self)
-  
 
-proc persistGameResult(gameResult: GameResult) =
-  try:
-    updateLevelProgress(gameResult)
-    saveSaveSlot()
-  except:
-    print("Failed to persist game result", getCurrentExceptionMsg())
-
-method resume*(self: GameResultScreen) =
+method resume*(self: GameResultScreen): bool =
   initGameResultScreen()
 
   gfx.setFont(buttonFont)
@@ -167,6 +179,7 @@ method resume*(self: GameResultScreen) =
   discard playdate.system.addMenuItem("Restart level", proc(menuItem: PDMenuItemButton) =
     popScreen()
   )
+  return true
 
 proc executeAction(self: GameResultScreen, action: GameResultAction) =
   case action
@@ -181,6 +194,15 @@ proc executeAction(self: GameResultScreen, action: GameResultAction) =
     else:
       print "next not enabled"
       popScreen()
+  of GameResultAction.ShowHints:
+    setResult(ScreenResult(screenType: ScreenType.Game, enableHints: true))
+    popScreen()
+  of GameResultAction.ShowReplay:
+    let inputRecording= self.gameResult.inputRecording
+    if inputRecording.isSome:
+      pushScreen(newGameScreen(self.gameResult.levelId, inputRecording))
+    else:
+      print "ERROR: No input recording available"
 
 method update*(self: GameResultScreen): int =
   # no drawing needed here, we do it in resume
@@ -199,4 +221,4 @@ method update*(self: GameResultScreen): int =
   return 1
 
 method `$`*(self: GameResultScreen): string {.raises: [], tags: [].} =
-  return "GameResultScreen; type: " & repr(self)
+  return "GameResultScreen; type: " & repr(self.gameResult.resultType) & "; level: " & self.gameResult.levelId

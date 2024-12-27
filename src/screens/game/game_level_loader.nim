@@ -1,4 +1,7 @@
+{.push raises: [].}
+
 import chipmunk7
+import flatty
 import chipmunk_utils
 import options
 import common/integrity
@@ -16,49 +19,16 @@ import common/graphics_types
 import common/graphics_utils
 import common/data_utils
 import level_meta/level_data
+import level_meta/level_entity
 import cache/bitmap_cache
 import cache/bitmaptable_cache
 import common/lcd_patterns
 
 type
-  LevelPropertiesEntity = ref object of RootObj
-    name: string
-    value: JsonNode
-  LevelTextEntity = ref object of RootObj
-    halign: Option[string]
-    text: string
-  LevelVertexEntity {.bycopy.} = object
-    x*: int32
-    y*: int32
-  LevelPropertiesHolder = ref object of RootObj
-    properties: Option[seq[LevelPropertiesEntity]]
-  LevelObjectEntity = ref object of LevelPropertiesHolder
-    id: int32 # unique object id
-    gid: Option[uint32] # tile id including flip flags
-    x, y: int32
-    width*, height*: int32
-    rotation: float32
-    polygon: Option[seq[LevelVertexEntity]]
-    polyline: Option[seq[LevelVertexEntity]]
-    text: Option[LevelTextEntity]
-    ellipse: Option[bool]
-    `type`: string
-  LevelLayerEntity = ref object of LevelPropertiesHolder
-    objects: Option[seq[LevelObjectEntity]]
-    name: Option[string]
-    visible: bool
-    image: Option[string]
-    offsetx, offsety: Option[int32]
-    `type`: string
-  
-  LevelEntity = ref object of RootObj
-    width, height: int32
-    tilewidth, tileheight: int32
-    layers: seq[LevelLayerEntity]
-
   ClassIds {.pure.} = enum
     Player = 1'u32, Coin = 2'u32, Killer = 3'u32, Finish = 4'u32, Star = 5'u32, SignPost = 6'u32,
-    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32
+    Flag = 7'u32, Gravity = 8'u32, TallBook = 9'u32, BowlingBall = 10'u32, Marble = 11'u32, TennisBall = 12'u32,
+    TallPlank = 13'u32
 
 const
   GID_HFLIP_MASK: uint32 = 1'u32 shl 31
@@ -76,6 +46,15 @@ const
   vPlayerChassisOffset: Vect = v(40.0, 56.0)
   ## The amount of pixels the chassis center can be outside the level bounds before the game over
   chassisLevelBoundsSlop: Float = 50.Float
+
+proc fallbackElasticity(objectType: Option[DynamicObjectType]): float32 =
+  if objectType.isNone: return 0.0f
+  case objectType.get:
+    # keep in sync with editor defaults in game_objects.tsj
+    of DynamicObjectType.BowlingBall: 0.05f
+    of DynamicObjectType.Marble: 0.1f
+    of DynamicObjectType.TennisBall: 0.6f
+    else: 0.0f
 
 proc toLCDPattern(str: string): LCDPattern =
   case str
@@ -96,7 +75,7 @@ proc toDirection8(str: string): Direction8 =
       print("Unknown direction: " & $str)
       return D8_FALLBACK
 
-proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T =
+proc getProp[T](obj: LevelPropertiesHolder, name: string, mapper: JsonNode -> T, fallback: T): T {.raises: [], effectsOf: mapper.} =
   if obj.properties.isSome:
       let fillProp = obj.properties.get.findFirst(it => it.name == name)
       if fillProp.isSome:
@@ -132,7 +111,7 @@ proc direction8(obj: LevelObjectEntity): Direction8 =
     fallback = D8_UP
   )
 
-proc thickness(obj: LevelObjectEntity): float32 =
+proc thickness(obj: LevelObjectEntity): float32 {.raises: [].} =
   return obj.getProp(
     name = "thickness",
     mapper = (node => node.getFloat.float32),
@@ -151,6 +130,13 @@ proc friction(obj: LevelObjectEntity): float32 =
     name = "friction",
     mapper = (node => node.getFloat.float32),
     fallback = 1.0f
+  )
+
+proc elasticity(obj: LevelObjectEntity, fallback: float32): float32 =
+  return obj.getProp(
+    name = "bounciness", # bounciness is used in the editor as a more understandable term
+    mapper = (node => node.getFloat.float32),
+    fallback = fallback
   )
 
 proc startOffset(obj: LevelLayerEntity, frameCount: int32): int32 =
@@ -173,28 +159,28 @@ proc frameRepeat(obj: LevelLayerEntity): int32 =
   )
 
 
-proc readDataFileContents(path: string): string {.raises: [].} =
+proc readDataFileContents(path: string): string {.raises: [Exception].} =
   try:
     let playdateFile = playdate.file
-    let jsonString = playdateFile.open(path, kFileReadAny).readString()
-    return jsonString
+    let contentString = playdateFile.open(path, kFileReadAny).readString()
+    return contentString
   except:
     print("Could not read " & $path)
     print(getCurrentExceptionMsg())
-    return ""
+    raise getCurrentException()
 
-proc parseLevel(path: string): (LevelEntity, string) {.raises: [].} =
+proc parseJsonLevel(path: string): (LevelEntity, string) {.raises: [Exception].} =
   let jsonString = readDataFileContents(path)
+  return parseJsonLevelContents(jsonString)
+
+proc parseFlattyLevel(path: string): (LevelEntity, string) {.raises: [Exception].} =
+  let flattyString = readDataFileContents(path)
   try:
-    markStartTime()
-    let levelEntity = jsonString.parseJson().to(LevelEntity)
-    printT("Level parsed")
-    markStartTime()
-    let contentHash = jsonString.levelContentHash()
-    printT("Level hashed", contentHash)
+    let levelEntity = flattyString.fromFlatty(LevelEntity)
+    let contentHash = flattyString.levelContentHash()
     return (levelEntity, contentHash)
   except:
-    print("Level parse failed:")
+    print("parse Flatty Level failed:")
     print(getCurrentExceptionMsg())
     return (nil, "")
 
@@ -270,7 +256,7 @@ proc tiledRectPosToCenterPos*(x,y,width,height: float32, rotDegrees: float32): V
   let rotatedCenterY = centerX * sinRotation + centerY * cosRotation
   return v(x + rotatedCenterX, y.float32 + rotatedCenterY)
 
-proc loadAsDynamicObject(level: Level, obj: LevelObjectEntity, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): bool =
+proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): bool =
   if obj.width < 1 or obj.height < 1:
     return false
 
@@ -282,7 +268,27 @@ proc loadAsDynamicObject(level: Level, obj: LevelObjectEntity, bitmapTableId: Op
     mass = obj.massMultiplier * size.area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
-    bitmapTableId = bitmapTableId,
+    elasticity = obj.elasticity(objectType.fallbackElasticity),
+    objectType = objectType,
+  ))
+  return true
+
+
+proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): bool =
+  if obj.width < 1 or obj.height < 1:
+    return false
+
+  let centerV = v(obj.x.Float + obj.width/2, obj.y.Float + obj.height / 2)
+  let radius = obj.width.float32 * 0.5f
+  let area = PI * radius * radius 
+  level.dynamicCircles.add(newDynamicCircleSpec(
+    position = centerV, 
+    radius = radius,
+    mass = obj.massMultiplier * area * 0.005f,
+    angle = obj.rotation.degToRad,
+    friction = obj.friction,
+    elasticity = obj.elasticity(objectType.fallbackElasticity),
+    objectType = objectType,
   ))
   return true
     
@@ -334,7 +340,15 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       level.gravityZones.add(spec)
     of ClassIds.TallBook:
       # todo: should a default mass be set?
-      return loadAsDynamicObject(level, obj, some(BitmapTableId.TallBook))
+      return loadAsDynamicBox(level, obj, some(DynamicObjectType.TallBook))
+    of ClassIds.BowlingBall:
+      return loadAsDynamicCircle(level, obj, some(DynamicObjectType.BowlingBall))
+    of ClassIds.Marble:
+      return loadAsDynamicCircle(level, obj, some(DynamicObjectType.Marble))
+    of ClassIds.TennisBall:
+      return loadAsDynamicCircle(level, obj, some(DynamicObjectType.TennisBall))
+    of ClassIds.TallPlank:
+      return loadAsDynamicBox(level, obj, some(DynamicObjectType.TallPlank))
   return true
 
 proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
@@ -346,7 +360,7 @@ proc loadRectangle(level: Level, obj: LevelObjectEntity): bool =
     return false
 
   if obj.`type` == "DynamicObject":
-    return loadAsDynamicObject(level, obj)
+    return loadAsDynamicBox(level, obj)
   else:
     let objOffset: Vertex = (obj.x, obj.y)
     let width = obj.width
@@ -378,6 +392,7 @@ proc loadEllipse(level: var Level, obj: LevelObjectEntity): bool =
     mass = obj.massMultiplier * area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
+    objectType = none(DynamicObjectType),
   ))
   return true
 
@@ -427,7 +442,9 @@ proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   var imageName = layer.image.get
   imageName = imageName.rsplit('/', maxsplit=1)[^1] # remove path
   imageName = imageName.rsplit('.', maxsplit=1)[0] # remove extension
-  if imageName.endswith(BITMAP_TABLE_SUFFIX):
+  if layer.`class` == some("HintsBackgroundLayer"):
+    level.hintsPath = some(levelsBasePath & imageName)
+  elif imageName.endswith(BITMAP_TABLE_SUFFIX):
     # bitmap table animation
     try:
       imageName.removeSuffix(BITMAP_TABLE_SUFFIX) # in-place
@@ -446,7 +463,6 @@ proc loadImageLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
   else:
     # background image
     let imagePath = levelsBasePath & imageName
-    print(imagePath)
     let bitmap = getOrLoadBitmap(imagePath)
     level.background = some(bitmap)
 
@@ -464,16 +480,23 @@ proc loadLayer(level: var Level, layer: LevelLayerEntity) {.raises: [].} =
       print("Unknown layer type: " & $layer.`type`)
       return
 
-proc loadLevel*(path: string): Level =
+proc loadLevel*(path: string): Level {.raises: [Exception].} =
   print "Loading level: " & $path
   var level = Level(
     id: path,
+    meta: getLevelMeta(path),
     terrainPolygons: @[],
     initialChassisPosition: v(80.0, 80.0),
     initialDriveDirection: DD_RIGHT,
   )
   
-  let (levelEntity, contentHash) = parseLevel(path)
+  markStartTime()
+  let (levelEntity, contentHash) = if path.endsWith(jsonLevelFileExtensionWithDot): 
+    parseJsonLevel(path)
+  else: 
+    parseFlattyLevel(path)
+  printT("parsed levelEntity")
+  
   level.contentHash = contentHash
 
   let size: Size = (levelEntity.width * levelEntity.tilewidth, levelEntity.height * levelEntity.tileheight)
@@ -485,7 +508,6 @@ proc loadLevel*(path: string): Level =
     r = (levelEntity.width * levelEntity.tilewidth).Float - displaySize.x,
     t = (levelEntity.height * levelEntity.tileheight).Float - displaySize.y
   )
-  print("cameraBounds: " & $level.cameraBounds)
   level.chassisBounds = newBB(
     l = -chassisLevelBoundsSlop,
     b = -chassisLevelBoundsSlop,

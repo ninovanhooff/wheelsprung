@@ -8,17 +8,22 @@ import common/shared_types
 const
   Pi32*: float32 = PI
   TwoPi*: float32 = 2 * PI
+  NOMINAL_FRAME_RATE*: float32 = 50.0f
+  NOMINAL_FRAME_TIME_MILLIS*: uint32 = (1000.0f / NOMINAL_FRAME_RATE).uint32
 
 ### Time
 proc currentTimeMilliseconds*(): int32 {.inline.} = playdate.system.getCurrentTimeMilliseconds.int32
 proc currentTimeSeconds*(): Seconds {.inline.} = (currentTimeMilliseconds() / 1000).Seconds
+proc getElapsedSeconds*(): Seconds {.inline.} = playdate.system.getElapsedTime.Seconds
 
 proc formatTime*(time: Seconds): string =
   ## Format time in seconds to a string in the format "MM:SS.ff"
   return formatTime(time * 1000)
 
-proc formatTime*(time: Milliseconds, signed: bool = false): string =
-  ## Format time in seconds to a string in the format "MM:SS.ff"
+proc formatTime*(time: Milliseconds, signed: bool = false, trim: bool = false): string =
+  ## Format time in miliseconds to a string in the format "MM:SS.ff"
+  ## If signed is true, the string will include a sign (+ or -) for negative times
+  ## If trim is true, the string will not include minutes if the time is less than 1 minute
   
   let absTime = abs(time)
   let minutes = absTime div 60_000
@@ -28,14 +33,17 @@ proc formatTime*(time: Milliseconds, signed: bool = false): string =
     if signed and time < 0: "-" 
     elif signed and time >= 0: "+" 
     else: ""
-  return fmt"{signString}{minutes:02}:{seconds:02}.{hundredths:02}"
+  if trim and minutes == 0:
+    return fmt"{signString}{seconds}.{hundredths:02}"
+  else:
+    return fmt"{signString}{minutes:02}:{seconds:02}.{hundredths:02}"
 
 
-proc expire*(expireAt: var Option[Milliseconds], currentTime: Milliseconds): bool =
+proc expire*[T](expireAt: var Option[T], currentTime: T): bool {.discardable} =
   ## Sets expireAt to none and returns true if expireAt is after currentTime
   if expireAt.isSome:
     if currentTime > expireAt.get:
-      expireAt = none[Milliseconds]()
+      expireAt = none[T]()
       return true
   return false
 
@@ -49,7 +57,8 @@ proc print*(things: varargs[string, `$`]) =
 proc printT*(things: varargs[string, `$`]) =
   let duration = playdate.system.getElapsedTime - printTStartTime
   printTStartTime = -1f
-  ## Print any type by calling $ on it to convert it to string
+  # if defined(device):
+    # timing info is only meaningful on device
   playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t") & " in ms:" & $(duration * 1000f))
 
 proc markStartTime*() =
@@ -76,7 +85,7 @@ proc addBenchSample(samples: var seq[float32], sample: float32, name: string, nu
       max = s
     mean += s
   mean /= samples.len.float32
-  print(name,"Mean:", mean * 1000, "Min:", min * 1000, "Max:", max * 1000)    
+  print(name,"Mean:", mean * 1000, "Min:", min * 1000, "Max:", max * 1000, "ms")    
   return true    
 
 
@@ -150,7 +159,7 @@ proc rem*(n: int, m: int): int =
 
 ### Sequences
 
-proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
+proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] {.raises: [], effectsOf: pred.} =
   ## find the first item in the sequence that satisfies the predicate
   result = none(T)  # return none if no item satisfies the predicate
   for i, x in s:
@@ -158,8 +167,10 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
       result = some[T](x)
       break
 
-proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) =
+proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) {.raises: [], effectsOf: pred.} =
   ## find the first item in the sequence that satisfies the predicate
+  ## returns the index and the item
+  ## returns (-1, none) if no item satisfies the predicate
   result = (-1, none(T))  # return none if no item satisfies the predicate
   for i, x in s:
     if pred(x):
@@ -171,3 +182,6 @@ proc findFirstIndexed*[T](s: seq[T], pred: proc(x: T): bool): (int, Option[T]) =
 const allButtons: PDButtons = PDButton.fullSet
 proc anyButton*(buttons: PDButtons): bool =
   (buttons * allButtons).len > 0
+
+proc anyButton*(a: PDButtons, b: PDButtons): bool =
+  return (a * b).len > 0

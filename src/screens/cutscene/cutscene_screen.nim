@@ -1,4 +1,4 @@
-{.push raises: [], warning[LockLevel]:off.}
+{.push raises: [].}
 import playdate/api
 import std/sugar
 import common/utils
@@ -47,9 +47,10 @@ proc init(screen: CutSceneScreen) =
   except:
     print "Error initializing cutscene"
 
-method resume*(screen: CutSceneScreen) =
+method resume*(screen: CutSceneScreen): bool =
   playdate.display.setRefreshRate(30)
   playdate.system.logToConsole("Cutscene resumed")
+  return true
 
 method update*(screen: CutSceneScreen): int =
   if not screen.isInitialized:

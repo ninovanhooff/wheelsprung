@@ -6,6 +6,13 @@ import utils
 
 let kFileReadAny*: FileOptions = cast[FileOptions]({kFileRead, kFileReadData})
 
+proc makeDir*(dir: string) =
+  print "Creating directory", dir
+  try:
+    playdate.file.mkdir(dir)
+  except:
+    print "Failed to create directory", dir, getCurrentExceptionMsg()
+
 proc saveJson*[T](value: T, path: string) {.raises:[].} =
   let jsonNode = %value
   let jsonStr = $jsonNode

@@ -1,3 +1,4 @@
+{.experimental: "codeReordering".}
 {.push raises: [], warning[LockLevel]:off.}
 
 import playdate/api
@@ -5,8 +6,8 @@ import navigation/[screen, navigator]
 import common/utils
 import common/shared_types
 import common/audio_utils
+import common/data_utils
 import std/sequtils
-import std/strutils
 import std/options
 import std/tables
 import std/sugar
@@ -17,48 +18,66 @@ import level_select_types
 import level_select_view
 import screens/screen_types
 import screens/cutscene/cutscene_screen
-import screens/settings/settings_screen
+import screens/leaderboards/leaderboards_screen
+import scoreboards/scoreboards_service
 
 const
   initialUnlockedLevels = 30
   pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
+  LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY = "LevelSelectScreenScoreboardsUpdatedCallbackKey"
 
 var
   backgroundAudioPlayer: FilePlayer
   confirmPlayer: SamplePlayer
   selectNextPlayer, selectPreviousPlayer, selectBumperPlayer: SamplePlayer
+  cachedLevelPaths: seq[string] = @[]
 
 proc initLevelSelectScreen() =
   if not backgroundAudioPlayer.isNil:
     print("initLevelSelectScreen: already initialized")
     return
 
-  backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/level_select/ambience") 
+  backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/music/soundtrack")
   except:
     playdate.system.error(getCurrentExceptionMsg())
     nil
   
-  selectPreviousPlayer = getOrLoadSamplePlayer("audio/menu/select_previous")
-  selectNextPlayer = getOrLoadSamplePlayer("audio/menu/select_next")
-  confirmPlayer = getOrLoadSamplePlayer("audio/menu/confirm")
-  selectBumperPlayer = getOrLoadSamplePlayer("audio/menu/bumper")
+  selectPreviousPlayer = getOrLoadSamplePlayer(SampleId.SelectPrevious)
+  selectNextPlayer = getOrLoadSamplePlayer(SampleId.SelectNext)
+  confirmPlayer = getOrLoadSamplePlayer(SampleId.Confirm)
+  selectBumperPlayer = getOrLoadSamplePlayer(SampleId.Bumper)
+
+proc getLevelRowByBoardIdIndexed(screen: LevelSelectScreen, boardId: string): (int, Option[LevelRow]) =
+  return screen.levelRows.findFirstIndexed(it => it.levelMeta.scoreboardId == boardId)
 
 
 proc getLevelPaths(): seq[string] =
+  if cachedLevelPaths.len > 0 and defined(device):
+    # reading from disk is expensive, and no levels will change on device:
+    return cachedLevelPaths
+
   try:
-    return playdate.file.listFiles(levelsBasePath)
-      .filterIt(it.endsWith(levelFileExtension))
+    cachedLevelPaths = playdate.file.listFiles(levelsBasePath)
+      .filterIt(it.isLevelFile)
       .mapIt(levelsBasePath & it)
+
+    return cachedLevelPaths
   except IOError:
     print("ERROR reading level paths", getCurrentExceptionMsg())
+    makeDir(levelsBasePath)
     return @[]
 
-proc newLevelSelectScreen*(): LevelSelectScreen =
-  return LevelSelectScreen(
+proc newLevelSelectScreen*(selectedPath: Option[Path] = none(Path)): LevelSelectScreen =
+  let screen = LevelSelectScreen(
     levelRows: @[],
     screenType: ScreenType.LevelSelect
   )
+  if selectedPath.isSome:
+    screen.refreshLevelRows()
+    screen.selectPath(selectedPath.get)
+
+  return screen
 
 proc updateScrollPosition(screen: LevelSelectScreen) =
   screen.scrollTarget = screen.selectedIndex.float32 - LEVEL_SELECT_VISIBLE_ROWS / 2 + 0.8f
@@ -78,9 +97,20 @@ proc selectRow(screen: LevelSelectScreen, idx: int) =
   elif screen.selectedIndex > screen.levelRows.high:
     screen.selectedIndex = 0
 
+  # clamp to unlocked levels
+  screen.selectedIndex = screen.selectedIndex.clamp(0, screen.firstLockedRowIdx.get(screen.levelRows.len) - 1)
+  # print "selected index: ", screen.selectedIndex, " firstLockedRowIdx: ", screen.firstLockedRowIdx, " levelRows.high: ", screen.levelRows.high
   screen.levelTheme = screen.levelRows[screen.selectedIndex].levelMeta.theme
 
+proc selectPath(screen: LevelSelectScreen, path: string) =
+  let (idx, _) = screen.levelRows.findFirstIndexed(it => it.levelMeta.path == path)
+  if idx >= 0:
+    screen.selectRow(idx)
+  else:
+    print("WARN Could not find level with path: ", path)
+
 proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
+  screen.isSelectionDirty = true
   if screen.selectedIndex <= 0 and screen.firstLockedRowIdx.get(screen.levelRows.len) < screen.levelRows.len:
     if immediately: 
       screen.scrollPosition = -1f
@@ -94,6 +124,7 @@ proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
     screen.upActivatedAt = some(currentTimeSeconds() + timeout)
 
 proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
+  screen.isSelectionDirty = true
   if screen.selectedIndex >= screen.firstLockedRowIdx.get(screen.levelRows.len) - 1:
     if immediately: 
       screen.scrollPosition += 1f
@@ -107,18 +138,26 @@ proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
     let timeout: Seconds = if screen.downActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
     screen.downActivatedAt = some(currentTimeSeconds() + timeout)
 
+proc navigateToLeaderboardsScreen(screen: LevelSelectScreen) =
+  let selectedLevelMeta = screen.levelRows[screen.selectedIndex].levelMeta
+  pushScreen(newLeaderboardsScreen(initialBoardId = selectedLevelMeta.scoreboardId))
+
 
 proc updateInput(screen: LevelSelectScreen) =
+  screen.isSelectionDirty = false
   let buttonState = playdate.system.getButtonState()
   let rows = screen.levelRows
   let numRows = rows.len
+  if numRows == 0:
+    return
+  if screen.selectedIndex >= numRows:
+    screen.selectedIndex = 0
+  let selectedLevelMeta = rows[screen.selectedIndex].levelMeta
 
   if kButtonA in buttonState.pushed:
-    let levelPath = rows[screen.selectedIndex].levelMeta.path
+    let levelPath = selectedLevelMeta.path
     let gameScreen = newGameScreen(levelPath)
-    # the ganme screen loaded successfully, save as last opened level
     confirmPlayer.playVariation
-    setLastOpenedLevel(levelPath)
     pushScreen(gameScreen)
   elif kButtonUp in buttonState.current:
     selectPreviousRow(screen, kbuttonUp in buttonState.pushed)
@@ -128,15 +167,25 @@ proc updateInput(screen: LevelSelectScreen) =
     screen.selectedIndex += 1
     if screen.selectedIndex >= numRows:
       screen.selectedIndex = 0
+  elif kButtonRight in buttonState.pushed:
+    navigateToLeaderboardsScreen(screen)
 
   updateScrollPosition(screen)
 
 proc newLevelRow(levelMeta: LevelMeta): LevelRow =
   return LevelRow(
     levelMeta: levelMeta,
-    progress: getLevelProgress(levelMeta.path)
+    progress: getLevelProgress(levelMeta.path),
+    optLeaderScore: getGlobalBest(levelMeta.scoreboardId)
   )
 
+proc refreshLevelRow(screen: LevelSelectScreen, boardId: BoardId) =
+  let (idx, optRow) = getLevelRowByBoardIdIndexed(screen, boardId)
+  if optRow.isSome:
+    let row = optRow.get
+    row.optLeaderScore = getGlobalBest(boardId)
+    screen.levelRows[idx] = row
+    screen.markRowDirty(idx.int32)
 
 proc refreshLevelRows(screen: LevelSelectScreen) =
   screen.levelRows.setLen(0)
@@ -157,37 +206,10 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
   print "firstLockedRowIdx: ", screen.firstLockedRowIdx
 
   for levelPath in levelPaths:
-    # for unknown levels, add them to the list using path as name
-    let levelMeta = newLevelMeta(
-      name = levelPath[levelsBasePath.len .. ^1],
-      path = levelPath,
-      hash = "no hash: user level",
-      theme = LevelTheme.Space
-    )
+    let levelMeta = getLevelMeta(levelPath)
     screen.levelRows.insert(levelMeta.newLevelRow())
 
-proc getInitialRowIdx(screen: LevelSelectScreen): int =
-  let optLastOpenedLevel = getSaveSlot().lastOpenedLevel
-  if optLastOpenedLevel.isSome:
-    let lastOpenedLevelPath = optLastOpenedLevel.get
-    let (previousRowIdx, _) = screen.levelRows.findFirstIndexed(it => it.levelMeta.path == lastOpenedLevelPath)
-    if previousRowIdx >= 0:
-      return previousRowIdx
-  return 0
-
-proc addMenuItemWorkaround(title: string, callback: proc(state: LuaStatePtr): cint {.cdecl, raises: [].}): PDMenuItemButton =
-  # This is a workaround for a bug in the SDK where a crash occurs when the menu item is selected
-  
-  try:
-    playdate.lua.pushString(title)
-    playdate.lua.pushFunction(callback)
-    playdate.lua.callFunction("LuaAddMenuItemWorkaround", 2)
-  except:
-    print "Error adding menu item"
-  
-  return nil
-
-method resume*(screen: LevelSelectScreen) =
+method resume*(screen: LevelSelectScreen): bool =
   screen.upActivatedAt = none(Seconds)
   screen.downActivatedAt = none(Seconds)
   try:
@@ -198,30 +220,52 @@ method resume*(screen: LevelSelectScreen) =
   initLevelSelectScreen()
   initLevelSelectView()
 
-  screen.selectRow(getInitialRowIdx(screen))
+  # screen.selectRow(getInitialRowIdx(screen))
 
   resumeLevelSelectView(screen)
+  backgroundAudioPlayer.volume=0.0
   backgroundAudioPlayer.play(0)
+  backgroundAudioPlayer.fadeVolume(1.0, 1.0, 60_000, nil)
 
   discard playdate.system.addMenuItem("Panels Test", proc(menuItem: PDMenuItemButton) =
     pushScreen(newCutSceneScreen())
   )
 
-  # todo move to utils and use everywhere where menu items are added
-  discard addMenuItemWorkaround("Settings", proc(state: LuaStatePtr): cint {.cdecl, raises: [].} =
-    let argCount = playdate.lua.getArgCount()
-    print(fmt"Nim callback with {argCount} argument(s)")
-    pushScreen(newSettingsScreen())
+  discard playdate.system.addMenuItem("Leaderboards", proc(menuItem: PDMenuItemButton) =
+    navigateToLeaderboardsScreen(screen)
   )
+
+  addScoreboardChangedCallback(
+    LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY,
+    proc(boardId: BoardId) =
+      screen.refreshLevelRow(boardId)
+  )
+  return true
 
 
 method pause*(screen: LevelSelectScreen) =
-  backgroundAudioPlayer.stop()
+  backgroundAudioPlayer.fadeVolume(0.0, 0.0, 30_000, proc (player: FilePlayer) =
+    player.pause()
+  )
+  removeScoreboardChangedCallback(LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY)
+
+method destroy*(screen: LevelSelectScreen) =
+  pause(screen)
 
 method update*(screen: LevelSelectScreen): int =
   updateInput(screen)
   draw(screen)
   return 1
+
+method getRestoreState*(screen: LevelSelectScreen): Option[ScreenRestoreState] =
+  return some(ScreenRestoreState(
+    screenType: ScreenType.LevelSelect,
+    selectedPath: some(screen.levelRows[screen.selectedIndex].levelMeta.path)
+  ))
+
+method setResult*(screen: LevelSelectScreen, screenResult: ScreenResult) =
+  if screenResult.screenType == ScreenType.LevelSelect:
+    screen.selectPath(screenResult.selectPath)
 
 method `$`*(screen: LevelSelectScreen): string =
   return "LevelSelectScreen"

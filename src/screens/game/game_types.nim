@@ -2,11 +2,16 @@ import playdate/api
 import chipmunk7
 import options
 import std/sugar
+import std/sets
 import common/graphics_types
 import common/utils
 import common/shared_types
+import level_meta/level_data
 import cache/bitmaptable_cache
+import input/input_types
 import game_constants
+import pid_controller
+export input_types
 export game_constants
 
 type 
@@ -29,6 +34,7 @@ type
     body*: Body
   Finish* = object
     position*: Vertex
+    bounds*: LCDRect
     flip*: LCDBitmapFlip
   GravityZone* = ref object
     position*: Vertex
@@ -59,9 +65,17 @@ type
     coinProgress*: float32
     gameResult*: GameResult
 
+  DynamicObjectType* {.pure.} = enum 
+    TallBook,
+    TallPlank
+    BowlingBall,
+    Marble,
+    TennisBall
+
   DynamicObject* = object
     shape*: Shape
     bitmapTable*: Option[AnnotatedBitmapTable]
+    objectType*: Option[DynamicObjectType]
 
   DynamicBoxSpec* = object
     position*: Vect
@@ -69,7 +83,8 @@ type
     mass*: Float
     angle*: Float
     friction*: Float
-    bitmapTableId*: Option[BitmapTableId]
+    elasticity*: Float
+    objectType*: Option[DynamicObjectType]
 
   DynamicCircleSpec* = object
     position*: Vect
@@ -77,7 +92,8 @@ type
     mass*: Float
     angle*: Float
     friction*: Float
-    bitmapTableId*: Option[BitmapTableId]
+    elasticity*: Float
+    objectType*: Option[DynamicObjectType]
 
 
   Text* = object
@@ -151,8 +167,10 @@ const GameShapeFilters* = (
 
 type Level* = ref object of RootObj
   id*: Path
+  meta*: LevelMeta
   contentHash*: string
   background*: Option[LCDBitmap]
+  hintsPath*: Option[Path]
   terrainPolygons*: seq[Polygon]
   terrainPolylines*: seq[Polyline]
   dynamicBoxes*: seq[DynamicBoxSpec]
@@ -175,13 +193,23 @@ type AttitudeAdjust* = ref object
   direction*: Float # 1.0 or -1.0, not necessarily the same as drive direction
   startedAt*: Milliseconds
 
+type GameStartState* = ref object of RootObj
+  levelName*: string
+  readyGoFrame*: int32
+  gameStartFrame*: int32
+
+type GameReplayState* = ref object of RootObj
+  hideOverlayAt*: Option[Seconds]
+
 type GameState* = ref object of RootObj
   level*: Level
 
   background*: LCDBitmap
+  hintsEnabled*: bool
 
   # Game state
   isGameStarted*: bool
+  isGamePaused*: bool
   remainingCoins*: seq[Coin]
   remainingStar*: Option[Star]
   starEnabled*: bool
@@ -200,6 +228,9 @@ type GameState* = ref object of RootObj
 
   # time
   time*: Milliseconds
+  gameStartState*: Option[GameStartState]
+  gameReplayState*: Option[GameReplayState]
+    ## Frame counter for the readyGo start animation
   frameCounter*: int32
   finishFlipDirectionAt*: Option[Milliseconds]
   finishTrophyBlinkerAt*: Option[Milliseconds]
@@ -211,6 +242,8 @@ type GameState* = ref object of RootObj
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect
+  camXController*: PIDController
+  camYController*: PIDController
   driveDirection*: DriveDirection
   dynamicObjects*: seq[DynamicObject]
 
@@ -219,6 +252,9 @@ type GameState* = ref object of RootObj
     ## A ghost that is being recorded
   ghostPlayback*: Ghost
     ## A ghost that represents the best time for the level
+  
+  inputRecording*: InputRecording
+  inputProvider*: InputProvider
 
   # Player
   # bike bodies
@@ -270,6 +306,18 @@ type GameState* = ref object of RootObj
   handPivot*: PivotJoint
   headPivot*: PivotJoint
 
+proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
+  result = Finish(
+    position: position,
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + finishSize,
+      top: position.y,
+      bottom: position.y + finishSize,
+    ),
+    flip: flip
+  )
+
 proc newCoin*(position: Vertex, count: int32 = 1, coinIndex: int32 = 0): Coin =
   result = Coin(
     position: position,
@@ -302,36 +350,38 @@ proc newGravityZone*(position: Vertex, direction: Direction8, animation: Animati
 proc newGravityZoneSpec*(position: Vertex, direction: Direction8): GravityZoneSpec =
   result = GravityZoneSpec(position: position, direction: direction)
 
-proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
-  result = Finish(position: position, flip: flip)
+proc toBitmapTableId*(objectType: DynamicObjectType): BitmapTableId =
+  case objectType
+  of DynamicObjectType.TallBook: BitmapTableId.TallBook
+  of DynamicObjectType.TallPlank: BitmapTableId.TallPlank
+  of DynamicObjectType.BowlingBall: BitmapTableId.BowlingBall
+  of DynamicObjectType.Marble: BitmapTableId.Marble
+  of DynamicObjectType.TennisBall: BitmapTableId.TennisBall
 
-proc newDynamicObject*(shape: Shape, bitmapTableId: Option[BitmapTableId] = none(BitmapTableId)): DynamicObject =
+proc newDynamicObject*(shape: Shape, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): DynamicObject =
+  let bitmapTableId = objectType.map(it => it.toBitmapTableId())
   let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
-  result = DynamicObject(shape: shape, bitmapTable: bitmapTable)
+  result = DynamicObject(
+    shape: shape, 
+    bitmapTable: bitmapTable,
+    objectType: objectType
+  )
 
-proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, bitmapTableId: Option[BitmapTableId]): DynamicBoxSpec =
+proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, elasticity: Float = 0f, objectType: Option[DynamicObjectType]): DynamicBoxSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Box mass must be greater than 0")
-  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, bitmapTableId: bitmapTableId)
+  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, elasticity: elasticity, objectType: objectType)
 
-proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float): DynamicCircleSpec =
+proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float, elasticity: Float = 0f, objectType: Option[DynamicObjectType]): DynamicCircleSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Circle mass must be greater than 0")
-  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction)
+  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction, elasticity: elasticity, objectType: objectType)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(
     value: value,
     position: position,
     alignment: alignment,
-  )
-
-proc newCameraState*(camera: Camera, camVertex: Vertex, viewport: LCDRect, frameCounter: int32): CameraState =
-  result = CameraState(
-    camera: camera,
-    camVertex: camVertex,
-    viewport: viewport,
-    frameCounter: frameCounter,
   )
 
 proc getRiderBodies*(state: GameState): seq[Body] =
@@ -346,4 +396,6 @@ proc getRiderBodies*(state: GameState): seq[Body] =
 
 proc destroy*(state: GameState) =
   print("Destroying game state")
-  state.space.destroy()
+  if state != nil and state.space != nil:
+    state.space.destroy()
+    state.space = nil

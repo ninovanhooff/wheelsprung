@@ -8,7 +8,6 @@ import common/data_utils
 import common/utils
 import common/integrity
 import common/save_slot_types
-import level_meta/level_data
 
 const 
   saveSlotVersion = 1
@@ -27,48 +26,33 @@ proc getLevelProgress*(id: Path): LevelProgress =
     result = newLevelProgress(levelId = id, bestTime = none(Milliseconds), hasCollectedStar = false, signature = none(string))
     saveSlot.progress[id] = result
 
+proc setLevelProgress*(id: Path, progress: LevelProgress) =
+  print ("Setting progress for level", id, repr(progress))
+  saveSlot.progress[id] = progress
+
 proc isStarEnabled*(id: Path): bool =
   let progress = getLevelProgress(id)
   result = progress.bestTime.isSome
 
-proc updateLevelProgress*(gameResult: GameResult) =
-  let id = gameResult.levelId
+proc getPlayerName*(): Option[string] =
+  return saveSlot.playerName
 
-  case gameResult.resultType
-    of GameResultType.GameOver:
-      return
-    of GameResultType.LevelComplete:
-      discard # Continue to update progress
-  
-  var progress: LevelProgress = getLevelProgress(id)
-  let bestTime = progress.bestTime.get(Milliseconds.high)
-  if gameResult.time < bestTime :
-    print ("New best time", gameResult.time, "for level", id)
-    progress.bestTime = some(gameResult.time)
+proc setPlayerName*(name: string) =
+  print "Setting player name to:", name
+  saveSlot.playerName = some(name)
 
-  if gameResult.starCollected:
-    print ("Collected star for level", id)
-    progress.hasCollectedStar = true
+proc getRestoreState*(): Option[RestoreState] =
+  return saveSlot.restoreState
 
-  let levelMeta = officialLevels.getOrDefault(id, nil)
-  # only official levels need a content hash
-  if levelMeta == nil or levelMeta.contentHash == gameResult.levelHash:
-    progress.sign()
-  else:
-    print "WARN Level content hash mismatch for level", id
-    progress.signature = none(string)
-  print ("Saving progress for level", id, repr(progress))
-  saveSlot.progress[id] = progress
-
-proc setLastOpenedLevel*(levelPath: string) =
-  saveSlot.lastOpenedLevel = some(levelPath)
+proc setRestoreState*(restoreState: RestoreState) =
+  saveSlot.restoreState = some(restoreState)
 
 proc loadSaveSlot*(): SaveSlot =
   let optSaveSlotEntity = loadJson[SaveSlotEntity](filePath)
   let optSaveSlot = optSaveSlotEntity.map(saveSlotFromEntity)
   if optSaveSlot.isSome:
     saveSlot = optSaveSlot.get
-    print("Loaded save slot", saveSlot.repr)
+    print("Loaded save slot")
   else:
     saveSlot = SaveSlot(
       progress: initTable[Path, LevelProgress](), 
@@ -84,4 +68,5 @@ proc getSaveSlot*(): SaveSlot =
     result = saveSlot
 
 proc saveSaveSlot*() =
+  print ("Saving save slot")
   saveSlotToEntity(saveSlot).saveJson(filePath)

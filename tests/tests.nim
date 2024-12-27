@@ -9,6 +9,7 @@ import options
 import screens/game/game_types
 import screens/game/game_coin
 import screens/game/game_level_loader
+import screens/game/input/game_input_recording
 
 import minitest
 import hashing_test
@@ -50,7 +51,8 @@ proc runTests*() =
   let level: Level = Level(coins: coins)
   let state: GameState = GameState(
       remainingCoins : coins,
-      level : level
+      level : level,
+      inputProvider: newLiveInputProvider(),
   )
   assert state.coinProgress == 1f, "When level has no coins, progress should be 1"
 
@@ -112,7 +114,7 @@ proc runTests*() =
   check(tiledRectPosToCenterPos(0, 0, 100, 100, -90).toVertex, newVertex(50, -50))
   check(tiledRectPosToCenterPos(0, 0, 100, 100, 360).toVertex, newVertex(50, 50))
 
-  check("levels/tutorial_brake.wmj".nextLevelPath(), some("levels/tutorial_leaning.wmj"))
+  check("levels/tutorial_brake.flatty".nextLevelPath(), some("levels/tutorial_turn_around.flatty"))
   check("nonExisting.wmj".nextLevelPath(), none(Path))
   check("levels/level3.wmj".nextLevelPath(), none(Path))
 
@@ -121,7 +123,55 @@ proc runTests*() =
   check rem(-1, -4) == -1
   check rem(1, 4) == 1
 
+  # test whether any of the buttons are pressed
+  check ({kButtonB, kButtonA} * {kButtonB}).len > 0
+
+  let inputRecording = newInputRecording()
+  inputRecording.addInputFrame({kButtonA}, 0)
+  let recordedInputProvider = RecordedInputProvider(recording: inputRecording)
+  let frame0ButtonState = (
+    current: {kButtonA},
+    pushed: {kButtonA},
+    released: {}
+  ).PDButtonState
+  check(recordedInputProvider.getButtonState(0), frame0ButtonState)
+  inputRecording.addInputFrame({kButtonA}, 1)
+  check(recordedInputProvider.getButtonState(1), (
+    current: {kButtonA},
+    pushed: {},
+    released: {}
+  ).PDButtonState)
+  inputRecording.addInputFrame({kButtonB}, 2)
+  check(recordedInputProvider.getButtonState(2), (
+    current: {kButtonB},
+    pushed: {kButtonB},
+    released: {kButtonA}
+  ).PDButtonState)
+  inputRecording.addInputFrame({}, 3)
+  check(recordedInputProvider.getButtonState(3), (
+    current: {},
+    pushed: {},
+    released: {kButtonB}
+  ).PDButtonState)
+  inputRecording.addInputFrame({kButtonA, kButtonRight}, 4)
+  check(recordedInputProvider.getButtonState(4), (
+    current: {kButtonA, kButtonRight},
+    pushed: {kButtonA, kButtonRight},
+    released: {}
+  ).PDButtonState)
+  inputRecording.addInputFrame({kButtonA, kButtonLeft}, 5)
+  check(recordedInputProvider.getButtonState(5), (
+    current: {kButtonA, kButtonLeft},
+    pushed: {kButtonLeft},
+    released: {kButtonRight}
+  ).PDButtonState)
+  # earlier frames should not be affected
+  check(recordedInputProvider.getButtonState(0), frame0ButtonState)
+
+
   testHashing()
 
+  for i in countdown(5, 10):
+    print "ERROR did not expect any invocation for invalid countdown range", i
 
   print "======== Test: Tests Completed ========="
