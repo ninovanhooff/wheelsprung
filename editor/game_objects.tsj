@@ -95,6 +95,12 @@
          "image":"bowling_ball.png",
          "imageheight":95,
          "imagewidth":95,
+         "properties":[
+                {
+                 "name":"bounciness",
+                 "type":"float",
+                 "value":0.05
+                }],
          "type":"DynamicObject"
         }, 
         {
@@ -103,6 +109,11 @@
          "imageheight":20,
          "imagewidth":20,
          "properties":[
+                {
+                 "name":"bounciness",
+                 "type":"float",
+                 "value":0.1
+                }, 
                 {
                  "name":"massMultiplier",
                  "type":"float",
@@ -115,6 +126,12 @@
          "image":"tennis_ball.png",
          "imageheight":40,
          "imagewidth":40,
+         "properties":[
+                {
+                 "name":"bounciness",
+                 "type":"float",
+                 "value":0.3
+                }],
          "type":"DynamicObject"
         }, 
         {

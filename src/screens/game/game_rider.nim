@@ -78,7 +78,7 @@ proc addRider*(state: GameState, torsoPosition: Vect) =
 
     let headPosition = localToWorld(riderTorso, headOffset.transform(dd))
     let headAngle = torsoAngle + headRotationOffset * dd
-    state.riderHead = space.addCircle(headPosition, headRadius, headMass, headAngle, 2f, GameCollisionTypes.Head, GameShapeFilters.Player)[0]
+    state.riderHead = space.addCircle(headPosition, headRadius, headMass, headAngle, 2f, 0f, GameCollisionTypes.Head, GameShapeFilters.Player)[0]
     
     let upperArmPosition = localToWorld(riderTorso, upperArmOffset.transform(dd))
     let upperArmAngle = torsoAngle + upperArmRotationOffset * dd

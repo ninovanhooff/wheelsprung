@@ -83,6 +83,7 @@ type
     mass*: Float
     angle*: Float
     friction*: Float
+    elasticity*: Float
     objectType*: Option[DynamicObjectType]
 
   DynamicCircleSpec* = object
@@ -91,6 +92,7 @@ type
     mass*: Float
     angle*: Float
     friction*: Float
+    elasticity*: Float
     objectType*: Option[DynamicObjectType]
 
 
@@ -365,15 +367,15 @@ proc newDynamicObject*(shape: Shape, objectType: Option[DynamicObjectType] = non
     objectType: objectType
   )
 
-proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, objectType: Option[DynamicObjectType]): DynamicBoxSpec =
+proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, elasticity: Float = 0f, objectType: Option[DynamicObjectType]): DynamicBoxSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Box mass must be greater than 0")
-  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, objectType: objectType)
+  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, elasticity: elasticity, objectType: objectType)
 
-proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float, objectType: Option[DynamicObjectType]): DynamicCircleSpec =
+proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float, elasticity: Float = 0f, objectType: Option[DynamicObjectType]): DynamicCircleSpec =
   if mass <= 0.0:
     raise newException(RangeDefect, "Circle mass must be greater than 0")
-  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction, objectType: objectType)
+  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction, elasticity: elasticity, objectType: objectType)
 
 proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
   result = Text(

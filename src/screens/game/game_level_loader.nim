@@ -47,6 +47,15 @@ const
   ## The amount of pixels the chassis center can be outside the level bounds before the game over
   chassisLevelBoundsSlop: Float = 50.Float
 
+proc fallbackElasticity(objectType: Option[DynamicObjectType]): float32 =
+  if objectType.isNone: return 0.0f
+  case objectType.get:
+    # keep in sync with editor defaults in game_objects.tsj
+    of DynamicObjectType.BowlingBall: 0.05f
+    of DynamicObjectType.Marble: 0.1f
+    of DynamicObjectType.TennisBall: 0.3f
+    else: 0.0f
+
 proc toLCDPattern(str: string): LCDPattern =
   case str
     of "grid4": return patGrid4
@@ -121,6 +130,13 @@ proc friction(obj: LevelObjectEntity): float32 =
     name = "friction",
     mapper = (node => node.getFloat.float32),
     fallback = 1.0f
+  )
+
+proc elasticity(obj: LevelObjectEntity, fallback: float32): float32 =
+  return obj.getProp(
+    name = "bounciness", # bounciness is used in the editor as a more understandable term
+    mapper = (node => node.getFloat.float32),
+    fallback = fallback
   )
 
 proc startOffset(obj: LevelLayerEntity, frameCount: int32): int32 =
@@ -252,6 +268,7 @@ proc loadAsDynamicBox(level: Level, obj: LevelObjectEntity, objectType: Option[D
     mass = obj.massMultiplier * size.area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
+    elasticity = obj.elasticity(objectType.fallbackElasticity),
     objectType = objectType,
   ))
   return true
@@ -270,6 +287,7 @@ proc loadAsDynamicCircle(level: Level, obj: LevelObjectEntity, objectType: Optio
     mass = obj.massMultiplier * area * 0.005f,
     angle = obj.rotation.degToRad,
     friction = obj.friction,
+    elasticity = obj.elasticity(objectType.fallbackElasticity),
     objectType = objectType,
   ))
   return true

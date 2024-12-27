@@ -65,6 +65,7 @@ proc addDynamicObjects*(state: GameState) =
           mass = obj.mass,
           angle = obj.angle,
           friction = obj.friction,
+          elasticity = obj.elasticity,
           collisionType=GameCollisionTypes.DynamicObject,
           shapeFilter = GameShapeFilters.DynamicObject
         )[1], # get shape from tuple
@@ -79,6 +80,7 @@ proc addDynamicObjects*(state: GameState) =
           obj.position, obj.radius, 
           mass = obj.mass,
           friction = obj.friction,
+          elasticity = obj.elasticity,
           collisionType=GameCollisionTypes.DynamicObject,
           shapeFilter = GameShapeFilters.DynamicObject,
           userData = cast[DataPointer](obj.objectType)

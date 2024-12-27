@@ -57,6 +57,11 @@
             "id": 7,
             "members": [
                 {
+                    "name": "bounciness",
+                    "type": "float",
+                    "value": 0
+                },
+                {
                     "name": "friction",
                     "type": "float",
                     "value": 1
