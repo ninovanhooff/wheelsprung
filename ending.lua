@@ -1,5 +1,5 @@
-Sequence2 = { -- Sequence 2
-    title = "Chapter 2",
+Ending = { -- Sequence 2
+    title = "Ending",
     panels = { -- a list of PANELS for Sequence 2
         {     -- Panel 1
             layers = {

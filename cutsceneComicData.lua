@@ -2,9 +2,9 @@
 -- you can split it up into multiple files to make it easier to manage 
 
 import "intro.lua"
-import "sequence2.lua"
+import "ending.lua"
 
 cutsceneComicData = { -- a list of SEQUENCES for this comic
 	Intro,
-	Sequence2
+	Ending
 }
