@@ -14,20 +14,15 @@ Panels.credits = gameCredits
 
 -- COMIC DATA:
 -- add data to the table in this file to create your comic
--- Nino: nope, we are using the example data below
--- import "myComicData.lua"
--- comicData = myComicData
-
-
--- EXAMPLES:
--- uncomment this file to have the example data used in the `start()` command
--- look in the `examples` folder for the data files
-import "examples/comicData.lua"
+import "comicData/intro.lua"
+local introComicData <const> = {
+    Intro
+}
 
 
 -- SETTINGS:
 -- change any settings before calling `start()`
-Panels.Settings.showMenuOnLaunch = true
+-- Panels.Settings.showMenuOnLaunch = true
 
 
 -- START:
@@ -35,8 +30,8 @@ Panels.Settings.showMenuOnLaunch = true
 -- Panels.start(comicData)
 
 function StartPanelsExample(finishCallback)
-    print("StartPanelsExample", comicData, finishCallback)
-    Panels.startCutscene(comicData, finishCallback)
+    print("StartPanelsExample", introComicData, finishCallback)
+    Panels.startCutscene(introComicData, finishCallback)
 end
 
 function UpdatePanels()
