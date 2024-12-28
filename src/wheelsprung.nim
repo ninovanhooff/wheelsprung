@@ -26,12 +26,10 @@ let initialScreenProvider: InitialScreenProvider =
 
 var 
   isFirstFrame = true
-  frameRate* = NOMINAL_FRAME_RATE
-  frameTime: Seconds = 1.0f / frameRate
 
 proc init() {.raises: [].} =
   discard getSaveSlot() # preload user profile
-  playdate.display.setRefreshRate(frameRate)
+  playdate.display.setRefreshRate(NOMINAL_FRAME_RATE)
   playdate.system.randomize() # seed the random number generator
 
   # The color used when the display is drawn at an offset. See HitStopScreen
@@ -58,6 +56,9 @@ proc init() {.raises: [].} =
   else:
     pushScreen(newLevelSelectScreen())
 
+proc getFrameTime(): float32 =
+  return 1.0f / playdate.display.getRefreshRate()
+
 
 
 proc update() {.raises: [].} =
@@ -65,7 +66,7 @@ proc update() {.raises: [].} =
   discard updateNavigator()
   playdate.system.drawFPS(0, 0)# let preloadBudget = lastFrameElapsedSeconds + frameTime - getElapsedSeconds()
   if not isFirstFrame:
-    runPreloader(frameStartTime + frameTime)
+    runPreloader(frameStartTime + getFrameTime())
   else:
     isFirstFrame = false
     print "RENDERED FIRST FRAME"
@@ -95,10 +96,9 @@ proc catchingUpdate(): int {.raises: [].} =
   return 1 ## 1: update display
 
 proc incrementFrameRate(change: float32) =
-  frameRate += change
-  frameTime = 1.0f / frameRate
-  playdate.display.setRefreshRate(frameRate)
-  print("frameRate:" & $frameRate)
+  let newFrameRate = playdate.display.getRefreshRate() + change
+  playdate.display.setRefreshRate(newFrameRate)
+  print("frameRate:" & $newFrameRate)
 
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =

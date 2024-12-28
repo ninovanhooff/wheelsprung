@@ -1,7 +1,6 @@
 import std/[math, options]
 import std/[strutils, setutils]
 import std/tables
-import std/sugar
 import playdate/api
 import common/shared_types
 

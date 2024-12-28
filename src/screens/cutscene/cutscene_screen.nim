@@ -49,8 +49,13 @@ proc init(screen: CutSceneScreen) =
 
 method resume*(screen: CutSceneScreen): bool =
   playdate.display.setRefreshRate(30)
-  playdate.system.logToConsole("Cutscene resumed")
   return true
+
+method pause*(screen: CutSceneScreen) =
+  playdate.display.setRefreshRate(NOMINAL_FRAME_RATE)
+
+method destroy*(screen: CutSceneScreen) =
+  screen.pause()
 
 method update*(screen: CutSceneScreen): int =
   if not screen.isInitialized:

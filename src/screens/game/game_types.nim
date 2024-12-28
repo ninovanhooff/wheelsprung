@@ -2,7 +2,6 @@ import playdate/api
 import chipmunk7
 import options
 import std/sugar
-import std/sets
 import common/graphics_types
 import common/utils
 import common/shared_types

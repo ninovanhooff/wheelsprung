@@ -42,6 +42,8 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BowlingBallImpact),
   PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.MarbleImpact),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.Bitmap, bitmapId: BitmapId.Acorn),
+  PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.PickupHighlight),
+  PreloadJob(timeCost: 0.021.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.ReadyGo),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeGhostWheel),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeWheel),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderTorso),
