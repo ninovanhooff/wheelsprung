@@ -15,9 +15,6 @@ Panels.credits = gameCredits
 -- COMIC DATA:
 -- add data to the table in this file to create your comic
 import "comicData/intro.lua"
-local introComicData <const> = {
-    Intro
-}
 
 
 -- SETTINGS:
@@ -30,8 +27,8 @@ local introComicData <const> = {
 -- Panels.start(comicData)
 
 function StartPanelsExample(finishCallback)
-    print("StartPanelsExample", introComicData, finishCallback)
-    Panels.startCutscene(introComicData, finishCallback)
+    print("StartPanelsExample", IntroCutscene, finishCallback)
+    Panels.startCutscene(IntroCutscene, finishCallback)
 end
 
 function UpdatePanels()
