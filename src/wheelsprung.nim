@@ -15,10 +15,10 @@ import scoreboards/scoreboards_service
 import playdate/api
 import screens/screen_types
 import screens/game/game_screen
-import screens/cutscene/cutscene_screen
 import screens/level_select/level_select_screen
-import screens/settings/settings_screen
-import screens/game_result/game_result_screen
+# import screens/cutscene/cutscene_screen
+# import screens/settings/settings_screen
+# import screens/game_result/game_result_screen
 
 let initialScreenProvider: InitialScreenProvider = 
   proc(): Screen =
@@ -41,8 +41,9 @@ proc init() {.raises: [].} =
   initNavigator(initialScreenProvider)
   let restoreState = getRestoreState()
   print "restoreState:", restoreState.repr
-  if true: # can be set to true for debugging-convenience
-    pushScreen(newCutSceneScreen())
+  if false: # can be set to true for debugging-convenience
+    discard
+    # pushScreen(newCutSceneScreen())
     # let gameResult = GameResult(
     #   levelId: "levels/level1.wmj",
     #   resultType: GameResultType.LevelComplete,
