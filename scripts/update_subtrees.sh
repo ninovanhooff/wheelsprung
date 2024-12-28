@@ -13,8 +13,8 @@ cd "${SCRIPT_DIR}/../../wheelsprung-panels"
 # recreate the subtrees
 # echo "Splitting subtree for comicData..."
 git subtree split --prefix=source/comicData -b subtree-comicdata 
-echo "Subtree for comicData split into branch 'subtree-comicdata'"
-# git subtree split --prefix=source/images/cutscenes -b subtree-images
+#echo "Subtree for comicData split into branch 'subtree-comicdata'"
+ git subtree split --prefix=source/images/cutscenes -b subtree-images
 
 # cd back to the nim repo
 echo "Pulling subtrees..."
