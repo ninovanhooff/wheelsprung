@@ -32,8 +32,13 @@ function StartPanelsExample(finishCallback)
 end
 
 function UpdatePanels()
+    local crankChange, acceleratedChange = playdate.getCrankChange()
+    if crankChange ~= 0 then
+        Panels.cranked(crankChange, acceleratedChange)
+    end
     Panels.update()
 end
+
 print("===== MAIN.LUA end =====")
 playdate.setCollectsGarbage(false)
 playdate.stop()
