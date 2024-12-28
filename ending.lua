@@ -13,3 +13,8 @@ Ending = { -- Sequence 2
         }
     }
 }
+
+-- A cutscene must be a ComicData object, which is a table of sequences.
+EndingCutscene = {
+    Ending
+}

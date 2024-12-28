@@ -31,3 +31,8 @@ Intro = {
         },
     }
 }
+
+-- A cutscene must be a ComicData object, which is a table of sequences.
+IntroCutscene = {
+    Intro
+}
