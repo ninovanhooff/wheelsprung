@@ -5,26 +5,14 @@ print("===== MAIN.LUA start =====")
 -- if you don't see any files in libraries/panels  
 -- you may need to initialize the submodule
 import "libraries/panels/Panels"
-
--- CREDITS:
--- edit the table inside `credits.lua`
--- to create your game credits
-import "gameCredits.lua"
-Panels.credits = gameCredits
+-- SETTINGS:
+-- load common Panels settings
+-- Probably, not other calls to Panels.Settings are needed
+import "comicData/panelsSettings"
 
 -- COMIC DATA:
 -- add data to the table in this file to create your comic
 import "comicData/intro.lua"
-
-
--- SETTINGS:
--- change any settings before calling `start()`
--- Panels.Settings.showMenuOnLaunch = true
-
-
--- START:
--- send the data table of your comic (or an example above) to the `start()` command
--- Panels.start(comicData)
 
 function StartPanelsExample(finishCallback)
     print("StartPanelsExample", IntroCutscene, finishCallback)
