@@ -42,7 +42,7 @@ proc finishCallback(state: LuaStatePtr): cint {.cdecl, raises: [].} =
 proc init(screen: CutSceneScreen) =
   try:
     playdate.lua.pushFunction(finishCallback)
-    playdate.lua.callFunction("StartPanelsExample", 1) # pass 1 arg: finishCallback
+    playdate.lua.callFunction("StartIntroCutscene", 1) # pass 1 arg: finishCallback
     screen.isInitialized = true
   except:
     print "Error initializing cutscene"

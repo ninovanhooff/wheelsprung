@@ -18,5 +18,9 @@
         "Roobert",
         "Unflipped",
         "Vect"
+    ],
+    "Lua.diagnostics.globals": [
+        "Panels",
+        "import"
     ]
 }

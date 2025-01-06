@@ -14,8 +14,8 @@ import "comicData/panelsSettings"
 -- add data to the table in this file to create your comic
 import "comicData/intro.lua"
 
-function StartPanelsExample(finishCallback)
-    print("StartPanelsExample", IntroCutscene, finishCallback)
+function StartIntroCutscene(finishCallback)
+    print("StartIntroCutscene", IntroCutscene, finishCallback)
     Panels.startCutscene(IntroCutscene, finishCallback)
 end
 
@@ -29,6 +29,8 @@ function UpdatePanels()
     Panels.update()
 end
 
-print("===== MAIN.LUA end =====")
+-- not sure if these actually do anything
+-- when the main loop is not defined in Lua
 playdate.setCollectsGarbage(false)
 playdate.stop()
+print("===== MAIN.LUA end =====")
