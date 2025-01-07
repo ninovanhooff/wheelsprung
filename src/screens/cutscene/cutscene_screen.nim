@@ -68,6 +68,12 @@ proc init(screen: CutSceneScreen) =
 
 method resume*(screen: CutSceneScreen): bool =
   playdate.display.setRefreshRate(30)
+
+  # add menu item to skip the story
+  discard playdate.system.addMenuItem("Skip Story", proc(menuItem: PDMenuItemButton) =
+    finish()
+  )
+
   return true
 
 method pause*(screen: CutSceneScreen) =
