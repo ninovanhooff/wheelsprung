@@ -89,3 +89,6 @@ proc getLevelMeta*(path: Path): LevelMeta =
 
 proc getMetaByBoardId*(boardId: string): Option[LevelMeta] =
   return officialLevels.values.toSeq.findFirst(it => it.scoreboardId == boardId)
+
+proc getFirstLevelMeta*(): LevelMeta =
+  return officialLevels.values.toSeq[0]

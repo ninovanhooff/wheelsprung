@@ -1,6 +1,7 @@
 import std/options
 import input/input_types
 import screens/game/game_types
+import screens/cutscene/cutscene_types
 
 type
   ScreenType* {.pure.}= enum
@@ -46,6 +47,7 @@ type
     state*: GameState
   CutSceneScreen* = ref object of Screen # todo must this be defined here?
     isInitialized*: bool
+    cutsceneId*: CutsceneId
 
 
 proc newGameScreen*(levelPath:string, recording: Option[InputRecording] = none(InputRecording)): GameScreen =
@@ -57,4 +59,7 @@ proc newGameScreen*(levelPath:string, recording: Option[InputRecording] = none(I
   )
 
 proc newCutSceneScreen*(): CutSceneScreen =
-  return CutSceneScreen(screenType: ScreenType.CutScene)
+  return CutSceneScreen(
+    screenType: ScreenType.CutScene,
+    cutsceneId: CutsceneId.Intro,
+  )

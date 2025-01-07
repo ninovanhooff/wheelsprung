@@ -1,9 +1,23 @@
 {.push raises: [].}
 import playdate/api
-import std/sugar
 import common/utils
 import navigation/[screen, navigator]
 import screens/screen_types
+import cutscene_types
+import level_meta/level_data
+
+var
+  activeCutsceneId: CutsceneId = CutsceneId.Intro
+    ## We need to keep this as a variable because we cannot reference the screen in the callback (cdecl)
+
+proc finish() =
+  print "Finishing cutscene", activeCutsceneId
+  case activeCutsceneId:
+    of CutsceneId.Intro:
+      let firstLevelPath = getFirstLevelMeta().path
+      replaceScreen(newGameScreen(levelPath = firstLevelPath))
+    of CutsceneId.Ending:
+      popScreen()
 
 proc finishCallback(state: LuaStatePtr): cint {.cdecl, raises: [].} =
   let argCount = playdate.lua.getArgCount()
@@ -34,8 +48,7 @@ proc finishCallback(state: LuaStatePtr): cint {.cdecl, raises: [].} =
   except:
     playdate.system.logToConsole(getCurrentExceptionMsg())
 
-  playdate.system.logToConsole("cutscene finished. Starting game")
-  replaceScreen(newGameScreen(levelPath = "levels/dragster.flatty"))
+  finish()
   
   return 0
 
@@ -44,6 +57,7 @@ proc init(screen: CutSceneScreen) =
     playdate.lua.pushFunction(finishCallback)
     playdate.lua.callFunction("StartIntroCutscene", 1) # pass 1 arg: finishCallback
     screen.isInitialized = true
+    activeCutsceneId = screen.cutsceneId
   except:
     print "Error initializing cutscene"
 
@@ -63,10 +77,9 @@ method update*(screen: CutSceneScreen): int =
 
   let buttonState = playdate.system.getButtonState()
   if kButtonB in buttonState.pushed:
-    playdate.system.logToConsole("Cutscene skipped by user")
     # We might want to call Panels.haltCutscene() if bg audio is still playing
     # if not, unloading the cutscene is a waste of time since we have ample memory
-    replaceScreen(newGameScreen(levelPath = "levels/dragster.flatty"))
+    finish()
     return 0
 
   try:
