@@ -155,10 +155,14 @@ proc updateInput(screen: LevelSelectScreen) =
   let selectedLevelMeta = rows[screen.selectedIndex].levelMeta
 
   if kButtonA in buttonState.pushed:
-    let levelPath = selectedLevelMeta.path
-    let gameScreen = newGameScreen(levelPath)
-    confirmPlayer.playVariation
-    pushScreen(gameScreen)
+    confirmPlayer.playVariation()
+    if selectedLevelMeta == getFirstOfficialLevelMeta():
+      backgroundAudioPlayer.stop() # we might be loading a lot of data for the cutscene. Stop the music to prevent a stutter
+      pushScreen(newCutSceneScreen(cutsceneId = CutsceneId.Intro))
+    else:
+      let levelPath = selectedLevelMeta.path
+      let gameScreen = newGameScreen(levelPath)
+      pushScreen(gameScreen)
   elif kButtonUp in buttonState.current:
     selectPreviousRow(screen, kbuttonUp in buttonState.pushed)
   elif kButtonDown in buttonState.current:
@@ -226,10 +230,6 @@ method resume*(screen: LevelSelectScreen): bool =
   backgroundAudioPlayer.volume=0.0
   backgroundAudioPlayer.play(0)
   backgroundAudioPlayer.fadeVolume(1.0, 1.0, 60_000, nil)
-
-  discard playdate.system.addMenuItem("Panels Test", proc(menuItem: PDMenuItemButton) =
-    pushScreen(newCutSceneScreen(cutsceneId = CutsceneId.Ending))
-  )
 
   discard playdate.system.addMenuItem("Leaderboards", proc(menuItem: PDMenuItemButton) =
     navigateToLeaderboardsScreen(screen)

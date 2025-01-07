@@ -14,7 +14,7 @@ proc finish() =
   print "Finishing cutscene", activeCutsceneId
   case activeCutsceneId:
     of CutsceneId.Intro:
-      let firstLevelPath = getFirstLevelMeta().path
+      let firstLevelPath = getFirstOfficialLevelMeta().path
       replaceScreen(newGameScreen(levelPath = firstLevelPath))
     of CutsceneId.Ending:
       popScreen()
