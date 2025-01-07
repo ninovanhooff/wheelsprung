@@ -8,6 +8,12 @@ function StartIntroCutscene(finishCallback)
     Panels.startCutscene(IntroCutscene, finishCallback)
 end
 
+function StartEndingCutscene(finishCallback)
+    require("lua/panelsLoader")
+    print("StartEndingCutscene")
+    Panels.startCutscene(EndingCutscene, finishCallback)
+end
+
 function UpdatePanels()
     -- workaround for inputHandlers not called when C code is running
     -- https://devforum.play.date/t/lua-inputhandlers-not-called-when-both-c-updatecallback-is-defined/20745

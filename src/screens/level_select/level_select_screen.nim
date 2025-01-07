@@ -228,7 +228,7 @@ method resume*(screen: LevelSelectScreen): bool =
   backgroundAudioPlayer.fadeVolume(1.0, 1.0, 60_000, nil)
 
   discard playdate.system.addMenuItem("Panels Test", proc(menuItem: PDMenuItemButton) =
-    pushScreen(newCutSceneScreen())
+    pushScreen(newCutSceneScreen(cutsceneId = CutsceneId.Ending))
   )
 
   discard playdate.system.addMenuItem("Leaderboards", proc(menuItem: PDMenuItemButton) =

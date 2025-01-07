@@ -2,6 +2,7 @@ import std/options
 import input/input_types
 import screens/game/game_types
 import screens/cutscene/cutscene_types
+export cutscene_types
 
 type
   ScreenType* {.pure.}= enum
@@ -58,8 +59,8 @@ proc newGameScreen*(levelPath:string, recording: Option[InputRecording] = none(I
     screenType: ScreenType.Game
   )
 
-proc newCutSceneScreen*(): CutSceneScreen =
+proc newCutSceneScreen*(cutsceneId: CutsceneId): CutSceneScreen =
   return CutSceneScreen(
     screenType: ScreenType.CutScene,
-    cutsceneId: CutsceneId.Intro,
+    cutsceneId: cutsceneId,
   )

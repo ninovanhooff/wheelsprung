@@ -54,8 +54,13 @@ proc finishCallback(state: LuaStatePtr): cint {.cdecl, raises: [].} =
 
 proc init(screen: CutSceneScreen) =
   try:
+    let luaFunctionName = case screen.cutsceneId:
+      of CutsceneId.Intro:
+        "StartIntroCutscene"
+      of CutsceneId.Ending:
+        "StartEndingCutscene"
     playdate.lua.pushFunction(finishCallback)
-    playdate.lua.callFunction("StartIntroCutscene", 1) # pass 1 arg: finishCallback
+    playdate.lua.callFunction(luaFunctionName, 1) # pass 1 arg: finishCallback
     screen.isInitialized = true
     activeCutsceneId = screen.cutsceneId
   except:

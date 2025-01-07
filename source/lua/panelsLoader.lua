@@ -9,5 +9,6 @@ import "libraries/panels/Panels"
 import "comicData/panelsSettings"
 
 -- COMIC DATA:
--- add data to the table in this file to create your comic
+-- load cutscene data
 import "comicData/intro.lua"
+import "comicData/ending.lua"
