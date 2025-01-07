@@ -61,6 +61,14 @@ method update*(screen: CutSceneScreen): int =
   if not screen.isInitialized:
     screen.init()
 
+  let buttonState = playdate.system.getButtonState()
+  if kButtonB in buttonState.pushed:
+    playdate.system.logToConsole("Cutscene skipped by user")
+    # We might want to call Panels.haltCutscene() if bg audio is still playing
+    # if not, unloading the cutscene is a waste of time since we have ample memory
+    replaceScreen(newGameScreen(levelPath = "levels/dragster.flatty"))
+    return 0
+
   try:
     playdate.lua.callFunction("UpdatePanels", 0)
   except:
