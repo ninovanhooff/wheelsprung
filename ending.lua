@@ -3,12 +3,21 @@ Ending = { -- Sequence 2
     panels = { -- a list of PANELS for Sequence 2
         {     -- Panel 1
             layers = {
-                -- list of layers for panel 1
+                { image = "Ending/A/house.png",     parallax = 0.6 },
+                { image = "Ending/A/flip.png",  parallax = 0.3 },
+                { image = "Ending/A/speech.png", parallax = 0.2 },
+                {
+                    text = "*    Wow, that was delicious!*",
+                    x = 295, y = 15,
+                    rect =  {width = 70, height = 123},
+                    parallax = 0.2
+                },
             }
         },
         { -- Panel 2
             layers = {
-                -- list of layers for panel 2
+                { image = "Ending/B/house.png",     parallax = 0.6 },
+                { image = "Ending/B/flip.png",  parallax = 0.3 },
             }
         }
     }
