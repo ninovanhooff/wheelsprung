@@ -8,6 +8,23 @@ Intro = {
                 { image = "Intro/A/2-parents.png",  parallax = 0.8 },
                 { image = "Intro/A/3-children.png", parallax = 0.6 },
                 { image = "Intro/A/4-plant.png",    parallax = 0.1 },
+                { 
+                    imageTable = "common/buttonRT", 
+                    x = 330, y = 100, parallax = 2, 
+                    loop = true, startDelay = 1500,
+                },
+                {
+                    text = "Ⓑ: Skip Story",
+                    x = 10, y = 200, parallax = 0,
+                    background = Panels.Color.WHITE,
+                    border = 1, -- does nothing, requires Panels 2.0
+                    animate = {
+                        trigger = Panels.Input.RIGHT,
+                        opacity = 0,
+                        duration = 1000,
+                        ease = playdate.easingFunctions.outQuint,
+                    },
+                },
             }
         },
         { -- Panel 2
