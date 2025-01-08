@@ -8,6 +8,9 @@ set -e
 cd "${SCRIPT_DIR}/../../wheelsprung-panels"
 
 # Perhaps delete the subtrees
+echo "delete local subtree branches..."
+git branch -D subtree-comicdata
+git branch -D subtree-images
 
 
 # recreate the subtrees
