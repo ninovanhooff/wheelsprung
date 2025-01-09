@@ -17,7 +17,6 @@ Intro = {
                     text = "Ⓑ: Skip Story",
                     x = 10, y = 200, parallax = 0,
                     background = Panels.Color.WHITE,
-                    border = 1, -- does nothing, requires Panels 2.0
                     animate = {
                         trigger = Panels.Input.RIGHT,
                         opacity = 0,
