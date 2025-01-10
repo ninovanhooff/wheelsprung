@@ -5,6 +5,6 @@ import "intro.lua"
 import "ending.lua"
 
 cutsceneComicData = { -- a list of SEQUENCES for this comic
-	--Intro,
+	Intro,
 	Ending
 }
