@@ -42,7 +42,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.flatty", theme= Desk, hash="6A7FBB2524358A86BF4A1F96FDE24CD1"),
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.flatty", theme= Bath, hash="FA763F59170C357953CE30B29FBC5667"),
   newLevelMeta(name= "Ripple Ride", path="levels/hills.flatty", theme= Bath, hash="5E6783CF62C2C15ED73282CCE633D66B"),
-  newLevelMeta(name= "Laundry Loop", path="levels/globe_of_death.flatty", theme= Bath, hash="297651CFFAA6E83E1703E465A158E6B1"),
+  newLevelMeta(name= "Laundry Loop", path="levels/globe_of_death.flatty", theme= Bath, hash="A0E40ACCCC2C9239DD3A60D98859044A"),
   newLevelMeta(name= "Ripcurl Rush", path="levels/looping.flatty", theme= Bath, hash="3B6D26825A9D30FEAA364F13B03953F5", boardId = "hills"),
 
   newLevelMeta(name= "Novel Navigations", path="levels/novel_navigations.flatty", theme= Bookshelf, hash="83D025E12A1140BC3B86831F20FF4622"),
@@ -58,7 +58,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Killveyor", path="levels/killveyor.flatty", theme= Space, hash="62CD10EDDA94748B614B9A8E07E5E6A8"),
   newLevelMeta(name= "Ludicrous Launch", path="levels/ludicrous_launch.flatty", theme= Space, hash="5CC9E809001ED5E0C07144F2CE92F478"),
 
-  newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.flatty", theme= Plants, hash="6C2AFA63DB64AD88EB324918BEA8B557"),
+  newLevelMeta(name= "Globe of Death 3", path="levels/globe_of_death_3.flatty", theme= Plants, hash="EA08EBDBB0F31C6BEBFE2BA9C060CB1D"),
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.flatty", theme= Plants, hash="6E5F2C44C7ED48F25ED86E834C68149B"),
   newLevelMeta(name= "Half Pipe", path="levels/halfpipe.flatty", theme= Plants, hash="AD044D60F6F6C95534182E7C7C105AE6"),
   newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.flatty", theme= Plants, hash="0CF980DB09C2EE873C16836319B51CBD"),
