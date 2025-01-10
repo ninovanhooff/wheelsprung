@@ -96,6 +96,6 @@ method update*(screen: CutSceneScreen): int =
   try:
     playdate.lua.callFunction("UpdatePanels", 0)
   except:
-    print "Error updating cutscene"
+    print "Error updating cutscene", getCurrentExceptionMsg()
   
   return 1
