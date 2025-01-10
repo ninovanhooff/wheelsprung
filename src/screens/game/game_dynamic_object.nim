@@ -134,7 +134,7 @@ proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
   elif not shouldPlay and rollPlayer.isPlaying:
     rollPlayer.fadeOut()
 
-  print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
+  # print "updateRollSound: ", objectType, shouldPlay, fastestAngularVelocity
   # rollPlayer.update()
 
 let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: pointer, unused: pointer) {.cdecl raises: [].} =
@@ -174,7 +174,7 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
     if impactPlayer.isSome:
       let player = impactPlayer.get
       if not player.isPlaying:
-        print "impact", totalImpulse, mass
+        # print "impact", totalImpulse, mass
         impactPlayer.get.volume = clamp(targetVolume, 0.0, 1.0)
         impactPlayer.get.playVariation()
 
@@ -192,8 +192,7 @@ let collisionSeparateFunc*: CollisionSeparateFunc = proc(arb: Arbiter; space: Sp
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
 
-  let objectType = cast[DynamicObjectType](shapeA.userData)
-
+  # let objectType = cast[DynamicObjectType](shapeA.userData)
   # print "collisionSeparateFunc: ", objectType, shapeB.collisionType.repr
 
   discard space.addPostStepCallback(
