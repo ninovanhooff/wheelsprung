@@ -55,8 +55,8 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Tutorial: Gravity", path="levels/tutorial_gravity.flatty", theme= Space, hash="E1C388DD1554CA7B27FB5753C07B434B"),
   newLevelMeta(name= "Wall Rider", path="levels/wall_rider.flatty", theme= Space, hash="90DDCFE21872F9CBF4AB9693F4C36784"),
   newLevelMeta(name= "Gravity Vault", path="levels/gravity_vault.flatty", theme= Space, hash="93C6BA7A0E681C89846FF2559789CEC7"),
-  newLevelMeta(name= "Marble Vault", path="levels/marble_vault.flatty", theme= Space, hash="E86B172095D41D35AC16C57AC918AFA8"),
-  newLevelMeta(name= "Killveyor", path="levels/killveyor.flatty", theme= Space, hash="62CD10EDDA94748B614B9A8E07E5E6A8"),
+  newLevelMeta(name= "Marble Vault", path="levels/marble_vault.flatty", theme= Space, hash="9C500E009452ADEDB9ABD107D6F879D6"),
+  newLevelMeta(name= "Killveyor", path="levels/killveyor.flatty", theme= Space, hash="8C70F5F0FD5F9D8EF3602861A6F49C21"),
   newLevelMeta(name= "Ludicrous Launch", path="levels/ludicrous_launch.flatty", theme= Space, hash="5CC9E809001ED5E0C07144F2CE92F478"),
 
   newLevelMeta(name= "Circle of Life", path="levels/globe_of_death_3.flatty", theme= Plants, hash="EA08EBDBB0F31C6BEBFE2BA9C060CB1D"),
