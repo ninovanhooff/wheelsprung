@@ -20,9 +20,12 @@ echo "DEVICE_PDX_PATH ${DEVICE_PDX_PATH}"
 
 strip_pdz() {
   local dir_path="$1"
-  # both of these directories are included in panelsLoader.pdz
-  rm -rf "${dir_path}/libraries/panels/modules"
+  # Only keep the assets folder in the libraries/panels folder
+  find "${dir_path}/libraries/panels" -mindepth 1 -maxdepth 1 ! -name "assets" -exec rm -rf {} +
+  # included in panelsLoader.pdz
   rm -rf "${dir_path}/comicData"
+  # unused
+  rm -rf "${dir_path}/libraries/panels/assets/audio"
 }
 
 echo "Stripping pdz files..."
