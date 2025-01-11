@@ -11,6 +11,7 @@ import common/utils
 import common/level_utils
 import common/save_slot_types
 import screens/settings/settings_screen
+import screens/cutscene/cutscene_screen
 import screens/screen_types
 import data_store/user_profile
 import cache/font_cache
@@ -20,7 +21,7 @@ import data_store/game_result_updater
 
 type 
   GameResultAction {.pure.} = enum
-    LevelSelect, Restart, Next, ShowHints, ShowReplay
+    LevelSelect, Restart, Next, ShowHints, ShowReplay, ShowEndingCutscene
   GameResultScreen = ref object of Screen
     previousProgress: LevelProgress
     gameResult: GameResult
@@ -73,7 +74,10 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     availableActions.insert(GameResultAction.ShowHints, position)
     hintOfferCount[gameResult.levelId] = timesOffered + 1
 
-  let currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default
+  var currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default. Else: select restart
+  if nextPath.isNone and resultType == GameResultType.LevelComplete:
+    availableActions.insert(GameResultAction.ShowEndingCutscene, 0)
+    currentActionIndex = 0
 
   let backgroundImageName = if resultType == GameResultType.GameOver: "game-over-bg" else: "level-complete-bg"
   let backgroundImage = getOrLoadBitmap("images/game_result/" & backgroundImageName)
@@ -105,8 +109,9 @@ proc label(resultType: GameResultType, gameResultAction: GameResultAction): stri
   of GameResultAction.LevelSelect: return "Level Select"
   of GameResultAction.Restart: return if resultType == GameResultType.LevelComplete: "Restart" else: "Retry"
   of GameResultAction.Next: return if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
-  of GameResultAction.ShowHints: "Show hints"
-  of GameResultAction.ShowReplay: "Show replay"
+  of GameResultAction.ShowHints: return "Show hints"
+  of GameResultAction.ShowReplay: return "Show replay"
+  of GameResultAction.ShowEndingCutscene: return "The End?"
 
 const buttonTextCenterX = 100
 
@@ -203,6 +208,8 @@ proc executeAction(self: GameResultScreen, action: GameResultAction) =
       pushScreen(newGameScreen(self.gameResult.levelId, inputRecording))
     else:
       print "ERROR: No input recording available"
+  of GameResultAction.ShowEndingCutscene:
+    pushScreen(newCutSceneScreen(CutsceneId.Ending))
 
 method update*(self: GameResultScreen): int =
   # no drawing needed here, we do it in resume
