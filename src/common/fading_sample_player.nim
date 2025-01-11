@@ -38,7 +38,7 @@ proc update*(player: FadingSamplePlayer) =
   if not player.isPlaying(): return
 
   player.samplePlayer.volume = lerp(player.samplePlayer.volume.left, player.targetVolume, player.lerpSpeed)
-  print("volume: ", player.samplePlayer.volume.left)
+  # print("volume: ", player.samplePlayer.volume.left)
   if player.targetVolume < 0.01f and player.samplePlayer.volume.left < 0.01f:
-    print("stopping")
+    # print("stopping")
     player.samplePlayer.stop()
