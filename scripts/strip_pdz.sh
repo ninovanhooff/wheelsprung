@@ -20,7 +20,9 @@ echo "DEVICE_PDX_PATH ${DEVICE_PDX_PATH}"
 
 strip_pdz() {
   local dir_path="$1"
+  # both of these directories are included in panelsLoader.pdz
   rm -rf "${dir_path}/libraries/panels/modules"
+  rm -rf "${dir_path}/comicData"
 }
 
 echo "Stripping pdz files..."
