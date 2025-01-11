@@ -41,9 +41,9 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.flatty", theme= Bath, hash="F56F62ED85D51DA493C590FEF71A3F0B"),
   newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.flatty", theme= Desk, hash="6A7FBB2524358A86BF4A1F96FDE24CD1"),
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.flatty", theme= Bath, hash="FA763F59170C357953CE30B29FBC5667"),
-  newLevelMeta(name= "Ripple Ride", path="levels/hills.flatty", theme= Bath, hash="5E6783CF62C2C15ED73282CCE633D66B"),
+  newLevelMeta(name= "Ripple Ride", path="levels/hills.flatty", theme= Bath, hash="5E6783CF62C2C15ED73282CCE633D66B", boardId = "hills"),
   newLevelMeta(name= "Laundry Loop", path="levels/globe_of_death.flatty", theme= Bath, hash="A0E40ACCCC2C9239DD3A60D98859044A"),
-  newLevelMeta(name= "Ripcurl Rush", path="levels/looping.flatty", theme= Bath, hash="3B6D26825A9D30FEAA364F13B03953F5", boardId = "hills"),
+  newLevelMeta(name= "Ripcurl Rush", path="levels/looping.flatty", theme= Bath, hash="3B6D26825A9D30FEAA364F13B03953F5"),
 
   newLevelMeta(name= "Novel Navigations", path="levels/novel_navigations.flatty", theme= Bookshelf, hash="83D025E12A1140BC3B86831F20FF4622"),
   newLevelMeta(name= "Under Covers", path="levels/under_covers.flatty", theme= Bookshelf, hash="07C4F9B28FA27A1EDB706A9432544979"),
