@@ -10,8 +10,8 @@ import common/shared_types
 import common/utils
 import common/level_utils
 import common/save_slot_types
+import level_meta/level_data
 import screens/settings/settings_screen
-import screens/cutscene/cutscene_screen
 import screens/screen_types
 import data_store/user_profile
 import cache/font_cache
@@ -209,6 +209,10 @@ proc executeAction(self: GameResultScreen, action: GameResultAction) =
     else:
       print "ERROR: No input recording available"
   of GameResultAction.ShowEndingCutscene:
+    # prepare the level select screen to scroll to the first official level after the cutscene ends
+    let firstOfficialLevelPath = getFirstOfficialLevelMeta().path
+    setResult(ScreenResult(screenType: ScreenType.LevelSelect, selectPath: firstOfficialLevelPath))
+    # clear the backstack, leaving only the LevelSelect screen and start ending cutscene
     popToScreenType(ScreenType.LevelSelect)
     pushScreen(newCutSceneScreen(CutsceneId.Ending))
 
