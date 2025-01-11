@@ -13,6 +13,8 @@ PRODUCT="$(basename "$(pwd)")"
 echo "PRODUCT ${PRODUCT}"
 DEVICE_PDX="${PRODUCT}_device.pdx"
 
+echo "Stripping lua build artifacts..."
+"$SCRIPT_DIR"/strip_pdz.sh
 
 # Create a PDX file for the device
 "$SCRIPT_DIR"/bundle_device.sh "$PRODUCT.pdx" "$DEVICE_PDX"
