@@ -29,7 +29,7 @@ echo "Game Dir mounted"
 # trap 'tput setaf 1;tput bold;echo $BASH_COMMAND;read;tput init' DEBUG
 
 # Only copy files which changed and are newer than the destination
-rsync -zavrti --update --modify-window=1 --prune-empty-dirs "${DEVICE_PDX}" "/Volumes/PLAYDATE/Games/"
+rsync -zavrti --update --modify-window=1 --prune-empty-dirs --delete "${DEVICE_PDX}" "/Volumes/PLAYDATE/Games/"
 
 # Unmount
 MOUNT_DEVICE="$(diskutil list | grep PLAYDATE | grep -oE '[^ ]+$')"
