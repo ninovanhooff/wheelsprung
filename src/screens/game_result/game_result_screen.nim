@@ -209,6 +209,7 @@ proc executeAction(self: GameResultScreen, action: GameResultAction) =
     else:
       print "ERROR: No input recording available"
   of GameResultAction.ShowEndingCutscene:
+    popToScreenType(ScreenType.LevelSelect)
     pushScreen(newCutSceneScreen(CutsceneId.Ending))
 
 method update*(self: GameResultScreen): int =
