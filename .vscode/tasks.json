@@ -59,6 +59,18 @@
       }
     },
     {
+      "label": "Delete device data folder",
+      "type": "shell",
+      "dependsOn": [
+        "Reboot Device to Data disk",
+      ],
+      "command": "./scripts/delete_device_data_folder.sh",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
       "label": "Level Sync Watcher",
       "type": "shell",
       "command": "./scripts/sync_levels.sh",
