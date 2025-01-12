@@ -20,36 +20,7 @@ proc finish() =
       popScreen()
 
 proc finishCallback(state: LuaStatePtr): cint {.cdecl, raises: [].} =
-  let argCount = playdate.lua.getArgCount()
-  print(fmt"Nim callback with {argCount} argument(s)")
-
-  try: 
-    for i in countup(1, argCount): # Lua indices start from 1...
-      let argType = playdate.lua.getArgType(i.cint)
-
-      case argType:
-        of kTypeBool:
-          let value = playdate.lua.getArgBool(i)
-          playdate.system.logToConsole(fmt"Argument {i} is a bool: {value}")
-        of kTypeFloat:
-          let value = playdate.lua.getArgFloat(i)
-          playdate.system.logToConsole(fmt"Argument {i} is a float: {value}")
-        of kTypeInt:
-          let value = playdate.lua.getArgInt(i)
-          playdate.system.logToConsole(fmt"Argument {i} is an int: {value}")
-        of kTypeString:
-          let value = playdate.lua.getArgString(i)
-          playdate.system.logToConsole(fmt"Argument {i} is a string: {value}")
-        of kTypeNil:
-          let isNil = playdate.lua.argIsNil(i)
-          playdate.system.logToConsole(fmt"Argument {i} is nil: {isNil}")
-        else:
-          playdate.system.logToConsole(fmt"Argument {i} is not a recognized type.")
-  except:
-    playdate.system.logToConsole(getCurrentExceptionMsg())
-
   finish()
-  
   return 0
 
 proc init(screen: CutSceneScreen) =
@@ -66,7 +37,7 @@ proc init(screen: CutSceneScreen) =
     screen.isInitialized = true
     activeCutsceneId = screen.cutsceneId
   except:
-    print "Error initializing cutscene"
+    print "Error initializing cutscene", getCurrentExceptionMsg()
 
 method resume*(screen: CutSceneScreen): bool =
   playdate.display.setRefreshRate(30)
