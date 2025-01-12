@@ -47,18 +47,23 @@ proc getRestoreState*(): Option[RestoreState] =
 proc setRestoreState*(restoreState: RestoreState) =
   saveSlot.restoreState = some(restoreState)
 
-proc loadSaveSlot*(): SaveSlot =
+proc loadSaveSlot(): SaveSlot =
+  print "loadSaveSlot"
   let optSaveSlotEntity = loadJson[SaveSlotEntity](filePath)
   let optSaveSlot = optSaveSlotEntity.map(saveSlotFromEntity)
   if optSaveSlot.isSome:
     saveSlot = optSaveSlot.get
     print("Loaded save slot")
   else:
+    print("Creating new save slot")
     saveSlot = SaveSlot(
       progress: initTable[Path, LevelProgress](), 
       modelVersion: saveSlotVersion
     )
-    print("Created new save slot")
+    # we usually end up here when the data folder doesn't exist yet.
+    # this is a good time to create the levels folder too.
+    makeDir("levels")
+    print("Created new save slot and ensured levels folder exists")
   result = saveSlot
 
 proc getSaveSlot*(): SaveSlot =

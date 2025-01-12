@@ -12,25 +12,25 @@ proc save*(config: Config) =
   print "Saving", repr(config)
   saveJson(config, "config.json")
 
-proc createAndSave(): Config =
-  let config = Config()
-  save(config)
-  return config
+# proc createAndSave(): Config =
+#   let config = Config()
+#   save(config)
+#   return config
 
-proc loadConfig(): Config =
-  let optConfig = loadJson[Config]("config.json")
-  if optConfig.isSome:
-    print "Loaded", repr(optConfig.get)
-    return optConfig.get
-  else:
-    # we usually end up here when the data folder doesn't exist yet.
-    # this is a good time to create the levels folder too.
-    makeDir("levels")
-    return createAndSave()
+# proc loadConfig(): Config =
+#   let optConfig = loadJson[Config]("config.json")
+#   if optConfig.isSome:
+#     print "Loaded", repr(optConfig.get)
+#     return optConfig.get
+#   else:
+#     # we usually end up here when the data folder doesn't exist yet.
+#     # this is a good time to create the levels folder too.
+#     makeDir("levels")
+#     return createAndSave()
 
 proc getConfig*(): Config =
   if config == nil:
-    config = loadConfig()
+    config = Config()
   return config
 
 proc updateConfig*(update: Config -> void) =
