@@ -54,7 +54,7 @@ local Intro1 <const> = {
 }
 
 local Intro2 <const> = {
-    -- Sequence 1
+    -- Sequence 2
     title = "Introduction 2",
     panels = { -- a list of PANELS for Sequence 1
         { -- Panel 4
