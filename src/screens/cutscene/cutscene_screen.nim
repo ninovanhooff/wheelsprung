@@ -60,7 +60,9 @@ proc init(screen: CutSceneScreen) =
       of CutsceneId.Ending:
         "StartEndingCutscene"
     playdate.lua.pushFunction(finishCallback)
+    markStartTime()
     playdate.lua.callFunction(luaFunctionName, 1) # pass 1 arg: finishCallback
+    printT("Cutscene init")
     screen.isInitialized = true
     activeCutsceneId = screen.cutsceneId
   except:
