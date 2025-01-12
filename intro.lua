@@ -1,8 +1,8 @@
 import "CoreLibs/ui/crankIndicator"
 
-Intro = {
+local Intro1 <const> = {
     -- Sequence 1
-    title = "Introduction",
+    title = "Introduction 1",
     panels = { -- a list of PANELS for Sequence 1
         {      -- Panel 1
             renderFunction = function(panel, offset)
@@ -50,7 +50,13 @@ Intro = {
 
             }
         },
+    }
+}
 
+local Intro2 <const> = {
+    -- Sequence 1
+    title = "Introduction 2",
+    panels = { -- a list of PANELS for Sequence 1
         { -- Panel 4
             layers = {
                 { image = "Intro/E/road.png",     parallax = 0.7 },
@@ -202,7 +208,9 @@ Intro = {
     }
 }
 
+
 -- A cutscene must be a ComicData object, which is a table of sequences.
 IntroCutscene = {
-    Intro
+    Intro1,
+    Intro2
 }
