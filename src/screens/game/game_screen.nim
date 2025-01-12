@@ -25,7 +25,7 @@ import navigation/navigator
 import data_store/game_result_updater
 import screens/screen_types
 import screens/game_result/game_result_screen
-import screens/settings/settings_screen
+# import screens/settings/settings_screen
 import screens/hit_stop/hit_stop_screen
 
 const
@@ -78,7 +78,7 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
     setResult(ScreenResult(screenType: ScreenType.Game, restartGame: true))
   var screen = createHitstopScreen(state, collisionShape)
   screen.menuItems = @[
-    MenuItemDefinition(name: settingsLabel, action: () => pushScreen(newSettingsScreen())),
+    # MenuItemDefinition(name: settingsLabel, action: () => pushScreen(newSettingsScreen())),
     MenuItemDefinition(name: levelSelectLabel, action: popScreen),
     MenuItemDefinition(name: restartLevelLabel, action: restartGameHandler),
   ]
@@ -280,9 +280,9 @@ proc updateTimers(state: GameState) =
 
 proc addMenuItems(gameScreen: GameScreen) =
   if gameScreen.state.isInLiveMode:
-    discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
-      pushScreen(newSettingsScreen())
-    )
+    # discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
+    #   pushScreen(newSettingsScreen())
+    # )
     discard playdate.system.addMenuItem(levelSelectLabel, proc(menuItem: PDMenuItemButton) =
       popScreen()
     )

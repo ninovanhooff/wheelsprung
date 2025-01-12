@@ -11,7 +11,7 @@ import common/utils
 import common/level_utils
 import common/save_slot_types
 import level_meta/level_data
-import screens/settings/settings_screen
+# import screens/settings/settings_screen
 import screens/screen_types
 import data_store/user_profile
 import cache/font_cache
@@ -175,9 +175,9 @@ method resume*(self: GameResultScreen): bool =
     persistGameResult(self.gameResult)
     self.hasPersistedResult = true
 
-  discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
-    pushScreen(newSettingsScreen())
-  )
+  # discard playdate.system.addMenuItem("Settings", proc(menuItem: PDMenuItemButton) =
+  #   pushScreen(newSettingsScreen())
+  # )
   discard playdate.system.addMenuItem("Level select", proc(menuItem: PDMenuItemButton) =
     popToScreenType(ScreenType.LevelSelect)
   )
