@@ -1,4 +1,4 @@
-import "CoreLibs/ui"
+import "CoreLibs/ui/crankIndicator"
 
 Intro = {
     -- Sequence 1
