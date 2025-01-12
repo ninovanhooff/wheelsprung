@@ -50,6 +50,7 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderGhostHead),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderUpperArm),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.Killer),
+  PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.Flag),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.Font, fontId: FontId.NontendoBold),
   PreloadJob(timeCost: 0.012.Seconds, jobType: PreloadJobType.Font, fontId: FontId.M6X11),
   PreloadJob(timeCost: 0.008.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Fall1),
