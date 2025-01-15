@@ -1,8 +1,8 @@
-import "CoreLibs/ui/crankIndicator"
+import "CoreLibs/ui"
 
-local Intro1 <const> = {
+Intro = {
     -- Sequence 1
-    title = "Introduction 1",
+    title = "Introduction",
     panels = { -- a list of PANELS for Sequence 1
         {      -- Panel 1
             renderFunction = function(panel, offset)
@@ -50,13 +50,7 @@ local Intro1 <const> = {
 
             }
         },
-    }
-}
 
-local Intro2 <const> = {
-    -- Sequence 2
-    title = "Introduction 2",
-    panels = { -- a list of PANELS for Sequence 1
         { -- Panel 4
             layers = {
                 { image = "Intro/E/road.png",     parallax = 0.7 },
@@ -198,7 +192,7 @@ local Intro2 <const> = {
         { image = "Intro/P/Nuts.png", x = 150, parallax = 0.4 },
         { image = "Intro/P/Speech.png",   x = 200, parallax = 0.45 },
         {
-            text = "*Let's pick up some nuts*",
+            text = "*Let's pick up some nuts!*",
             x = 360, y = 35,
             rect =  {width = 90, height = 123},
             parallax = 0.45
@@ -208,9 +202,7 @@ local Intro2 <const> = {
     }
 }
 
-
 -- A cutscene must be a ComicData object, which is a table of sequences.
 IntroCutscene = {
-    Intro1,
-    Intro2
+    Intro
 }

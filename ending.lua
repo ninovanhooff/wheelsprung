@@ -30,7 +30,7 @@ Ending = { -- Sequence 2
                 { image = "Ending/C/flip.png",  parallax = 0.4},
                 { image = "Ending/C/speech.png",  parallax = 0.3},
                 {
-                    text = "*    Mmmm \r  What's that tasty \r   smell*",
+                    text = "*    Mmmm \r  What's that tasty \r   smell?*",
                     x = 285, y = 85,
                     rect =  {width = 80, height = 123},
                     parallax = 0.3
