@@ -192,7 +192,7 @@ Intro = {
         { image = "Intro/P/Nuts.png", x = 150, parallax = 0.4 },
         { image = "Intro/P/Speech.png",   x = 200, parallax = 0.45 },
         {
-            text = "*Let's pick up some nuts*",
+            text = "*Let's pick up some nuts!*",
             x = 360, y = 35,
             rect =  {width = 90, height = 123},
             parallax = 0.45
