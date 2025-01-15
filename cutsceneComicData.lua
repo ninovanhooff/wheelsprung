@@ -4,6 +4,7 @@
 import "intro.lua"
 import "ending.lua"
 
+cutsceneComicData = {}
 function table.merge(t1, t2)
 	for _,v in ipairs(t2) do
 		table.insert(t1, v)
@@ -12,4 +13,5 @@ function table.merge(t1, t2)
 	return t1
 end
 
-cutsceneComicData = table.merge(IntroCutscene, EndingCutscene)
+table.merge(cutsceneComicData, IntroCutscene)
+table.merge(cutsceneComicData, EndingCutscene)
