@@ -4,7 +4,12 @@
 import "intro.lua"
 import "ending.lua"
 
-cutsceneComicData = { -- a list of SEQUENCES for this comic
-	Intro,
-	Ending
-}
+function table.merge(t1, t2)
+	for _,v in ipairs(t2) do
+		table.insert(t1, v)
+	end 
+
+	return t1
+end
+
+cutsceneComicData = table.merge(IntroCutscene, EndingCutscene)

@@ -1,4 +1,4 @@
-Ending = { -- Sequence 2
+local Ending <const> = { -- Sequence 2
     title = "Ending",
     panels = { -- a list of PANELS for Sequence 2
         {     -- Panel 1
