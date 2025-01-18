@@ -67,7 +67,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name = "Rolling Raiders", path="levels/boulder.flatty", theme= Plants, hash="0541EF41C104AE11FFCE43B3B3077A85"),
 
   newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.flatty", theme= Desk, hash="633154C6A64C4C0EB4FCC1FE1F0490B0"),
-  newLevelMeta(name = "Time Traveler", path="levels/time_traveler.flatty", theme= Desk, hash="8E2F789AFA9EB7F39C455EF2A9612000"),
+  newLevelMeta(name = "Time Traveler", path="levels/time_traveler.flatty", theme= Desk, hash="18193FB4744661DA83906690CE211469"),
   newLevelMeta(name = "Tight Squeeze", path="levels/tight_squeeze.flatty", theme= Desk, hash="0541EF41C104AE11FFCE43B3B3077A85"),
   newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="E7ED841B154ADD2B5694AD6613CCE5D1"),
   newLevelMeta(name= "Ramp of Pages", path="levels/leg_up.flatty", theme= Desk, hash="6F48907EB90D6985CB66486C4A11FFEC"),
