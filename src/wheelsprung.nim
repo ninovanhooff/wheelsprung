@@ -1,39 +1,84 @@
-import sugar
 import options
 import std/strutils
+import std/sugar
 import strformat
 import ../tests/tests
-import utils
+import common/utils
+import common/shared_types
 import globals
-import configuration
-import navigation/[navigator, screen]
+import data_store/user_profile
+import navigation/[navigator, screen, backstack_builder]
+import cache/cache_preloader
+import scoreboards/scoreboards_service
 
 
 import playdate/api
+import screens/screen_types
 import screens/game/game_screen
 import screens/level_select/level_select_screen
-import screens/settings/settings_screen
-
-const FONT_PATH = "fonts/Roobert-11-Medium.pft"
+# import screens/cutscene/cutscene_screen
+# import screens/settings/settings_screen
+# import screens/game_result/game_result_screen
 
 let initialScreenProvider: InitialScreenProvider = 
   proc(): Screen =
     result = newLevelSelectScreen()
 
 var 
-  font: LCDFont
+  isFirstFrame = true
+
+proc init() {.raises: [].} =
+  discard getSaveSlot() # preload user profile
+  playdate.display.setRefreshRate(NOMINAL_FRAME_RATE)
+  playdate.system.randomize() # seed the random number generator
+
+  # The color used when the display is drawn at an offset. See HitStopScreen
+  playdate.graphics.setBackgroundColor(kColorBlack)
+
+  if defined(debug):
+    runTests()
+
+  initNavigator(initialScreenProvider)
+  let restoreState = getRestoreState()
+  print "restoreState:", restoreState.repr
+  if false: # can be set to true for debugging-convenience
+    discard
+    # pushScreen(newCutSceneScreen())
+    # let gameResult = GameResult(
+    #   levelId: "levels/level1.wmj",
+    #   resultType: GameResultType.LevelComplete,
+    #   time: 1840,
+    #   starCollected: true,
+    # )
+    # pushScreen(newGameResultScreen(gameResult))
+  elif restoreState.get(@[]).len > 0:
+    let screens = createBackStack(restoreState.get(@[]))
+    replaceBackstack(screens)
+  else:
+    pushScreen(newLevelSelectScreen())
+
+proc getFrameTime(): float32 =
+  return 1.0f / playdate.display.getRefreshRate()
+
+
 
 proc update() {.raises: [].} =
+  let frameStartTime = getElapsedSeconds()
   discard updateNavigator()
-  playdate.system.drawFPS(0, 0)
+  playdate.system.drawFPS(0, 0)# let preloadBudget = lastFrameElapsedSeconds + frameTime - getElapsedSeconds()
+  if not isFirstFrame:
+    runPreloader(frameStartTime + getFrameTime())
+  else:
+    isFirstFrame = false
+    print "RENDERED FIRST FRAME"
 
-proc runCatching(fun: () -> (void), messagePrefix: string=""): void = 
+proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
   try:
     fun()
   except:
     let exception = getCurrentException()
     var message: string = ""
-    try: 
+    try:
       message = &"{messagePrefix}\n{getCurrentExceptionMsg()}\n{exception.getStackTrace()}"
       # replace line number notation from (90) to :90, which is more common and can be picked up as source link
       message = message.replace('(', ':')
@@ -45,32 +90,36 @@ proc runCatching(fun: () -> (void), messagePrefix: string=""): void =
       # Log the error to the console, total stack trace might be too long for single call
       playdate.system.logToConsole(line)
 
-proc catchingUpdate(): int {.raises: [].} = 
+    playdate.system.error("FATAL:" & getCurrentExceptionMsg())
+
+proc catchingUpdate(): int {.raises: [].} =
   runCatching(update)
   return 1 ## 1: update display
+
+proc incrementFrameRate(change: float32) =
+  let newFrameRate = playdate.display.getRefreshRate() + change
+  playdate.display.setRefreshRate(newFrameRate)
+  print("frameRate:" & $newFrameRate)
 
 # This is the application entrypoint and event handler
 proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   if event == kEventInit:
-    playdate.display.setRefreshRate(refreshRate)
-    playdate.system.randomize() # seed the random number generator
-
-    font = try: playdate.graphics.newFont(FONT_PATH) except: nil
-    playdate.graphics.setFont(font)
-
-    if defined(debug):
-      runCatching(runTests, "UNIT TESTS FAILED")
-    initNavigator(initialScreenProvider)
-    let lastOpenedLevelPath = getConfig().lastOpenedLevel
-    if false:
-      pushScreen(newLevelSelectScreen())
-    elif lastOpenedLevelPath.isSome and playdate.file.exists(lastOpenedLevelPath.get()):
-      pushScreen(newGameScreen(lastOpenedLevelPath.get()))
-    else:
-      pushScreen(newLevelSelectScreen())
+    return # Do nothing, we want a Lua env for Panels
+  elif event == kEventInitLua:
+    runCatching(init)
     
     # Set the update callback
     playdate.system.setUpdateCallback(catchingUpdate)
+  elif event == kEventTerminate or event == kEventLowPower:
+    if event == kEventLowPower:
+      print("Wheelsprung: Low power mode, saving state")
+    elif event == kEventTerminate:
+      print("Wheelsprung will terminate")
+    setRestoreState(createRestoreState())
+    saveSaveSlot()
+  elif event == kEventUnlock:
+    print("Wheelsprung: Unlocked. Refreshing scoreboards")
+    fetchAllScoreboards()
   elif event == kEventKeyReleased:
     if keycode == 116:
       print("T")
@@ -97,15 +146,15 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
       print("debugDrawConstraints:" & $debugDrawConstraints)
     elif keycode == 106:
       print("J")
-      refreshRate -= 5.0f
-      playdate.display.setRefreshRate(refreshRate)
-      print("refreshRate:" & $refreshRate)
+      incrementFrameRate(-5.0f)
     elif keycode == 108:
       print("L")
-      refreshRate += 5.0f
-      playdate.display.setRefreshRate(refreshRate)
-      print("refreshRate:" & $refreshRate)
+      incrementFrameRate(5.0f)
     else:
       print("keycode:" & $keycode)
+  elif event == kEventKeyPressed:
+    discard
+  else:
+    print("unhandled event:" & $event & " keycode:" & $keycode)
 # Used to setup the SDK entrypoint
 initSDK()

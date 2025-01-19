@@ -20,14 +20,18 @@ proc floor*(v: Vect): Vect {.inline.} =
 proc `/`*(v: Vect, s: Float): Vect {.inline.} =
   result = v(v.x / s, v.y / s)
 
+proc area*(v: SizeF): float32 {.inline.} =
+  result = v.x * v.y
+
 proc flip*(body: Body, relativeTo: Body) {.inline.} =
   ## Flip body horizontally relative to relativeTo
   body.angle = relativeTo.angle + (relativeTo.angle - body.angle)
   body.position = localToWorld(relativeTo, worldToLocal(relativeTo, body.position).transform(-1.0))
 
 proc addBox*(
-  space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f,
-  collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE) : Body =
+  space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f, friction = 0f, elasticity = 0f,
+  collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE
+  ) : (Body, Shape) =
     let body = space.addBody(
         newBody(mass, momentForBox(mass, size.x, size.y))
     )
@@ -38,12 +42,17 @@ proc addBox*(
       let shape = space.addShape(newBoxShape(body, size.x, size.y, 0f))
       shape.filter = shapeFilter
       shape.collisionType = collisionType
-
-    return body
+      shape.friction = friction
+      shape.elasticity = elasticity
+      return (body, shape)
+    else:
+      return (body, nil)
 
 proc addCircle*(
-  space: Space, pos: Vect, radius: float32, mass: float32, angle: float32 = 0f, 
-  collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE) : Body =
+  space: Space, pos: Vect, radius: float32, mass: float32, angle: float32 = 0f, friction = 0f, elasticity = 0f,
+  collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE,
+  userData: DataPointer = nil
+  ) : (Body, Shape) =
     let body = space.addBody(
         newBody(mass, momentForCircle(mass, 0f, radius, vzero))
     )
@@ -54,5 +63,9 @@ proc addCircle*(
       let shape = space.addShape(newCircleShape(body, radius, vzero))
       shape.filter = shapeFilter
       shape.collisionType = collisionType
+      shape.friction = friction
+      shape.elasticity = elasticity
+      shape.userData= userData
+      return (body, shape)
 
-    return body
+    return (body, nil)

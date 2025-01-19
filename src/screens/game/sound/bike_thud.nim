@@ -1,9 +1,10 @@
 import std/random
 import playdate/api
 import chipmunk7
-import utils, audio_utils
+import common/[utils, audio_utils]
 import screens/game/game_types
 import system
+import cache/sound_cache
 
 const
   minContactImpulse: Float = 25.0
@@ -23,8 +24,9 @@ proc initBikeThud*() =
   print("initBikeThud")
 
   try:
-    for i in 1..3:
-      thudPlayers.add(playdate.sound.newSamplePlayer("/audio/thud/thud_" & $i))
+    thudPlayers.add(getOrLoadSamplePlayer(SampleId.BikeThud1))
+    thudPlayers.add(getOrLoadSamplePlayer(SampleId.BikeThud2))
+    thudPlayers.add(getOrLoadSamplePlayer(SampleId.BikeThud3))
     
     curPlayer = getRandomThud()
   except:

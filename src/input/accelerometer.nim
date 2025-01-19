@@ -1,5 +1,5 @@
 import playdate/api
-import utils
+import common/utils
 
 template system*: untyped = playdate.system
 

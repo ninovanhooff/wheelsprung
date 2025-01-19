@@ -1,0 +1,173 @@
+{
+    "automappingRulesFile": "",
+    "commands": [
+    ],
+    "compatibilityVersion": 1100,
+    "extensionsPath": "extensions",
+    "folders": [
+        "."
+    ],
+    "properties": [
+    ],
+    "propertyTypes": [
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 9,
+            "members": [
+                {
+                    "name": "frameRepeat",
+                    "type": "int",
+                    "value": 2
+                },
+                {
+                    "name": "startFrame",
+                    "type": "int",
+                    "value": 1
+                }
+            ],
+            "name": "AnimationLayer",
+            "type": "class",
+            "useAs": [
+                "layer",
+                "project"
+            ]
+        },
+        {
+            "id": 3,
+            "name": "Direction8",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "up",
+                "down",
+                "left",
+                "right",
+                "up",
+                "up_left",
+                "up_right",
+                "down_left",
+                "down_right"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffff7e79",
+            "drawFill": true,
+            "id": 7,
+            "members": [
+                {
+                    "name": "bounciness",
+                    "type": "float",
+                    "value": 0
+                },
+                {
+                    "name": "friction",
+                    "type": "float",
+                    "value": 1
+                },
+                {
+                    "name": "massMultiplier",
+                    "type": "float",
+                    "value": 1
+                }
+            ],
+            "name": "DynamicObject",
+            "type": "class",
+            "useAs": [
+                "object",
+                "tile",
+                "project"
+            ]
+        },
+        {
+            "id": 1,
+            "name": "Fill",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "grid4",
+                "black"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 11,
+            "members": [
+            ],
+            "name": "HintsBackgroundLayer",
+            "type": "class",
+            "useAs": [
+                "layer",
+                "project"
+            ]
+        },
+        {
+            "id": 10,
+            "name": "NutType",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "Random",
+                "Peanut",
+                "Almond",
+                "Pistachio",
+                "Walnut",
+                "Hazel"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffff9300",
+            "drawFill": true,
+            "id": 4,
+            "members": [
+                {
+                    "name": "thickness",
+                    "type": "float",
+                    "value": 0
+                }
+            ],
+            "name": "Polyline",
+            "type": "class",
+            "useAs": [
+                "object",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 8,
+            "members": [
+            ],
+            "name": "Reference",
+            "type": "class",
+            "useAs": [
+                "object",
+                "project"
+            ]
+        },
+        {
+            "color": "#ff00f900",
+            "drawFill": true,
+            "id": 5,
+            "members": [
+                {
+                    "name": "fill",
+                    "propertyType": "Fill",
+                    "type": "string",
+                    "value": "grid4"
+                }
+            ],
+            "name": "TerrainPolygon",
+            "type": "class",
+            "useAs": [
+                "object",
+                "project"
+            ]
+        }
+    ]
+}

@@ -3,5 +3,24 @@
     "lldb.displayFormat": "auto",
     "lldb.showDisassembly": "auto",
     "lldb.dereferencePointers": true,
-    "lldb.consoleMode": "commands"
+    "lldb.consoleMode": "commands",
+    "search.exclude": {
+        "**/stderr.txt": true,
+        "**/stdout.txt": true
+    },
+    "cSpell.words": [
+        "Backflip",
+        "elif",
+        "Flatty",
+        "Fredoka",
+        "Killveyor",
+        "Navigations",
+        "Roobert",
+        "Unflipped",
+        "Vect"
+    ],
+    "Lua.diagnostics.globals": [
+        "Panels",
+        "import"
+    ]
 }

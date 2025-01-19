@@ -13,6 +13,8 @@ PRODUCT="$(basename "$(pwd)")"
 echo "PRODUCT ${PRODUCT}"
 DEVICE_PDX="${PRODUCT}_device.pdx"
 
+echo "Stripping lua build artifacts..."
+"$SCRIPT_DIR"/strip_pdz.sh
 
 # Create a PDX file for the device
 "$SCRIPT_DIR"/bundle_device.sh "$PRODUCT.pdx" "$DEVICE_PDX"
@@ -27,7 +29,7 @@ echo "Game Dir mounted"
 # trap 'tput setaf 1;tput bold;echo $BASH_COMMAND;read;tput init' DEBUG
 
 # Only copy files which changed and are newer than the destination
-rsync -zavrti --update --modify-window=1 --prune-empty-dirs "${DEVICE_PDX}" "/Volumes/PLAYDATE/Games/"
+rsync -zavrti --update --modify-window=1 --prune-empty-dirs --delete "${DEVICE_PDX}" "/Volumes/PLAYDATE/Games/"
 
 # Unmount
 MOUNT_DEVICE="$(diskutil list | grep PLAYDATE | grep -oE '[^ ]+$')"

@@ -3,15 +3,24 @@
 import playdate/api
 import math
 import options
+import std/sequtils
 import chipmunk7
-import game_types, graphics_types, shared_types
-import game_bike, game_finish
-import graphics_utils
+import game_types
+import common/graphics_types
+import game_bike, game_finish, game_ghost, game_killer, game_coin, game_star, game_gravity_zone
+import overlay/game_start_overlay_view
+import overlay/game_ended_overlay
+import overlay/game_replay_overlay
+import game_dynamic_object
+import common/graphics_utils
+import common/lcd_patterns
+import game_debug_view
 import chipmunk_utils
-import utils
+import common/utils
 import globals
 import cache/bitmaptable_cache
-import lcd_patterns
+import cache/font_cache
+import screens/hit_stop/hit_stop_screen
 
 const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
@@ -20,20 +29,20 @@ const
   patternSize: int32 = 8'i32
 
 var
+  isGameViewInitialized: bool = false
   bikeChassisImageTable: AnnotatedBitmapTable
   bikeWheelImageTable: AnnotatedBitmapTable
 
   riderTorsoImageTable: AnnotatedBitmapTable
   riderHeadImageTable: AnnotatedBitmapTable
+  riderTailImageTable: AnnotatedBitmapTable
   riderUpperArmImageTable: AnnotatedBitmapTable
   riderLowerArmImageTable: AnnotatedBitmapTable
   riderUpperLegImageTable: AnnotatedBitmapTable
   riderLowerLegImageTable: AnnotatedBitmapTable
-  killerImageTable: AnnotatedBitmapTable
-  gravityImageTable: AnnotatedBitmapTable
-  coinImage: LCDBitmap
-  starImage: LCDBitmap
   gridImage: LCDBitmap
+
+  smallFont: LCDFont
 
   # pre-allocated vars for drawing
   swingArmAttachmentScreenPos: Vect
@@ -41,81 +50,28 @@ var
 
 
 proc initGameView*() =
-  if bikeChassisImageTable != nil: return # already initialized
+  if isGameViewInitialized: return # already initialized
 
   bikeChassisImageTable = getOrLoadBitmapTable(BitmapTableId.BikeChassis)
   bikeWheelImageTable = getOrLoadBitmapTable(BitmapTableId.BikeWheel)
   riderTorsoImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTorso)
   riderHeadImageTable = getOrLoadBitmapTable(BitmapTableId.RiderHead)
+  riderTailImageTable = getOrLoadBitmapTable(BitmapTableId.RiderTail)
   riderUpperArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperArm)
   riderLowerArmImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerArm)
   riderUpperLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderUpperLeg)
   riderLowerLegImageTable = getOrLoadBitmapTable(BitmapTableId.RiderLowerLeg)
-  killerImageTable = getOrLoadBitmapTable(BitmapTableId.Killer)
-  gravityImageTable = getOrLoadBitmapTable(BitmapTableId.Gravity)
-  initGameFinish()
 
-  try:
-    coinImage = gfx.newBitmap("images/coin")
-    starImage = gfx.newBitmap("images/star")
-    gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
-  except:
-    echo getCurrentExceptionMsg()
+  isGameViewInitialized = true
 
-proc drawCircle(camera: Camera, pos: Vect, radius: float, angle: float, color: LCDColor) =
-  # covert from center position to top left
-  let drawPos = pos - camera
-  let x = (drawPos.x - radius).toInt
-  let y = (drawPos.y - radius).toInt
-  let size: int = (radius * 2f).toInt
-  # angle is in radians, convert to degrees
-  let deg = radTodeg(angle)
-  gfx.drawEllipse(x,y,size, size, 1, deg+10, deg + 350, color);
+proc getIsGameViewInitialized*(): bool =
+  isGameViewInitialized
 
-proc drawSegment(camera: Camera, segment: SegmentShape, color: LCDColor) =
-  let drawAPos = segment.a - camera
-  let drawBPos = segment.b - camera
-  # gfx.drawLine(drawAPos.x.toInt, drawAPos.y.toInt, drawBPos.x.toInt, drawBPos.y.toInt, 1, color);
-  gfx.drawLine(drawAPos.x.int32, drawAPos.y.int32, drawBPos.x.int32, drawBPos.y.int32, 1, color);
+proc cameraShift(vertex: Vertex, cameraCenter: Vertex): Vertex {.inline.} =
+  let perspectiveShift: Vertex = (cameraCenter - vertex) div 20
+  result = perspectiveShift
 
-proc shapeIter(shape: Shape, data: pointer) {.cdecl.} =
-  let state = cast[ptr GameState](data)
-  let camera = state.camera
-  if shape.kind == cpCircleShape:
-    let circle = cast[CircleShape](shape)
-    drawCircle(camera, circle.body.position + circle.offset, circle.radius, circle.body.angle, kColorBlack)
-  elif shape.kind == cpSegmentShape:
-    let segment = cast[SegmentShape](shape)
-    drawSegment(camera, segment, kColorBlack)
-  elif shape.kind == cpPolyShape:
-    let poly = cast[PolyShape](shape)
-    let numVerts = poly.count
-    for i in 0 ..< numVerts:
-      let a = localToWorld(poly.body, poly.vert(i)) - camera
-      let b = localToWorld(poly.body, poly.vert((i+1) mod numVerts)) - camera
-      gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-
-proc constraintIter(constraint: Constraint, data: pointer) {.cdecl.} =
-  let state = cast[ptr GameState](data)
-  let camera = state.camera
-  if constraint.isGrooveJoint:
-    # discard
-    let groove = cast[GrooveJoint](constraint)
-    let a = localToWorld(groove.bodyA, groove.grooveA) - camera
-    let b = localToWorld(groove.bodyA, groove.grooveB) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-  elif constraint.isDampedSpring:
-    let spring = cast[DampedSpring](constraint)
-    let a = localToWorld(spring.bodyA, spring.anchorA) - camera
-    let b = localToWorld(spring.bodyB, spring.anchorB) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-  elif constraint.isDampedRotarySpring:
-    let spring = cast[DampedRotarySpring](constraint)
-    let a = localToWorld(spring.bodyA, vzero) - camera
-    let b = localToWorld(spring.bodyB, vzero) - camera
-    gfx.drawLine(a.x.toInt, a.y.toInt, b.x.toInt, b.y.toInt, 1, kColorBlack);
-
-proc initGameBackground*(state: GameState) =
+proc initGeometryBackground(state: GameState)=
   let level = state.level
   state.background = gfx.newBitmap(
     level.size.x, level.size.y, kColorWhite
@@ -126,18 +82,87 @@ proc initGameBackground*(state: GameState) =
   let terrainPolygons = level.terrainPolygons
   for polygon in level.terrainPolygons:
     gfx.fillPolygon(polygon.vertices, polygon.fill, kPolygonFillNonZero)
-    drawPolygon(polygon.vertices)
+    drawPolyline(polygon.vertices)
   # for some reason, level.terrainPolygons is modified by calling gfx.fillPolygon
   # as a workaround, we re-copy the data back to the level
   level.terrainPolygons = terrainPolygons
 
+  for polyline in level.terrainPolylines:
+    drawPolyline(polyline.vertices, polyline.thickness.int32)
+    for vertex in polyline.vertices:
+      # fill the gaps between sharp-angled line segments
+      let radius = ((polyline.thickness * 0.75f) / 2f).roundToNearestInt()
+      if radius > 0:
+        fillCircle(vertex.x, vertex.y, radius)
+
+  if smallFont.isNil:
+    smallFont = getOrLoadFont(FontId.Roobert10Bold)
+  gfx.setFont(smallFont)
+  for text in level.texts:
+    gfx.drawTextAligned(text.value, text.position.x, text.position.y, text.alignment)
+
   gfx.popContext()
 
-# proc offset(vertices: seq[Vertex], off: Vertex): seq[Vertex] =
-#   vertices.map(vertex => (
-#     (vertex[0] - off[0]),
-#     (vertex[1] - off[1])
-#   ))
+proc initGameBackground*(state: GameState) =
+  let level = state.level
+
+  if state.hintsEnabled:
+    try:
+      state.background = gfx.newBitmap(state.level.hintsPath.get)
+    except:
+      print "Hints Image load failed:", getCurrentExceptionMsg()
+  elif level.background.isSome:
+    state.background = level.background.get
+  else:
+    state.initGeometryBackground()
+
+proc drawPolygonDepth*(state: GameState) =
+  let level = state.level
+  let camVertex = state.camera.toVertex()
+
+  gfx.setDrawOffset(-camVertex.x, -camVertex.y)
+
+  # draw driving surface
+  let viewport: LCDRect = offsetScreenRect(camVertex)
+  let camCenter = camVertex + halfDisplaySize.toVertex + (x: 0'i32, y: -30'i32)
+  for polygon in level.terrainPolygons:
+    if not polygon.bounds.intersects(viewport):
+      continue # skip drawing polygons that are not visible
+
+    # todo make sure this is a reference, not a copy
+    let polyVerts = polygon.vertices
+    let shiftedVertices = polyVerts.mapIt(it.cameraShift(camCenter))
+
+    for curIndex in 0..polyVerts.len - 2:
+      let nextIndex = curIndex + 1
+
+      if polygon.edgeIndices[curIndex]:
+        continue
+
+      let v1 = polyVerts[curIndex]
+      let v2 = polyVerts[nextIndex]
+
+      let dot = polygon.normals[curIndex].dotVertex(shiftedVertices[curIndex] + shiftedVertices[nextIndex])
+
+      if dot < 0:
+        gfx.fillPolygon(
+          [
+            v1, 
+            v1 + shiftedVertices[curIndex], 
+            v2 + shiftedVertices[nextIndex], 
+            v2
+          ], 
+          patGrayTransparent, 
+          kPolygonFillNonZero
+        )
+
+    if debugDrawShapes:
+      for i in 0..polyVerts.len - 1:
+        drawLine(polyVerts[i] + shiftedVertices[i], polyVerts[i], kColorBlack)
+        gfx.drawTextAligned($i, polyVerts[i].x, polyVerts[i].y)
+  
+  gfx.setDrawOffset(0,0)
+
 
 proc drawRotated(table: AnnotatedBitmapTable, center: Vect, angle: float32, driveDirection: DriveDirection) {.inline.} =
   table.drawRotated(
@@ -159,7 +184,7 @@ proc drawBikeForks*(state: GameState) =
   let camera = state.camera
   let driveDirection = state.driveDirection
 
-  if state.gameResult.isSome and state.gameResult.get.resultType == GameResultType.GameOver:
+  if state.bikeConstraints.len == 0:
     #drawLineOutlined from top of forkArm to bottom of forkArm
     let forkArm = state.forkArm
     let forkArmTopCenter = localToWorld(forkArm, forkArmTopCenterOffset) - camera
@@ -171,7 +196,7 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
-    # #drawLineOutlined from left of swingArm to right of swingArm
+    # drawLineOutlined from left of swingArm to right of swingArm
     let swingArm = state.swingArm
     let swingArmLeftCenter = localToWorld(swingArm, v(-halfSwingArmWidth, 0.0)) - camera
     let swingArmRightCenter = localToWorld(swingArm, v(halfSwingArmWidth, 0.0)) - camera
@@ -206,40 +231,6 @@ proc drawBikeForks*(state: GameState) =
       kColorWhite,
     )
 
-const
-  rotationIndicatorRadius = 16'i32
-  rotationIndicatorSize = rotationIndicatorRadius * 2'i32
-  rotationIndicatorWidthDegrees = 6f
-
-proc drawRotationForceIndicator(center: Vertex, forceDegrees: float32) =
-  let
-    x = center[0] - rotationIndicatorRadius
-    y = center[1] - rotationIndicatorSize
-  # total rotation range indicator
-  gfx.drawEllipse(
-    x, y, rotationIndicatorSize, rotationIndicatorSize, 
-    3, 
-    315, 45, 
-    kColorBlack
-  )
-  # current rotation indicator
-  gfx.drawEllipse(
-    x,y - 3'i32,rotationIndicatorSize,rotationIndicatorSize,
-    9, 
-    forceDegrees - rotationIndicatorWidthDegrees, forceDegrees + rotationIndicatorWidthDegrees, 
-    kColorXOR
-  )
-
-method getBitmap(asset: Asset, frameCounter: int32): LCDBitmap {.base.} =
-  print("getImage not implemented for: ", repr(asset))
-  return fallbackBitmap()
-
-method getBitmap(asset: Texture, frameCounter: int32): LCDBitmap =
-  return asset.image
-
-method getBitmap(asset: Animation, frameCounter: int32): LCDBitmap =
-  return asset.bitmapTable.getBitmap((frameCounter div 2'i32) mod asset.frameCount)
-
 proc drawPlayer(state: GameState) =
   let chassis = state.chassis
   let camera = state.camera
@@ -263,6 +254,8 @@ proc drawPlayer(state: GameState) =
 
   # rider
 
+  riderTailImageTable.drawRotated(state.riderTail, state)
+
   let riderHead = state.riderHead
   let riderHeadScreenPos = riderHead.position - camera
   if state.finishFlipDirectionAt.isSome:
@@ -273,68 +266,70 @@ proc drawPlayer(state: GameState) =
   else:
     riderHeadImageTable.drawRotated(riderHead, state)
 
-  var chassisTorque = 0.0
-  if state.attitudeAdjust.isSome:
-    chassisTorque = state.lastTorque
-
-  let chassisTorqueDegrees = chassisTorque / 1_000f
-  drawRotationForceIndicator(
-    riderHeadScreenPos.toVertex,
-    chassisTorqueDegrees
-  )
-
-  riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderUpperLegImageTable.drawRotated(state.riderUpperLeg, state)
+  riderTorsoImageTable.drawRotated(state.riderTorso, state)
   riderLowerLegImageTable.drawRotated(state.riderLowerLeg, state)
-  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
+  riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
 
 proc drawGame*(statePtr: ptr GameState) =
   let state = statePtr[]
   let level = state.level
   let camera = state.camera
   let camVertex = camera.toVertex()
+  let viewport: LCDRect = offsetScreenRect(camVertex)
+  let cameraState = newCameraState(camera, camVertex, viewport, state.frameCounter)
+  let frameCounter: int32 = state.frameCounter
+
 
   if debugDrawLevel:
     state.background.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
   else:
     gfx.clear(kColorWhite)
 
+  if level.background.isNone:
+    state.drawPolygonDepth()
+
   # draw grid
   if debugDrawGrid:
+    if gridImage.isNil:
+      try:
+        gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
+      except:
+        print "Image load failed:", getCurrentExceptionMsg()
     gfx.setDrawMode(kDrawmodeWhiteTransparent)
     gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
     gfx.setDrawMode(kDrawmodeCopy)
 
+  state.drawDynamicObjects()
+
   if debugDrawTextures:
     # assets
-    let frameCounter: int32 = state.frameCounter
     for asset in level.assets:
-      let assetScreenPos = asset.position - camVertex
-      asset.getBitmap(frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
+      drawAsset(asset, cameraState)
+
+    # gravity zones
+    drawGravityZones(state.gravityZones, state.gravityDirection, cameraState)
 
     # coins
-    for coin in state.remainingCoins:
-      let coinScreenPos = coin.position - camVertex
-      if coin.count < 2:
-        coinImage.draw(coinScreenPos[0], coinScreenPos[1], kBitmapUnflipped)
-      else:
-        gfx.drawTextAligned($coin.count, coinScreenPos[0] + 10, coinScreenPos[1])
+    drawCoins(state.remainingCoins, cameraState)
 
     # star
     if state.remainingStar.isSome:
-      let starScreenPos = state.remainingStar.get - camVertex
-      starImage.draw(starScreenPos[0], starScreenPos[1], kBitmapUnflipped)
+      drawStar(state.remainingStar.get, cameraState)
 
 
     # killer
-    for killer in state.killers:
-      let killerScreenPos = killer.position - camera
-      killerImageTable.drawRotated(killerScreenPos, killer.angle)
+    drawKillers(state.killers, camera)
 
-    drawFinish(state)
+    drawFinish(state, cameraState)
 
-  if debugDrawPlayer:
+  ## do not store poses in a variable to avoid copying
+  if state.ghostPlayback.poses.high >= frameCounter:
+    state.drawGhostPose(state.ghostPlayback.poses[frameCounter])
+
+
+  if isGameViewInitialized and debugDrawPlayer:
     drawPlayer(state)
 
   if debugDrawShapes:
@@ -345,10 +340,29 @@ proc drawGame*(statePtr: ptr GameState) =
     let forkImpulse: int32 = state.forkArmSpring.impulse.int32
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
-  if state.time < 0.5:
-    let messageY = (state.riderHead.position.y - camera.y - 26.0).int32
-    if not state.isGameStarted:
-      gfx.drawTextAligned("Ready?", 200, messageY)
-    else:
-      gfx.drawTextAligned("Go!", 200, messageY)
-  
+  # Game overlays
+  if state.gameStartState.isSome:
+    drawGameStartOverlay(state.gameStartState.get)
+
+  if state.gameReplayState.isSome:
+    state.drawGameReplayOverlay()
+  elif state.gameResult.isSome:
+    state.drawGameEndedOverlay()
+proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
+  # Creates hitstopscreen without menu items
+  drawGame(unsafeAddr state)
+  let bitmapA = gfx.copyFrameBufferBitmap()
+
+  let body = collisionShape.body
+  let imageTable = if body == state.riderHead: riderHeadImageTable else: bikeWheelImageTable
+
+  gfx.setDrawMode(kDrawmodeFillWhite)
+  imageTable.drawRotated(body, state)
+  gfx.setDrawMode(kDrawmodeCopy)
+
+  let bitmapB = gfx.copyFrameBufferBitmap()
+  return newHitStopScreen(
+    bitmapA = bitmapA, 
+    bitmapB = bitmapB, 
+    maxShakeMagnitude = state.chassis.velocity.vlength * 0.2f
+  )

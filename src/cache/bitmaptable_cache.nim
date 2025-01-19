@@ -1,66 +1,62 @@
 {.push raises: [].}
 import tables
 import playdate/api
-import graphics_types
-import utils
-
-const
-  ## Amount of rotation images (angle steps) for sprites which sjhould be freely rotatable
-  ## e.g. bike chassis, rider parts, killer, etc.
-  imageRotations: int32 = 64'i32
+import common/graphics_types
+import common/utils
 
 type
   BitmapTableId* {.pure.} = enum
     BikeChassis = "images/bike-chassis"
+    BikeGhostWheel = "images/bike-ghost-wheel"
     BikeWheel = "images/bike-wheel"
     RiderTorso = "images/rider/torso"
+    RiderGhostHead = "images/rider/ghost-head"
     RiderHead = "images/rider/head"
+    RiderTail = "images/rider/tail"
     RiderUpperArm = "images/rider/upper-arm"
     RiderLowerArm = "images/rider/lower-arm"
     RiderUpperLeg = "images/rider/upper-leg"
     RiderLowerLeg = "images/rider/lower-leg"
     Killer = "images/killer/killer"
+    TallBook = "images/dynamic_objects/tall-book"
+    TallPlank = "images/dynamic_objects/tall-plank"
+    BowlingBall = "images/dynamic_objects/bowling-ball"
+    Marble = "images/dynamic_objects/marble"
+    TennisBall = "images/dynamic_objects/tennis-ball"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
-    Gravity = "images/gravity"
+    Nuts = "images/nuts"
+    PickupHighlight = "images/pickup-highlight"
+    ReadyGo = "images/ready-go"
+    GravityUp = "images/gravity/gravity-up"
+    GravityUpRight = "images/gravity/gravity-up-right"
+    GravityRight = "images/gravity/gravity-right"
+    LevelStatus = "images/level_select/level-status"
+    GameResultActionArrows = "images/game_result/action-arrows"
   BitmapTableCache = TableRef[BitmapTableId, AnnotatedBitmapTable]
 
 # global singleton
 let bitmapTableCache = BitmapTableCache()
 
-proc frameCount(id: BitmapTableId): int32 =
-  case id
-  of BitmapTableId.Trophy: return 2'i32
-  of BitmapTableId.Flag: return 46'i32
-  of BitmapTableId.Gravity: return 33'i32
-  
-  of BitmapTableId.BikeChassis,
-    BitmapTableId.BikeWheel,
-    BitmapTableId.RiderTorso,
-    BitmapTableId.RiderHead,
-    BitmapTableId.RiderUpperArm,
-    BitmapTableId.RiderLowerArm,
-    BitmapTableId.RiderUpperLeg,
-    BitmapTableId.RiderLowerLeg,
-    BitmapTableId.Killer: return imageRotations
-  
-
 proc loadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
   try:
+    markStartTime()
+    let bitmapTable = gfx.newBitmapTable($id)
+    printT("LOAD BitmapTable: ", $id)
     return newAnnotatedBitmapTable(
-      bitmapTable = gfx.newBitmapTable($id),
-      frameCount = id.frameCount,
+      bitmapTable = bitmapTable,
+      frameCount = bitmapTable.getBitmapTableInfo().count.int32,
     )
-  except KeyError:
-    playdate.system.error("BitmapTableId or FrameCount not found for: " & $id)
-    return nil
   except IOError:
     playdate.system.error(getCurrentExceptionMsg())
     return nil
 
 proc getOrLoadBitmapTable*(id: BitmapTableId): AnnotatedBitmapTable =
   try:
-    return bitmapTableCache.mgetOrPut(id, loadBitmapTable(id))
-  except IOError:
+    if not bitmapTableCache.hasKey(id):
+      bitmapTableCache[id] = loadBitmapTable(id)
+    
+    return bitmapTableCache[id]
+  except Exception:
     print getCurrentExceptionMsg()
 

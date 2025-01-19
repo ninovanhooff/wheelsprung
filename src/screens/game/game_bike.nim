@@ -43,6 +43,7 @@ proc addWheel(state: GameState, chassisOffset: Vect): Body =
   let shape = space.addShape(newCircleShape(body, radius, vzero))
   shape.filter = GameShapeFilters.Player
   shape.collision_type = GameCollisionTypes.Wheel
+  shape.elasticity=0.5
   shape.friction = wheelFriction
   state.bikeShapes.add(shape)
 
@@ -58,7 +59,7 @@ proc addChassis(state: GameState, pos: Vect): Body =
 
   return body
 
-proc addChassisShape*(state: GameState): Shape =
+proc addChassisShape*(state: GameState) =
   let space = state.space
   let chassis = state.chassis
 
@@ -67,8 +68,14 @@ proc addChassisShape*(state: GameState): Shape =
   shape.collision_type = GameCollisionTypes.Chassis
   shape.friction = chassisFriction
   state.bikeShapes.add(shape)
+  state.chassisShape = shape
 
-  return shape
+proc makeBikeElastic*(state: GameState) =
+  for shape in state.bikeShapes:
+    if shape.collision_type == GameCollisionTypes.Wheel:
+      shape.elasticity = 0.5
+    else:
+      shape.elasticity = 0.2
 
 proc addSwingArm(state: GameState, chassisOffset: Vect): Body =
   let space = state.space
@@ -212,7 +219,6 @@ proc initGameBike*(state: GameState) =
   state.forkArm = state.addForkArm(forkArmPosOffset.transform(dd))
   
   state.setBikeConstraints()
-  initBikeSound()
 
 proc isBikeInLevelBounds*(state: GameState): bool =
   state.level.chassisBounds.containsVect(

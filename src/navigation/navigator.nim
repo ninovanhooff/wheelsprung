@@ -11,8 +11,9 @@
 .}
 
 import std/sugar
+import std/options
 import screen
-import utils
+import common/utils
 import playdate/api
 
 type Navigator = () -> (void)
@@ -56,7 +57,13 @@ proc resumeActiveScreen() =
     backStack.add(activeScreen)
   
   printNavigation("Resuming screen", activeScreen)
-  activeScreen.resume()
+  # Since resume isthe callback where menu items are added, 
+  # we remove all menu items before resuming
+  playdate.system.removeAllMenuItems() 
+  if not activeScreen.resume():
+    print("ERROR: Screen did not resume")
+    popScreenImmediately()
+    resumeActiveScreen()
 
 proc pushScreen*(toScreen: Screen) =
   pendingNavigators.add(() =>
@@ -65,6 +72,12 @@ proc pushScreen*(toScreen: Screen) =
 
 proc popScreen*() =
   pendingNavigators.add(popScreenImmediately)
+
+
+proc replaceScreen*(toScreen: Screen) =
+  ## Replaces the current screen with toScreen
+  popScreen()
+  pushScreen(toScreen)
 
 proc popToScreenType*(screenType: ScreenType) =
   pendingNavigators.add(proc() =
@@ -81,28 +94,55 @@ proc clearNavigationStack*() =
       popScreenImmediately()
   )
 
+proc setResult*(screenResult: ScreenResult) =
+  # start searching at screen below current screen on backstack
+  # since returning a result to self does not make sense
+  # not using Option here because that doesn't seem to work well for generic types like Screen
+  print "Processing", screenResult.repr
+  for i in countdown(backStack.high - 1, 0):
+    let targetScreen = backStack[i]
+    if targetScreen.screenType == screenResult.screenType:
+      targetScreen.setResult(screenResult)
+      break
+
 proc executePendingNavigators() =
   if pendingNavigators.len == 0: return
 
-  let activeScreen = getActiveScreen()  
+  let previousActiveScreen = getActiveScreen()
   for navigation in pendingNavigators:
     navigation()
   pendingNavigators.setLen(0)
 
-  let activeScreenIndex = backStack.find(activeScreen)
-  if activeScreen != nil and activeScreenIndex != backStack.high:
-    if activeScreenIndex != -1:
+  let prevActiveScreenIndex = backStack.find(previousActiveScreen)
+  if previousActiveScreen != nil and prevActiveScreenIndex != backStack.high:
+    if prevActiveScreenIndex != -1:
       # the activeScreen was moved from the top of the stack to another position
-      printNavigation("Pausing screen", activeScreen)
-      activeScreen.pause()
+      printNavigation("Pausing screen", previousActiveScreen)
+      previousActiveScreen.pause()
 
-  playdate.system.removeAllMenuItems()
   resumeActiveScreen()
 
 proc updateNavigator*(): int =
   executePendingNavigators()
   if backStack.len == 0:
     print("TODO updateNavigator: No active screen")
-    return 0
+    result = 0
   else:
-    return getActiveScreen().update()
+    ## Update the active screen in a separate graphics context
+    playdate.graphics.pushContext(nil)
+    result = getActiveScreen().update()
+    ## Ensure no graphics state is leaked
+    playdate.graphics.popContext()
+
+proc createRestoreState*(): seq[ScreenRestoreState] = 
+  result = @[]
+  for screen in backStack:
+    let screenState = screen.getRestoreState()
+    if screenState.isSome:
+      result.add(screenState.get)
+
+proc replaceBackstack*(screens: seq[Screen]) =
+  for screen in backStack:
+    screen.destroy()
+  backStack = screens
+  resumeActiveScreen()

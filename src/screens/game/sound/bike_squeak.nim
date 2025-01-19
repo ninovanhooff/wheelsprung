@@ -1,7 +1,9 @@
 import playdate/api
+import std/options
 import chipmunk7
-import utils
+import common/utils
 import screens/game/game_types
+import cache/sound_cache
 
 const
   contractImpulseThreshold = 25.0
@@ -14,11 +16,15 @@ proc initBikeSqueak*()=
   print("initializing bike squeak")
 
   try:
-    contractPlayer = playdate.sound.newSamplePlayer("/audio/suspension/suspension_contract_adpcm")
+    contractPlayer = getOrLoadSamplePlayer(SampleId.BikeSqueak)
   except:
     print(getCurrentExceptionMsg())
 
 proc updateBikeSqueak*(state: GameState) =
+  if state.gameResult.isSome:
+    # forks detached, usually constantly contracting
+    return
+    
   let forkImpulse: Float = state.forkArmSpring.impulse
   if not contractPlayer.isPlaying and forkImpulse > contractImpulseThreshold:
     contractPlayer.play(1, 1.0)

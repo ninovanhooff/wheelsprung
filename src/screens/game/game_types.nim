@@ -1,31 +1,107 @@
 import playdate/api
 import chipmunk7
 import options
-import graphics_types
-import utils
-import shared_types
+import std/sugar
+import common/graphics_types
+import common/utils
+import common/shared_types
+import level_meta/level_data
+import cache/bitmaptable_cache
+import input/input_types
+import game_constants
+import pid_controller
+export input_types
+export game_constants
 
 type 
-  Camera* = Vect
   DriveDirection* = Float
   RotationDirection* = DriveDirection
 
+  Direction8* = enum
+    ## 4 horizontal and 4 diagonal directions
+    D8_UP, D8_UP_RIGHT, D8_RIGHT, D8_DOWN_RIGHT, D8_DOWN, D8_DOWN_LEFT, D8_LEFT, D8_UP_LEFT
+
   Coin* = ref object
     position*: Vertex
+    bounds*: LCDRect
     count*: int32
-    activeFrom*: Seconds
+    coinIndex*: int32 ## index of the coin in the coin image table
+    activeFrom*: Milliseconds
   Star* = Vertex
-  Killer* = Vertex
-  Finish* = Vertex
+  Killer* = object
+    bounds*: LCDRect
+    body*: Body
+  Finish* = object
+    position*: Vertex
+    bounds*: LCDRect
+    flip*: LCDBitmapFlip
   GravityZone* = ref object
     position*: Vertex
-    gravity*: Vect
+    direction*: Direction8
+    animation*: Animation
+  GravityZoneSpec* = ref object
+    position*: Vertex
+    direction*: Direction8
   GameCollisionType* = CollisionType
 
   RiderAttitudePosition* {.pure.} = enum
     Neutral, Forward, Backward
 
+  SizeF* = Vect
 
+  Pose* = object
+    position*: Vect
+    angle*: Float
+
+  PlayerPose* = object
+    headPose*: Pose
+    frontWheelPose*: Pose
+    rearWheelPose*: Pose
+    flipX*: bool
+
+  Ghost* = ref object
+    poses*: seq[PlayerPose]
+    coinProgress*: float32
+    gameResult*: GameResult
+
+  DynamicObjectType* {.pure.} = enum 
+    TallBook,
+    TallPlank
+    BowlingBall,
+    Marble,
+    TennisBall
+
+  DynamicObject* = object
+    shape*: Shape
+    bitmapTable*: Option[AnnotatedBitmapTable]
+    objectType*: Option[DynamicObjectType]
+
+  DynamicBoxSpec* = object
+    position*: Vect
+    size*: Vect
+    mass*: Float
+    angle*: Float
+    friction*: Float
+    elasticity*: Float
+    objectType*: Option[DynamicObjectType]
+
+  DynamicCircleSpec* = object
+    position*: Vect
+    radius*: Float
+    mass*: Float
+    angle*: Float
+    friction*: Float
+    elasticity*: Float
+    objectType*: Option[DynamicObjectType]
+
+
+  Text* = object
+    value*: string
+    position*: Vertex
+    alignment*: TextAlignment
+
+const 
+  GRAVITY_MAGNITUDE*: Float = 90.0
 
 const DD_LEFT*: DriveDirection = -1.0
 const DD_RIGHT*: DriveDirection = 1.0
@@ -44,6 +120,7 @@ const GameCollisionTypes* = (
   Chassis: cast[GameCollisionType](7),
   Star: cast[GameCollisionType](8),
   GravityZone: cast[GameCollisionType](9),
+  DynamicObject: cast[GameCollisionType](10),
 )
 
 const TERRAIN_MASK_BIT = cuint(1 shl 30)
@@ -52,16 +129,17 @@ const KILLER_MASK_BIT = cuint(1 shl 28)
 const FINISH_MASK_BIT = cuint(1 shl 27)
 const PLAYER_MASK_BIT = cuint(1 shl 26)
 const GRAVITY_ZONE_MASK_BIT = cuint(1 shl 25)
+const DYNAMIC_OBJECT_MASK_BIT = cuint(1 shl 24)
 
 const GameShapeFilters* = (
   Player: ShapeFilter(
     categories: PLAYER_MASK_BIT,
     mask: TERRAIN_MASK_BIT or COLLECTIBLE_MASK_BIT or KILLER_MASK_BIT or
-      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT
+      FINISH_MASK_BIT or GRAVITY_ZONE_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   Terrain: ShapeFilter(
     categories: TERRAIN_MASK_BIT,
-    mask: PLAYER_MASK_BIT
+    mask: PLAYER_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   Collectible: ShapeFilter(
     categories: COLLECTIBLE_MASK_BIT,
@@ -69,7 +147,7 @@ const GameShapeFilters* = (
   ),
   Killer: ShapeFilter(
     categories: KILLER_MASK_BIT,
-    mask: PLAYER_MASK_BIT
+    mask: PLAYER_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
   ),
   Finish: ShapeFilter(
     categories: FINISH_MASK_BIT,
@@ -79,23 +157,28 @@ const GameShapeFilters* = (
     categories: GRAVITY_ZONE_MASK_BIT,
     mask: PLAYER_MASK_BIT
   ),
+  DynamicObject: ShapeFilter(
+    categories: DYNAMIC_OBJECT_MASK_BIT,
+    mask: PLAYER_MASK_BIT or TERRAIN_MASK_BIT or KILLER_MASK_BIT or DYNAMIC_OBJECT_MASK_BIT
+  ),
   # WARNING Collisions only happen when mask of both shapes match the category of the other
 )
 
-
-type Direction8* = enum
-  ## 4 horizontal and 4 diagonal directions
-  D8_UP, D8_UP_RIGHT, D8_RIGHT, D8_DOWN_RIGHT, D8_DOWN, D8_DOWN_LEFT, D8_LEFT, D8_UP_LEFT
-
-const D8_FALLBACK* = D8_UP
-
 type Level* = ref object of RootObj
+  id*: Path
+  meta*: LevelMeta
+  contentHash*: string
+  background*: Option[LCDBitmap]
+  hintsPath*: Option[Path]
   terrainPolygons*: seq[Polygon]
+  terrainPolylines*: seq[Polyline]
+  dynamicBoxes*: seq[DynamicBoxSpec]
+  dynamicCircles*: seq[DynamicCircleSpec]
   coins*: seq[Coin]
   killers*: seq[Killer]
-  gravityZones*: seq[GravityZone]
-  finishPosition*: Vertex
-  finishRequiredRotations*: int32
+  gravityZones*: seq[GravityZoneSpec]
+  texts*: seq[Text]
+  finish*: Finish
   starPosition*: Option[Vertex]
   assets*: seq[Asset]
   ## Level size in Pixels
@@ -106,46 +189,73 @@ type Level* = ref object of RootObj
   initialDriveDirection*: DriveDirection
 
 type AttitudeAdjust* = ref object
-  # adjustType*: AttitudeAdjustType #todo move DpadInputType type def to proper place
   direction*: Float # 1.0 or -1.0, not necessarily the same as drive direction
-  startedAt*: Seconds
+  startedAt*: Milliseconds
+
+type GameStartState* = ref object of RootObj
+  levelName*: string
+  readyGoFrame*: int32
+  gameStartFrame*: int32
+
+type GameReplayState* = ref object of RootObj
+  hideOverlayAt*: Option[Seconds]
 
 type GameState* = ref object of RootObj
   level*: Level
 
   background*: LCDBitmap
+  hintsEnabled*: bool
 
-  ## Game state
+  # Game state
   isGameStarted*: bool
+  isGamePaused*: bool
   remainingCoins*: seq[Coin]
   remainingStar*: Option[Star]
-  killers*: seq[Body]
+  starEnabled*: bool
+    ## If the star is enabled, the player can collect it. Stars are enabled by finishing the level at least once.
+  killers*: seq[Killer]
+  gravityZones*: seq[GravityZone]
   gameResult*: Option[GameResult]
 
-  ## Input
+  # Input
   isThrottlePressed*: bool
   isAccelerometerEnabled*: bool
-  lastTorque*: Float # only used to display attitude indicator
+  lastTorque*: Float # torque applied by attitude adjust in last frame
 
-  ## Navigation state
+  # Navigation state
   resetGameOnResume*: bool
 
-  ## time
-  time*: Seconds
+  # time
+  time*: Milliseconds
+  gameStartState*: Option[GameStartState]
+  gameReplayState*: Option[GameReplayState]
+    ## Frame counter for the readyGo start animation
   frameCounter*: int32
-  finishFlipDirectionAt*: Option[Seconds]
-  finishTrophyBlinkerAt*: Option[Seconds]
+  finishFlipDirectionAt*: Option[Milliseconds]
+  finishTrophyBlinkerAt*: Option[Milliseconds]
 
 
-  ## Physics
+  # Physics
   space*: Space
+  gravityDirection*: Direction8
   attitudeAdjust*: Option[AttitudeAdjust]
   camera*: Camera
   cameraOffset*: Vect
+  camXController*: PIDController
+  camYController*: PIDController
   driveDirection*: DriveDirection
+  dynamicObjects*: seq[DynamicObject]
 
-  ## Player
+  ## Ghost
+  ghostRecording*: Ghost
+    ## A ghost that is being recorded
+  ghostPlayback*: Ghost
+    ## A ghost that represents the best time for the level
+  
+  inputRecording*: InputRecording
+  inputProvider*: InputProvider
 
+  # Player
   # bike bodies
   rearWheel*: Body
   frontWheel*: Body
@@ -155,6 +265,7 @@ type GameState* = ref object of RootObj
 
   # bike shapes
   bikeShapes*: seq[Shape]
+  chassisShape*: Shape
   swingArmShape*: Shape
   forkArmShape*: Shape
 
@@ -168,6 +279,7 @@ type GameState* = ref object of RootObj
   # rider bodies
   riderHead*: Body
   riderTorso*: Body
+  riderTail*: Body
   riderUpperArm*: Body
   riderLowerArm*: Body
   riderUpperLeg*: Body
@@ -177,7 +289,10 @@ type GameState* = ref object of RootObj
   # Rider Constraints
   riderConstraints*: seq[Constraint] # todo remove if unused
   headRotarySpring*: DampedRotarySpring
+  tailRotarySpring*: DampedRotarySpring
   assPivot*: PivotJoint
+  # tail to chassis
+  tailPivot*: PivotJoint
   # shoulder to chassis
   shoulderPivot*: PivotJoint
   # upper arm to torso
@@ -190,11 +305,83 @@ type GameState* = ref object of RootObj
   handPivot*: PivotJoint
   headPivot*: PivotJoint
 
-proc newCoin*(position: Vertex, count: int32 = 1'i32): Coin =
-  result = Coin(position: position, count: count)
+proc newFinish*(position: Vertex, flip: LCDBitmapFlip): Finish =
+  result = Finish(
+    position: position,
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + finishSize,
+      top: position.y,
+      bottom: position.y + finishSize,
+    ),
+    flip: flip
+  )
 
-proc newGravityZone*(position: Vertex, gravity: Vect): GravityZone =
-  result = GravityZone(position: position, gravity: gravity)
+proc newCoin*(position: Vertex, count: int32 = 1, coinIndex: int32 = 0): Coin =
+  result = Coin(
+    position: position,
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + coinSize,
+      top: position.y,
+      bottom: position.y + coinSize,
+    ),
+    count: count,
+    coinIndex: coinIndex,
+  )
+
+proc newKiller*(position: Vertex): Killer =
+  result = Killer(
+    bounds: LCDRect(
+      left: position.x, 
+      right: position.x + killerSize,
+      top: position.y,
+      bottom: position.y + killerSize,
+    )
+  )
+
+proc newKiller*(bounds: LCDRect, body: Body): Killer =
+  result = Killer(bounds: bounds, body: body)
+
+proc newGravityZone*(position: Vertex, direction: Direction8, animation: Animation): GravityZone =
+  result = GravityZone(position: position, direction: direction, animation: animation)
+
+proc newGravityZoneSpec*(position: Vertex, direction: Direction8): GravityZoneSpec =
+  result = GravityZoneSpec(position: position, direction: direction)
+
+proc toBitmapTableId*(objectType: DynamicObjectType): BitmapTableId =
+  case objectType
+  of DynamicObjectType.TallBook: BitmapTableId.TallBook
+  of DynamicObjectType.TallPlank: BitmapTableId.TallPlank
+  of DynamicObjectType.BowlingBall: BitmapTableId.BowlingBall
+  of DynamicObjectType.Marble: BitmapTableId.Marble
+  of DynamicObjectType.TennisBall: BitmapTableId.TennisBall
+
+proc newDynamicObject*(shape: Shape, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): DynamicObject =
+  let bitmapTableId = objectType.map(it => it.toBitmapTableId())
+  let bitmapTable = bitmapTableId.map(it => getOrLoadBitmapTable(it))
+  result = DynamicObject(
+    shape: shape, 
+    bitmapTable: bitmapTable,
+    objectType: objectType
+  )
+
+proc newDynamicBoxSpec*(position: Vect, size: Vect, mass: Float, angle: Float, friction: Float, elasticity: Float = 0f, objectType: Option[DynamicObjectType]): DynamicBoxSpec =
+  if mass <= 0.0:
+    raise newException(RangeDefect, "Box mass must be greater than 0")
+  result = DynamicBoxSpec(position: position, size: size, mass: mass, angle: angle, friction: friction, elasticity: elasticity, objectType: objectType)
+
+proc newDynamicCircleSpec*(position: Vect, radius: Float, mass: Float, angle: Float, friction: Float, elasticity: Float = 0f, objectType: Option[DynamicObjectType]): DynamicCircleSpec =
+  if mass <= 0.0:
+    raise newException(RangeDefect, "Circle mass must be greater than 0")
+  result = DynamicCircleSpec(position: position, radius: radius, mass: mass, angle: angle, friction: friction, elasticity: elasticity, objectType: objectType)
+
+proc newText*(value: string, position: Vertex, alignment: TextAlignment): Text =
+  result = Text(
+    value: value,
+    position: position,
+    alignment: alignment,
+  )
 
 proc getRiderBodies*(state: GameState): seq[Body] =
   result = @[
@@ -208,4 +395,6 @@ proc getRiderBodies*(state: GameState): seq[Body] =
 
 proc destroy*(state: GameState) =
   print("Destroying game state")
-  state.space.destroy()
+  if state != nil and state.space != nil:
+    state.space.destroy()
+    state.space = nil

@@ -1,6 +1,6 @@
 # Wheelsprung (Playdate)
 
-![Screenshot](screenshots/github_banner.png)
+![Screenshot](screenshots/wheelsprung_gameplay.gif)
 
 
 A physics-based motocross-platformer for the Playdate console. Made with the Nim programming language and the Chipmunk2D physics library for playdate. It relies on 2 libraries for that:
@@ -9,20 +9,46 @@ A physics-based motocross-platformer for the Playdate console. Made with the Nim
 
 [Chipmunk2D for Playdate](https://github.com/samdze/chipmunk-2d)
 
+## Level Editor
+A public level editor is available. See the [guide on the Wiki][editor] for installation and usage instructions.
+
 ## Installation
-This project should work on MacOS with Apple Silicon and Windows. See [Playdate-Nim][pdnim] for installation instructions.
+NOTE: Although this repository is publicly available, the level files are not. You may be able to compile the project, but will have to provide your own level files to run the game.
+
+This project should work on MacOS and Windows. See [Playdate-Nim][pdnim] for installation instructions.
 
 
 ## Troubleshooting
-
+As noted above, the level files are not included. This may be a cause for crashes.
 
 ### Make sure you can run the playdate-nim sample project
 See [Playdate-Nim][pdnim] for installation instructions.
 
 ### Linux support
-This project needs Chipmunk as **static** library. This is provided for the windows simulator(64 bit), MacOs simulator(Apple silicon), and the playdate device. For other platforms, I appreciate a Pull Request.
+All the necessities to run on Linux should be in place, but the Linux build target is not maintained and last checked a long time ago. 
 
-I compiled the windows lib, by installing Msys2, and adding the C build tools for MinGW (make and cmake). Then, I could build `libchipmunk.a` with 
+## Development
+As noted above, the level files are not included. This may be a cause for crashes.
+
+
+### Level hash updater
+
+```
+./scripts/run_level_updater.sh
+```
+
+### Tiled extension
+To build the Tiled extension every time you save changes to the typescript files:
+
+```
+cd editor/extensions
+npm run watch
+```
+
+...or select the Node.js > Run Script: watch from the Run and Debug dropdown
+
+### Chipmunk
+The Chipmunk physics library comes bundled as a pre-compiled static library. For future reference; this is how I was able to compile it for Mac and Linux. For Windows, I used [tdm-gcc][tdm-gcc].
 
 ```
 mkdir build
@@ -35,3 +61,5 @@ The resulting lib is placed in the [lib](./lib) folder.
 
 
 [pdnim]: https://github.com/samdze/playdate-nim/tree/main/playdate_example
+[editor]: https://github.com/ninovanhooff/wheelsprung/wiki/Level-Editor
+[tdm-gcc]: https://jmeubank.github.io/tdm-gcc/
