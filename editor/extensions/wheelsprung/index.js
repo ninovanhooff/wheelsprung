@@ -19,6 +19,103 @@
     return vertices;
   }
 
+  // src/outline-polyline.ts
+  function getOffsets(a, b, thickness) {
+    var dx = b.x - a.x, dy = b.y - a.y, len = Math.sqrt(dx * dx + dy * dy), scale = thickness / (2 * len);
+    return {
+      x: -scale * dy,
+      y: scale * dx
+    };
+  }
+  function getIntersection(a1, b1, a2, b2) {
+    var k1 = (b1.y - a1.y) / (b1.x - a1.x), k2 = (b2.y - a2.y) / (b2.x - a2.x);
+    if (Math.abs(k1 - k2) < 1e-5) {
+      return;
+    }
+    var m1 = a1.y - k1 * a1.x;
+    var m2 = a2.y - k2 * a2.x;
+    var x = (m1 - m2) / (k2 - k1);
+    var y = k1 * x + m1;
+    return { x, y };
+  }
+  function isArray(obj) {
+    return Object.prototype.toString.call(obj) === "[object Array]";
+  }
+  function me(points, thickness) {
+    var arr = [];
+    for (var i2 = 0; i2 < points.length; i2++) {
+      var pt = points[i2];
+      arr.push({
+        x: pt[0],
+        y: pt[1]
+      });
+    }
+    points = arr;
+    if (!isArray(thickness)) {
+      var t2 = thickness;
+      thickness = [];
+      for (var i2 = 0; i2 < points.length; i2++) {
+        thickness.push(t2);
+      }
+    }
+    var off, off2, poly = [], isFirst, isLast, prevA, prevB, interA, interB, p0a, p1a, p0b, p1b;
+    for (var i2 = 0, il = points.length - 1; i2 < il; i2++) {
+      isFirst = !i2;
+      isLast = i2 === points.length - 2;
+      off = getOffsets(points[i2], points[i2 + 1], thickness[i2]);
+      off2 = getOffsets(points[i2], points[i2 + 1], thickness[i2 + 1]);
+      p0a = { x: points[i2].x + off.x, y: points[i2].y + off.y };
+      p1a = { x: points[i2 + 1].x + off2.x, y: points[i2 + 1].y + off2.y };
+      p0b = { x: points[i2].x - off.x, y: points[i2].y - off.y };
+      p1b = { x: points[i2 + 1].x - off2.x, y: points[i2 + 1].y - off2.y };
+      if (!isFirst) {
+        interA = getIntersection(prevA[0], prevA[1], p0a, p1a);
+        if (interA) {
+          poly.unshift(interA);
+        }
+        interB = getIntersection(prevB[0], prevB[1], p0b, p1b);
+        if (interB) {
+          poly.push(interB);
+        }
+      }
+      if (isFirst) {
+        poly.unshift(p0a);
+        poly.push(p0b);
+      }
+      if (isLast) {
+        poly.unshift(p1a);
+        poly.push(p1b);
+      }
+      if (!isLast) {
+        prevA = [p0a, p1a];
+        prevB = [p0b, p1b];
+      }
+    }
+    for (var i2 = 0; i2 < poly.length; i2++) {
+      var pt = poly[i2];
+      poly[i2] = [pt.x, pt.y];
+    }
+    poly.push(poly[0]);
+    return poly;
+  }
+  function polylineToPolygon(polygon, thickness) {
+    var points = polygon.map((pt) => [pt.x, pt.y]);
+    tiled.log("Running me:" + points);
+    var vertices = me(points, thickness);
+    return vertices.map((pt) => Qt.point(pt[0], pt[1]));
+  }
+
+  // src/new-polygon.ts
+  function newPolygon(oldObj) {
+    var object = new MapObject();
+    object.x = oldObj.x;
+    object.y = oldObj.y;
+    object.width = oldObj.width;
+    object.height = oldObj.height;
+    object.shape = MapObject.Polygon;
+    return object;
+  }
+
   // src/apply-wheelsprung-fixes.ts
   function applyWheelsprungFixes(mapOrLayer) {
     tiled.log("Running applyWheelsprungFixes:" + mapOrLayer);
@@ -42,6 +139,15 @@
           );
           object.polygon = ensureWindingOrder(object.polygon);
         }
+        if (object.shape == MapObject.Polyline && object.selected) {
+          var polygon = polylineToPolygon(object.polygon, 4);
+          var newObject = newPolygon(object);
+          tiled.log("New object:" + newObject);
+          tiled.log("new polygon:" + polygon);
+          newObject.polygon = polygon;
+          mapOrLayer.addObject(newObject);
+        }
+        ;
         if (object.shape == MapObject.Ellipse && object.className == "DynamicObject") {
           if (object.width != object.height) {
             tiled.log("Ellipses not supported for Dynamic Objects. Making circular:" + object);
