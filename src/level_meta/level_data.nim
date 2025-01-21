@@ -36,7 +36,7 @@ proc newLevelMeta*(name: string, path: Path, theme: LevelTheme, hash: string, bo
 let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Tutorial: Throttle", path="levels/dragster.flatty", theme= Kitchen, hash="87EF3CC160DE2D1C0804CF36ABA223B4", boardId = "tutorialaccelerate"),
   newLevelMeta(name= "Tutorial: Brake", path="levels/tutorial_brake.flatty", theme= Kitchen, hash="9D47D61C3598C885BAA933B4A80AE172", boardId = "tutorialbrake"),
-  newLevelMeta(name= "Tutorial: Turning", path="levels/tutorial_turn_around.flatty", theme= Kitchen, hash="9089CE2DEDB0D7F36AD724CDAA90AA89", boardId = "tutorialturnaround"),
+  newLevelMeta(name= "Tutorial: Turning", path="levels/tutorial_turn_around.flatty", theme= Kitchen, hash="A2D2CC0B6DEE5CAC099E6A975435C6C1", boardId = "tutorialturnaround"),
   
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.flatty", theme= Bath, hash="F56F62ED85D51DA493C590FEF71A3F0B"),
   newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.flatty", theme= Desk, hash="6A7FBB2524358A86BF4A1F96FDE24CD1"),
@@ -69,7 +69,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.flatty", theme= Desk, hash="633154C6A64C4C0EB4FCC1FE1F0490B0"),
   newLevelMeta(name = "Time Traveler", path="levels/time_traveler.flatty", theme= Desk, hash="18193FB4744661DA83906690CE211469"),
   newLevelMeta(name = "Tight Squeeze", path="levels/tight_squeeze.flatty", theme= Desk, hash="7A93A4DD90103EF4363EB503BFAF0642"),
-  newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="E7ED841B154ADD2B5694AD6613CCE5D1"),
+  newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="F3EC23101EF368AB565D25E86F312566"),
   newLevelMeta(name= "Ramp of Pages", path="levels/leg_up.flatty", theme= Desk, hash="6F48907EB90D6985CB66486C4A11FFEC"),
   newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.flatty", theme= Desk, hash="15B0EC58F7BB8A9912DB470DE0CCA81F"),
 
