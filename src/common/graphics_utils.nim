@@ -69,9 +69,9 @@ proc drawRotated*(annotatedT: AnnotatedBitmapTable, center: Vect, angle: float32
   let frameCount = annotatedT.frameCount
   var index: int32 = ((normalizeAngle(angle) / TwoPi) * frameCount.float32).roundToNearestInt
   if index == frameCount: index = 0
-  let bitmap = annotatedT.bitmapTable.getBitmap(index)
+  let bitmap: LCDBitmap = annotatedT.bitmapTable.getBitmap(index)
 
-  if bitmap == nil:
+  if bitmap.isNil:
     print "Bitmap is nil for index: " & $index, "angle: " & $angle, "normalizeAngle: " & $normalizeAngle(angle), "equalsToTwoPi: " & $(normalizeAngle(angle) == TwoPi)
     return
 
@@ -105,7 +105,7 @@ proc drawAsset*(asset: Asset, camState: CameraState) =
     asset.getBitmap(camState.frameCounter).draw(assetScreenPos[0], assetScreenPos[1], asset.flip)
 
   if asset.stencilPatternId.isSome:
-    gfx.setStencilImage(nil)
+    gfx.setStencilImage(LCD_BITMAP_NONE)
 
 proc newAnimation*(bitmapTable: LCDBitmapTable, position: Vertex, flip: LCDBitmapFlip, startOffset: int32, frameRepeat: int32, stencilPattern: Option[LCDPatternId] = none(LCDPatternId)): Animation =
   let firstFrame = bitmapTable.getBitmap(0)

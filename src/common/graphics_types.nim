@@ -59,6 +59,7 @@ type
     frameCounter*: int32
 
 const LCD_RECT_ZERO* = makeLCDRect(0, 0, 0, 0)
+let LCD_BITMAP_NONE* = default(LCDBitmap)
 
 proc newPolygon*(vertices: seq[Vertex], bounds: LCDRect, fill: LCDPattern = nil, edgeIndices: seq[bool] = @[]): Polygon
   ## forward declaration
