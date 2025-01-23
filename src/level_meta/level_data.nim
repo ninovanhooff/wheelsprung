@@ -63,13 +63,13 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Circle of Life", path="levels/globe_of_death_3.flatty", theme= Plants, hash="7854D8CFBB1DAF942869B3AF1AD352C5", boardId = "circleoflife"),
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.flatty", theme= Plants, hash="6E5F2C44C7ED48F25ED86E834C68149B", boardId = "treasuretunnel"),
   newLevelMeta(name= "Half-Pipe Jungle", path="levels/halfpipe.flatty", theme= Plants, hash="31609EFBA4AB9DEFD10A4BF90CB5300D", boardId = "halfpipejungle"),
-  newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.flatty", theme= Plants, hash="0CF980DB09C2EE873C16836319B51CBD", boardId = "ricketybridge"),
-  newLevelMeta(name = "Rolling Raiders", path="levels/boulder.flatty", theme= Plants, hash="7A93A4DD90103EF4363EB503BFAF0642", boardId = "rollingraiders"),
+  newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.flatty", theme= Plants, hash="A0C19A9307B480D408F4C58A1546F47E", boardId = "ricketybridge"),
+  newLevelMeta(name = "Rolling Raiders", path="levels/boulder.flatty", theme= Plants, hash="1614917810A5E55BEA5573A8061EE063", boardId = "rollingraiders"),
 
   newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.flatty", theme= Desk, hash="633154C6A64C4C0EB4FCC1FE1F0490B0", boardId = "zigzagdown"),
   newLevelMeta(name = "Time Traveler", path="levels/time_traveler.flatty", theme= Desk, hash="18193FB4744661DA83906690CE211469", boardId = "timetraveler"),
   newLevelMeta(name = "Tight Squeeze", path="levels/tight_squeeze.flatty", theme= Desk, hash="0541EF41C104AE11FFCE43B3B3077A85", boardId = "tightsqueeze"),
-  newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="793F6209459E91973FFAFA8EA398174D", boardId = "ballisticbowler"),
+  newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="8332FA64799ED652AB4415B0D412EBAA", boardId = "ballisticbowler"),
   newLevelMeta(name= "Ramp of Pages", path="levels/ramp_of_pages.flatty", theme= Desk, hash="6F48907EB90D6985CB66486C4A11FFEC", boardId = "rampofpages"),
   newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.flatty", theme= Desk, hash="15B0EC58F7BB8A9912DB470DE0CCA81F", boardId = "ballancingact"),
 
