@@ -20,6 +20,7 @@ type
     Killer = "images/killer/killer"
     TallBook = "images/dynamic_objects/tall-book"
     TallPlank = "images/dynamic_objects/tall-plank"
+    Die5 = "images/dynamic_objects/die5"
     BowlingBall = "images/dynamic_objects/bowling-ball"
     Marble = "images/dynamic_objects/marble"
     TennisBall = "images/dynamic_objects/tennis-ball"

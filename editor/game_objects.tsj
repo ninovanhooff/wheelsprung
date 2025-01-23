@@ -9,7 +9,7 @@
  "name":"Game Objects",
  "objectalignment":"topleft",
  "spacing":0,
- "tilecount":13,
+ "tilecount":14,
  "tiledversion":"1.11.0",
  "tileheight":175,
  "tiles":[
@@ -139,6 +139,13 @@
          "image":"tall_plank.png",
          "imageheight":175,
          "imagewidth":10,
+         "type":"DynamicObject"
+        }, 
+        {
+         "id":13,
+         "image":"die5.png",
+         "imageheight":20,
+         "imagewidth":20,
          "type":"DynamicObject"
         }],
  "tilewidth":95,

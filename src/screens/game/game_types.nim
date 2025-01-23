@@ -69,7 +69,8 @@ type
     TallPlank
     BowlingBall,
     Marble,
-    TennisBall
+    TennisBall,
+    Die5
 
   DynamicObject* = object
     shape*: Shape
@@ -356,6 +357,7 @@ proc toBitmapTableId*(objectType: DynamicObjectType): BitmapTableId =
   of DynamicObjectType.BowlingBall: BitmapTableId.BowlingBall
   of DynamicObjectType.Marble: BitmapTableId.Marble
   of DynamicObjectType.TennisBall: BitmapTableId.TennisBall
+  of DynamicObjectType.Die5: BitmapTableId.Die5
 
 proc newDynamicObject*(shape: Shape, objectType: Option[DynamicObjectType] = none(DynamicObjectType)): DynamicObject =
   let bitmapTableId = objectType.map(it => it.toBitmapTableId())
