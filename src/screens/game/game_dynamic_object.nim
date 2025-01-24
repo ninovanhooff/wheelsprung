@@ -6,7 +6,7 @@ import std/sets
 import std/math
 import std/options
 import chipmunk7
-import chipmunk_utils
+import chipmunk/chipmunk_utils
 import common/utils
 import common/audio_utils
 import common/graphics_utils

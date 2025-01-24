@@ -1,7 +1,7 @@
 {.push raises: [].}
 import std/[options, sugar, math]
 import playdate/api
-import chipmunk7, chipmunk_utils
+import chipmunk7, chipmunk/chipmunk_utils
 import common/utils
 import screens/game/[
   game_types, game_constants, game_bike, game_rider

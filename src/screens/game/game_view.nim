@@ -15,7 +15,7 @@ import game_dynamic_object
 import common/graphics_utils
 import common/lcd_patterns
 import game_debug_view
-import chipmunk_utils
+import chipmunk/chipmunk_utils
 import common/utils
 import globals
 import cache/bitmaptable_cache

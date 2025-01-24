@@ -1,6 +1,6 @@
 import std/[random, math, sugar, sequtils]
 import chipmunk7
-import chipmunk_utils
+import chipmunk/chipmunk_utils
 import common/graphics_utils
 import cache/bitmaptable_cache
 import game_types

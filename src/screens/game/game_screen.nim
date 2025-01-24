@@ -1,7 +1,7 @@
 {. push raises: [].}
 import options, sugar
 import chipmunk7
-import chipmunk_utils
+import chipmunk/chipmunk_utils
 import playdate/api
 import common/utils
 import data_store/user_profile

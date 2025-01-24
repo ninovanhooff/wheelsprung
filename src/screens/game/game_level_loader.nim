@@ -2,7 +2,7 @@
 
 import chipmunk7
 import flatty
-import chipmunk_utils
+import chipmunk/chipmunk_utils
 import options
 import common/integrity
 import common/utils

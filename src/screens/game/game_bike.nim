@@ -2,7 +2,7 @@ import chipmunk7
 import std/math
 import game_types
 import sound/bike_sound
-import chipmunk_utils
+import chipmunk/chipmunk_utils
 
 const
   chassisMass = 1.5

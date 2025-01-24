@@ -1,5 +1,5 @@
 import chipmunk7
-import chipmunk_utils
+import chipmunk/chipmunk_utils
 import std/math
 import game_types
 
