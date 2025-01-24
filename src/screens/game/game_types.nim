@@ -289,7 +289,6 @@ type GameState* = ref object of RootObj
   # keep in sync with getRiderBodies()
 
   # Rider Constraints
-  riderConstraints*: seq[Constraint] # todo remove if unused
   headRotarySpring*: DampedRotarySpring
   tailRotarySpring*: DampedRotarySpring
   assPivot*: PivotJoint
