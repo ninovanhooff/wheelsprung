@@ -65,7 +65,8 @@ proc getFrameTime(): float32 =
 proc update() {.raises: [].} =
   let frameStartTime = getElapsedSeconds()
   discard updateNavigator()
-  playdate.system.drawFPS(0, 0)# let preloadBudget = lastFrameElapsedSeconds + frameTime - getElapsedSeconds()
+  if debugDrawFps:
+    playdate.system.drawFPS(0, 0)# let preloadBudget = lastFrameElapsedSeconds + frameTime - getElapsedSeconds()
   if not isFirstFrame:
     runPreloader(frameStartTime + getFrameTime())
   else:
@@ -150,6 +151,10 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     elif keycode == 108:
       print("L")
       incrementFrameRate(5.0f)
+    elif keycode == 102:
+      print("F")
+      debugDrawFps = not debugDrawFps
+      print("debugDrawFps:" & $debugDrawFps)
     else:
       print("keycode:" & $keycode)
   elif event == kEventKeyPressed:
