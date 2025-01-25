@@ -11,14 +11,16 @@ const
   starRadius = 10.0
   vStarOffset = v(starRadius, starRadius)
 
-proc initGameStar*(state: GameState) =
-  # asssigment by copy
-  if state.starEnabled:
+proc addStar*(state: GameState) =
+  let star: Vertex = if state.starEnabled:
+    # assignment by copy
     state.remainingStar = state.level.starPosition
+    state.remainingStar.get
   else:
     state.remainingStar = none(Star)
-
-proc addStar*(space: Space, star: Star) =
+    return
+  
+  let space = state.space
   let shape: Shape = newCircleShape(space.staticBody, starRadius, toVect(star) + vStarOffset)
   shape.sensor = true # only detect collisions, don't apply forces to colliders
   shape.collisionType = GameCollisionTypes.Star

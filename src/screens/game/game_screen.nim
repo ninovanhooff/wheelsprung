@@ -178,9 +178,7 @@ proc createSpace(level: Level): Space {.raises: [].} =
 
   space.addTerrain(level.terrainPolygons)
   space.addTerrain(level.terrainPolylines)
-  # cannot add coins here because they are mutable and thus are part of the state, not the level
-  if(level.starPosition.isSome):
-    space.addStar(level.starPosition.get)
+  # cannot add coins or star (nuts) here because they are mutable and thus are part of the state, not the level
   space.addFinish(level.finish)
       
   return space
@@ -227,8 +225,8 @@ proc newGameState(
   initGameRider(state, riderPosition)
   
   addGameCoins(state)
+  addStar(state)
   addGravityZones(state)
-  initGameStar(state)
   state.addDynamicObjects()
 
   if background.isNil:

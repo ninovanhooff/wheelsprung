@@ -40,7 +40,7 @@ proc initGameCoin() =
   coinsImageTable = getOrLoadBitmapTable(BitmapTableId.Nuts)
 
 proc addGameCoins*(state: GameState) =
-  # asssigment by copy
+  # assignment by copy
   state.remainingCoins = @[]
   for coin in state.level.coins:
     state.remainingCoins.add(myDeepCopy(coin))
