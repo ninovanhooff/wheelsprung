@@ -328,6 +328,8 @@ proc drawGame*(statePtr: ptr GameState) =
   if state.ghostPlayback.poses.high >= frameCounter:
     state.drawGhostPose(state.ghostPlayback.poses[frameCounter])
 
+  if debugDrawPlayer == false and frameCounter > 0:
+    state.drawGhostPose(state.ghostRecording.poses[frameCounter - 1])
 
   if isGameViewInitialized and debugDrawPlayer:
     drawPlayer(state)
