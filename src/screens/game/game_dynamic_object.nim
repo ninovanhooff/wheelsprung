@@ -41,6 +41,7 @@ proc impactSampleId(objectType: DynamicObjectType): Option[SampleId] =
   of DynamicObjectType.BowlingBall: some(SampleId.BowlingBallImpact)
   of DynamicObjectType.Marble: some(SampleId.MarbleImpact)
   of DynamicObjectType.TennisBall: some(SampleId.TennisBallImpact)
+  of DynamicObjectType.Die5: some(SampleId.Die5Impact)
   else: none(SampleId)
 
 proc getOrLoadFadingSamplePlayer(sampleId: SampleId): FadingSamplePlayer =
@@ -76,7 +77,8 @@ proc addDynamicObjects*(state: GameState) =
           friction = obj.friction,
           elasticity = obj.elasticity,
           collisionType=GameCollisionTypes.DynamicObject,
-          shapeFilter = GameShapeFilters.DynamicObject
+          shapeFilter = GameShapeFilters.DynamicObject,
+          userData = cast[DataPointer](obj.objectType)
         )[1], # get shape from tuple
         objectType = obj.objectType,
       )
@@ -167,6 +169,7 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
 
   let totalImpulse = arb.totalImpulse.vlength
   let objectType = cast[DynamicObjectType](shapeA.userData)
+  # print "collisionPostSolveFunc: ", objectType, shapeB.collisionType.repr, totalImpulse
   let mass = shapeA.body.mass
   let targetVolume = totalImpulse / mass / 100f
   if arb.isFirstContact and shapeB.collisionType == GameCollisionTypes.Terrain and  targetVolume >= minImpactVolume:
@@ -174,9 +177,11 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
     if impactPlayer.isSome:
       let player = impactPlayer.get
       if not player.isPlaying:
-        # print "impact", totalImpulse, mass
+        print "impact", totalImpulse, mass, targetVolume
         impactPlayer.get.volume = clamp(targetVolume, 0.0, 1.0)
         impactPlayer.get.playVariation()
+    else:
+      print "No impact player for: ", objectType
 
   discard space.addPostStepCallback(
     postStepCallback,
@@ -186,7 +191,6 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
 
 
 let collisionSeparateFunc*: CollisionSeparateFunc = proc(arb: Arbiter; space: Space; unused: pointer) {.cdecl.} =
-  var state = cast[GameState](space.userData)
   var 
     shapeA: Shape
     shapeB: Shape

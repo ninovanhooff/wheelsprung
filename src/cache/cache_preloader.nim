@@ -34,6 +34,7 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.SelectNext),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.SelectPrevious),  
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.LevelStatus),
+  PreloadJob(timeCost: 0.009.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.Die5),
   PreloadJob(timeCost: 0.009.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.Marble),
   PreloadJob(timeCost: 0.016.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.TennisBall),
   PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.TennisBallImpact),
@@ -41,6 +42,7 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.MarbleRolling),
   PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BowlingBallImpact),
   PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.MarbleImpact),
+  PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Die5Impact),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.Bitmap, bitmapId: BitmapId.Acorn),
   PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.PickupHighlight),
   PreloadJob(timeCost: 0.021.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.ReadyGo),
@@ -81,7 +83,7 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.018.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderTail),
   PreloadJob(timeCost: 0.019.Seconds, jobType: PreloadJobType.Font, fontId: FontId.Roobert10Bold),
   PreloadJob(timeCost: 0.024.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeChassis),
-  PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.Scoreboards),
+  # PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.Scoreboards),
 ]
 
 proc execute(job: PreloadJob) =

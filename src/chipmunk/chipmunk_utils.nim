@@ -30,7 +30,8 @@ proc flip*(body: Body, relativeTo: Body) {.inline.} =
 
 proc addBox*(
   space: Space, pos: Vect, size: Vect, mass: float32, angle: float32 = 0f, friction = 0f, elasticity = 0f,
-  collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE
+  collisionType: GameCollisionType = GameCollisionTypes.None, shapeFilter = SHAPE_FILTER_NONE,
+  userData: DataPointer = nil
   ) : (Body, Shape) =
     let body = space.addBody(
         newBody(mass, momentForBox(mass, size.x, size.y))
@@ -44,6 +45,7 @@ proc addBox*(
       shape.collisionType = collisionType
       shape.friction = friction
       shape.elasticity = elasticity
+      shape.userData = userData
       return (body, shape)
     else:
       return (body, nil)
@@ -65,7 +67,7 @@ proc addCircle*(
       shape.collisionType = collisionType
       shape.friction = friction
       shape.elasticity = elasticity
-      shape.userData= userData
+      shape.userData = userData
       return (body, shape)
 
     return (body, nil)
