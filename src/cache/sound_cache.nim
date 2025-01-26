@@ -19,6 +19,8 @@ type
     MarbleImpact = "/audio/dynamic_objects/marble_impact"
     TennisBallImpact = "/audio/dynamic_objects/tennis_ball_impact"
     Die5Impact = "/audio/dynamic_objects/die5_impact"
+    TallBookImpact = "/audio/dynamic_objects/tall_book_impact"
+    TallPlankImpact = "/audio/dynamic_objects/tall_plank_impact"
     Finish = "/audio/finish/finish"
     FinishUnlock = "/audio/finish/finish_unlock"
     Coin = "/audio/pickup/coin"

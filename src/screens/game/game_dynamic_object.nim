@@ -17,6 +17,7 @@ import cache/sound_cache
 const
   minImpactVolume: Float = 0.1f
   minRollSoundAngularVelocity: Float = 0.3f # if angular velocity multiplied by rollRateMultiplier is less than this, don't play roll sound
+  impactCollisionTypes = [GameCollisionTypes.Terrain, GameCollisionTypes.Killer] # impact 
 
 var 
   rollPlayers = initTable[DynamicObjectType, Option[FadingSamplePlayer]]()
@@ -42,7 +43,8 @@ proc impactSampleId(objectType: DynamicObjectType): Option[SampleId] =
   of DynamicObjectType.Marble: some(SampleId.MarbleImpact)
   of DynamicObjectType.TennisBall: some(SampleId.TennisBallImpact)
   of DynamicObjectType.Die5: some(SampleId.Die5Impact)
-  else: none(SampleId)
+  of DynamicObjectType.TallBook: some(SampleId.TallBookImpact)
+  of DynamicObjectType.TallPlank: some(SampleId.TallPlankImpact)
 
 proc getOrLoadFadingSamplePlayer(sampleId: SampleId): FadingSamplePlayer =
   let player = getOrLoadSamplePlayer(sampleId)
@@ -169,15 +171,15 @@ let collisionPostSolveFunc*: CollisionPostSolveFunc = proc(arb: Arbiter; space: 
 
   let totalImpulse = arb.totalImpulse.vlength
   let objectType = cast[DynamicObjectType](shapeA.userData)
-  # print "collisionPostSolveFunc: ", objectType, shapeB.collisionType.repr, totalImpulse
   let mass = shapeA.body.mass
   let targetVolume = totalImpulse / mass / 100f
-  if arb.isFirstContact and shapeB.collisionType == GameCollisionTypes.Terrain and  targetVolume >= minImpactVolume:
+  # print "collisionPostSolveFunc: ", objectType, shapeB.collisionType.repr, totalImpulse, targetVolume
+  if arb.isFirstContact and shapeB.collisionType in impactCollisionTypes and  targetVolume >= minImpactVolume:
     let impactPlayer = getImpactPlayer(objectType)
     if impactPlayer.isSome:
       let player = impactPlayer.get
       if not player.isPlaying:
-        print "impact", totalImpulse, mass, targetVolume
+        # print "impact", totalImpulse, mass, targetVolume
         impactPlayer.get.volume = clamp(targetVolume, 0.0, 1.0)
         impactPlayer.get.playVariation()
     else:

@@ -41,6 +41,8 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BowlingBallRolling),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.MarbleRolling),
   PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BowlingBallImpact),
+  PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.TallBookImpact),
+  PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.TallPlankImpact),
   PreloadJob(timeCost: 0.007.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.MarbleImpact),
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Die5Impact),
   PreloadJob(timeCost: 0.011.Seconds, jobType: PreloadJobType.Bitmap, bitmapId: BitmapId.Acorn),
@@ -83,8 +85,13 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.018.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.RiderTail),
   PreloadJob(timeCost: 0.019.Seconds, jobType: PreloadJobType.Font, fontId: FontId.Roobert10Bold),
   PreloadJob(timeCost: 0.024.Seconds, jobType: PreloadJobType.BitmapTable, bitmapTableId: BitmapTableId.BikeChassis),
-  # PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.Scoreboards),
 ]
+
+## simulator might crash when a network result comes in while the game is restarted
+if defined(device):
+  jobs.add(
+    PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.Scoreboards),
+  )
 
 proc execute(job: PreloadJob) =
   case job.jobType
