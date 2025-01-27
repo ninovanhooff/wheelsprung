@@ -29,6 +29,7 @@ type
 
 var jobs: seq[PreloadJob] = @[
   # order items lowest to highest prio since we will pop from the end
+  PreloadJob(timeCost: 0.010.Seconds, jobType: PreloadJobType.Bitmap, bitmapId: BitmapId.QrLevelEditor),
   PreloadJob(timeCost: 0.014.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Bumper),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Confirm),
   PreloadJob(timeCost: 0.013.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.SelectNext),

@@ -9,6 +9,7 @@ import globals
 import data_store/user_profile
 import navigation/[navigator, screen, backstack_builder]
 import cache/cache_preloader
+import cache/bitmap_cache
 import scoreboards/scoreboards_service
 
 
@@ -121,6 +122,12 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   elif event == kEventUnlock:
     print("Wheelsprung: Unlocked. Refreshing scoreboards")
     fetchAllScoreboards()
+  elif event == kEventPause:
+    print("Wheelsprung: Pausing")
+    let qrEditorBg = getOrLoadBitmap(BitmapId.QrLevelEditor)
+    playdate.system.setMenuImage(qrEditorBg)
+  elif event == kEventResume:
+    print("Wheelsprung: Resuming")
   elif event == kEventKeyReleased:
     if keycode == 116:
       print("T")
