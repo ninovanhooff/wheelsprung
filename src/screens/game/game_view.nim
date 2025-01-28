@@ -26,7 +26,6 @@ const
   swingArmChassisAttachmentOffset = v(0.0, 5.0)
   frontForkChassisAttachmentOffset = v(15.0, -3.0)
   forkOutlineWidth: int32 = 4'i32
-  patternSize: int32 = 8'i32
 
 var
   isGameViewInitialized: bool = false
@@ -292,14 +291,24 @@ proc drawGame*(statePtr: ptr GameState) =
 
   # draw grid
   if debugDrawGrid:
+    let levelSize = state.level.size
     if gridImage.isNil:
       try:
-        gridImage = gfx.newBitmap(displaySize.x.int32, displaySize.y.int32, gridPattern)
+        let gridPattern = gfx.newBitmap(20, 20, kColorClear)
+        gfx.pushContext(gridPattern)
+        gfx.fillRect(0, 0, 1, 1, kColorBlack)
+        gfx.popContext()
+        gridImage = gfx.newBitmap(levelSize.x, levelSize.y.int32, kColorClear)
+        gfx.pushContext(gridImage)
+        gfx.setFont(smallFont)
+        gridPattern.drawTiled(0, 0, level.size.x, level.size.y, kBitmapUnflipped)
+        for x in countup(0, level.size.x, 100):
+          for y in countup(0, level.size.y, 100):
+            gfx.drawText(fmt"({x},{y})", x, y)
+        gfx.popContext()
       except:
         print "Image load failed:", getCurrentExceptionMsg()
-    gfx.setDrawMode(kDrawmodeWhiteTransparent)
-    gridImage.draw(-camVertex[0] mod patternSize, -camVertex[1] mod patternSize, kBitmapUnflipped)
-    gfx.setDrawMode(kDrawmodeCopy)
+    gridImage.draw(-camVertex.x, -camVertex.y, kBitmapUnflipped)
 
   state.drawDynamicObjects()
 
