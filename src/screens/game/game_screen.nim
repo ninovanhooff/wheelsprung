@@ -31,6 +31,7 @@ import screens/hit_stop/hit_stop_screen
 const
   restartLevelLabel = "Restart level"
   levelSelectLabel = "Level select"
+  enableHintsLabel = "Show hints"
   settingsLabel = "Settings"
   exitReplayLabel = "Exit replay"
 
@@ -76,12 +77,22 @@ proc onRestartGamePressed(screen: GameScreen) =
 proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen {.raises: [].} =
   let restartGameHandler = proc() = 
     setResult(ScreenResult(screenType: ScreenType.Game, restartGame: true))
+  let enableHintsHandler = proc() = 
+    setResult(ScreenResult(screenType: ScreenType.Game, restartGame: true, enableHints: true))
+
   var screen = createHitstopScreen(state, collisionShape)
   screen.menuItems = @[
     # MenuItemDefinition(name: settingsLabel, action: () => pushScreen(newSettingsScreen())),
     MenuItemDefinition(name: levelSelectLabel, action: popScreen),
     MenuItemDefinition(name: restartLevelLabel, action: restartGameHandler),
   ]
+
+  if not state.hintsEnabled:
+    screen.menuItems.insert(
+      # add as first item
+      MenuItemDefinition(name: enableHintsLabel, action: enableHintsHandler),
+    )
+
   screen.onCanceled = proc(pushed: PDButtons) =
     if kButtonA in pushed:
       restartGameHandler()
@@ -281,6 +292,13 @@ proc addMenuItems(gameScreen: GameScreen) =
     # discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
     #   pushScreen(newSettingsScreen())
     # )
+    if not gameScreen.state.hintsEnabled:
+      discard playdate.system.addMenuItem(enableHintsLabel, proc(menuItem: PDMenuItemButton) =
+        gameScreen.state.enableHints()
+        # rebuild menu items
+        playdate.system.removeAllMenuItems()
+        gameScreen.addMenuItems()
+      )
     discard playdate.system.addMenuItem(levelSelectLabel, proc(menuItem: PDMenuItemButton) =
       popScreen()
     )
