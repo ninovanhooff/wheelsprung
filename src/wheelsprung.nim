@@ -10,6 +10,7 @@ import data_store/user_profile
 import navigation/[navigator, screen, backstack_builder]
 import cache/cache_preloader
 import cache/bitmap_cache
+import cache/font_cache
 import scoreboards/scoreboards_service
 
 
@@ -125,7 +126,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   elif event == kEventPause:
     print("Wheelsprung: Pausing")
     let qrEditorBg = getOrLoadBitmap(BitmapId.QrLevelEditor)
-    playdate.system.setMenuImage(qrEditorBg)
+    playdate.system.setMenuImage(qrEditorBg, 27)
   elif event == kEventResume:
     print("Wheelsprung: Resuming")
   elif event == kEventKeyReleased:
