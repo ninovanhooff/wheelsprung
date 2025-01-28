@@ -325,7 +325,8 @@ proc drawGame*(statePtr: ptr GameState) =
     drawFinish(state, cameraState)
 
   ## do not store poses in a variable to avoid copying
-  if state.ghostPlayback.poses.high >= frameCounter:
+  ## do not draw ghost when hints enabled to avoid visual clutter
+  if state.ghostPlayback.poses.high >= frameCounter and not state.hintsEnabled:
     state.drawGhostPose(state.ghostPlayback.poses[frameCounter])
 
   if debugDrawPlayer == false and frameCounter > 0:
