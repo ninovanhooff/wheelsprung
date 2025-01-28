@@ -38,6 +38,11 @@ const
 # forward declarations
 proc onResetGame(screen: GameScreen) {.raises: [].}
 
+
+proc hintsAvailable(state: GameState): bool =
+  ## true when the level has hints but they are not shown yet
+  (not state.hintsEnabled) and state.level.hintsPath.isSome
+
 proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResume: bool = true): GameResult {.discardable.} =
   state.tailRotarySpring.restAngle = 0f
   result = GameResult(
@@ -46,7 +51,7 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
     resultType: resultType,
     time: state.time,
     starCollected: state.remainingStar.isNone and state.starEnabled and state.level.starPosition.isSome,
-    hintsAvailable: (not state.hintsEnabled) and state.level.hintsPath.isSome,
+    hintsAvailable: state.hintsAvailable,
     inputRecording: some(state.inputRecording),
   )
   state.resetGameOnResume = resetGameOnResume
@@ -87,7 +92,7 @@ proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen 
     MenuItemDefinition(name: restartLevelLabel, action: restartGameHandler),
   ]
 
-  if not state.hintsEnabled:
+  if state.hintsAvailable:
     screen.menuItems.insert(
       # add as first item
       MenuItemDefinition(name: enableHintsLabel, action: enableHintsHandler),
@@ -292,7 +297,7 @@ proc addMenuItems(gameScreen: GameScreen) =
     # discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
     #   pushScreen(newSettingsScreen())
     # )
-    if not gameScreen.state.hintsEnabled:
+    if gameScreen.state.hintsAvailable:
       discard playdate.system.addMenuItem(enableHintsLabel, proc(menuItem: PDMenuItemButton) =
         gameScreen.state.enableHints()
         # rebuild menu items
