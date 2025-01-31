@@ -24,6 +24,7 @@ type
     BowlingBall = "images/dynamic_objects/bowling-ball"
     Marble = "images/dynamic_objects/marble"
     TennisBall = "images/dynamic_objects/tennis-ball"
+    Confetti = "images/confetti"
     Trophy = "images/trophy"
     Flag = "images/flag/flag"
     Nuts = "images/nuts"

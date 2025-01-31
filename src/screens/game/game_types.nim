@@ -235,6 +235,7 @@ type GameState* = ref object of RootObj
   frameCounter*: int32
   finishFlipDirectionAt*: Option[Milliseconds]
   finishTrophyBlinkerAt*: Option[Milliseconds]
+    ## indication of the last coin collected
 
 
   # Physics
