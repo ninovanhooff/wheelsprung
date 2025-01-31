@@ -43,7 +43,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.flatty", theme= Bath, hash="FA763F59170C357953CE30B29FBC5667", boardId = "toweltrial"),
   newLevelMeta(name= "Ripple Ride", path="levels/hills.flatty", theme= Bath, hash="5E6783CF62C2C15ED73282CCE633D66B", boardId = "hills"),
   newLevelMeta(name= "Laundry Loop", path="levels/globe_of_death.flatty", theme= Bath, hash="A0E40ACCCC2C9239DD3A60D98859044A", boardId = "laundryloop"),
-  newLevelMeta(name= "Ripcurl Rush", path="levels/looping.flatty", theme= Bath, hash="BC00C8E70A16B2AEB83F21BC39F4E92E", boardId = "ripcurlrush"),
+  newLevelMeta(name= "Ripcurl Rush", path="levels/looping.flatty", theme= Bath, hash="363F3E6B90786B60F700FC0F7FAC6030", boardId = "ripcurlrush"),
 
   newLevelMeta(name= "Novel Navigations", path="levels/novel_navigations.flatty", theme= Bookshelf, hash="83D025E12A1140BC3B86831F20FF4622", boardId = "novelnavigations"),
   newLevelMeta(name= "Shelf Swinger", path="levels/shelf_swinger.flatty", theme= Bookshelf, hash="2BDCF6E1BF311A84E2DB2D7FE2577E84", boardId = "shelfswinger"),
@@ -63,17 +63,17 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Circle of Life", path="levels/globe_of_death_3.flatty", theme= Plants, hash="7854D8CFBB1DAF942869B3AF1AD352C5", boardId = "circleoflife"),
   newLevelMeta(name= "Treasure Tunnel", path="levels/treasure_tunnel.flatty", theme= Plants, hash="6E5F2C44C7ED48F25ED86E834C68149B", boardId = "treasuretunnel"),
   newLevelMeta(name= "Half-Pipe Jungle", path="levels/halfpipe.flatty", theme= Plants, hash="31609EFBA4AB9DEFD10A4BF90CB5300D", boardId = "halfpipejungle"),
-  newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.flatty", theme= Plants, hash="A0C19A9307B480D408F4C58A1546F47E", boardId = "ricketybridge"),
+  newLevelMeta(name= "Rickety Bridge", path="levels/rickety_bridge.flatty", theme= Plants, hash="8C39CB2E191C2C1857E05F5195CA1324", boardId = "ricketybridge"),
   newLevelMeta(name = "Rolling Raiders", path="levels/boulder.flatty", theme= Plants, hash="1614917810A5E55BEA5573A8061EE063", boardId = "rollingraiders"),
 
-  newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.flatty", theme= Desk, hash="EBC549D596A6FC39C9FBEFBDF3E86E1F", boardId = "zigzagdown"),
+  newLevelMeta(name= "Zig Zag Down", path="levels/zig_zag_down.flatty", theme= Desk, hash="1BC2F0289F91904C6AF35C6B78FA1C0A", boardId = "zigzagdown"),
   newLevelMeta(name = "Time Traveler", path="levels/time_traveler.flatty", theme= Desk, hash="18193FB4744661DA83906690CE211469", boardId = "timetraveler"),
   newLevelMeta(name = "Tight Squeeze", path="levels/tight_squeeze.flatty", theme= Desk, hash="0541EF41C104AE11FFCE43B3B3077A85", boardId = "tightsqueeze"),
   newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="8332FA64799ED652AB4415B0D412EBAA", boardId = "ballisticbowler"),
   newLevelMeta(name= "Ramp of Pages", path="levels/ramp_of_pages.flatty", theme= Desk, hash="9FA6020E1448BC1AB5AFC006F556CE14", boardId = "rampofpages"),
   newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.flatty", theme= Desk, hash="98EB076F989D7353CD52AE9247CE3F5E", boardId = "ballancingact"),
 
-  newLevelMeta(name= "Paradise", path="levels/paradise.flatty", theme= Desk, hash="51EC31AF720A86755859AFA43F5DCD94", boardId = "paradise"),
+  newLevelMeta(name= "Go Nuts!", path="levels/paradise.flatty", theme= Space, hash="83186121F0D31EB394488F26ECBE4D40", boardId = "paradise"),
 ]
   .map(meta => (meta.path, meta)) # use path as key
   .toOrderedTable
