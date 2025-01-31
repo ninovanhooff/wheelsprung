@@ -46,20 +46,25 @@ proc drawFinish*(state: GameState, camState: CameraState) =
     let finishScreenPos: Vertex = finish.position - camVertex
     let finishTableIndex: int32 = if state.isFinishActivated: 1'i32 else: 0'i32
     let optGameResult = state.gameResult
-    initGameFinish()
-    if true:#w(optGameResult.isNone or optGameResult.get.resultType != GameResultType.LevelComplete):
-      trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos[0], finishScreenPos[1], finish.flip)
+
+    var confettiFrameIndex: int32 = 0
 
     # confetti
     if optGameResult.isSome and optGameResult.get.resultType == GameResultType.LevelComplete:
       let confettiImageTable = getOrLoadBitmapTable(BitmapTableId.Confetti)
       let millisSinceFinish: Milliseconds = state.time - optGameResult.get.time
-      let confettiFrameIndex: int32 = millisSinceFinish div confettiFrameTime
+      confettiFrameIndex = millisSinceFinish div confettiFrameTime
       if confettiFrameIndex < confettiImageTable.frameCount:
         let confettiFrame = confettiImageTable.getBitmap(confettiFrameIndex)
         let confettiOffset = newVertex(-16, -confettiFrame.height + 8)
         let confettiPos = finishScreenPos + confettiOffset
         confettiFrame.draw(confettiPos.x, confettiPos.y, finish.flip)
+
+    if confettiFrameIndex < 4:
+      # keep drawing trophy until confetti has left cup.
+      # This means that if the game is not won, the trophy will also be drawn
+      initGameFinish()
+      trophyImageTable.getBitmap(finishTableIndex).draw(finishScreenPos.x, finishScreenPos.y, finish.flip)
 
   # Last coin collect blinker (HUD)
   if state.finishTrophyBlinkerAt.isSome:
