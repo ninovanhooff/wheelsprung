@@ -54,7 +54,7 @@ proc drawFinish*(state: GameState, camState: CameraState) =
       let millisSinceFinish: Milliseconds = state.time - optGameResult.get.time
       confettiFrameIndex = millisSinceFinish div confettiFrameTime
 
-    if confettiFrameIndex < 4:
+    if confettiFrameIndex == -1 or (confettiFrameIndex mod 3 < 2 and confettiFrameIndex < 8):
       # keep drawing trophy until confetti has left cup.
       # This means that if the game is not won, the trophy will also be drawn
       initGameFinish()
