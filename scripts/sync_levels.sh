@@ -7,7 +7,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 SOURCE_DIR="$SCRIPT_DIR/../source/levels"
 SUPPORT_DIR="$SCRIPT_DIR/../support/levels"
 DEST_DIR="$HOME/Developer/PlaydateSDK/Disk/Data/com.ninovanhooff.wheelsprung/levels"
-alias run_rsync_images='rsync -azP rsync --include="*/" --include="*.png" --exclude="*"  $SUPPORT_DIR $SOURCE_DIR/..'
+alias run_rsync_images='rsync -azP rsync --include="*/" --include="*.png" --include="*.gif" --exclude="*"  $SUPPORT_DIR $SOURCE_DIR/..'
 alias run_rsync_data='rsync -azP --exclude ".*/" --exclude ".*" --exclude "tmp/" $SOURCE_DIR $DEST_DIR/..'
 alias run_level_updater="$SCRIPT_DIR/run_level_updater.sh"
 alias compile_images="$SCRIPT_DIR/compile_images.sh"

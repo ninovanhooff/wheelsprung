@@ -39,7 +39,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Tutorial: Turning", path="levels/tutorial_turn_around.flatty", theme= Kitchen, hash="A2D2CC0B6DEE5CAC099E6A975435C6C1", boardId = "tutorialturnaround"),
   
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.flatty", theme= Bath, hash="F56F62ED85D51DA493C590FEF71A3F0B" , boardId = "tutorialbalance"),
-  newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.flatty", theme= Desk, hash="6A7FBB2524358A86BF4A1F96FDE24CD1", boardId = "leapoffaith"),
+  newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.flatty", theme= Desk, hash="85FE36BD0DBA06FFE16174ECC899EE67", boardId = "leapoffaith"),
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.flatty", theme= Bath, hash="FA763F59170C357953CE30B29FBC5667", boardId = "toweltrial"),
   newLevelMeta(name= "Ripple Ride", path="levels/hills.flatty", theme= Bath, hash="5E6783CF62C2C15ED73282CCE633D66B", boardId = "hills"),
   newLevelMeta(name= "Laundry Loop", path="levels/globe_of_death.flatty", theme= Bath, hash="A0E40ACCCC2C9239DD3A60D98859044A", boardId = "laundryloop"),
