@@ -53,6 +53,13 @@ proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
   playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
 
+proc printException*(message: string, e: ref Exception) =
+  ## Print an exception
+  let message = fmt"{message}:{getCurrentExceptionMsg()}\n{e.getStackTrace()}"
+  # Log the error to the console, total stack trace might be too long for single call
+  for line in message.splitLines():
+    playdate.system.logToConsole(line)
+
 proc printT*(things: varargs[string, `$`]) =
   let duration = playdate.system.getElapsedTime - printTStartTime
   printTStartTime = -1f

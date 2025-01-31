@@ -322,8 +322,7 @@ method resume*(gameScreen: GameScreen): bool =
     try:
       gameScreen.state = newGameState(loadLevel(gameScreen.levelPath), replayInputRecording = gameScreen.replayInputRecording)
     except Exception as e:
-      print "ERROR: Could not load level: " & gameScreen.levelPath
-      print e.msg
+      printException("ERROR: Could not load level: " & gameScreen.levelPath, e)
       return false
   var state = gameScreen.state
   
