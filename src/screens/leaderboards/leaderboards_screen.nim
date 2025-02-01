@@ -126,12 +126,14 @@ proc updateInput(screen: LeaderboardsScreen) =
   let buttonState = playdate.system.getButtonState()
 
   if kButtonUp in buttonState.pushed:
+    playSelectPreviousSound()
     screen.currentLeaderboardIdx -= 1
     if screen.currentLeaderboardIdx < 0:
       screen.currentLeaderboardIdx = screen.leaderboards.high
     selectPageContainingPlayer(screen)
     screen.isDirty = true
   elif kButtonDown in buttonState.pushed:
+    playSelectNextSound()
     screen.currentLeaderboardIdx += 1
     if screen.currentLeaderboardIdx > screen.leaderboards.high:
       screen.currentLeaderboardIdx = 0
@@ -140,11 +142,13 @@ proc updateInput(screen: LeaderboardsScreen) =
   elif kButtonRight in buttonState.pushed:
     screen.currentLeaderboardPageIdx += 1
     if screen.scoreIdxHigh >= screen.currentLeaderboardPageIdx * LEADERBOARDS_PAGE_SIZE:
+      playSelectNextSound()
       screen.isDirty = true
     else:
       screen.currentLeaderboardPageIdx -= 1
   elif kButtonLeft in buttonState.pushed:
     if screen.currentLeaderboardPageIdx > 0:
+      playSelectPreviousSound()
       screen.currentLeaderboardPageIdx -= 1
       screen.isDirty = true
     else:
