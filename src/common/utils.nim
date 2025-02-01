@@ -9,6 +9,7 @@ const
   TwoPi*: float32 = 2 * PI
   NOMINAL_FRAME_RATE*: float32 = 50.0f
   NOMINAL_FRAME_TIME_MILLIS*: uint32 = (1000.0f / NOMINAL_FRAME_RATE).uint32
+  ENABLE_PRINT_T*: bool = false
 
 ### Time
 proc currentTimeMilliseconds*(): int32 {.inline.} = playdate.system.getCurrentTimeMilliseconds.int32
@@ -61,15 +62,15 @@ proc printException*(message: string, e: ref Exception) =
     playdate.system.logToConsole(line)
 
 proc printT*(things: varargs[string, `$`]) =
-  let duration = playdate.system.getElapsedTime - printTStartTime
-  printTStartTime = -1f
-  # if defined(device):
-    # timing info is only meaningful on device
-  playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t") & " in ms:" & $(duration * 1000f))
+  if defined(ENABLE_PRINT_T):
+    let duration = playdate.system.getElapsedTime - printTStartTime
+    printTStartTime = -1f
+    playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t") & " in ms:" & $(duration * 1000f))
 
 proc markStartTime*() =
   ## Mark the start time for the printT function
-  printTStartTime = playdate.system.getElapsedTime
+  if defined(ENABLE_PRINT_T):
+    printTStartTime = playdate.system.getElapsedTime
 
 ### Bench / trace / profile
 

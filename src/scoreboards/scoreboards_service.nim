@@ -94,7 +94,7 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
     case scoresListResult.kind
     of PDResultSuccess:
       let scoresList = scoresListResult.result
-      print "===== NETWORK Scores OK", $scoresList
+      print "===== NETWORK Scores OK"#, $scoresList
       scoreboardsCache.setScoreboard(scoresList)
       if scoresList.scores.len == 10:
         setPlayerName(scoresList.scores[9].player)
@@ -111,7 +111,7 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
 
   boardId.increaseLoadingCount()
   notifyScoreboardsChanged(boardId) # Notify listeners that the board is being updated
-  print "===== NETWORK Scores START", boardId, $resultCode
+  print "===== NETWORK Scores START", boardId
 
 proc shouldSubmitScore(boardId: BoardId, score: uint32): bool =
   let board = getScoreBoard(boardId)
