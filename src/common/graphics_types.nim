@@ -136,7 +136,7 @@ proc newAnnotatedBitmapTable*(bitmapTable: LCDBitmapTable, frameCount: int32): A
     halfFrameHeight: firstBitmap.height.float32 * 0.5f
   )
 
-proc newVertex*(x, y: SomeInteger): Vertex =
+proc newVertex*(x, y: SomeSignedInt): Vertex =
   result = (x: x.int32, y: y.int32)
 
 proc newCameraState*(camera: Camera, camVertex: Vertex, viewport: LCDRect, frameCounter: int32): CameraState =
