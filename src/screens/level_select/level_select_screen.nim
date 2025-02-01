@@ -32,7 +32,7 @@ var
 
 proc initLevelSelectScreen() =
   if not backgroundAudioPlayer.isNil:
-    print("initLevelSelectScreen: already initialized")
+    # print("initLevelSelectScreen: already initialized")
     return
 
   backgroundAudioPlayer = try: playdate.sound.newFilePlayer("/audio/music/soundtrack")
@@ -202,8 +202,8 @@ proc refreshLevelRows(screen: LevelSelectScreen) =
   
   screen.firstLockedRowIdx = some(initialUnlockedLevels + numLevelsUnlocked + levelPaths.len)
 
-  print "unknown levels: ", repr(levelPaths)
-  print "firstLockedRowIdx: ", screen.firstLockedRowIdx
+  # print "unknown levels: ", repr(levelPaths)
+  # print "firstLockedRowIdx: ", screen.firstLockedRowIdx
 
   for levelPath in levelPaths:
     let levelMeta = getLevelMeta(levelPath)

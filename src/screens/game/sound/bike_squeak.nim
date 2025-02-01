@@ -13,7 +13,7 @@ var
 
 proc initBikeSqueak*()=
   if contractPlayer != nil: return # already initialized
-  print("initializing bike squeak")
+  # print("initializing bike squeak")
 
   try:
     contractPlayer = getOrLoadSamplePlayer(SampleId.BikeSqueak)

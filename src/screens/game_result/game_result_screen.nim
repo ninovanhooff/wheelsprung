@@ -82,7 +82,7 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
   let backgroundImageName = if resultType == GameResultType.GameOver: "game-over-bg" else: "level-complete-bg"
   let backgroundImage = getOrLoadBitmap("images/game_result/" & backgroundImageName)
 
-  print "previousProgress", repr(previousProgress)
+  # print "previousProgress", repr(previousProgress)
     
 
   return GameResultScreen(

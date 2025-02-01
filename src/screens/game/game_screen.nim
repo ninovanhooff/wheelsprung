@@ -60,10 +60,10 @@ proc setGameResult(state: GameState, resultType: GameResultType, resetGameOnResu
 proc popOrPushGameResult(state: GameState) =
   state.resetGameOnResume = true
   if state.isInReplayMode:
-    print "pop game result"
+    # print "pop game result"
     popScreen()
   else:
-    print "push game result"
+    # print "push game result"
     navigateToGameResult(state.gameResult.get)
 
 proc enableHints*(state: var GameState) =

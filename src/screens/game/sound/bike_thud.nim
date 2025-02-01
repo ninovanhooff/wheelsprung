@@ -21,7 +21,7 @@ proc getRandomThud(): SamplePlayer=
 
 proc initBikeThud*() =
   if thudPlayers.len > 0: return # already initialized
-  print("initBikeThud")
+  # print("initBikeThud")
 
   try:
     thudPlayers.add(getOrLoadSamplePlayer(SampleId.BikeThud1))

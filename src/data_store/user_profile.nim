@@ -27,7 +27,7 @@ proc getLevelProgress*(id: Path): LevelProgress =
     saveSlot.progress[id] = result
 
 proc setLevelProgress*(id: Path, progress: LevelProgress) =
-  print ("Setting progress for level", id, repr(progress))
+  print "Setting progress for level", id
   saveSlot.progress[id] = progress
 
 proc isStarEnabled*(id: Path): bool =
