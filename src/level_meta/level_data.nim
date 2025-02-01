@@ -73,7 +73,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Ramp of Pages", path="levels/ramp_of_pages.flatty", theme= Desk, hash="9FA6020E1448BC1AB5AFC006F556CE14", boardId = "rampofpages"),
   newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.flatty", theme= Desk, hash="98EB076F989D7353CD52AE9247CE3F5E", boardId = "ballancingact"),
 
-  newLevelMeta(name= "Go Nuts!", path="levels/paradise.flatty", theme= Space, hash="4DB7D7B9F863C9D56801A018CAFE353A", boardId = "paradise"),
+  newLevelMeta(name= "Go Nuts!", path="levels/paradise.flatty", theme= Space, hash="07BB70BB5C9E9ED69BFAFC8A59DD9E02", boardId = "paradise"),
 ]
   .map(meta => (meta.path, meta)) # use path as key
   .toOrderedTable
