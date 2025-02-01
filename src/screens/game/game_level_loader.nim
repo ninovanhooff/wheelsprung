@@ -339,7 +339,6 @@ proc loadGid(level: Level, obj: LevelObjectEntity): bool =
       let spec = newGravityZoneSpec(position, obj.direction8)
       level.gravityZones.add(spec)
     of ClassIds.TallBook:
-      # todo: should a default mass be set?
       return loadAsDynamicBox(level, obj, some(DynamicObjectType.TallBook))
     of ClassIds.BowlingBall:
       return loadAsDynamicCircle(level, obj, some(DynamicObjectType.BowlingBall))

@@ -47,13 +47,6 @@ proc updateCameraPid*(state: GameState, snapToTarget: bool = false) =
     let cameraTarget = state.level.cameraBounds.clampVect(
       state.chassis.position - halfDisplaySize + state.cameraOffset
     )
-    # todo combine 3 calls into 1
-    # camXController.setTargetPosition(cameraTarget.x)
-    # camYController.setTargetPosition(cameraTarget.y)
-    # let controlX = camXController.updatePID(state.camera.x)
-    # let controlY = camYController.updatePID(state.camera.y)
-    # let newX = moveCamera(state.camera.x, controlX)
-    # let newY = moveCamera(state.camera.y, controlY)
     let newX = state.camXController.stepToTarget(state.camera.x, cameraTarget.x)
     let newY = state.camYController.stepToTarget(state.camera.y, cameraTarget.y)
     state.camera = state.level.cameraBounds.clampVect(
