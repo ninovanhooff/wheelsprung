@@ -42,6 +42,7 @@ type
     SelectPrevious = "/audio/menu/select_previous"
     SelectNext = "/audio/menu/select_next"
     Confirm = "/audio/menu/confirm"
+    Cancel = "/audio/menu/cancel2"
     Bumper = "/audio/menu/bumper"
 
 # global singleton

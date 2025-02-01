@@ -25,6 +25,7 @@ process_sounds() {
 # process_sounds "support/sounds/coin" "source/audio/pickup" "$1"
 # process_sounds "support/sounds/fall" "source/audio/fall" "$1"
 # process_sounds "support/sounds/collision" "source/audio/collision" "$1"
+# process_sounds "support/sounds/menu" "source/audio/menu" "$1"
 # process_sounds "support/sounds/finish" "source/audio/finish" "$1"
 # process_sounds "support/sounds/gravity" "source/audio/gravity" "$1"
 # process_sounds "support/sounds/dynamic_objects" "source/audio/dynamic_objects" "$1"

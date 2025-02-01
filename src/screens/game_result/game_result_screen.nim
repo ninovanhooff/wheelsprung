@@ -10,6 +10,7 @@ import common/shared_types
 import common/utils
 import common/level_utils
 import common/save_slot_types
+import common/menu_sounds
 import level_meta/level_data
 # import screens/settings/settings_screen
 import screens/screen_types
@@ -41,7 +42,6 @@ var
   actionArrowsImageTable: AnnotatedBitmapTable
   hintOfferCount: Table[Path, int] = initTable[Path, int]()
     ## key: level path, value number of times hints have been offered for this level
-
 
 proc initGameResultScreen() =
   if not buttonFont.isNil:
@@ -221,12 +221,16 @@ method update*(self: GameResultScreen): int =
   let buttonState = playdate.system.getButtonState()
 
   if kButtonA in buttonState.pushed:
+    playConfirmSound()
     executeAction(self, self.availableActions[self.currentActionIndex])
   elif kButtonLeft in buttonState.pushed:
+    playSelectPreviousSound()
     self.currentActionIndex = rem(self.currentActionIndex - 1, len(self.availableActions))
   elif kButtonRight in buttonState.pushed:
+    playSelectNextSound()
     self.currentActionIndex = rem(self.currentActionIndex + 1, len(self.availableActions))
   elif kButtonB in buttonState.pushed:
+    playCancelSound()
     executeAction(self, GameResultAction.LevelSelect)
 
   drawGameResult(self)

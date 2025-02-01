@@ -14,6 +14,7 @@ import common/utils
 import common/score_utils
 import data_store/user_profile
 import data_store/game_result_updater
+import common/menu_sounds
 
 const 
   LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY = "LeaderboardsScreenScoreboardUpdatedCallbackKey"
@@ -35,6 +36,8 @@ proc popScreen() =
 {.warning[UnusedImport]: on.}
 
 proc popScreen(screen: LeaderboardsScreen) =
+  print "play cancel sound"
+  playCancelSound()
   let optLevelMeta = getMetaByBoardId(screen.currentLeaderboard().boardId)
   optLevelMeta.map(proc (it: LevelMeta) = 
     setResult(ScreenResult(screenType: ScreenType.LevelSelect, selectPath: it.path))

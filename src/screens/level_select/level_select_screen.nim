@@ -7,30 +7,27 @@ import common/utils
 import common/shared_types
 import common/audio_utils
 import common/data_utils
+import common/menu_sounds
 import std/sequtils
 import std/options
 import std/tables
 import std/sugar
-import cache/sound_cache
 import data_store/user_profile
 import level_meta/level_data
 import level_select_types
 import level_select_view
 import screens/screen_types
-import screens/cutscene/cutscene_screen
 import screens/leaderboards/leaderboards_screen
 import scoreboards/scoreboards_service
 
 const
-  initialUnlockedLevels = 30
+  initialUnlockedLevels = 3
   pushedButtonTimeout = 0.3.Seconds
   heldButtonTimeout = 0.2.Seconds
   LEVEL_SELECT_SCOREBOARDS_UPDATED_CALLBACK_KEY = "LevelSelectScreenScoreboardsUpdatedCallbackKey"
 
 var
   backgroundAudioPlayer: FilePlayer
-  confirmPlayer: SamplePlayer
-  selectNextPlayer, selectPreviousPlayer, selectBumperPlayer: SamplePlayer
   cachedLevelPaths: seq[string] = @[]
 
 proc initLevelSelectScreen() =
@@ -43,11 +40,6 @@ proc initLevelSelectScreen() =
     playdate.system.error(getCurrentExceptionMsg())
     nil
   
-  selectPreviousPlayer = getOrLoadSamplePlayer(SampleId.SelectPrevious)
-  selectNextPlayer = getOrLoadSamplePlayer(SampleId.SelectNext)
-  confirmPlayer = getOrLoadSamplePlayer(SampleId.Confirm)
-  selectBumperPlayer = getOrLoadSamplePlayer(SampleId.Bumper)
-
 proc getLevelRowByBoardIdIndexed(screen: LevelSelectScreen, boardId: string): (int, Option[LevelRow]) =
   return screen.levelRows.findFirstIndexed(it => it.levelMeta.scoreboardId == boardId)
 
@@ -114,11 +106,11 @@ proc selectPreviousRow(screen: LevelSelectScreen, immediately: bool) =
   if screen.selectedIndex <= 0 and screen.firstLockedRowIdx.get(screen.levelRows.len) < screen.levelRows.len:
     if immediately: 
       screen.scrollPosition = -1f
-      selectBumperPlayer.playVariation()
+      playBumperSound()
     return
   screen.downActivatedAt = none(Seconds)
   if immediately or currentTimeSeconds() > screen.upActivatedAt.get(0):
-    selectPreviousPlayer.play()
+    playSelectPreviousSound()
     screen.selectRow(screen.selectedIndex - 1)
     let timeout: Seconds = if screen.upActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
     screen.upActivatedAt = some(currentTimeSeconds() + timeout)
@@ -128,12 +120,12 @@ proc selectNextRow(screen: LevelSelectScreen, immediately: bool) =
   if screen.selectedIndex >= screen.firstLockedRowIdx.get(screen.levelRows.len) - 1:
     if immediately: 
       screen.scrollPosition += 1f
-      selectBumperPlayer.playVariation()
+      playBumperSound()
     return  
 
   screen.upActivatedAt = none(Seconds)
   if immediately or currentTimeSeconds() > screen.downActivatedAt.get(0):
-    selectNextPlayer.play()
+    playSelectNextSound()
     screen.selectRow(screen.selectedIndex + 1)
     let timeout: Seconds = if screen.downActivatedAt.isNone: pushedButtonTimeout else: heldButtonTimeout
     screen.downActivatedAt = some(currentTimeSeconds() + timeout)
@@ -155,7 +147,7 @@ proc updateInput(screen: LevelSelectScreen) =
   let selectedLevelMeta = rows[screen.selectedIndex].levelMeta
 
   if kButtonA in buttonState.pushed:
-    confirmPlayer.playVariation()
+    playConfirmSound()
     if selectedLevelMeta == getFirstOfficialLevelMeta():
       backgroundAudioPlayer.stop() # we might be loading a lot of data for the cutscene. Stop the music to prevent a stutter
       pushScreen(newCutSceneScreen(cutsceneId = CutsceneId.Intro))
@@ -164,7 +156,7 @@ proc updateInput(screen: LevelSelectScreen) =
       let gameScreen = newGameScreen(levelPath)
       pushScreen(gameScreen)
   elif kButtonUp in buttonState.current:
-    selectPreviousRow(screen, kbuttonUp in buttonState.pushed)
+    selectPreviousRow(screen, kButtonUp in buttonState.pushed)
   elif kButtonDown in buttonState.current:
     selectNextRow(screen, kButtonDown in buttonState.pushed)
   elif kButtonDown in buttonState.pushed:
@@ -172,7 +164,11 @@ proc updateInput(screen: LevelSelectScreen) =
     if screen.selectedIndex >= numRows:
       screen.selectedIndex = 0
   elif kButtonRight in buttonState.pushed:
+    playConfirmSound()
     navigateToLeaderboardsScreen(screen)
+  elif kButtonB in buttonState.pushed:
+    # menu select is the root screen, can't go back
+    playBumperSound()
 
   updateScrollPosition(screen)
 
