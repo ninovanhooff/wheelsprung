@@ -31,7 +31,7 @@ proc currentLeaderboard(screen: LeaderboardsScreen): Leaderboard {.inline.} =
   screen.leaderboards[screen.currentLeaderboardIdx]
 
 {.warning[UnusedImport]: off.}
-proc popScreen() =
+proc popScreen() {.used.} =
   print "ERROR: use popScreen(screen: LeaderboardsScreen) instead"
 {.warning[UnusedImport]: on.}
 

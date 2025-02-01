@@ -1,4 +1,5 @@
 {.push raises: [].}
+{.used.}
 import playdate/api
 import common/utils
 import navigation/[screen, navigator]

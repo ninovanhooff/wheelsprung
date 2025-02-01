@@ -4,13 +4,11 @@ import std/sugar
 import strformat
 import ../tests/tests
 import common/utils
-import common/shared_types
 import globals
 import data_store/user_profile
 import navigation/[navigator, screen, backstack_builder]
 import cache/cache_preloader
 import cache/bitmap_cache
-import cache/font_cache
 import scoreboards/scoreboards_service
 
 
@@ -18,9 +16,6 @@ import playdate/api
 import screens/screen_types
 import screens/game/game_screen
 import screens/level_select/level_select_screen
-# import screens/cutscene/cutscene_screen
-# import screens/settings/settings_screen
-# import screens/game_result/game_result_screen
 
 let initialScreenProvider: InitialScreenProvider = 
   proc(): Screen =

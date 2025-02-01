@@ -4,13 +4,10 @@ import playdate/api
 import common/[graphics_types, graphics_utils]
 import game_types
 import common/shared_types
-import common/utils
 import cache/bitmaptable_cache
 
 
 const
-  vFinishSize = v(38.0, 38.0)
-
   blinkerPeriod = 500.Milliseconds
   halfBlinkerPeriod = blinkerPeriod div 2
   trophyBlinkerPos: Vertex = (360'i32, 8'i32)

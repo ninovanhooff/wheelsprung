@@ -1,5 +1,5 @@
 {. push raises: [].}
-import options, sugar
+import options
 import chipmunk7
 import chipmunk/chipmunk_utils
 import playdate/api
@@ -32,7 +32,7 @@ const
   restartLevelLabel = "Restart level"
   levelSelectLabel = "Level select"
   enableHintsLabel = "Show hints"
-  settingsLabel = "Settings"
+  # settingsLabel = "Settings"
   exitReplayLabel = "Exit replay"
 
 # forward declarations

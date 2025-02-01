@@ -147,13 +147,10 @@ let postStepCallback: PostStepFunc = proc(space: Space, dynamicObjectShape: poin
     updateRollSound(objType, state)
 
 let collisionBeginFunc*: CollisionBeginFunc = proc(arb: Arbiter; space: Space; unused: pointer): bool {.cdecl.} =
-  var state: GameState = cast[GameState](space.userData)
   var 
     shapeA: Shape
     shapeB: Shape
   arb.shapes(addr(shapeA), addr(shapeB))
-
-  let objectType = cast[DynamicObjectType](shapeA.userData)
 
   # print "collisionBeginFunc: ", objectType, shapeB.collisionType.repr
   discard space.addPostStepCallback(
