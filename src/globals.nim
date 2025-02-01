@@ -5,4 +5,4 @@ var
   debugDrawTextures* = true
   debugDrawPlayer* = true
   debugDrawConstraints* = false
-  debugDrawFps* = true
+  debugDrawFps* = false
