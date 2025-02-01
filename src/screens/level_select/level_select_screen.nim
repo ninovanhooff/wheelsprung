@@ -17,6 +17,7 @@ import level_meta/level_data
 import level_select_types
 import level_select_view
 import screens/screen_types
+import screens/cutscene/cutscene_screen
 import screens/leaderboards/leaderboards_screen
 import scoreboards/scoreboards_service
 
