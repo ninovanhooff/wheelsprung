@@ -33,5 +33,5 @@ proc playSelectPreviousSound*() =
 
 proc playBumperSound*() =
   if bumperPlayer == nil:
-    bumperPlayer = getOrLoadSamplePlayer(SampleId.Bumper)
+    bumperPlayer = getOrLoadSamplePlayer(SampleId.SquirrelSqueak1)
   bumperPlayer.playVariation()

@@ -377,7 +377,7 @@ method update*(gameScreen: GameScreen): int =
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
-        playScreamSound()
+        playFallSound()
       state.popOrPushGameResult()
 
     state.updateTimers() # increment for next frame

@@ -30,7 +30,7 @@ type
 var jobs: seq[PreloadJob] = @[
   # order items lowest to highest prio since we will pop from the end
   PreloadJob(timeCost: 0.010.Seconds, jobType: PreloadJobType.Bitmap, bitmapId: BitmapId.QrLevelEditor),
-  PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Bumper),
+  PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.SquirrelSqueak1),
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Confirm),
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Cancel),
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.SelectNext),
@@ -63,6 +63,10 @@ var jobs: seq[PreloadJob] = @[
   PreloadJob(timeCost: 0.010.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Fall2),
   PreloadJob(timeCost: 0.008.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Collision1),
   PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Collision2),
+  PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Collision3),
+  PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Collision4),
+  PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Collision5),
+  PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.Collision6),
   PreloadJob(timeCost: 0.006.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeThud1),
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeThud2),
   PreloadJob(timeCost: 0.005.Seconds, jobType: PreloadJobType.SoundSample, sampleId: SampleId.BikeThud3),

@@ -19,6 +19,11 @@ proc initGameSound*() =
   try:
     collisionPlayers.add(getOrLoadSamplePlayer(SampleId.Collision1))
     collisionPlayers.add(getOrLoadSamplePlayer(SampleId.Collision2))
+    collisionPlayers.add(getOrLoadSamplePlayer(SampleId.Collision3))
+    collisionPlayers.add(getOrLoadSamplePlayer(SampleId.Collision4))
+    collisionPlayers.add(getOrLoadSamplePlayer(SampleId.Collision5))
+    collisionPlayers.add(getOrLoadSamplePlayer(SampleId.Collision6))
+    collisionPlayers.add(getOrLoadSamplePlayer(SampleId.SquirrelSqueak1))
     fallPlayers.add(getOrLoadSamplePlayer(SampleId.Fall1))
     fallPlayers.add(getOrLoadSamplePlayer(SampleId.Fall2))
 
@@ -50,5 +55,5 @@ proc playStarSound*() =
 proc playCollisionSound*() =
   collisionPlayers[rand(collisionPlayers.high)].playVariation()
 
-proc playScreamSound*() =
+proc playFallSound*() =
   fallPlayers[rand(fallPlayers.high)].playVariation()

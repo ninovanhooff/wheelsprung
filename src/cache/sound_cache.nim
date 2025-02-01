@@ -27,14 +27,16 @@ type
     Star = "/audio/pickup/star"
     Collision1 = "/audio/collision/collision-01"
     Collision2 = "/audio/collision/collision-02"
+    Collision3 = "/audio/collision/collision-03"
+    Collision4 = "/audio/collision/collision-04"
+    Collision5 = "/audio/collision/collision-05"
+    Collision6 = "/audio/collision/collision-06"
     Fall1 = "/audio/fall/fall-01"
     Fall2 = "/audio/fall/fall-02"
     BikeSqueak = "/audio/suspension/suspension_contract_adpcm"
     BikeThud1 = "/audio/thud/thud_1"
     BikeThud2 = "/audio/thud/thud_2"
     BikeThud3 = "/audio/thud/thud_3"
-    BikeCollision1 = "/audio/collision/collision-01"
-    BikeCollision2 = "/audio/collision/collision-02"
     BikeFall1 = "/audio/fall/fall-01"
     BikeFall2 = "/audio/fall/fall-02"
     GravityUp = "/audio/gravity/gravity_up"
@@ -43,7 +45,7 @@ type
     SelectNext = "/audio/menu/select_next"
     Confirm = "/audio/menu/confirm"
     Cancel = "/audio/menu/cancel"
-    Bumper = "/audio/menu/bumper"
+    SquirrelSqueak1 = "/audio/squirrel/squirrel-squeak-01"
 
 # global singleton
 let audioSampleCache = AudioSampleCache()
