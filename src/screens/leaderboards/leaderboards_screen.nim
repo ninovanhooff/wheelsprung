@@ -36,7 +36,6 @@ proc popScreen() =
 {.warning[UnusedImport]: on.}
 
 proc popScreen(screen: LeaderboardsScreen) =
-  print "play cancel sound"
   playCancelSound()
   let optLevelMeta = getMetaByBoardId(screen.currentLeaderboard().boardId)
   optLevelMeta.map(proc (it: LevelMeta) = 
