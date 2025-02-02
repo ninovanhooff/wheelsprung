@@ -57,7 +57,7 @@ proc performTest(procToTest: proc(), label: string = "") =
   echo "AllocStats Diff", allocDiff
   echo "Retained: ", leaks
 
-  # Eun a few more iterations. In more memory is retained on every run, it's likely a leak
+  # Run a few more iterations. If more memory is retained on every run, it's likely a leak
 
   for i in 1 .. 3:
     echo "==== run: ", i, label
