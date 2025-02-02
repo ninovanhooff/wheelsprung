@@ -11,13 +11,15 @@ const testLevelPath = "/Users/ninovanhooff/PlaydateProjects/wheelsprung/scripts/
 proc loadLevelTest() =
   discard loadLevel(testLevelPath)
 
-proc gameStateTest() =
-  let level = loadLevel(testLevelPath)
-  for i in 1 .. 3:
-    echo "==== run: ", i  
-    let gameState: GameState = newGameState(level = level)
-    # let gameState: GameState = GameState(level : level)
-    gameState.destroy()
+# newGameState is private. To enable testing, temporarily make it public
+
+# proc gameStateTest() =
+#   let level = loadLevel(testLevelPath)
+#   for i in 1 .. 3:
+#     echo "==== run: ", i
+#     let gameState: GameState = newGameState(level = level)
+#     # let gameState: GameState = GameState(level : level)
+#     gameState.destroy()
 
 proc gameScreenTest() =
   var gameScreen: GameScreen = newGameScreen(testLevelPath)
@@ -68,7 +70,7 @@ proc performTest(procToTest: proc(), label: string = "") =
 
 when isMainModule:
   performTest(loadLevelTest, "loadLevelTest")
-  performTest(gameStateTest, "gameStateTest")
+  # performTest(gameStateTest, "gameStateTest")
   performTest(gameScreenTest, "gameScreenTest")
   echo "All tests passed"
 
