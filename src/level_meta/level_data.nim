@@ -71,7 +71,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name = "Tight Squeeze", path="levels/tight_squeeze.flatty", theme= Desk, hash="E918A9D751CF34C351B10E3EDE3462B4", boardId = "tightsqueeze"),
   newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="5D1E24E5224539001FC68B734BE5F7A0", boardId = "ballisticbowler"),
   newLevelMeta(name= "Ramp of Pages", path="levels/ramp_of_pages.flatty", theme= Desk, hash="FFE4140194259B6B4BD194C078FCA558", boardId = "rampofpages"),
-  newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.flatty", theme= Desk, hash="D86EEFAC67E8076403CD5B5497FC5048", boardId = "ballancingact"),
+  newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.flatty", theme= Desk, hash="AEA07FDE8004427F8959C741F2F5CB31", boardId = "ballancingact"),
 
   newLevelMeta(name= "Go Nuts!", path="levels/paradise.flatty", theme= Space, hash="90C6984E1062ACF94E825CF96EB915B7", boardId = "paradise"),
 ]
