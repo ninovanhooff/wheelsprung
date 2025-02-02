@@ -17,14 +17,21 @@ var saveSlot: SaveSlot
   ## Global singleton
 
 proc getLevelProgress*(id: Path): LevelProgress =
+  if saveSlot.isNil:
+    print "ERROR: saveSlot is nil. CREATING EMPTY saveslot"
+    saveSlot = SaveSlot()
   try:
-    result = saveSlot.progress[id]
-    if result.verify(id) == false:
+    let progress = saveSlot.progress[id]
+    if progress.signature.isNone:
+      raise newException(CatchableError, "No signature found for level progress")
+    if progress.verify(id) == false:
       raise newException(CatchableError, "Integrity check failed for level progress")
+    return progress
   except CatchableError:
-    # print (getCurrentExceptionMsg(), id)
-    result = newLevelProgress(levelId = id, bestTime = none(Milliseconds), hasCollectedStar = false, signature = none(string))
-    saveSlot.progress[id] = result
+    print (getCurrentExceptionMsg(), id)
+    let progress = newLevelProgress(levelId = id, bestTime = none(Milliseconds), hasCollectedStar = false, signature = none(string))
+    saveSlot.progress[id] = progress
+    return progress
 
 proc setLevelProgress*(id: Path, progress: LevelProgress) =
   print "Setting progress for level", id
