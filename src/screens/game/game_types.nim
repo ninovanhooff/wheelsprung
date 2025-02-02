@@ -400,5 +400,6 @@ proc destroy*(state: GameState) =
   print("Destroying game state")
   if state != nil and state.space != nil:
     freeSpaceChildren(state.space)
+    state.space.userData = nil # remove cyclic reference to state
     state.space.destroy()
     state.space = nil

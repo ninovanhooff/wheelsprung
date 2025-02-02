@@ -4,6 +4,7 @@ import std/sugar
 import strformat
 import ../tests/tests
 import common/utils
+import common/integrity
 import globals
 import data_store/user_profile
 import navigation/[navigator, screen, backstack_builder]
@@ -25,6 +26,11 @@ var
   isFirstFrame = true
 
 proc init() {.raises: [].} =
+  try:
+    initIntegrity()
+  except:
+    print("ERROR: Failed to initialize integrity. Saving and loading will be disabled.")
+  
   discard getSaveSlot() # preload user profile
   playdate.display.setRefreshRate(NOMINAL_FRAME_RATE)
   playdate.system.randomize() # seed the random number generator

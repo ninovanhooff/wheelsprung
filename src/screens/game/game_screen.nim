@@ -245,8 +245,9 @@ proc newGameState(
   addGravityZones(state)
   state.addDynamicObjects()
 
-  if background.isNil:
-    initGameBackground(state)
+  when not defined(useHostOS):
+    if background.isNil:
+      initGameBackground(state)
 
   state.killers = space.addKillers(level)
   return state
@@ -293,6 +294,8 @@ proc updateTimers(state: GameState) =
     echo("blinker timeout")
 
 proc addMenuItems(gameScreen: GameScreen) =
+  when defined(useHostOS):
+    return
   if gameScreen.state.isInLiveMode:
     # discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
     #   pushScreen(newSettingsScreen())

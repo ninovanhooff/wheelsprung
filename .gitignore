@@ -24,6 +24,7 @@ stdout.txt
 
 # binary build output
 /scripts/level_hash_updater/update_level_hashes
+/scripts/gc_test/gc_test
 
 # secrets
 release.env

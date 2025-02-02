@@ -10,7 +10,4 @@ if [ ${#WHEELSPRUNG_LEVEL_SALT} -ne 64 ]; then
   exit 1
 fi
 
-## only print the first 7 characters of the salt for security reasons
-echo "level salt run_updater ${WHEELSPRUNG_LEVEL_SALT:0:7}"
-
-nim c -d:useHostOS -r "./scripts/level_hash_updater/update_level_hashes.nim"
+nim c -d:useHostOS -d:nimAllocStats -r "./scripts/gc_test/gc_test.nim"

@@ -52,7 +52,10 @@ var printTStartTime: Seconds = -1f
 
 proc print*(things: varargs[string, `$`]) =
   ## Print any type by calling $ on it to convert it to string
-  playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
+  when defined(useHostOS):
+    echo things.join("\t")
+  else:
+    playdate.system.logToConsole($currentTimeMilliseconds() & ": " &  things.join("\t"))
 
 proc printException*(message: string, e: ref Exception) =
   ## Print an exception
