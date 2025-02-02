@@ -18,6 +18,11 @@ var saveSlot: SaveSlot
 
 type NoSignatureError = object of ValueError
 
+proc setEmptyLevelProgress(levelId: Path): LevelProgress =
+  let progress = newLevelProgress(levelId = levelId, bestTime = none(Milliseconds), hasCollectedStar = false, signature = none(string))
+  saveSlot.progress[levelId] = progress
+  return progress
+
 proc getLevelProgress*(id: Path): LevelProgress =
   if saveSlot.isNil:
     print "ERROR: saveSlot is nil. CREATING EMPTY saveslot"
@@ -30,14 +35,10 @@ proc getLevelProgress*(id: Path): LevelProgress =
       raise newException(CatchableError, "Integrity check failed for level progress")
     return progress
   except NoSignatureError:
-    let progress = newLevelProgress(levelId = id, bestTime = none(Milliseconds), hasCollectedStar = false, signature = none(string))
-    saveSlot.progress[id] = progress
-    return progress
+    return setEmptyLevelProgress(id)
   except CatchableError as e:
-    print getCurrentExceptionMsg(), id, repr(typeof(e))
-    let progress = newLevelProgress(levelId = id, bestTime = none(Milliseconds), hasCollectedStar = false, signature = none(string))
-    saveSlot.progress[id] = progress
-    return progress
+    print getCurrentExceptionMsg(), id
+    return setEmptyLevelProgress(id)
 
 proc setLevelProgress*(id: Path, progress: LevelProgress) =
   print "Setting progress for level", id
