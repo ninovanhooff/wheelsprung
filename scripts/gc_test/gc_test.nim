@@ -1,7 +1,7 @@
 import std/importutils
 
 import screens/screen_types
-import screens/game/game_screen
+import screens/game/game_screen {.all.}
 import screens/game/game_level_loader
 import screens/game/game_types
 import navigation/screen
@@ -11,15 +11,13 @@ const testLevelPath = "/Users/ninovanhooff/PlaydateProjects/wheelsprung/scripts/
 proc loadLevelTest() =
   discard loadLevel(testLevelPath)
 
-# newGameState is private. To enable testing, temporarily make it public
-
-# proc gameStateTest() =
-#   let level = loadLevel(testLevelPath)
-#   for i in 1 .. 3:
-#     echo "==== run: ", i
-#     let gameState: GameState = newGameState(level = level)
-#     # let gameState: GameState = GameState(level : level)
-#     gameState.destroy()
+proc gameStateTest() =
+  let level = loadLevel(testLevelPath)
+  for i in 1 .. 3:
+    echo "==== run: ", i
+    let gameState: GameState = newGameState(level = level)
+    # let gameState: GameState = GameState(level : level)
+    gameState.destroy()
 
 proc gameScreenTest() =
   var gameScreen: GameScreen = newGameScreen(testLevelPath)
@@ -70,7 +68,7 @@ proc performTest(procToTest: proc(), label: string = "") =
 
 when isMainModule:
   performTest(loadLevelTest, "loadLevelTest")
-  # performTest(gameStateTest, "gameStateTest")
+  performTest(gameStateTest, "gameStateTest")
   performTest(gameScreenTest, "gameScreenTest")
   echo "All tests passed"
 
