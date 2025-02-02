@@ -3,8 +3,21 @@ import strutils
 import common/shared_types
 import murmurhash
 
-const LevelSalt {.strdefine.}: string = "NO_LEVEL_SALT" # Replaced by actual value in config.nims
-const GameResultSalt {.strdefine.}: string = "NO_GAME_RESULT_SALT"
+const
+  NO_LEVEL_SALT = "NO_LEVEL_SALT"
+  NO_GAME_RESULT_SALT = "NO_GAME_RESULT_SALT"
+  SALT_LENGTH = 64
+  LevelSalt {.strdefine.}: string = NO_LEVEL_SALT # Replaced by actual value in config.nims
+  GameResultSalt {.strdefine.}: string = NO_GAME_RESULT_SALT
+
+proc initIntegrity*() =
+  ## This proc is called from the main init proc in the main file
+  ## It is used to set the actual values of the salts
+  if LevelSalt == NO_LEVEL_SALT or LevelSalt.len != 64:
+    raise newException(ValueError, "LevelSalt not set")
+    
+  if GameResultSalt == NO_GAME_RESULT_SALT or GameResultSalt.len != 64:
+    raise newException(ValueError, "GameResultSalt not set")
 
 proc murmurHash(s: string): string =
   let arr = MurmurHash3_x64_128(s)
