@@ -293,6 +293,8 @@ proc updateTimers(state: GameState) =
     echo("blinker timeout")
 
 proc addMenuItems(gameScreen: GameScreen) =
+  when defined(useHostOS):
+    return
   if gameScreen.state.isInLiveMode:
     # discard playdate.system.addMenuItem(settingsLabel, proc(menuItem: PDMenuItemButton) =
     #   pushScreen(newSettingsScreen())
