@@ -161,9 +161,10 @@ proc frameRepeat(obj: LevelLayerEntity): int32 =
 
 proc readDataFileContents(path: string): string {.raises: [Exception].} =
   try:
-    let playdateFile = playdate.file
-    let contentString = playdateFile.open(path, kFileReadAny).readString()
-    return contentString
+    when defined(useHostOS):
+      return readFile(path)
+    else:
+      return playdate.file.open(path, kFileReadAny).readString()
   except:
     print("Could not read " & $path)
     print(getCurrentExceptionMsg())
