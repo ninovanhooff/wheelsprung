@@ -30,12 +30,19 @@ proc gameScreenTest() =
   gameScreen.destroy()
 
 proc performTest(procToTest: proc(), label: string = "") =
+  # setup:
+  # pre-allocate memory for testing variables so that they don't affect the results
   var leaks: int = 0
   var allocDiff: AllocStats = getAllocStats()
   var beforeAllocStats: AllocStats = getAllocStats()
   var afterAllocStats: AllocStats = getAllocStats()
+  privateAccess(AllocStats)
   
+  # start with a clean slate
   GC_fullCollect()
+
+  # the first run is special because it initializes the imported modules
+  # if memory is retained after this run, it's not necessarily a leak
   echo "====== run: Initial ===== ", label
   beforeAllocStats = getAllocStats()
 
@@ -44,12 +51,13 @@ proc performTest(procToTest: proc(), label: string = "") =
   
   afterAllocStats = getAllocStats()
   allocDiff = afterAllocStats - beforeAllocStats
-  privateAccess(AllocStats)
   leaks = allocDiff.allocCount - allocDiff.deallocCount
   echo "AllocStats Before", beforeAllocStats
   echo "AllocStats After", afterAllocStats
   echo "AllocStats Diff", allocDiff
   echo "Retained: ", leaks
+
+  # Eun a few more iterations. In more memory is retained on every run, it's likely a leak
 
   for i in 1 .. 3:
     echo "==== run: ", i, label
