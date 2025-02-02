@@ -245,8 +245,9 @@ proc newGameState(
   addGravityZones(state)
   state.addDynamicObjects()
 
-  if background.isNil:
-    initGameBackground(state)
+  when not defined(useHostOS):
+    if background.isNil:
+      initGameBackground(state)
 
   state.killers = space.addKillers(level)
   return state
