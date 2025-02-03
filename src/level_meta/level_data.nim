@@ -41,7 +41,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Tutorial: Balance", path="levels/tutorial_leaning.flatty", theme= Bath, hash="14AB64B792F3289B4543D35043DA2006" , boardId = "tutorialbalance"),
   newLevelMeta(name= "Leap of Faith", path="levels/leap_of_faith.flatty", theme= Desk, hash="EEC78847587BE6ACC3AB2E148A378E16", boardId = "leapoffaith"),
   newLevelMeta(name= "Towel Trial", path="levels/towel_trial.flatty", theme= Bath, hash="DA0A2C427905CE6AFE0C517267CD1BDE", boardId = "toweltrial"),
-  newLevelMeta(name= "Ripple Ride", path="levels/hills.flatty", theme= Bath, hash="B761D4E4CE698D1098E38C18745B900B", boardId = "hills"),
+  newLevelMeta(name= "Ripple Ride", path="levels/hills.flatty", theme= Bath, hash="E58BDA21643B1DD4ADCF5D7915A64E8A", boardId = "hills"),
   newLevelMeta(name= "Laundry Loop", path="levels/globe_of_death.flatty", theme= Bath, hash="496977DBF544B5430FFCC5F8F6550547", boardId = "laundryloop"),
   newLevelMeta(name= "Ripcurl Rush", path="levels/looping.flatty", theme= Bath, hash="ED9C09C0A119D9CE9FDC923B2235512D", boardId = "ripcurlrush"),
 
