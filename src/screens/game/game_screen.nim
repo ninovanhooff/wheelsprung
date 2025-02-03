@@ -71,7 +71,6 @@ proc enableHints*(state: var GameState) =
     print "ERROR: No hints available for this level"
     return
     
-  state.background = nil
   state.hintsEnabled = true
   state.initGameBackground()
 

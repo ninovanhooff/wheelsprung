@@ -105,14 +105,17 @@ proc initGeometryBackground(state: GameState)=
 proc initGameBackground*(state: GameState) =
   let level = state.level
 
+  if level.background.isSome:
+    state.background = level.background.get
+
   if state.hintsEnabled:
     try:
-      state.background = gfx.newBitmap(state.level.hintsPath.get)
+      gfx.pushContext(state.background)
+      gfx.newBitmap(state.level.hintsPath.get).draw(0, 0, kBitmapUnflipped)
+      gfx.popContext()
     except:
       print "Hints Image load failed:", getCurrentExceptionMsg()
-  elif level.background.isSome:
-    state.background = level.background.get
-  else:
+  elif state.background.isNil:
     state.initGeometryBackground()
 
 proc drawPolygonDepth*(state: GameState) =
