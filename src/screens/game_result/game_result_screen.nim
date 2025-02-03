@@ -75,9 +75,15 @@ proc newGameResultScreen*(gameResult: GameResult): GameResultScreen {.raises: []
     hintOfferCount[gameResult.levelId] = timesOffered + 1
 
   var currentActionIndex = gameResult.isNewPersonalBest(previousProgress).int32 # if new personal best, select next / level select by default. Else: select restart
-  if nextPath.isNone and resultType == GameResultType.LevelComplete:
-    availableActions.insert(GameResultAction.ShowEndingCutscene, 0)
-    currentActionIndex = 0
+
+  # when the last level ends in victory, show ending cutscene as first option. 
+  # If it is a game-over, people who struggle too much might want to see the ending cutscene. So we offer it as the last option
+  if nextPath.isNone:
+    let position = if resultType == GameResultType.LevelComplete: 0 else: availableActions.len
+    availableActions.insert(GameResultAction.ShowEndingCutscene, position)
+    if resultType == GameResultType.LevelComplete:
+      currentActionIndex = 0
+    
 
   let backgroundImageName = if resultType == GameResultType.GameOver: "game-over-bg" else: "level-complete-bg"
   let backgroundImage = getOrLoadBitmap("images/game_result/" & backgroundImageName)
@@ -111,7 +117,7 @@ proc label(resultType: GameResultType, gameResultAction: GameResultAction): stri
   of GameResultAction.Next: return if resultType == GameResultType.LevelComplete: "Next" else: "Skip"
   of GameResultAction.ShowHints: return "Show hints"
   of GameResultAction.ShowReplay: return "Show replay"
-  of GameResultAction.ShowEndingCutscene: return "The End?"
+  of GameResultAction.ShowEndingCutscene: return if resultType == GameResultType.LevelComplete: "The End?" else: "Skip"
 
 const buttonTextCenterX = 100
 
