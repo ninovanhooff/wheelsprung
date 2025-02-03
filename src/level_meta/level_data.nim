@@ -70,10 +70,10 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name = "Time Traveler", path="levels/time_traveler.flatty", theme= Desk, hash="FAF8E4D22D57ACD6899241B6BA547188", boardId = "timetraveler"),
   newLevelMeta(name = "Tight Squeeze", path="levels/tight_squeeze.flatty", theme= Desk, hash="E918A9D751CF34C351B10E3EDE3462B4", boardId = "tightsqueeze"),
   newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="E64D63A878E1B5F6D70F6AB9BDFA539D", boardId = "ballisticbowler"),
-  newLevelMeta(name= "Ramp of Pages", path="levels/ramp_of_pages.flatty", theme= Desk, hash="23E7CBD7C2D96DEC5A088415F231288C", boardId = "rampofpages"),
+  newLevelMeta(name= "Ramp of Pages", path="levels/ramp_of_pages.flatty", theme= Desk, hash="E02BB5E6992286B00F0475E70AAFCBD0", boardId = "rampofpages"),
   newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.flatty", theme= Desk, hash="5E550D482B16A933C195189AFD5BF2A1", boardId = "ballancingact"),
 
-  newLevelMeta(name= "Go Nuts!", path="levels/paradise.flatty", theme= Space, hash="90C6984E1062ACF94E825CF96EB915B7", boardId = "paradise"),
+  newLevelMeta(name= "Go Nuts!", path="levels/paradise.flatty", theme= Space, hash="5BB162C29A8152C40CBDAA119087D4F6", boardId = "paradise"),
 ]
   .map(meta => (meta.path, meta)) # use path as key
   .toOrderedTable
