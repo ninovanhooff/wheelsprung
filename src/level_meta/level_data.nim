@@ -46,7 +46,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name= "Ripcurl Rush", path="levels/looping.flatty", theme= Bath, hash="ED9C09C0A119D9CE9FDC923B2235512D", boardId = "ripcurlrush"),
 
   newLevelMeta(name= "Novel Navigations", path="levels/novel_navigations.flatty", theme= Bookshelf, hash="35D56F2B63EF2C082EBB892D45730FCF", boardId = "novelnavigations"),
-  newLevelMeta(name= "Shelf Swinger", path="levels/shelf_swinger.flatty", theme= Bookshelf, hash="F982995B1460C9B2AA0BF991A8947D40", boardId = "shelfswinger"),
+  newLevelMeta(name= "Shelf Swinger", path="levels/shelf_swinger.flatty", theme= Bookshelf, hash="3B16FA0E701278DD7D97134F4567B5AB", boardId = "shelfswinger"),
   newLevelMeta(name= "Hooked", path="levels/hooked.flatty", theme= Bookshelf, hash="886B477BE59DF08F11C5E718760F234B", boardId = "hooked"),
   newLevelMeta(name= "Dominoes", path="levels/dominoes.flatty", theme= Bookshelf, hash="3916A43742286FCFDE36BB5F2B89B513", boardId = "dominoes"),
   newLevelMeta(name= "Rollercoaster", path="levels/rollercoaster.flatty", theme= Bookshelf, hash="51332761CC207FFB4D6A64204B23EE58", boardId = "rollercoaster"),
@@ -70,7 +70,7 @@ let officialLevels*: OrderedTable[Path, LevelMeta] = @[
   newLevelMeta(name = "Time Traveler", path="levels/time_traveler.flatty", theme= Desk, hash="FAF8E4D22D57ACD6899241B6BA547188", boardId = "timetraveler"),
   newLevelMeta(name = "Tight Squeeze", path="levels/tight_squeeze.flatty", theme= Desk, hash="E918A9D751CF34C351B10E3EDE3462B4", boardId = "tightsqueeze"),
   newLevelMeta(name= "Ballistic Bowler", path="levels/ballistic_bowler.flatty", theme= Desk, hash="E64D63A878E1B5F6D70F6AB9BDFA539D", boardId = "ballisticbowler"),
-  newLevelMeta(name= "Ramp of Pages", path="levels/ramp_of_pages.flatty", theme= Desk, hash="FFE4140194259B6B4BD194C078FCA558", boardId = "rampofpages"),
+  newLevelMeta(name= "Ramp of Pages", path="levels/ramp_of_pages.flatty", theme= Desk, hash="23E7CBD7C2D96DEC5A088415F231288C", boardId = "rampofpages"),
   newLevelMeta(name= "Ballancing Act", path="levels/ballancing_act.flatty", theme= Desk, hash="5E550D482B16A933C195189AFD5BF2A1", boardId = "ballancingact"),
 
   newLevelMeta(name= "Go Nuts!", path="levels/paradise.flatty", theme= Space, hash="90C6984E1062ACF94E825CF96EB915B7", boardId = "paradise"),
