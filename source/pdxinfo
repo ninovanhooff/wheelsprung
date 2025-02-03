@@ -1,7 +1,7 @@
 name=Wheelsprung
 author=Nino van Hooff
-description=Motorcross platformer
+description=Motocross platformer
 bundleId=com.ninovanhooff.wheelsprung
-version=0.12.0
-buildNumber=12
+version=1.0.0
+buildNumber=14
 imagePath=SystemAssets
