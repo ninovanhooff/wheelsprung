@@ -14,6 +14,7 @@ import std/sugar
 import std/options
 import screen
 import common/utils
+import common/graphics_types
 import playdate/api
 
 type Navigator = () -> (void)
@@ -129,7 +130,7 @@ proc updateNavigator*(): int =
     result = 0
   else:
     ## Update the active screen in a separate graphics context
-    playdate.graphics.pushContext(nil)
+    playdate.graphics.pushContext(LCD_BITMAP_NONE)
     result = getActiveScreen().update()
     ## Ensure no graphics state is leaked
     playdate.graphics.popContext()
