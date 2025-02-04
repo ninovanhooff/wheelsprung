@@ -60,6 +60,17 @@ cmake --build .
 The resulting lib is placed in the [lib](./lib) folder.
 
 
+
+### Level Editor build
+The level editor build contains binaries for Windows and Mac simulators + device.
+
+1. Execute Build & Run Simulator PDX (mac build)
+2. Execute Build & Run Device PDX
+3. On windows, execute `nimble simulate`
+4. Copy the generated `pdex.dll` from the winfows build output to `wheelsprung.pdx` in the Max outputs. This should now contain `pdex.dll`, `pdex.dyLib`, and `pdex.bin`
+5. Executue `./scripts/bundle_editor` on the mac machine
+
+
 [pdnim]: https://github.com/samdze/playdate-nim/tree/main/playdate_example
 [editor]: https://github.com/ninovanhooff/wheelsprung/wiki/Level-Editor
 [tdm-gcc]: https://jmeubank.github.io/tdm-gcc/
