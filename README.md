@@ -30,6 +30,20 @@ All the necessities to run on Linux should be in place, but the Linux build targ
 ## Development
 As noted above, the level files are not included. This may be a cause for crashes.
 
+### Analyze device crashes
+
+Reboot to Datadisk and open `crashlox.txt`. Look at the `pc` value.
+
+If PC value starts with `0x6` on rev A or `0x9` on revB, the crash is in game code
+
+Remove the aforementioned prefixes. eg. for `pc:60015036` use `0x15036` `and run
+
+```
+arm-none-eabi-gdb ./source/pdex.elf
+(gdb) info line *0x15036
+```
+
+
 
 ### Level hash updater
 
