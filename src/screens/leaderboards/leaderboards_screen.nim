@@ -112,15 +112,19 @@ proc scoreIdxHigh(screen: LeaderboardsScreen): int =
     return -1
 
 
-proc refreshLeaderboards*(screen: LeaderboardsScreen) =
+proc refreshLeaderboards*(screen: LeaderboardsScreen, updatedBoardId: Option[BoardId] = none(BoardId)) =
   let scoreboards = getScoreboardStates()
   screen.leaderboards = scoreboards.mapIt(it.toLeaderboard())
   if screen.currentLeaderboardIdx > screen.leaderboards.high:
     screen.currentLeaderboardIdx = screen.leaderboards.high
   if screen.currentLeaderboardPageIdx > screen.scoreIdxHigh div LEADERBOARDS_PAGE_SIZE:
     screen.currentLeaderboardPageIdx = screen.scoreIdxHigh div LEADERBOARDS_PAGE_SIZE
-  selectPageContainingPlayer(screen)
-  screen.isDirty = true
+
+  if updatedBoardId.get("") == screen.currentLeaderboard.boardId:
+    # if the current leaderboard was updated, it may be that the player's position moved to
+    # a different page
+    selectPageContainingPlayer(screen)
+    screen.isDirty = true
 
 proc updateInput(screen: LeaderboardsScreen) =
   let buttonState = playdate.system.getButtonState()
@@ -178,7 +182,7 @@ method resume*(screen: LeaderboardsScreen): bool =
 
   addScoreboardChangedCallback(
     LEADERBOARDS_SCOREBOARD_UPDATED_CALLBACK_KEY,
-    proc(boardId: BoardId) = screen.refreshLeaderboards
+    proc(boardId: BoardId) = screen.refreshLeaderboards(some(boardId))
   )
 
   discard playdate.system.addMenuItem("Refresh", proc(menuItem: PDMenuItemButton) =
