@@ -96,8 +96,6 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
       let scoresList = scoresListResult.result
       print "===== NETWORK Scores OK"#, $scoresList
       scoreboardsCache.setScoreboard(scoresList)
-      if scoresList.scores.len == 10:
-        setPlayerName(scoresList.scores[9].player)
     of PDResultError: 
       print "===== NETWORK Scores ERROR", scoresListResult.message
     of PDResultUnavailable:
