@@ -74,7 +74,11 @@ proc persistGameResult*(gameResult: GameResult) =
   except:
     print("Failed to persist game result", getCurrentExceptionMsg())
 
-proc uploadLocalScores*() =
+proc uploadOneLocalScore*() =
+  ## In case a previous score submission failed, this function will retry to submit the score
+  ## Only submits one score per invocation. 
+  ## Queueing is not implemented yet; and the scoreboard API can get overwhelmed resulting in a freeze (watchdog)
   for (path, progress) in getSaveSlot().progress.pairs:
     if progress.bestTime.isSome:
       progress.submitScoreToScoreboard()
+      return

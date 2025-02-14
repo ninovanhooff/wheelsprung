@@ -94,7 +94,7 @@ proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> voi
     case scoresListResult.kind
     of PDResultSuccess:
       let scoresList = scoresListResult.result
-      print "===== NETWORK Scores OK"#, $scoresList
+      print "===== NETWORK Scores OK", scoresList.boardID
       scoreboardsCache.setScoreboard(scoresList)
     of PDResultError: 
       print "===== NETWORK Scores ERROR", scoresListResult.message
