@@ -389,12 +389,13 @@ method update*(gameScreen: GameScreen): int =
     state.updateCamera()
   else:
     state.updateCameraPid()
-  drawGame(addr state) # todo pass as object?
+  drawGame(state)
   return 1
 
 method destroy*(gameScreen: GameScreen) =
   gameScreen.pause()
   gameScreen.state.destroy()
+  gameScreen.state = nil
 
 method setResult*(gameScreen: GameScreen, screenResult: ScreenResult) =
   if screenResult.screenType != gameScreen.screenType: return

@@ -274,8 +274,7 @@ proc drawPlayer(state: GameState) =
   riderLowerArmImageTable.drawRotated(state.riderLowerArm, state)
   riderUpperArmImageTable.drawRotated(state.riderUpperArm, state)
 
-proc drawGame*(statePtr: ptr GameState) =
-  let state = statePtr[]
+proc drawGame*(state: GameState) =
   let level = state.level
   let camera = state.camera
   let camVertex = camera.toVertex()
@@ -348,10 +347,10 @@ proc drawGame*(statePtr: ptr GameState) =
     drawPlayer(state)
 
   if debugDrawShapes:
-    eachShape(statePtr.space, shapeIter, statePtr)
+    eachShape(state.space, shapeIter, unsafeaddr state)
 
   if debugDrawConstraints:
-    eachConstraint(statePtr.space, constraintIter, statePtr)
+    eachConstraint(state.space, constraintIter, unsafeaddr state)
     let forkImpulse: int32 = state.forkArmSpring.impulse.int32
     gfx.fillRect(300, 50, 10, forkImpulse, kColorBlack)
 
@@ -365,7 +364,7 @@ proc drawGame*(statePtr: ptr GameState) =
     state.drawGameEndedOverlay()
 proc createHitstopScreen*(state: GameState, collisionShape: Shape): HitStopScreen =
   # Creates hitstopscreen without menu items
-  drawGame(unsafeAddr state)
+  drawGame(state)
   let bitmapA = gfx.copyFrameBufferBitmap()
 
   let body = collisionShape.body
