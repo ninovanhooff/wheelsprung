@@ -124,7 +124,8 @@ proc refreshLeaderboards*(screen: LeaderboardsScreen, updatedBoardId: Option[Boa
     # if the current leaderboard was updated, it may be that the player's position moved to
     # a different page
     selectPageContainingPlayer(screen)
-    screen.isDirty = true
+  # always set screen to  dirty. Even if the current board was not updated, the loading count might have changed
+  screen.isDirty = true
 
 proc updateInput(screen: LeaderboardsScreen) =
   let buttonState = playdate.system.getButtonState()
