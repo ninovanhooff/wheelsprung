@@ -36,7 +36,7 @@ proc getLevelProgress*(id: Path): LevelProgress =
     return progress
   except NoSignatureError:
     return setEmptyLevelProgress(id)
-  except CatchableError as e:
+  except CatchableError:
     print getCurrentExceptionMsg(), id
     return setEmptyLevelProgress(id)
 

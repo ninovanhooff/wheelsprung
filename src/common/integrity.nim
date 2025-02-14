@@ -13,10 +13,10 @@ const
 proc initIntegrity*() =
   ## This proc is called from the main init proc in the main file
   ## It is used to set the actual values of the salts
-  if LevelSalt == NO_LEVEL_SALT or LevelSalt.len != 64:
+  if LevelSalt == NO_LEVEL_SALT or LevelSalt.len != SALT_LENGTH:
     raise newException(ValueError, "LevelSalt not set")
     
-  if GameResultSalt == NO_GAME_RESULT_SALT or GameResultSalt.len != 64:
+  if GameResultSalt == NO_GAME_RESULT_SALT or GameResultSalt.len != SALT_LENGTH:
     raise newException(ValueError, "GameResultSalt not set")
 
 proc murmurHash(s: string): string =

@@ -89,7 +89,7 @@ proc notifyScoreboardsChanged(boardId: BoardId) =
 
 let emptyResultHandler = proc(result: PDResult[PDScoresList]) = discard
 proc refreshBoard(boardId: BoardId, resultHandler: PDResult[PDScoresList] -> void = emptyResultHandler) =
-  let resultCode = playdate.scoreboards.getScores(boardId) do (scoresListResult: PDResult[PDScoresList]) -> void:
+  playdate.scoreboards.getScores(boardId) do (scoresListResult: PDResult[PDScoresList]) -> void:
     boardId.decreaseLoadingCount()
     case scoresListResult.kind
     of PDResultSuccess:

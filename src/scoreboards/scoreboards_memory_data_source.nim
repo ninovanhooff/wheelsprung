@@ -35,15 +35,4 @@ proc createScoreboards*(cache: ScoreboardsMemoryDataSource, boardIds: seq[string
 proc setScoreboard*(cache: ScoreboardsMemoryDataSource, scoreboard: PDScoresList) =
   cache.scoreboards[scoreboard.boardID] = scoreboard
 
-proc addScore*(cache: ScoreboardsMemoryDataSource, boardID: string, score: PDScore) =
-  let board = cache.getScoreboard(boardID)
-  if board.isSome:
-    var updatedBoard = board.get
-    var newScores = updatedBoard.scores
-    newScores.add(score)
-    updatedBoard.scores = newScores
-    cache.scoreboards[boardID] = updatedBoard
-  else:
-    print "ERROR: score not saved. Scoreboards memory cache not initialised. Could not find board with ID: ", boardID
-
 
