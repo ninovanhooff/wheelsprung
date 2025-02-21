@@ -11,19 +11,19 @@ import data_store/user_profile
 import scoreboards/scoreboards_service
 import playdate/api
 
-proc submitScoreToScoreboard(progress: LevelProgress) =
+proc submitScoreToScoreboard(progress: LevelProgress): bool =
   if progress.signature.isNone:
     print "Not submitting levelprogress to Scoreboards. Signature is None"
-    return
+    return false
 
   let boardId = getLevelMeta(progress.levelId).scoreboardId
   if boardId.len == 0:
     print fmt"Not submitting levelprogress for {progress.levelId} to Scoreboards. No scoreboardId"
-    return
+    return false
 
   let score = progress.calculateScore()
   if not submitScore(boardId, score):
-    return
+    return false
 
   # get all official levels which have a scoreboardId and sum the scores
   var totalScore = 0'u32
@@ -32,9 +32,10 @@ proc submitScoreToScoreboard(progress: LevelProgress) =
       let levelScore = getLevelProgress(path).calculateScore()
       if levelScore <= 0:
         print "Not submitting total score because no score for", levelMeta.scoreboardId
-        return
+        return false
       totalScore += levelScore
   submitLeaderboardScore(totalScore)
+  return true
 
 proc updateLevelProgress*(gameResult: GameResult, save: bool) =
   let id = gameResult.levelId
@@ -80,5 +81,5 @@ proc uploadOneLocalScore*() =
   ## Queueing is not implemented yet; and the scoreboard API can get overwhelmed resulting in a freeze (watchdog)
   for (path, progress) in getSaveSlot().progress.pairs:
     if progress.bestTime.isSome:
-      progress.submitScoreToScoreboard()
-      return
+      if progress.submitScoreToScoreboard():
+        return # one score was submitted, quit
