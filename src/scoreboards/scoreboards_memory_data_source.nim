@@ -1,7 +1,6 @@
 {.push raises: [].}
 
 import playdate/api
-import common/utils
 import std/options
 import std/tables
 import scoreboards_types

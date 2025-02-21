@@ -60,7 +60,7 @@ proc updateLevelProgress*(gameResult: GameResult, save: bool) =
   # only official levels need a content hash
   if levelMeta == nil or levelMeta.contentHash == gameResult.levelHash:
     progress.sign()
-    submitScoreToScoreboard(progress)
+    discard submitScoreToScoreboard(progress)
   else:
     print "WARN Level content hash mismatch for level", id
     progress.signature = none(string)
