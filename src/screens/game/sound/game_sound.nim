@@ -33,7 +33,7 @@ proc initGameSound*() =
 proc playFinishSound*() =
   if finishPlayer == nil:
     finishPlayer = getOrLoadSamplePlayer(SampleId.Finish)
-  finishPlayer.playVariation()
+  finishPlayer.play()
 
 proc playCoinSound*(coinProgress: float32) =
   ## coinProgress the fraction of coins collected
