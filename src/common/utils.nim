@@ -75,6 +75,14 @@ proc markStartTime*() =
   if defined(ENABLE_PRINT_T):
     printTStartTime = playdate.system.getElapsedTime
 
+proc safeEnumName*[T: enum](val: T): string =
+  ## Return the name of the enum if known, otherwise a fallback with the ordinal value
+  let ordVal = val.ord
+  if ordVal >= T.low.ord and ordVal <= T.high.ord:
+    result = $val
+  else:
+    result = "Unknown(" & $ordVal & ")"
+
 ### Bench / trace / profile
 
 var benchTable: Table[string, seq[float32]] = initTable[string, seq[float32]]()

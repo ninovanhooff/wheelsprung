@@ -63,8 +63,6 @@ proc init() {.raises: [].} =
 proc getFrameTime(): float32 =
   return 1.0f / playdate.display.getRefreshRate()
 
-
-
 proc update() {.raises: [].} =
   let frameStartTime = getElapsedSeconds()
   discard updateNavigator()
@@ -169,6 +167,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   elif event == kEventKeyPressed:
     discard
   else:
-    print("unhandled event:" & $event & " keycode:" & $keycode)
+    print("unhandled event:" & safeEnumName(event) & " keycode:" & $keycode)
+      
 # Used to setup the SDK entrypoint
 initSDK()

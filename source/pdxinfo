@@ -1,7 +1,7 @@
 name=Wheelsprung
 author=Nino van Hooff
-description=Motocross platformer
+description=A motorcross themed physics game for the Playdate handheld.
 bundleId=com.ninovanhooff.wheelsprung
-version=1.0.2
-buildNumber=16
+version=1.0.3
+buildNumber=17
 imagePath=SystemAssets
