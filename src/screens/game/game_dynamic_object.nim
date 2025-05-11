@@ -69,11 +69,11 @@ proc getImpactPlayer*(objectType: DynamicObjectType): Option[SamplePlayer] =
 let balloonVelocityFunc: BodyVelocityFunc = proc(body: Body, gravity: Vect, damping: Float, dt: Float) {.cdecl.} =
   print "balloonVelocityFunc: ", body.repr
 
-  # call the default velocity function
-  updateVelocity(body, gravity, damping, dt)
-
   # apply a force to the body in the direction of the world-up vector
   body.applyForceAtWorldPoint(v(0f, -100f), body.position)
+
+  # call the default velocity function
+  updateVelocity(body, gravity, damping, dt)
 
 proc addDynamicObjects*(state: GameState) =
   
@@ -105,6 +105,7 @@ proc addDynamicObjects*(state: GameState) =
           shapeFilter = GameShapeFilters.DynamicObject,
           userData = cast[DataPointer](obj.objectType)
         )
+    # todo add buoyancy to editor and only apply to buoyant objects
     circleObject.velocityUpdateFunc = balloonVelocityFunc
 
     let circleDynamicObject = newDynamicObject(
