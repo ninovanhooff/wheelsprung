@@ -280,16 +280,3 @@ proc updateDynamicObjects*(state: GameState) =
   for optPlayer in rollPlayers.values:
     if optPlayer.isSome:
       optPlayer.get.update()
-
-  # if state.isGameStarted and (not state.isGamePaused):
-  #   for obj in state.dynamicObjects:
-  #     if obj.shape.kind == cpCircleShape:
-  #       # make circles float 
-  #       # todo: only balloons
-        
-  #       let body = obj.shape.body
-  #       print "circle: ", obj.shape.repr
-  #       # need to use WorldPoint because the force vector is in world coordinates
-  #       # the force should always be applied in the "up" direction of the world, not the body orientation
-  #       # todo use a custom update function instead: https://chatgpt.com/share/6820ab66-e870-8007-87c1-a83ea5ee6493
-  #       body.applyForceAtWorldPoint(v(0f, -100f), body.position)
