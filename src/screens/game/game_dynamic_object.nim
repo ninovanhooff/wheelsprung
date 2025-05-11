@@ -66,6 +66,15 @@ proc getImpactPlayer*(objectType: DynamicObjectType): Option[SamplePlayer] =
     impactPlayers[objectType] = player
     return player
 
+let balloonVelocityFunc: BodyVelocityFunc = proc(body: Body, gravity: Vect, damping: Float, dt: Float) {.cdecl.} =
+  print "balloonVelocityFunc: ", body.repr
+
+  # call the default velocity function
+  updateVelocity(body, gravity, damping, dt)
+
+  # apply a force to the body in the direction of the world-up vector
+  body.applyForceAtWorldPoint(v(0f, -100f), body.position)
+
 proc addDynamicObjects*(state: GameState) =
   
   let space = state.space
@@ -87,9 +96,7 @@ proc addDynamicObjects*(state: GameState) =
     )
 
   for obj in state.level.dynamicCircles:
-    state.dynamicObjects.add(
-      newDynamicObject(
-        shape = space.addCircle(
+    let (circleObject, circleShape) = space.addCircle(
           obj.position, obj.radius, 
           mass = obj.mass,
           friction = obj.friction,
@@ -97,9 +104,16 @@ proc addDynamicObjects*(state: GameState) =
           collisionType=GameCollisionTypes.DynamicObject,
           shapeFilter = GameShapeFilters.DynamicObject,
           userData = cast[DataPointer](obj.objectType)
-        )[1], # get shape from tuple
+        )
+    circleObject.velocityUpdateFunc = balloonVelocityFunc
+
+    let circleDynamicObject = newDynamicObject(
+        shape = circleShape,
         objectType = obj.objectType,
       )
+
+    state.dynamicObjects.add(
+      circleDynamicObject
     )
 
 proc updateRollSound(objectType: DynamicObjectType, state: GameState) =
@@ -266,3 +280,16 @@ proc updateDynamicObjects*(state: GameState) =
   for optPlayer in rollPlayers.values:
     if optPlayer.isSome:
       optPlayer.get.update()
+
+  # if state.isGameStarted and (not state.isGamePaused):
+  #   for obj in state.dynamicObjects:
+  #     if obj.shape.kind == cpCircleShape:
+  #       # make circles float 
+  #       # todo: only balloons
+        
+  #       let body = obj.shape.body
+  #       print "circle: ", obj.shape.repr
+  #       # need to use WorldPoint because the force vector is in world coordinates
+  #       # the force should always be applied in the "up" direction of the world, not the body orientation
+  #       # todo use a custom update function instead: https://chatgpt.com/share/6820ab66-e870-8007-87c1-a83ea5ee6493
+  #       body.applyForceAtWorldPoint(v(0f, -100f), body.position)
