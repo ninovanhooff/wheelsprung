@@ -67,13 +67,10 @@ proc getImpactPlayer*(objectType: DynamicObjectType): Option[SamplePlayer] =
     return player
 
 let balloonVelocityFunc: BodyVelocityFunc = proc(body: Body, gravity: Vect, damping: Float, dt: Float) {.cdecl.} =
-  print "balloonVelocityFunc: ", body.repr
+  print "balloonVelocityFunc: ", damping, dt #todo remove print for performance
 
-  # apply a force to the body in the direction of the world-up vector
-  body.applyForceAtWorldPoint(v(0f, -100f), body.position)
-
-  # call the default velocity function
-  updateVelocity(body, gravity, damping, dt)
+  # call the default velocity function with the modified gravity and slightly stronger damping (1.0 is no damping)
+  updateVelocity(body, gravity + v(0f, -140f), damping * 0.995f, dt)
 
 proc addDynamicObjects*(state: GameState) =
   
