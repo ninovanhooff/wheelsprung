@@ -181,6 +181,11 @@ proc handleInput*(state: GameState, liveButtonState: PDButtonState, onShowGameRe
 
   let providedButtonState = state.inputProvider.getButtonState(state.frameCounter)
 
+  if state.isGameStarted and state.isInLiveMode and {kButtonA, kButtonB, kButtonUp} <= liveButtonState.current:
+    print("instant restart pressed")
+    onRestartGamePressed()
+    return
+
   if not state.isGameStarted and providedButtonState.pushed.anyButton:
     state.isGameStarted = true
 

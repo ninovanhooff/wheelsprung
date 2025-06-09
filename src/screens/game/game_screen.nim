@@ -75,7 +75,8 @@ proc enableHints*(state: var GameState) =
   state.initGameBackground()
 
 proc onRestartGamePressed(screen: GameScreen) =
-  persistGameResult(screen.state.gameResult.get)
+  if screen.state.gameResult.isSome:
+    persistGameResult(screen.state.gameResult.get)
   screen.onResetGame()
 
 proc buildHitStopScreen(state: GameState, collisionShape: Shape): HitStopScreen {.raises: [].} =
