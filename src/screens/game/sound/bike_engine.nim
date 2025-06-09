@@ -50,8 +50,11 @@ proc updateBikeEngine*(state: GameState) =
     if currentPlayer != targetPlayer:
         fadeoutPlayer = currentPlayer
         currentPlayer = targetPlayer
-        currentPlayer.play(0, 1.0f) 
         currentPlayer.volume = maxVolume
+        
+    if currentPlayer.isPlaying == false:
+        # after a quick level restart, the player might not be playing https://trello.com/c/xtPKx1cH
+        currentPlayer.play(0, 1.0f) 
 
     # rate
     let playerBaseRpm: float = 
@@ -71,7 +74,7 @@ proc updateBikeEngine*(state: GameState) =
             fadeoutPlayer.stop()
             fadeoutPlayer = nil
 
-    # print("playerBaseRpm: " & $playerBaseRpm & "throttlePlayerIndex" & " rate: " & $currentPlayer.rate)
+    # print("currentPlayer: ", currentPlayer.repr, "isPlaying:", currentPlayer.isPlaying,  "isThrottlePlayer", currentPlayer == throttlePlayer ," curRpm: ", curRpm, " targetRpm: ", targetRpm, " throttle: ", throttle)
 
 proc pauseBikeEngine*()=
     if not isInitialized: return
