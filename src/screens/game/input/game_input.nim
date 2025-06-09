@@ -20,22 +20,17 @@ const
   # applied to both wheels
   brakeTorque = 2_000.0
 
-var
   # device controls
-  actionThrottle = kButtonA
-  actionBrake = kButtonB
-  actionFlipDirection = kButtonDown
+  actionThrottle = if defined simulator: kButtonUp else: kButtonA
+  actionBrake = if defined simulator: kButtonDown else: kButtonB
+  actionFlipDirection = if defined simulator: kButtonB else: kButtonDown
   actionLeanLeft = kButtonLeft
   actionLeanRight = kButtonRight
+  restartGameButtonCombo = {kButtonA, kButtonB, kButtonUp}
 
+var
   dPadInputType: DPadInputType
   attitudeInputResponse: (t: Seconds) -> Float
-
-# simulator overrides
-if defined simulator:
-  actionThrottle = kButtonUp
-  actionBrake = kButtonDown
-  actionFlipDirection = kButtonB
 
 proc onThrottle(state: GameState) =
   let rearWheel = state.rearWheel
@@ -181,7 +176,7 @@ proc handleInput*(state: GameState, liveButtonState: PDButtonState, onShowGameRe
 
   let providedButtonState = state.inputProvider.getButtonState(state.frameCounter)
 
-  if state.isGameStarted and state.isInLiveMode and {kButtonA, kButtonB, kButtonUp} <= liveButtonState.current:
+  if state.isGameStarted and state.isInLiveMode and restartGameButtonCombo <= liveButtonState.current:
     print("instant restart pressed")
     onRestartGamePressed()
     return
