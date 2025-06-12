@@ -124,7 +124,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     fetchAllScoreboards()
   elif event == kEventPause:
     print("Wheelsprung: Pausing")
-    let qrEditorBg = getOrLoadBitmap(BitmapId.QrLevelEditor)
+    let qrEditorBg = getOrLoadBitmap(BitmapId.MenuButtonMapping)
     playdate.system.setMenuImage(qrEditorBg, 27)
   elif event == kEventResume:
     print("Wheelsprung: Resuming")
