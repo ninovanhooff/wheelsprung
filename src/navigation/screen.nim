@@ -2,6 +2,7 @@
 {.push base, raises: [].}
 import std/options
 import common/utils
+import cache/bitmap_cache
 import screens/screen_types
 export screen_types
 
@@ -39,3 +40,7 @@ method getRestoreState*(self: Screen): Option[ScreenRestoreState] =
   ## Necessary info to restore state after the game is restarted
   print "getRestoreState not implemented for screen: " & $self
   return none(ScreenRestoreState)
+
+method getSystemMenuBitmapId*(self: Screen): BitmapId =
+  ## The BitmapId to use for the system menu background when this screen is showing
+  BitmapId.QrLevelEditor # default to the QR code bitmap

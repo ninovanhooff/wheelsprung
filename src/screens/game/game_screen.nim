@@ -3,6 +3,7 @@ import options
 import chipmunk7
 import chipmunk/chipmunk_utils
 import playdate/api
+import cache/bitmap_cache
 import common/utils
 import data_store/user_profile
 import data_store/configuration
@@ -414,7 +415,13 @@ method getRestoreState*(gameScreen: GameScreen): Option[ScreenRestoreState] =
     screenType: ScreenType.Game,
     levelPath: gameScreen.levelPath,
   ))
-  
+
+method getSystemMenuBitmapId*(gameScreen: GameScreen): BitmapId =
+  if gameScreen.state.isInLiveMode:
+    return BitmapId.MenuButtonMapping
+  else:
+    BitmapId.QrLevelEditor
+
 
 method `$`*(gameScreen: GameScreen): string =
   return fmt"GameScreen {gameScreen.levelPath}, inputRecording: {gameScreen.replayInputRecording.isSome}" 

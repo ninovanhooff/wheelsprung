@@ -14,6 +14,7 @@ type
     LevelSelectBgDesk = "images/level_select/bg-desk"
     LevelSelectBgSpace = "images/level_select/bg-space"
     LevelSelectBgPlants = "images/level_select/bg-plants"
+    MenuButtonMapping = "images/system_menu/menu-button-mapping"
     QrLevelEditor = "images/system_menu/qr-level-editor"
   # a table mapping image path to LCDBitmap
   BitmapCache = TableRef[string, LCDBitmap]
