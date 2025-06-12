@@ -15,6 +15,7 @@ import std/options
 import screen
 import common/utils
 import playdate/api
+import cache/bitmap_cache
 
 type Navigator = () -> (void)
 type InitialScreenProvider* = () -> (Screen)
@@ -146,3 +147,6 @@ proc replaceBackstack*(screens: seq[Screen]) =
     screen.destroy()
   backStack = screens
   resumeActiveScreen()
+
+proc getSystemMenuBitmapId*(): BitmapId =
+  getActiveScreen().getSystemMenuBitmapId()

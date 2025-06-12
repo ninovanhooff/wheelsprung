@@ -7,6 +7,7 @@ import chipmunk7
 import navigation/[screen, navigator]
 import common/shared_types
 import common/utils
+import cache/bitmap_cache
 
 
 ## A Screen that Blinks the screen for a few frames
@@ -82,3 +83,6 @@ method update*(screen: HitStopScreen): int =
 method getRestoreState*(self: Screen): Option[ScreenRestoreState] =
   # not worth the effort restoring this screen
   return none(ScreenRestoreState)
+
+method getSystemMenuBitmapId*(hitStopScreen: HitStopScreen): BitmapId =
+  BitmapId.MenuButtonMapping
