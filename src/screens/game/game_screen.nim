@@ -354,12 +354,8 @@ method pause*(gameScreen: GameScreen) {.raises: [].} =
 
 method update*(gameScreen: GameScreen): int =
   var state = gameScreen.state
-  let liveButtonState = playdate.system.getButtonState()
   handleInput(
     state,
-    # by passing the liveButtonState we know we process the button state atomically. 
-    # There is no chance that the button state changes between processing here and recording below
-    liveButtonState,
     onShowGameResultPressed = proc () = state.popOrPushGameResult(),
     onRestartGamePressed = proc () = gameScreen.onRestartGamePressed(),
   )
@@ -375,9 +371,7 @@ method update*(gameScreen: GameScreen): int =
     state.space.step(timeStepSeconds64)
     
     state.ghostRecording.addPose(state)
-    if state.isInLiveMode:
-      state.inputRecording.addInputFrame(liveButtonState.current, state.frameCounter)
-
+    
     if not state.isBikeInLevelBounds():
       if not state.gameResult.isSome:
         state.setGameResult(GameResultType.GameOver)
