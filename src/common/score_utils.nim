@@ -7,7 +7,7 @@ const
   SCOREBOARDS_MAX_SCORE* = 1_000_000'u32
 
 # At a frame time of 20 ms, the score is floored to the nearest 20 ms
-# Of the remaing 19 values, 16 ( 0 .. 15) can be used as a 
+# Of the remaining 19 values, 16 ( 0 .. 15) can be used as a 
 # raw value or bitmask to store additional information like stars collected
 
 proc calculateScore*(levelProgress: LevelProgress): uint32 =
@@ -26,7 +26,7 @@ proc calculateScore*(levelProgress: LevelProgress): uint32 =
 
 proc scoreToTime*(score: uint32, maxScore: uint32 = SCOREBOARDS_MAX_SCORE): Milliseconds =
   if score > maxScore:
-    print "scoreToTimeString: score is greater than maxValue", score, maxScore
+    print "scoreToTime: score is greater than maxValue", score, maxScore
     return -1
     
   # Floor the score to frame time increments
