@@ -19,7 +19,7 @@ method resume*(screen: Screen): bool =
   ## This is a good place to add system menu items for this screen.
   ## Called before update()
   ##
-  print "resume not implemented for screen: " & $screen & "\nDid you specify the the correct return type (bool)?Did you import this screen from the call site?\nReturning false"
+  print "resume not implemented for screen: " & $screen & "\nDid you specify the the correct return type (bool)?Did you import the screen methods from the call site?\nReturning false"
 
 method destroy*(screen: Screen) =
   discard

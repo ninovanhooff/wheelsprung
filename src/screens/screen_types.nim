@@ -7,6 +7,7 @@ export cutscene_types
 type
   ScreenType* {.pure.}= enum
     CutScene
+    Dialog
     LevelSelect
     Game
     HitStop
@@ -23,7 +24,7 @@ type
       currentLeaderboardIdx*: int
     of LevelSelect:
       selectedPath*: Option[string] # cannot use levelPath because it is already defined in Game
-    of CutScene, HitStop, GameResult, Settings:
+    of CutScene, HitStop, GameResult, Settings, Dialog:
       discard
   Screen* {.requiresInit.} = ref object of RootObj
     screenType*: ScreenType
@@ -38,7 +39,7 @@ type
       restartGame*: bool
     of LevelSelect:
       selectPath*: string
-    of CutScene, HitStop, GameResult, Leaderboards, Settings:
+    of CutScene, Dialog, HitStop, GameResult, Leaderboards, Settings:
       discard # no properties
 
 type

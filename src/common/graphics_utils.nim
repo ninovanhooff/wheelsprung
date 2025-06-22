@@ -256,3 +256,12 @@ proc fillRoundRect*(rect: Rect, radius: int32, color: LCDSolidColor) {.inline.} 
     radius= radius, 
     color= color
   )
+
+proc drawTextInRect*(text: string, rect: Rect, alignment: TextAlignment = kTextAlignmentLeft) =
+  ## Draws text in a rectangle with optional offsets
+  gfx.drawTextInRect(
+    text = text, 
+    x = rect.x, y = rect.y, 
+    width = rect.width, 
+    height = rect.height, 
+    alignment = alignment)

@@ -15,7 +15,7 @@ proc createScreen(screenRestoreState: ScreenRestoreState): Screen =
     return newLeaderboardsScreen(initialLeaderboardIdx = screenRestoreState.currentLeaderboardIdx)
   of ScreenType.Settings:
     return newSettingsScreen()
-  of ScreenType.CutScene, ScreenType.GameResult, ScreenType.HitStop:
+  of ScreenType.CutScene, ScreenType.Dialog, ScreenType.GameResult, ScreenType.HitStop:
     print("Cannot Restore: ", screenRestoreState.screenType)
     return nil
 
