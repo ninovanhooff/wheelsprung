@@ -19,6 +19,6 @@ proc newDialogScreen*(title, message, confirmButtonText: string): DialogScreen =
 let
   mirrorInstructionDialogScreen*: DialogScreen = newDialogScreen(
     title = "Mirror Instruction",
-    message = "Use a quality cable with a direct connection. In cases of glitches, select Audio > Disable Audio in Mirror.",
+    message = "Use a quality cable with a direct connection. In cases of glitches, select \"Audio > Disable Audio\" in Mirror.",
     confirmButtonText = "OK"
   )

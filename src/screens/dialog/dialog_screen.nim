@@ -1,6 +1,7 @@
 {. push raises: [].}
 import playdate/api
 import std/options
+import std/strutils
 import navigation/[screen, navigator]
 import common/[graphics_types, graphics_utils]
 import common/utils
@@ -27,7 +28,7 @@ proc drawDialog*(screen: DialogScreen) =
   fillRoundRect(buttonRect, buttonCornerRadius, kColorBlack)
   # text
   gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
-  gfx.drawTextAligned(screen.title, 200, titleY)
+  gfx.drawTextAligned(screen.title.toUpper(), 200, titleY)
   drawTextInRect(screen.message, messageRect)
   gfx.setDrawMode(kDrawModeFillWhite)
   gfx.drawTextAligned(screen.confirmButtonText, 200, buttonRect.y + 8)
