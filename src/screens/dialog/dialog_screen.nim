@@ -18,7 +18,8 @@ const
 let
   dialogRect: Rect = Rect(x: 10, y: dialogY, width: 380, height: 240) ## lower corners outside the screen
   buttonRect: Rect = Rect(x: 150, y: 190, width: 100, height: 32)
-  messageRect: Rect = Rect(x: 50, y: messageY, width: 300, height: 100)
+  messageBounds: Rect = Rect(x: 50, y: messageY, width: 300, height: buttonRect.y - messageY - 10)  
+    ## message will be centered in this rectangle
 
 proc drawDialog*(screen: DialogScreen) =
   # dialog background
@@ -29,7 +30,12 @@ proc drawDialog*(screen: DialogScreen) =
   # text
   gfx.setFont(getOrLoadFont(FontId.Roobert11Medium))
   gfx.drawTextAligned(screen.title.toUpper(), 200, titleY)
-  drawTextInRect(screen.message, messageRect)
+  let messageRectResult = getTextSizeInRect(screen.message, messageBounds)
+  let boundsInsetY: int32 = (messageBounds.height - messageRectResult.height.int32) div 2
+  drawTextInRect(
+    text = screen.message, 
+    rect = messageBounds.inset(x = 0, y = boundsInsetY),
+    )
   gfx.setDrawMode(kDrawModeFillWhite)
   gfx.drawTextAligned(screen.confirmButtonText, 200, buttonRect.y + 8)
 

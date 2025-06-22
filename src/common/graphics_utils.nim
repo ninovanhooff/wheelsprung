@@ -265,3 +265,12 @@ proc drawTextInRect*(text: string, rect: Rect, alignment: TextAlignment = kTextA
     width = rect.width, 
     height = rect.height, 
     alignment = alignment)
+
+proc getTextSizeInRect*(text: string, rect: Rect, alignment: TextAlignment = kTextAlignmentLeft): TextInRectResult =
+  ## Returns the size of the text in a rectangle with optional offsets
+  gfx.getTextSizeInRect(
+    text = text,
+    x = rect.x, y = rect.y,
+    width = rect.width,
+    height = rect.height,
+    alignment = alignment)
