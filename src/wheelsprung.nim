@@ -129,7 +129,7 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
   elif event == kEventResume:
     print("Wheelsprung: Resuming")
   elif event == kEventMirrorStarted:
-    print("Wheelsprung: Mirror started")
+    print("Wheelsprung: Mirror Started")
     pushScreen(mirrorInstructionDialogScreen)
   elif event == kEventMirrorEnded:
     print("Wheelsprung: Mirror Ended")
