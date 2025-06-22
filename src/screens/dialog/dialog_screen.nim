@@ -50,6 +50,7 @@ method update*(screen: DialogScreen): int =
   let buttonState = playdate.system.getButtonState()
   if buttonState.pushed.anyButton({kButtonA, kButtonB}):
     popScreen()
+  return 1
 
 method getRestoreState*(screen: DialogScreen): Option[ScreenRestoreState] =
   return none(ScreenRestoreState)
