@@ -148,8 +148,12 @@ proc isInReplayMode*(state: GameState): bool =
 proc isInLiveMode*(state: GameState): bool =
   return state.inputProvider of LiveInputProvider
 
-proc handleInput*(state: GameState, liveButtonState: PDButtonState, onShowGameResultPressed: VoidCallback, onRestartGamePressed: VoidCallback ) =
+proc handleInput*(state: GameState, onShowGameResultPressed: VoidCallback, onRestartGamePressed: VoidCallback ) =
   state.isThrottlePressed = false
+
+  let liveButtonState = playdate.system.getButtonState()
+  let providedButtonState = state.inputProvider.getButtonState(state.frameCounter)
+    ## in live mode, providedButtonState is the same as liveButtonState
 
   if state.gameResult.isSome:
     # when the game is over, the bike cannot be controlled anymore,
@@ -169,20 +173,29 @@ proc handleInput*(state: GameState, liveButtonState: PDButtonState, onShowGameRe
           onShowGameResultPressed()
         elif resultType == GameResultType.LevelComplete:
           onRestartGamePressed()
-    return
+
+    return # if the game is over, we don't want to handle any other input
 
   if state.isGamePaused:
     return
 
-  let providedButtonState = state.inputProvider.getButtonState(state.frameCounter)
+  if not state.isGameStarted and providedButtonState.pushed.anyButton:
+    state.isGameStarted = true
 
-  if state.isGameStarted and state.isInLiveMode and restartGameButtonCombo <= liveButtonState.current:
+  if not state.isGameStarted:
+    return
+
+  ## game is started and not paused, the game is being played (either in live mode or replay mode)
+
+  if state.isInLiveMode and restartGameButtonCombo <= liveButtonState.current:
     print("instant restart pressed")
     onRestartGamePressed()
     return
 
-  if not state.isGameStarted and providedButtonState.pushed.anyButton:
-    state.isGameStarted = true
+  if state.isInLiveMode:
+    state.inputRecording.addInputFrame(providedButtonState.current, state.frameCounter)
+
+  ## handle game actions
 
   if actionThrottle in providedButtonState.current:
     state.isThrottlePressed = true
