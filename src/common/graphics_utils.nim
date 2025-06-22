@@ -258,7 +258,6 @@ proc fillRoundRect*(rect: Rect, radius: int32, color: LCDSolidColor) {.inline.} 
   )
 
 proc drawTextInRect*(text: string, rect: Rect, alignment: TextAlignment = kTextAlignmentLeft) =
-  ## Draws text in a rectangle with optional offsets
   gfx.drawTextInRect(
     text = text, 
     x = rect.x, y = rect.y, 
@@ -267,7 +266,7 @@ proc drawTextInRect*(text: string, rect: Rect, alignment: TextAlignment = kTextA
     alignment = alignment)
 
 proc getTextSizeInRect*(text: string, rect: Rect, alignment: TextAlignment = kTextAlignmentLeft): TextInRectResult =
-  ## Returns the size of the text in a rectangle with optional offsets
+  ## Returns the size of the text in a rectangle. The size will never be larger than the rectangle.
   gfx.getTextSizeInRect(
     text = text,
     x = rect.x, y = rect.y,
