@@ -1,6 +1,7 @@
 import playdate/api
 import leaderboards_types
 import common/graphics_utils
+import common/utils
 import cache/font_cache
 import cache/bitmap_cache
 
@@ -36,7 +37,7 @@ proc draw*(screen: LeaderboardsScreen, forceRedraw: bool = false)=
       if score.isCurrentPlayer:
         fillRoundRect(20, y + 19, LCD_COLUMNS - 47, 3, 2, kColorBlack)
       gfx.drawTextAligned($score.rank, 72, y, kTextAlignmentRight)
-      gfx.drawText(score.player, 88, y)
+      gfx.drawText(score.player.elide(14), 88, y)
       gfx.drawText(score.timeString, 286, y)
       y += 24
     gfx.setDrawMode(kDrawModeCopy)
