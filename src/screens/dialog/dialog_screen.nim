@@ -7,6 +7,7 @@ import common/[graphics_types, graphics_utils]
 import common/utils
 import cache/font_cache
 import dialog_types
+export dialog_types
 
 const
   dialogCornerRadius: int32 = 10

@@ -16,6 +16,7 @@ import scoreboards/scoreboards_service
 import playdate/api
 import screens/screen_types
 import screens/game/game_screen
+import screens/dialog/dialog_screen
 import screens/level_select/level_select_screen
 
 let initialScreenProvider: InitialScreenProvider = 
@@ -127,6 +128,11 @@ proc handler(event: PDSystemEvent, keycode: uint) {.raises: [].} =
     playdate.system.setMenuImage(getOrLoadBitmap(getSystemMenuBitmapId()), 27)
   elif event == kEventResume:
     print("Wheelsprung: Resuming")
+  elif event == kEventMirrorStarted:
+    print("Wheelsprung: Mirror started")
+    pushScreen(mirrorInstructionDialogScreen)
+  elif event == kEventMirrorEnded:
+    print("Wheelsprung: Mirror Ended")
   elif event == kEventKeyReleased:
     if keycode == 116:
       print("T")
