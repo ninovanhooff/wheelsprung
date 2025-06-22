@@ -23,6 +23,7 @@ let
     ## message will be centered in this rectangle
 
 proc drawDialog*(screen: DialogScreen) =
+  gfx.pushContext(nil)
   # dialog background
   fillRoundRect(dialogRect, dialogCornerRadius, kColorWhite)
   drawRoundRect(dialogRect, dialogCornerRadius, 2, kColorBlack)
@@ -39,6 +40,7 @@ proc drawDialog*(screen: DialogScreen) =
     )
   gfx.setDrawMode(kDrawModeFillWhite)
   gfx.drawTextAligned(screen.confirmButtonText, 200, buttonRect.y + 8)
+  gfx.popContext()
 
 method resume*(screen: DialogScreen): bool =
   screen.drawDialog()
