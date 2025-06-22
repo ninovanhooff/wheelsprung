@@ -256,3 +256,20 @@ proc fillRoundRect*(rect: Rect, radius: int32, color: LCDSolidColor) {.inline.} 
     radius= radius, 
     color= color
   )
+
+proc drawTextInRect*(text: string, rect: Rect, alignment: TextAlignment = kTextAlignmentLeft) =
+  gfx.drawTextInRect(
+    text = text, 
+    x = rect.x, y = rect.y, 
+    width = rect.width, 
+    height = rect.height, 
+    alignment = alignment)
+
+proc getTextSizeInRect*(text: string, rect: Rect, alignment: TextAlignment = kTextAlignmentLeft): TextInRectResult =
+  ## Returns the size of the text in a rectangle. The size will never be larger than the rectangle.
+  gfx.getTextSizeInRect(
+    text = text,
+    x = rect.x, y = rect.y,
+    width = rect.width,
+    height = rect.height,
+    alignment = alignment)
