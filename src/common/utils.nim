@@ -11,6 +11,15 @@ const
   NOMINAL_FRAME_TIME_MILLIS*: uint32 = (1000.0f / NOMINAL_FRAME_RATE).uint32
   ENABLE_PRINT_T*: bool = false
 
+### String
+
+proc elide*(s: string, maxLength: int): string =
+  ## Elide a string to a maximum length, adding "…" if it was longer
+  if s.len <= maxLength:
+    return s
+  else:
+    return s[0 ..< maxLength - 1] & "…"
+
 ### Time
 proc currentTimeMilliseconds*(): int32 {.inline.} = playdate.system.getCurrentTimeMilliseconds.int32
 proc currentTimeSeconds*(): Seconds {.inline.} = (currentTimeMilliseconds() / 1000).Seconds
