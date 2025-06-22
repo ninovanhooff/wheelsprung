@@ -13,7 +13,7 @@ destination_pdx="${PRODUCT}_nolevels.pdx"
 
 echo "Bundle simulator PDX without levels from source_dir ${source_dir} to destination_dir ${destination_pdx}"
 
-rsync -avrti --delete --prune-empty-dirs --exclude="levels" "$source_dir/" "$destination_pdx"
+rsync -avrti --delete --prune-empty-dirs --exclude="levels" --exclude="pdex.dSYM" "$source_dir/" "$destination_pdx"
 
 # Remove the existing zip file if it exists
 # this is done because the zip command will append to the existing zip file
