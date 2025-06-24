@@ -1,6 +1,9 @@
 /// <reference types="@mapeditor/tiled-api" />
 
 import { ensureWindingOrder } from "./ensure-winding-order";
+import { polylineToPolygon } from "./outline-polyline";
+import { newPolygon } from "./new-polygon";
+
 
 export function applyWheelsprungFixes(mapOrLayer) {
 	tiled.log("Running applyWheelsprungFixes:" + mapOrLayer);
@@ -23,6 +26,16 @@ export function applyWheelsprungFixes(mapOrLayer) {
 				);
 				object.polygon = ensureWindingOrder(object.polygon);
 			}
+
+			if (object.shape == MapObject.Polyline && object.selected) {
+				var polygon = polylineToPolygon(object.polygon, 4.0);
+				var newObject = newPolygon(object);
+				tiled.log("New object:" + newObject);
+				tiled.log("new polygon:" + polygon);
+				newObject.polygon = polygon;
+				mapOrLayer.addObject(newObject);
+			};
+
 			if(object.shape == MapObject.Ellipse && object.className == "DynamicObject") {
 				if(object.width != object.height) {
 					tiled.log("Ellipses not supported for Dynamic Objects. Making circular:" + object);
