@@ -22,3 +22,7 @@ switch("define", "gameResultSalt=" & gameResultSalt)
 
 const levelSalt = getEnv("WHEELSPRUNG_LEVEL_SALT")
 switch("define", "levelSalt=" & levelSalt)
+# begin Nimble config (version 2)
+when withDir(thisDir(), system.fileExists("nimble.paths")):
+  include "nimble.paths"
+# end Nimble config

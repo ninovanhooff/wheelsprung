@@ -1,7 +1,7 @@
 [submodule "support/levels"]
 	path = support/levels
-	url = https://github.com/ninovanhooff/wheelsprung-levels
+	url = git@github.com:ninovanhooff/wheelsprung-levels.git
 	branch = main
 [submodule "source/libraries/panels"]
 	path = source/libraries/panels
-	url = https://github.com/ninovanhooff/panels
+	url = git@github.com:ninovanhooff/panels.git

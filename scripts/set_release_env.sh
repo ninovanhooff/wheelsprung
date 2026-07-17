@@ -9,3 +9,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 set -o allexport
 source "$SCRIPT_DIR/../release.env"
 
+# VS Code tasks run a non-interactive shell that doesn't source ~/.zshrc, so pdn (installed via nimble) and the Playdate SDK tools are not on PATH there
+export PATH="$PLAYDATE_SDK_PATH/bin:$PATH"
+export PATH="$HOME/.nimble/bin:$PATH"
+

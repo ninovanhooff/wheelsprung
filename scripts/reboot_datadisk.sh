@@ -10,6 +10,8 @@ if [ -e /Volumes/PLAYDATE ]; then
   exit 0
 fi
 
+. ./scripts/set_release_env.sh
+
 until ls /dev/cu.usbmodemPD*
 do
   echo "Playdate not found. Is it connected to USB and unlocked?"

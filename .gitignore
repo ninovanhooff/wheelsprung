@@ -4,11 +4,17 @@ wheelsprung*.zip
 *.dSYM
 .DS_Store
 game.map
+nimble.paths
 # Audacity autosave files
 **.aup3-wal
 **.aup3-shm
 # Blender autosave files
 **/*.blend[0-9]*
+
+# IDE
+.idea/other.xml
+.idea/caches/deviceStreaming.xml
+.sentry-native/*
 
 # levels
 # the levels folder contains a .gitkeep which is checked in, but otherwise the contents are generated and should be ignored
@@ -29,7 +35,6 @@ stdout.txt
 # secrets
 release.env
 
-# IDE
-.idea/other.xml
-.idea/caches/deviceStreaming.xml
-.sentry-native/*
+wheelsprung.pdx.zip
+source/pdxinfo
+wheelsprung.pdx
